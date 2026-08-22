@@ -6,22 +6,18 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// ─── منع req.body من أن يكون undefined ───
 app.use((req, res, next) => {
   if (req.body === undefined) req.body = {};
   next();
 });
 app.use(express.json({ limit: "1mb" }));
-
-// ─── خدمة الملفات الثابتة من مجلد public ───
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة المفاتيح ───
+// ─── مفاتيح API ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── تعريف المزودين ───
 const PROVIDERS = [
   {
     name: "gemini",
@@ -144,7 +140,6 @@ PROVIDERS.forEach(p => {
 });
 console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
 
-// ─── System Prompt ───
 const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 أخرج JSON فقط. كل سؤال يحتوي على:
 - category: الفئة
@@ -162,7 +157,6 @@ const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشر�
 - الخيارات متقاربة منطقياً لكن واحد فقط صحيح
 - الشرح يكون معلومة إضافية مفيدة للمقدم`;
 
-// ─── دالة تحليل JSON ───
 function extractAndParseJSON(rawText) {
   let cleaned = rawText.replace(/```json|```/g, "").trim();
   const objectMatch = cleaned.match(/(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/s);
@@ -178,7 +172,6 @@ function extractAndParseJSON(rawText) {
   }
 }
 
-// ─── دالة الاحتياطي ───
 async function callWithFallback(prompt) {
   const errors = [];
   for (const provider of PROVIDERS) {
@@ -213,7 +206,6 @@ async function callWithFallback(prompt) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
-// ─── API endpoint (مع منع الانهيار) ───
 app.post("/api/questions", async (req, res) => {
   console.log("📩 تم استلام طلب /api/questions");
   console.log("📦 البيانات:", JSON.stringify(req.body, null, 2));
@@ -237,7 +229,6 @@ app.post("/api/questions", async (req, res) => {
     return res.json({ questions: data });
   } catch (err) {
     console.error("❌ خطأ في الـ API:", err.message);
-    // ⚠️ هنا نرسل رد خطأ بدلاً من رمي الخطأ
     return res.status(500).json({ 
       error: 'فشل في توليد الأسئلة', 
       details: err.message 
@@ -245,7 +236,6 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
-// ─── Health Check ───
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -256,15 +246,13 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ─── تشغيل الخادم باستخدام المنفذ الديناميكي ───
+// ─── المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🌎 عالم التحديات — LIVE GAME SHOW (وضع الاحتياطي)`);
   console.log(`   الخادم يعمل على http://localhost:${PORT}`);
-  console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
 });
