@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -9,10 +8,8 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── Hardcoded Gemini API Key ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyCJ6J1EI4w4jGE6i4z6GQCpHI6R0vQOYdA";
 
-// ─── AI System Prompt ───
 const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 أخرج JSON فقط. كل سؤال يحتوي على:
 - category: الفئة
@@ -38,7 +35,6 @@ function cleanJson(s) {
   return JSON.parse(s.slice(a, b + 1));
 }
 
-// ─── Gemini API ───
 async function gemini(prompt) {
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
   const res = await fetch(url, {
@@ -54,30 +50,6 @@ async function gemini(prompt) {
   return cleanJson(json.candidates?.[0]?.content?.parts?.[0]?.text || "");
 }
 
-// ─── OpenRouter API ───
-async function openrouter(prompt) {
-  if (!process.env.OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY is missing");
-  const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: "openrouter/free",
-      messages: [
-        { role: "system", content: SYSTEM },
-        { role: "user", content: prompt }
-      ],
-      temperature: 0.7
-    })
-  });
-  if (!res.ok) throw new Error(`OpenRouter HTTP ${res.status}`);
-  const json = await res.json();
-  return cleanJson(json.choices?.[0]?.message?.content || "");
-}
-
-// ─── Questions API ───
 app.post("/api/questions", async (req, res) => {
   try {
     const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body || {};
@@ -85,10 +57,7 @@ app.post("/api/questions", async (req, res) => {
     const prompt = `أنشئ ${n} أسئلة من فئة "${category}" بمستوى "${difficulty}".
 لا تستخدم هذه الأسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 أعد مصفوفة JSON فقط.`;
-
-    const provider = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-    const data = provider === "openrouter" ? await openrouter(prompt) : await gemini(prompt);
-
+    const data = await gemini(prompt);
     if (!Array.isArray(data)) throw new Error("AI response is not an array");
     res.json({ questions: data });
   } catch (e) {
@@ -97,19 +66,14 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
-// ─── Health Check ───
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", provider: process.env.AI_PROVIDER || "gemini" });
-});
+app.get("/api/health", (req, res) => res.json({ status: "ok" }));
 
-// ─── SPA Fallback ───
-app.get("*", (req, res) => {
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🌎 عالم التحديات — LIVE GAME SHOW`);
-  console.log(`   Server running on http://localhost:${PORT}`);
-  console.log(`   AI Provider: ${process.env.AI_PROVIDER || "gemini"}`);
+  console.log(`   Server: http://localhost:${PORT}`);
 });
