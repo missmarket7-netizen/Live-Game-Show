@@ -19,23 +19,24 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── System Prompt محسّن ───
-const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
+// ─── دالة بناء System Prompt (ديناميكية) ───
+function buildSystemPrompt(count) {
+  return `انت مولد اسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 قواعد صارمة:
-1. أخرج JSON فقط بدون أي نص قبل أو بعد
-2. الشكل المطلوب: مصفوفة JSON تحتوي على ${n} كائنات
+1. اخرج JSON فقط بدون اي نص قبل او بعد
+2. الشكل المطلوب: مصفوفة JSON تحتوي على ${count} كائنات
 3. كل كائن يحتوي على:
    - "category": نص الفئة
-   - "difficulty": "سهل" أو "متوسط" أو "صعب"
+   - "difficulty": "سهل" او "متوسط" او "صعب"
    - "question": نص السؤال بالعربية الفصحى الواضحة
    - "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"]
-   - "correctIndex": رقم من 0 إلى 3
+   - "correctIndex": رقم من 0 الى 3
    - "explanation": شرح مختصر للمقدم
-4. الأسئلة واضحة، تجنب المختلف عليه
-5. في الدين: معلومات أساسية مشهورة فقط
-6. لا تكرر الأسئلة
-7. الخيارات متقاربة منطقياً لكن واحد فقط صحيح
-8. الشرح معلومة إضافية مفيدة للمقدم
+4. الاسئلة واضحة، تجنب المختلف عليه
+5. في الدين: معلومات اساسية مشهورة فقط
+6. لا تكرر الاسئلة
+7. الخيارات متقاربة منطقيا لكن واحد فقط صحيح
+8. الشرح معلومة اضافية مفيدة للمقدم
 
 مثال على الصيغة:
 [
@@ -45,31 +46,29 @@ const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشر�
     "question": "ما هي عاصمة المملكة العربية السعودية؟",
     "options": ["جدة", "الرياض", "مكة", "الدمام"],
     "correctIndex": 1,
-    "explanation": "الرياض هي العاصمة السياسية والإدارية للمملكة منذ عام 1932."
+    "explanation": "الرياض هي العاصمة السياسية والادارية للمملكة منذ عام 1932."
   }
 ]`;
+}
 
-// ─── دالة تحليل JSON محسّنة ───
+// ─── دالة تحليل JSON محسنة ───
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== 'string') {
-    throw new Error("الرد فارغ أو غير صالح");
+    throw new Error("الرد فارغ او غير صالح");
   }
 
   let cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
 
-  // محاولة 1: البحث عن مصفوفة JSON
   const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
   if (arrayMatch) {
     try { return JSON.parse(arrayMatch[0]); } catch (_) {}
   }
 
-  // محاولة 2: البحث عن كائن JSON
   const objectMatch = cleaned.match(/\{[\s\S]*\}/);
   if (objectMatch) {
     try { return JSON.parse(objectMatch[0]); } catch (_) {}
   }
 
-  // محاولة 3: تحليل النص كامل
   try { return JSON.parse(cleaned); } catch (_) {}
 
   throw new Error(`تعذر تحليل JSON: ${rawText.slice(0, 200)}`);
@@ -93,9 +92,7 @@ const PROVIDERS = [
           body: JSON.stringify({
             contents: [{
               role: "user",
-              parts: [{
-                text: SYSTEM.replace('${n}', count) + "\n\n" + prompt
-              }]
+              parts: [{ text: buildSystemPrompt(count) + "\n\n" + prompt }]
             }],
             generationConfig: { temperature: 0.7, maxOutputTokens: 4000 }
           })
@@ -135,7 +132,7 @@ const PROVIDERS = [
           body: JSON.stringify({
             model: process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free",
             messages: [
-              { role: "system", content: SYSTEM.replace('${n}', count) },
+              { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
             ],
             temperature: 0.7,
@@ -175,7 +172,7 @@ const PROVIDERS = [
           body: JSON.stringify({
             model: process.env.GROQ_MODEL || "llama3-70b-8192",
             messages: [
-              { role: "system", content: SYSTEM.replace('${n}', count) },
+              { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
             ],
             temperature: 0.7,
@@ -199,24 +196,24 @@ const PROVIDERS = [
   }
 ];
 
-// ─── أسئلة احتياطية جاهزة (لو فشلت كل المزودين) ───
+// ─── اسئلة احتياطية جاهزة (لو فشلت كل المزودين) ───
 function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
-    { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة السياسية والإدارية للمملكة منذ عام 1932." },
-    { category: "معلومات عامة", difficulty: "سهل", question: "كم عدد أيام السنة الميلادية؟", options: ["365", "364", "366", "360"], correctIndex: 0, explanation: "السنة الميلادية العادية تتكون من 365 يوماً." },
-    { category: "معلومات عامة", difficulty: "متوسط", question: "ما هو أطول نهر في العالم؟", options: ["النيل", "الأمازون", "الفرات", "اليانغتسي"], correctIndex: 0, explanation: "نهر النيل يبلغ طوله حوالي 6650 كم، وهو الأطول في العالم." },
-    { category: "رياضة", difficulty: "سهل", question: "كم عدد لاعبي فريق كرة القدم في الملعب؟", options: ["10", "11", "12", "9"], correctIndex: 1, explanation: "يتكون فريق كرة القدم من 11 لاعباً في الملعب." },
-    { category: "رياضة", difficulty: "متوسط", question: "في أي عام أقيمت أول بطولة كأس عالم؟", options: ["1928", "1930", "1934", "1926"], correctIndex: 1, explanation: "أقيمت أول بطولة كأس عالم لكرة القدم في الأوروغواي عام 1930." },
-    { category: "علوم", difficulty: "سهل", question: "ما هو أقرب كوكب إلى الشمس؟", options: ["الأرض", "الزهرة", "عطارد", "المريخ"], correctIndex: 2, explanation: "عطارد هو أقرب كوكب إلى الشمس وثاني أصغر كواكب المجموعة الشمسية." },
-    { category: "علوم", difficulty: "متوسط", question: "ما هو العنصر الكيميائي الذي يرمز له بـ Au؟", options: ["الفضة", "النحاس", "الذهب", "الألمنيوم"], correctIndex: 2, explanation: "Au هو الرمز الكيميائي للذهب من الكلمة اللاتينية Aurum." },
-    { category: "تاريخ", difficulty: "سهل", question: "في أي عام تأسست المملكة العربية السعودية؟", options: ["1925", "1930", "1932", "1935"], correctIndex: 2, explanation: "توحدت المملكة العربية السعودية تحت حكم الملك عبدالعزيز عام 1932." },
-    { category: "تاريخ", difficulty: "متوسط", question: "من هو مكتشف أمريكا؟", options: ["فاسكو دا غاما", "كولومبوس", "ماجلان", "كوك"], correctIndex: 1, explanation: "اكتشف كريستوفر كولومبوس الأمريكتين عام 1492." },
-    { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["ركعتان", "أربع ركعات", "ثلاث ركعات", "ركعة"], correctIndex: 0, explanation: "صلاة الفجر ركعتان فرض." },
-    { category: "دين", difficulty: "متوسط", question: "في أي شهر نزل القرآن الكريم؟", options: ["شعبان", "رمضان", "شوال", "رجب"], correctIndex: 1, explanation: "نزل القرآن الكريم في شهر رمضان المبارك." },
-    { category: "تقنية", difficulty: "سهل", question: "ما هي شركة التقنية التي أسسها بيل جيتس؟", options: ["Apple", "Google", "Microsoft", "IBM"], correctIndex: 2, explanation: "أسس بيل جيتس شركة مايكروسوفت عام 1975 مع بول ألين." },
+    { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة السياسية والادارية للمملكة منذ عام 1932." },
+    { category: "معلومات عامة", difficulty: "سهل", question: "كم عدد ايام السنة الميلادية؟", options: ["365", "364", "366", "360"], correctIndex: 0, explanation: "السنة الميلادية العادية تتكون من 365 يوما." },
+    { category: "معلومات عامة", difficulty: "متوسط", question: "ما هو اطول نهر في العالم؟", options: ["النيل", "الامازون", "الفرات", "اليانغتسي"], correctIndex: 0, explanation: "نهر النيل يبلغ طوله حوالي 6650 كم، وهو الاطول في العالم." },
+    { category: "رياضة", difficulty: "سهل", question: "كم عدد لاعبي فريق كرة القدم في الملعب؟", options: ["10", "11", "12", "9"], correctIndex: 1, explanation: "يتكون فريق كرة القدم من 11 لاعبا في الملعب." },
+    { category: "رياضة", difficulty: "متوسط", question: "في اي اقيمت اول بطولة كاس عالم؟", options: ["1928", "1930", "1934", "1926"], correctIndex: 1, explanation: "اقيمت اول بطولة كاس عالم لكرة القدم في الاوروغواي عام 1930." },
+    { category: "علوم", difficulty: "سهل", question: "ما هو اقرب كوكب الى الشمس؟", options: ["الارض", "الزهرة", "عطارد", "المريخ"], correctIndex: 2, explanation: "عطارد هو اقرب كوكب الى الشمس وثاني اصغر كواكب المجموعة الشمسية." },
+    { category: "علوم", difficulty: "متوسط", question: "ما هو العنصر الكيميائي الذي يرمز له بـ Au؟", options: ["الفضة", "النحاس", "الذهب", "الالمنيوم"], correctIndex: 2, explanation: "Au هو الرمز الكيميائي للذهب من الكلمة اللاتينية Aurum." },
+    { category: "تاريخ", difficulty: "سهل", question: "في اي عام تأسست المملكة العربية السعودية؟", options: ["1925", "1930", "1932", "1935"], correctIndex: 2, explanation: "توحدت المملكة العربية السعودية تحت حكم الملك عبدالعزيز عام 1932." },
+    { category: "تاريخ", difficulty: "متوسط", question: "من هو مكتشف امريكا؟", options: ["فاسكو دا غاما", "كولومبوس", "ماجلان", "كوك"], correctIndex: 1, explanation: "اكتشف كريستوفر كولومبوس الامريكتين عام 1492." },
+    { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["ركعتان", "اربع ركعات", "ثلاث ركعات", "ركعة"], correctIndex: 0, explanation: "صلاة الفجر ركعتان فرض." },
+    { category: "دين", difficulty: "متوسط", question: "في اي شهر نزل القران الكريم؟", options: ["شعبان", "رمضان", "شوال", "رجب"], correctIndex: 1, explanation: "نزل القران الكريم في شهر رمضان المبارك." },
+    { category: "تقنية", difficulty: "سهل", question: "ما هي شركة التقنية التي اسسها بيل جيتس؟", options: ["Apple", "Google", "Microsoft", "IBM"], correctIndex: 2, explanation: "اسس بيل جيتس شركة مايكروسوفت عام 1975 مع بول ألين." },
     { category: "تقنية", difficulty: "متوسط", question: "ما هو اختصار HTML؟", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlinks Text Mode Language"], correctIndex: 0, explanation: "HTML تعني لغة ترميز النصوص التشعبية." },
-    { category: "جغرافيا", difficulty: "سهل", question: "ما هي أكبر قارة في العالم من حيث المساحة؟", options: ["أفريقيا", "آسيا", "أمريكا الشمالية", "أوروبا"], correctIndex: 1, explanation: "آسيا هي أكبر قارة في العالم وتغطي حوالي 30% من مساحة اليابسة." },
-    { category: "جغرافيا", difficulty: "متوسط", question: "ما هو أعمق نقطة في المحيطات؟", options: ["خندق ماريانا", "خندق بورتوريكو", "خندق تونغا", "خندق الفلبين"], correctIndex: 0, explanation: "خندق ماريانا في المحيط الهادئ هو أعمق نقطة معروفة في المحيطات." }
+    { category: "جغرافيا", difficulty: "سهل", question: "ما هي اكبر قارة في العالم من حيث المساحة؟", options: ["افريقيا", "اسيا", "امريكا الشمالية", "اوروبا"], correctIndex: 1, explanation: "اسيا هي اكبر قارة في العالم وتغطي حوالي 30% من مساحة اليابسة." },
+    { category: "جغرافيا", difficulty: "متوسط", question: "ما هو اعمق نقطة في المحيطات؟", options: ["خندق ماريانا", "خندق بورتوريكو", "خندق تونغا", "خندق الفلبين"], correctIndex: 0, explanation: "خندق ماريانا في المحيط الهادئ هو اعمق نقطة معروفة في المحيطات." }
   ];
 
   let filtered = allQuestions.filter(q => q.difficulty === difficulty);
@@ -230,21 +227,21 @@ function getFallbackQuestions(category, count, difficulty) {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// ─── دالة الاحتياطي المحسّنة ───
+// ─── دالة الاحتياطي المحسنة ───
 async function callWithFallback(prompt, count) {
   const errors = [];
   for (const provider of PROVIDERS) {
     if (!provider.key) {
-      console.log(`⏭️  تخطي ${provider.name} (لا يوجد مفتاح)`);
+      console.log(`تخطي ${provider.name} (لا يوجد مفتاح)`);
       continue;
     }
     try {
-      console.log(`🔄 محاولة استخدام ${provider.name}...`);
+      console.log(`محاولة استخدام ${provider.name}...`);
       const rawResponse = await provider.call(prompt, count);
-      console.log(`📝 الرد الخام (أول 200 حرف):`, rawResponse.slice(0, 200));
+      console.log(`الرد الخام (اول 200 حرف):`, rawResponse.slice(0, 200));
 
       const parsed = extractAndParseJSON(rawResponse);
-      console.log(`✅ نجح ${provider.name}!`);
+      console.log(`نجح ${provider.name}!`);
 
       let questions;
       if (Array.isArray(parsed)) {
@@ -259,21 +256,20 @@ async function callWithFallback(prompt, count) {
         throw new Error("الرد ليس مصفوفة ولا كائن صالح");
       }
 
-      // التحقق من صحة كل سؤال
       const validQuestions = questions.filter(q =>
         q.question && Array.isArray(q.options) && q.options.length === 4 &&
         typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex <= 3
       );
 
       if (validQuestions.length === 0) {
-        throw new Error("لم يتم استخراج أسئلة صالحة من الرد");
+        throw new Error("لم يتم استخراج اسئلة صالحة من الرد");
       }
 
-      console.log(`✅ ${provider.name} أرجع ${validQuestions.length} سؤال صالح`);
+      console.log(`${provider.name} ارجع ${validQuestions.length} سؤال صالح`);
       return validQuestions;
 
     } catch (err) {
-      console.log(`❌ فشل ${provider.name}: ${err.message}`);
+      console.log(`فشل ${provider.name}: ${err.message}`);
       errors.push({ provider: provider.name, error: err.message });
     }
   }
@@ -284,36 +280,35 @@ async function callWithFallback(prompt, count) {
 
 // ─── API endpoint (مع منع الانهيار الكامل) ───
 app.post("/api/questions", async (req, res) => {
-  console.log("📩 تم استلام طلب /api/questions");
-  console.log("📦 البيانات:", JSON.stringify(req.body, null, 2));
+  console.log("تم استلام طلب /api/questions");
+  console.log("البيانات:", JSON.stringify(req.body, null, 2));
 
   try {
     const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
 
-    const prompt = `أنشئ بالضبط ${n} أسئلة من فئة "${category}" بمستوى "${difficulty}".
+    const prompt = `انشئ بالضبط ${n} اسئلة من فئة "${category}" بمستوى "${difficulty}".
 قواعد:
-- أخرج مصفوفة JSON فقط
-- لا تستخدم هذه الأسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
+- اخرج مصفوفة JSON فقط
+- لا تستخدم هذه الاسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 - كل سؤال يحتوي على: category, difficulty, question, options (4 خيارات), correctIndex (0-3), explanation
-- لا تضيف أي نص خارج JSON`;
+- لا تضيف اي نص خارج JSON`;
 
-    console.log("📝 المطالبة:", prompt.slice(0, 250) + "...");
+    console.log("المطالبة:", prompt.slice(0, 250) + "...");
 
     let data;
     try {
       data = await callWithFallback(prompt, n);
     } catch (aiErr) {
-      console.log(`⚠️ فشلت كل المزودين، استخدام الأسئلة الاحتياطية...`);
+      console.log(`فشلت كل المزودين، استخدام الاسئلة الاحتياطية...`);
       data = getFallbackQuestions(category, n, difficulty);
-      console.log(`✅ تم استخدام ${data.length} سؤال احتياطي`);
+      console.log(`تم استخدام ${data.length} سؤال احتياطي`);
     }
 
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("لم يتم توليد أي أسئلة.");
+      throw new Error("لم يتم توليد اي اسئلة.");
     }
 
-    // إضافة معلومات إضافية للأسئلة
     const enriched = data.map((q, i) => ({
       ...q,
       id: `q_${Date.now()}_${i}`,
@@ -321,12 +316,12 @@ app.post("/api/questions", async (req, res) => {
       difficulty: q.difficulty || difficulty
     }));
 
-    console.log(`✅ تم إرجاع ${enriched.length} سؤال بنجاح.`);
+    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح.`);
     return res.json({ questions: enriched, source: data.length > 0 && data[0]._fallback ? "fallback" : "ai" });
   } catch (err) {
-    console.error("❌ خطأ في الـ API:", err.message);
+    console.error("خطأ في الـ API:", err.message);
     return res.status(500).json({
-      error: 'فشل في توليد الأسئلة',
+      error: 'فشل في توليد الاسئلة',
       details: err.message
     });
   }
@@ -352,8 +347,8 @@ app.use((req, res) => {
 // ─── استخدام المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`🌎 عالم التحديات — LIVE GAME SHOW`);
+  console.log(`عالم التحديات — LIVE GAME SHOW`);
   console.log(`   الخادم يعمل على http://localhost:${PORT}`);
   console.log(`   المزودين المتاحين: ${PROVIDERS.filter(p => p.key).map(p => p.name).join(", ") || "لا يوجد"}`);
-  console.log(`   ترتيب المحاولات: Gemini → OpenRouter → Groq → Fallback`);
+  console.log(`   ترتيب المحاولات: Gemini -> OpenRouter -> Groq -> Fallback`);
 });
