@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// ─── Middleware ───
 app.use((req, res, next) => {
   if (req.body === undefined) req.body = {};
   next();
@@ -14,12 +13,10 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة المفاتيح ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── دالة بناء System Prompt (ديناميكية) ───
 function buildSystemPrompt(count) {
   return `انت مولد اسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 قواعد صارمة:
@@ -51,30 +48,23 @@ function buildSystemPrompt(count) {
 ]`;
 }
 
-// ─── دالة تحليل JSON محسنة ───
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== "string") {
     throw new Error("الرد فارغ او غير صالح");
   }
-
   let cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
-
   const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
   if (arrayMatch) {
     try { return JSON.parse(arrayMatch[0]); } catch (_) {}
   }
-
   const objectMatch = cleaned.match(/\{[\s\S]*\}/);
   if (objectMatch) {
     try { return JSON.parse(objectMatch[0]); } catch (_) {}
   }
-
   try { return JSON.parse(cleaned); } catch (_) {}
-
   throw new Error(`تعذر تحليل JSON: ${rawText.slice(0, 200)}`);
 }
 
-// ─── دوال المزودين ───
 const PROVIDERS = [
   {
     name: "gemini",
@@ -130,7 +120,7 @@ const PROVIDERS = [
           },
           signal: controller.signal,
           body: JSON.stringify({
-            model: process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free",
+            model: process.env.OPENROUTER_MODEL || "deepseek/deepseek-chat:free",
             messages: [
               { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
@@ -170,7 +160,7 @@ const PROVIDERS = [
           },
           signal: controller.signal,
           body: JSON.stringify({
-            model: process.env.GROQ_MODEL || "llama3-70b-8192",
+            model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
             messages: [
               { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
@@ -196,7 +186,6 @@ const PROVIDERS = [
   }
 ];
 
-// ─── اسئلة احتياطية جاهزة (لو فشلت كل المزودين) ───
 function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة السياسية والادارية للمملكة منذ عام 1932." },
@@ -227,7 +216,6 @@ function getFallbackQuestions(category, count, difficulty) {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// ─── دالة الاحتياطي المحسنة ───
 async function callWithFallback(prompt, count) {
   const errors = [];
   for (const provider of PROVIDERS) {
@@ -278,7 +266,6 @@ async function callWithFallback(prompt, count) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
-// ─── API endpoint (مع منع الانهيار الكامل) ───
 app.post("/api/questions", async (req, res) => {
   console.log("تم استلام طلب /api/questions");
   console.log("البيانات:", JSON.stringify(req.body, null, 2));
@@ -346,7 +333,6 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
-// ─── Health Check ───
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -358,12 +344,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ─── استخدام المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`عالم التحديات — LIVE GAME SHOW`);
