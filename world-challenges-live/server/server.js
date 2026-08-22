@@ -9,37 +9,19 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة مفاتيح API ───
+// ─── قراءة المفاتيح والمتغيرات ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
+const GROK_API_KEY = process.env.GROK_API_KEY || "";
+
 const AI_PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
+const GROK_MODEL = process.env.GROK_MODEL || "grok-2-latest"; // أو grok-beta
 
 console.log(`🤖 AI Provider: ${AI_PROVIDER}`);
-if (AI_PROVIDER === "gemini" && !GEMINI_API_KEY) {
-  console.warn("⚠️ GEMINI_API_KEY غير موجودة في .env");
-}
-if (AI_PROVIDER === "openrouter" && !OPENROUTER_API_KEY) {
-  console.warn("⚠️ OPENROUTER_API_KEY غير موجودة في .env");
-}
-
-// ─── اختبار صحة مفتاح Gemini ───
-async function testGeminiKey() {
-  if (!GEMINI_API_KEY) return false;
-  try {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-    const res = await fetch(url);
-    if (res.ok) {
-      console.log("✅ Gemini API Key صالح.");
-      return true;
-    } else {
-      console.warn(`❌ Gemini API Key غير صالح (HTTP ${res.status}).`);
-      return false;
-    }
-  } catch (e) {
-    console.error("❌ فشل اختبار Gemini:", e.message);
-    return false;
-  }
-}
+console.log(`   Gemini Key set: ${!!GEMINI_API_KEY}`);
+console.log(`   OpenRouter Key set: ${!!OPENROUTER_API_KEY}`);
+console.log(`   Grok (xAI) Key set: ${!!GROK_API_KEY}`);
 
 // ─── System Prompt ───
 const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
@@ -59,25 +41,25 @@ const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشر�
 - الخيارات متقاربة منطقياً لكن واحد فقط صحيح
 - الشرح يكون معلومة إضافية مفيدة للمقدم`;
 
-// ─── تنظيف الـ JSON ───
+// ─── تنظيف JSON ───
 function cleanJson(s) {
   s = s.replace(/```json|```/g, "").trim();
-  let firstBracket = s.indexOf('[');
-  let lastBracket = s.lastIndexOf(']');
-  if (firstBracket === -1 || lastBracket === -1 || lastBracket < firstBracket) {
-    const objMatch = s.match(/\{.*\}/s);
-    if (objMatch) {
-      try {
-        const obj = JSON.parse(objMatch[0]);
-        if (obj.question && obj.options) return [obj];
-      } catch (_) {}
-    }
-    throw new Error("لم يتم العثور على مصفوفة JSON صالحة: " + s.slice(0, 200));
+  let start = s.indexOf('[');
+  let end = s.lastIndexOf(']');
+  if (start !== -1 && end !== -1 && end > start) {
+    return JSON.parse(s.slice(start, end + 1));
   }
-  return JSON.parse(s.slice(firstBracket, lastBracket + 1));
+  const objMatch = s.match(/\{.*\}/s);
+  if (objMatch) {
+    try {
+      const obj = JSON.parse(objMatch[0]);
+      if (obj.question && obj.options) return [obj];
+    } catch (_) {}
+  }
+  throw new Error("لم يتم العثور على JSON صالح: " + s.slice(0, 300));
 }
 
-// ─── استدعاء Gemini ───
+// ─── 1. استدعاء Gemini ───
 async function callGemini(prompt) {
   if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY غير محددة");
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
@@ -86,7 +68,7 @@ async function callGemini(prompt) {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: SYSTEM + "\n\n" + prompt }] }],
-      generationConfig: { temperature: 0.7, responseMimeType: "application/json" }
+      generationConfig: { temperature: 0.7 }
     })
   });
   if (!res.ok) {
@@ -99,7 +81,7 @@ async function callGemini(prompt) {
   return cleanJson(text);
 }
 
-// ─── استدعاء OpenRouter ───
+// ─── 2. استدعاء OpenRouter (متوافق مع OpenAI) ───
 async function callOpenRouter(prompt) {
   if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY غير محددة");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -109,7 +91,7 @@ async function callOpenRouter(prompt) {
       "Authorization": `Bearer ${OPENROUTER_API_KEY}`
     },
     body: JSON.stringify({
-      model: "openrouter/free",
+      model: OPENROUTER_MODEL,
       messages: [
         { role: "system", content: SYSTEM },
         { role: "user", content: prompt }
@@ -127,6 +109,34 @@ async function callOpenRouter(prompt) {
   return cleanJson(content);
 }
 
+// ─── 3. استدعاء Grok (xAI - متوافق مع OpenAI) ───
+async function callGrok(prompt) {
+  if (!GROK_API_KEY) throw new Error("GROK_API_KEY غير محددة");
+  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${GROK_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: GROK_MODEL,
+      messages: [
+        { role: "system", content: SYSTEM },
+        { role: "user", content: prompt }
+      ],
+      temperature: 0.7
+    })
+  });
+  if (!res.ok) {
+    const errText = await res.text();
+    throw new Error(`Grok HTTP ${res.status}: ${errText.slice(0, 200)}`);
+  }
+  const json = await res.json();
+  const content = json.choices?.[0]?.message?.content || "";
+  if (!content) throw new Error("لم يرد Grok بنص");
+  return cleanJson(content);
+}
+
 // ─── API endpoint ───
 app.post("/api/questions", async (req, res) => {
   try {
@@ -137,20 +147,28 @@ app.post("/api/questions", async (req, res) => {
 أعد مصفوفة JSON فقط.`;
 
     let data;
-    if (AI_PROVIDER === "openrouter") {
-      data = await callOpenRouter(prompt);
-    } else {
-      data = await callGemini(prompt);
+    switch (AI_PROVIDER) {
+      case "openrouter":
+        data = await callOpenRouter(prompt);
+        break;
+      case "grok":
+        data = await callGrok(prompt);
+        break;
+      case "gemini":
+      default:
+        data = await callGemini(prompt);
+        break;
     }
 
     if (!Array.isArray(data) || data.length === 0) {
-      throw new Error("لم يتم توليد أسئلة، تأكد من صحة المفتاح أو جرب مزوداً آخر.");
+      throw new Error("تم توليد 0 سؤال، حاول مرة أخرى.");
     }
 
     res.json({ questions: data });
   } catch (e) {
     console.error("❌ API Error:", e.message);
-    res.status(500).json({ error: e.message });
+    // إرسال الخطأ التفصيلي للعميل مع رسالة مفهومة
+    res.status(500).json({ error: e.message, details: e.stack });
   }
 });
 
@@ -160,12 +178,12 @@ app.get("/api/health", (req, res) => {
     status: "ok",
     provider: AI_PROVIDER,
     geminiKeySet: !!GEMINI_API_KEY,
-    openrouterKeySet: !!OPENROUTER_API_KEY
+    openrouterKeySet: !!OPENROUTER_API_KEY,
+    grokKeySet: !!GROK_API_KEY
   });
 });
 
-// ─── SPA Fallback (المشكلة كانت هنا) ───
-// استخدم app.use بدلاً من app.get('*') لتجنب خطأ path-to-regexp
+// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
@@ -176,11 +194,4 @@ app.listen(PORT, async () => {
   console.log(`🌎 عالم التحديات — LIVE GAME SHOW`);
   console.log(`   Server running on http://localhost:${PORT}`);
   console.log(`   AI Provider: ${AI_PROVIDER}`);
-
-  if (AI_PROVIDER === "gemini") {
-    const valid = await testGeminiKey();
-    if (!valid) {
-      console.warn("⚠️ يرجى تحديث مفتاح Gemini API في ملف .env أو استخدام OpenRouter.");
-    }
-  }
 });
