@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-// ─── Middleware ───
 app.use((req, res, next) => {
   if (req.body === undefined) req.body = {};
   next();
@@ -14,12 +13,10 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة المفاتيح ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── دالة بناء System Prompt (ديناميكية) ───
 function buildSystemPrompt(count) {
   return `انت مولد اسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 قواعد صارمة:
@@ -51,30 +48,23 @@ function buildSystemPrompt(count) {
 ]`;
 }
 
-// ─── دالة تحليل JSON محسنة ───
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== 'string') {
     throw new Error("الرد فارغ او غير صالح");
   }
-
   let cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
-
   const arrayMatch = cleaned.match(/\[[\s\S]*\]/);
   if (arrayMatch) {
     try { return JSON.parse(arrayMatch[0]); } catch (_) {}
   }
-
   const objectMatch = cleaned.match(/\{[\s\S]*\}/);
   if (objectMatch) {
     try { return JSON.parse(objectMatch[0]); } catch (_) {}
   }
-
   try { return JSON.parse(cleaned); } catch (_) {}
-
   throw new Error(`تعذر تحليل JSON: ${rawText.slice(0, 200)}`);
 }
 
-// ─── دوال المزودين ───
 const PROVIDERS = [
   {
     name: "gemini",
@@ -196,7 +186,6 @@ const PROVIDERS = [
   }
 ];
 
-// ─── اسئلة احتياطية جاهزة (لو فشلت كل المزودين) ───
 function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة السياسية والادارية للمملكة منذ عام 1932." },
@@ -227,7 +216,6 @@ function getFallbackQuestions(category, count, difficulty) {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// ─── دالة الاحتياطي المحسنة ───
 async function callWithFallback(prompt, count) {
   const errors = [];
   for (const provider of PROVIDERS) {
@@ -266,11 +254,11 @@ async function callWithFallback(prompt, count) {
       }
 
       console.log(`${provider.name} ارجع ${validQuestions.length} سؤال صالح`);
-      return validQuestions;
+      return { questions: validQuestions, provider: provider.name, source: "ai" };
 
     } catch (err) {
       console.log(`فشل ${provider.name}: ${err.message}`);
-      errors.push({ provider: provider.name, error: err.message });
+n      errors.push({ provider: provider.name, error: err.message });
     }
   }
 
@@ -278,7 +266,6 @@ async function callWithFallback(prompt, count) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
-// ─── API endpoint (مع منع الانهيار الكامل) ───
 app.post("/api/questions", async (req, res) => {
   console.log("تم استلام طلب /api/questions");
   console.log("البيانات:", JSON.stringify(req.body, null, 2));
@@ -296,28 +283,47 @@ app.post("/api/questions", async (req, res) => {
 
     console.log("المطالبة:", prompt.slice(0, 250) + "...");
 
-    let data;
+    let result;
     try {
-      data = await callWithFallback(prompt, n);
+      result = await callWithFallback(prompt, n);
     } catch (aiErr) {
       console.log(`فشلت كل المزودين، استخدام الاسئلة الاحتياطية...`);
-      data = getFallbackQuestions(category, n, difficulty);
-      console.log(`تم استخدام ${data.length} سؤال احتياطي`);
+      const fallbackQuestions = getFallbackQuestions(category, n, difficulty);
+      result = {
+        questions: fallbackQuestions,
+        provider: "none",
+        source: "fallback"
+      };
+      console.log(`تم استخدام ${fallbackQuestions.length} سؤال احتياطي`);
     }
 
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(result.questions) || result.questions.length === 0) {
       throw new Error("لم يتم توليد اي اسئلة.");
     }
 
-    const enriched = data.map((q, i) => ({
+    const generatedAt = new Date().toISOString();
+    const enriched = result.questions.map((q, i) => ({
       ...q,
       id: `q_${Date.now()}_${i}`,
       category: q.category || category,
-      difficulty: q.difficulty || difficulty
+      difficulty: q.difficulty || difficulty,
+      generatedAt: generatedAt,
+      source: result.source,
+      provider: result.provider
     }));
 
-    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح.`);
-    return res.json({ questions: enriched, source: data.length > 0 && data[0]._fallback ? "fallback" : "ai" });
+    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح (المصدر: ${result.source}, المزود: ${result.provider}).`);
+    return res.json({
+      questions: enriched,
+      meta: {
+        source: result.source,
+        provider: result.provider,
+        generatedAt: generatedAt,
+        count: enriched.length,
+        requestedCategory: category,
+        requestedDifficulty: difficulty
+      }
+    });
   } catch (err) {
     console.error("خطأ في الـ API:", err.message);
     return res.status(500).json({
@@ -327,7 +333,6 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
-// ─── Health Check ───
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -339,12 +344,10 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ─── استخدام المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`عالم التحديات — LIVE GAME SHOW`);
