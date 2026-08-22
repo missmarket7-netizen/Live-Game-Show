@@ -6,28 +6,120 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+// ─── 1. تأمين req.body في Express 5 ───
+// Express 5 لا يعرّف req.body تلقائياً للطلبات الفارغة، مما يسبب أعطالاً.
+// هذا المiddleware يضمن أن req.body هو كائن دائماً.
+app.use((req, res, next) => {
+  if (req.body === undefined) req.body = {};
+  next();
+});
 app.use(express.json({ limit: "1mb" }));
+
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة المفاتيح ───
+// ─── 2. قراءة المفاتيح من البيئة ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── قائمة المزودين بالترتيب ───
+// ─── 3. تكوين المزودين مع دالة موحدة للاتصال ───
 const PROVIDERS = [
-  { name: "gemini", key: GEMINI_API_KEY, call: callGemini },
-  { name: "openrouter", key: OPENROUTER_API_KEY, call: callOpenRouter },
-  { name: "groq", key: GROQ_API_KEY, call: callGroq }
+  {
+    name: "gemini",
+    key: GEMINI_API_KEY,
+    call: async (prompt) => {
+      if (!GEMINI_API_KEY) throw new Error("مفتاح Gemini غير موجود");
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: SYSTEM + "\n\n" + prompt }] }],
+          generationConfig: { temperature: 0.7 }
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      }
+      const json = await res.json();
+      const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (!text) throw new Error("لم يرد Gemini بنص");
+      return text;
+    }
+  },
+  {
+    name: "openrouter",
+    key: OPENROUTER_API_KEY,
+    call: async (prompt) => {
+      if (!OPENROUTER_API_KEY) throw new Error("مفتاح OpenRouter غير موجود");
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${OPENROUTER_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: process.env.OPENROUTER_MODEL || "openrouter/free",
+          messages: [
+            { role: "system", content: SYSTEM },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7,
+          // تفعيل插件 Response Healing لإصلاح JSON التالف
+          plugins: [{ id: "response-healing" }]
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`OpenRouter HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      }
+      const json = await res.json();
+      const content = json.choices?.[0]?.message?.content || "";
+      if (!content) throw new Error("لم يرد OpenRouter بنص");
+      return content;
+    }
+  },
+  {
+    name: "groq",
+    key: GROQ_API_KEY,
+    call: async (prompt) => {
+      if (!GROQ_API_KEY) throw new Error("مفتاح Groq غير موجود");
+      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${GROQ_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: process.env.GROQ_MODEL || "llama3-70b-8192",
+          messages: [
+            { role: "system", content: SYSTEM },
+            { role: "user", content: prompt }
+          ],
+          temperature: 0.7,
+          response_format: { type: "json_object" }
+        })
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Groq HTTP ${res.status}: ${errText.slice(0, 200)}`);
+      }
+      const json = await res.json();
+      const content = json.choices?.[0]?.message?.content || "";
+      if (!content) throw new Error("لم يرد Groq بنص");
+      return content;
+    }
+  }
 ];
 
-console.log(`🌎 عالم التحديات — Fallback Mode (مع سجلات مفصلة)`);
+console.log(`🌎 عالم التحديات — وضع الاحتياطي (Fallback Mode)`);
 PROVIDERS.forEach(p => {
   console.log(`   ${p.name}: ${p.key ? "✅ مفتاح موجود" : "❌ لا يوجد مفتاح"}`);
 });
 console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
 
-// ─── System Prompt ───
+// ─── 4. System Prompt ───
 const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
 أخرج JSON فقط. كل سؤال يحتوي على:
 - category: الفئة
@@ -45,135 +137,36 @@ const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشر�
 - الخيارات متقاربة منطقياً لكن واحد فقط صحيح
 - الشرح يكون معلومة إضافية مفيدة للمقدم`;
 
-// ─── تنظيف JSON ───
-function cleanJson(s) {
-  s = s.replace(/```json|```/g, "").trim();
-  let start = s.indexOf('[');
-  let end = s.lastIndexOf(']');
-  if (start !== -1 && end !== -1 && end > start) {
-    return JSON.parse(s.slice(start, end + 1));
-  }
-  const objMatch = s.match(/\{.*\}/s);
-  if (objMatch) {
+// ─── 5. دالة قوية لتحليل JSON من النص الخام ───
+function extractAndParseJSON(rawText) {
+  // 1. إزالة علامات Markdown
+  let cleaned = rawText.replace(/```json|```/g, "").trim();
+
+  // 2. محاولة استخراج أول كائن JSON صحيح
+  const objectMatch = cleaned.match(/(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/s);
+  if (objectMatch) {
     try {
-      const obj = JSON.parse(objMatch[0]);
-      if (obj.question && obj.options) return [obj];
+      return JSON.parse(objectMatch[1]);
     } catch (_) {}
   }
-  throw new Error("لم يتم العثور على JSON صالح: " + s.slice(0, 300));
-}
 
-// ─── دوال المزودين (مع مهلة 30 ثانية) ───
+  // 3. محاولة استخراج أول مصفوفة JSON صحيحة
+  const arrayMatch = cleaned.match(/(\[[^\[\]]*(?:\[[^\[\]]*\][^\[\]]*)*\])/s);
+  if (arrayMatch) {
+    try {
+      return JSON.parse(arrayMatch[1]);
+    } catch (_) {}
+  }
 
-// 1. Gemini
-async function callGemini(prompt) {
-  if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY غير محددة");
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
+  // 4. المحاولة النهائية: تحليل النص كله
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      signal: controller.signal,
-      body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: SYSTEM + "\n\n" + prompt }] }],
-        generationConfig: { temperature: 0.7 }
-      })
-    });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Gemini HTTP ${res.status}: ${errText.slice(0, 200)}`);
-    }
-    const json = await res.json();
-    const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    if (!text) throw new Error("لم يرد Gemini بنص");
-    console.log("📝 Gemini raw (first 150 chars):", text.slice(0, 150));
-    return cleanJson(text);
-  } catch (err) {
-    clearTimeout(timeout);
-    throw err;
+    return JSON.parse(cleaned);
+  } catch (_) {
+    throw new Error(`تعذر تحليل JSON من النص: ${rawText.slice(0, 300)}`);
   }
 }
 
-// 2. OpenRouter
-async function callOpenRouter(prompt) {
-  if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY غير محددة");
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${OPENROUTER_API_KEY}`
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: process.env.OPENROUTER_MODEL || "openrouter/free",
-        messages: [
-          { role: "system", content: SYSTEM },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7
-      })
-    });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`OpenRouter HTTP ${res.status}: ${errText.slice(0, 200)}`);
-    }
-    const json = await res.json();
-    const content = json.choices?.[0]?.message?.content || "";
-    if (!content) throw new Error("لم يرد OpenRouter بنص");
-    console.log("📝 OpenRouter raw (first 150 chars):", content.slice(0, 150));
-    return cleanJson(content);
-  } catch (err) {
-    clearTimeout(timeout);
-    throw err;
-  }
-}
-
-// 3. Groq
-async function callGroq(prompt) {
-  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY غير محددة");
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${GROQ_API_KEY}`
-      },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: process.env.GROQ_MODEL || "llama3-70b-8192",
-        messages: [
-          { role: "system", content: SYSTEM },
-          { role: "user", content: prompt }
-        ],
-        temperature: 0.7
-      })
-    });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error(`Groq HTTP ${res.status}: ${errText.slice(0, 200)}`);
-    }
-    const json = await res.json();
-    const content = json.choices?.[0]?.message?.content || "";
-    if (!content) throw new Error("لم يرد Groq بنص");
-    console.log("📝 Groq raw (first 150 chars):", content.slice(0, 150));
-    return cleanJson(content);
-  } catch (err) {
-    clearTimeout(timeout);
-    throw err;
-  }
-}
-
-// ─── الدالة الأساسية مع Fallback ───
+// ─── 6. الدالة الأساسية مع الاحتياطي التلقائي ───
 async function callWithFallback(prompt) {
   const errors = [];
   for (const provider of PROVIDERS) {
@@ -183,9 +176,26 @@ async function callWithFallback(prompt) {
     }
     try {
       console.log(`🔄 محاولة استخدام ${provider.name}...`);
-      const result = await provider.call(prompt);
+      const rawResponse = await provider.call(prompt);
+      console.log(`📝 الرد الخام من ${provider.name} (أول 150 حرف):`, rawResponse.slice(0, 150));
+
+      // تحليل JSON من الرد الخام
+      const parsed = extractAndParseJSON(rawResponse);
       console.log(`✅ نجح ${provider.name}!`);
-      return result;
+
+      // التأكد من أن النتيجة مصفوفة
+      if (Array.isArray(parsed)) {
+        return parsed;
+      } else if (parsed && typeof parsed === 'object') {
+        // إذا كان الكائن يحتوي على خاصية questions
+        if (parsed.questions && Array.isArray(parsed.questions)) {
+          return parsed.questions;
+        }
+        // وإلا اعتبر الكائن نفسه كمصفوفة من سؤال واحد
+        return [parsed];
+      } else {
+        throw new Error("الرد ليس مصفوفة ولا كائن صالح");
+      }
     } catch (err) {
       console.log(`❌ فشل ${provider.name}: ${err.message}`);
       errors.push({ provider: provider.name, error: err.message });
@@ -195,34 +205,19 @@ async function callWithFallback(prompt) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
-// ─── اختبار المفاتيح عند بدء التشغيل (اختياري) ───
-async function testKeys() {
-  console.log("🔍 جاري اختبار المفاتيح...");
-  for (const p of PROVIDERS) {
-    if (!p.key) continue;
-    try {
-      // اختبار سريع باستخدام طلب بسيط
-      await p.call("أعطني سؤالاً واحداً فقط في أي فئة.");
-      console.log(`   ✅ ${p.name} يعمل بشكل جيد.`);
-    } catch (err) {
-      console.log(`   ❌ ${p.name} فشل في الاختبار: ${err.message}`);
-    }
-  }
-}
-
-// ─── API endpoint ───
+// ─── 7. نقطة النهاية API ───
 app.post("/api/questions", async (req, res) => {
   console.log("📩 تم استلام طلب /api/questions");
   console.log("📦 البيانات:", JSON.stringify(req.body, null, 2));
 
   try {
-    const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body || {};
+    const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
     const prompt = `أنشئ ${n} أسئلة من فئة "${category}" بمستوى "${difficulty}".
 لا تستخدم هذه الأسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 أعد مصفوفة JSON فقط.`;
 
-    console.log("📝 prompt:", prompt.slice(0, 200) + "...");
+    console.log("📝 المطالبة:", prompt.slice(0, 200) + "...");
 
     const data = await callWithFallback(prompt);
 
@@ -233,12 +228,12 @@ app.post("/api/questions", async (req, res) => {
     console.log(`✅ تم توليد ${data.length} سؤال بنجاح.`);
     res.json({ questions: data });
   } catch (e) {
-    console.error("❌ API Error:", e.message);
+    console.error("❌ خطأ في الـ API:", e.message);
     res.status(500).json({ error: e.message });
   }
 });
 
-// ─── Health Check ───
+// ─── 8. Health Check ───
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -249,18 +244,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── SPA Fallback ───
+// ─── 9. SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ─── بدء الخادم ───
+// ─── 10. تشغيل الخادم ───
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  console.log(`🌎 عالم التحديات — LIVE GAME SHOW (Fallback Mode)`);
-  console.log(`   Server running on http://localhost:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🌎 عالم التحديات — LIVE GAME SHOW (وضع الاحتياطي)`);
+  console.log(`   الخادم يعمل على http://localhost:${PORT}`);
   console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
-
-  // اختبار المفاتيح (اختياري، يمكن تعطيله)
-  await testKeys();
 });
