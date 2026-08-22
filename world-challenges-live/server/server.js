@@ -9,7 +9,7 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── اقرأ مفاتيح API من البيئة ───
+// ─── قراءة مفاتيح API ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const AI_PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
@@ -22,7 +22,7 @@ if (AI_PROVIDER === "openrouter" && !OPENROUTER_API_KEY) {
   console.warn("⚠️ OPENROUTER_API_KEY غير موجودة في .env");
 }
 
-// ─── دالة اختبار صحة مفتاح Gemini ───
+// ─── اختبار صحة مفتاح Gemini ───
 async function testGeminiKey() {
   if (!GEMINI_API_KEY) return false;
   try {
@@ -59,21 +59,17 @@ const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشر�
 - الخيارات متقاربة منطقياً لكن واحد فقط صحيح
 - الشرح يكون معلومة إضافية مفيدة للمقدم`;
 
-// ─── تنظيف الـ JSON من الشوائب ───
+// ─── تنظيف الـ JSON ───
 function cleanJson(s) {
   s = s.replace(/```json|```/g, "").trim();
-  // إذا كان النص يبدأ بـ { ... } وليس [ ... ]، نحاول استخراج الكائن
   let firstBracket = s.indexOf('[');
   let lastBracket = s.lastIndexOf(']');
   if (firstBracket === -1 || lastBracket === -1 || lastBracket < firstBracket) {
-    // قد يكون كائناً واحداً
     const objMatch = s.match(/\{.*\}/s);
     if (objMatch) {
       try {
         const obj = JSON.parse(objMatch[0]);
-        if (obj.question && obj.options) {
-          return [obj];
-        }
+        if (obj.question && obj.options) return [obj];
       } catch (_) {}
     }
     throw new Error("لم يتم العثور على مصفوفة JSON صالحة: " + s.slice(0, 200));
@@ -81,7 +77,7 @@ function cleanJson(s) {
   return JSON.parse(s.slice(firstBracket, lastBracket + 1));
 }
 
-// ─── استدعاء Gemini API ───
+// ─── استدعاء Gemini ───
 async function callGemini(prompt) {
   if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY غير محددة");
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
@@ -103,7 +99,7 @@ async function callGemini(prompt) {
   return cleanJson(text);
 }
 
-// ─── استدعاء OpenRouter API ───
+// ─── استدعاء OpenRouter ───
 async function callOpenRouter(prompt) {
   if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY غير محددة");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -168,8 +164,9 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// ─── SPA Fallback ───
-app.get("*", (req, res) => {
+// ─── SPA Fallback (المشكلة كانت هنا) ───
+// استخدم app.use بدلاً من app.get('*') لتجنب خطأ path-to-regexp
+app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
@@ -180,7 +177,6 @@ app.listen(PORT, async () => {
   console.log(`   Server running on http://localhost:${PORT}`);
   console.log(`   AI Provider: ${AI_PROVIDER}`);
 
-  // اختبار مفتاح Gemini (إذا كان المزود هو Gemini)
   if (AI_PROVIDER === "gemini") {
     const valid = await testGeminiKey();
     if (!valid) {
