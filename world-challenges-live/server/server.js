@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
+// ─── Middleware ───
 app.use((req, res, next) => {
   if (req.body === undefined) req.body = {};
   next();
@@ -13,11 +14,46 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── مفاتيح API ───
+// ─── قراءة المفاتيح ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
+// ─── System Prompt ───
+const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
+أخرج JSON فقط. كل سؤال يحتوي على:
+- category: الفئة
+- difficulty: سهل/متوسط/صعب
+- question: نص السؤال بالعربية الفصحى الواضحة
+- options: مصفوفة من 4 خيارات
+- correctIndex: رقم الإجابة الصحيحة (0-3)
+- explanation: شرح مختصر ومفيد للمقدم
+
+قواعد مهمة:
+- الأسئلة واضحة وسهلة الفهم
+- تجنب المختلف عليه والمتغير
+- في الدين: معلومات أساسية مشهورة، تجنب الفتاوى والخلافات
+- لا تكرر الأسئلة
+- الخيارات متقاربة منطقياً لكن واحد فقط صحيح
+- الشرح يكون معلومة إضافية مفيدة للمقدم`;
+
+// ─── دالة تحليل JSON ───
+function extractAndParseJSON(rawText) {
+  let cleaned = rawText.replace(/```json|```/g, "").trim();
+  const objectMatch = cleaned.match(/(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/s);
+  if (objectMatch) {
+    try { return JSON.parse(objectMatch[1]); } catch (_) {}
+  }
+  const arrayMatch = cleaned.match(/(\[[^\[\]]*(?:\[[^\[\]]*\][^\[\]]*)*\])/s);
+  if (arrayMatch) {
+    try { return JSON.parse(arrayMatch[1]); } catch (_) {}
+  }
+  try { return JSON.parse(cleaned); } catch (_) {
+    throw new Error(`تعذر تحليل JSON من النص: ${rawText.slice(0, 300)}`);
+  }
+}
+
+// ─── دوال المزودين ───
 const PROVIDERS = [
   {
     name: "gemini",
@@ -134,44 +170,7 @@ const PROVIDERS = [
   }
 ];
 
-console.log(`🌎 عالم التحديات — وضع الاحتياطي (Fallback Mode)`);
-PROVIDERS.forEach(p => {
-  console.log(`   ${p.name}: ${p.key ? "✅ مفتاح موجود" : "❌ لا يوجد مفتاح"}`);
-});
-console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
-
-const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
-أخرج JSON فقط. كل سؤال يحتوي على:
-- category: الفئة
-- difficulty: سهل/متوسط/صعب
-- question: نص السؤال بالعربية الفصحى الواضحة
-- options: مصفوفة من 4 خيارات
-- correctIndex: رقم الإجابة الصحيحة (0-3)
-- explanation: شرح مختصر ومفيد للمقدم
-
-قواعد مهمة:
-- الأسئلة واضحة وسهلة الفهم
-- تجنب المختلف عليه والمتغير
-- في الدين: معلومات أساسية مشهورة، تجنب الفتاوى والخلافات
-- لا تكرر الأسئلة
-- الخيارات متقاربة منطقياً لكن واحد فقط صحيح
-- الشرح يكون معلومة إضافية مفيدة للمقدم`;
-
-function extractAndParseJSON(rawText) {
-  let cleaned = rawText.replace(/```json|```/g, "").trim();
-  const objectMatch = cleaned.match(/(\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/s);
-  if (objectMatch) {
-    try { return JSON.parse(objectMatch[1]); } catch (_) {}
-  }
-  const arrayMatch = cleaned.match(/(\[[^\[\]]*(?:\[[^\[\]]*\][^\[\]]*)*\])/s);
-  if (arrayMatch) {
-    try { return JSON.parse(arrayMatch[1]); } catch (_) {}
-  }
-  try { return JSON.parse(cleaned); } catch (_) {
-    throw new Error(`تعذر تحليل JSON من النص: ${rawText.slice(0, 300)}`);
-  }
-}
-
+// ─── دالة الاحتياطي ───
 async function callWithFallback(prompt) {
   const errors = [];
   for (const provider of PROVIDERS) {
@@ -206,6 +205,7 @@ async function callWithFallback(prompt) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
+// ─── API endpoint (مع منع الانهيار) ───
 app.post("/api/questions", async (req, res) => {
   console.log("📩 تم استلام طلب /api/questions");
   console.log("📦 البيانات:", JSON.stringify(req.body, null, 2));
@@ -229,6 +229,7 @@ app.post("/api/questions", async (req, res) => {
     return res.json({ questions: data });
   } catch (err) {
     console.error("❌ خطأ في الـ API:", err.message);
+    // ✅ الإصلاح الحاسم: لا نستخدم throw new Error، بل نرد بـ JSON
     return res.status(500).json({ 
       error: 'فشل في توليد الأسئلة', 
       details: err.message 
@@ -236,6 +237,7 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
+// ─── Health Check ───
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
@@ -246,13 +248,15 @@ app.get("/api/health", (req, res) => {
   });
 });
 
+// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
-// ─── المنفذ الديناميكي ───
+// ─── استخدام المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🌎 عالم التحديات — LIVE GAME SHOW (وضع الاحتياطي)`);
   console.log(`   الخادم يعمل على http://localhost:${PORT}`);
+  console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
 });
