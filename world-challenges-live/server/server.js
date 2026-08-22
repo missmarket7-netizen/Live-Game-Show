@@ -9,19 +9,22 @@ const app = express();
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
-// ─── قراءة المفاتيح والمتغيرات ───
+// ─── قراءة المفاتيح ───
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
-const GROK_API_KEY = process.env.GROK_API_KEY || "";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-const AI_PROVIDER = (process.env.AI_PROVIDER || "gemini").toLowerCase();
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "openrouter/free";
-const GROK_MODEL = process.env.GROK_MODEL || "grok-2-latest"; // أو grok-beta
+// ─── قائمة المزودين بالترتيب (الأفضل أولاً) ───
+const PROVIDERS = [
+  { name: "gemini", key: GEMINI_API_KEY, call: callGemini },
+  { name: "openrouter", key: OPENROUTER_API_KEY, call: callOpenRouter },
+  { name: "groq", key: GROQ_API_KEY, call: callGroq }
+];
 
-console.log(`🤖 AI Provider: ${AI_PROVIDER}`);
-console.log(`   Gemini Key set: ${!!GEMINI_API_KEY}`);
-console.log(`   OpenRouter Key set: ${!!OPENROUTER_API_KEY}`);
-console.log(`   Grok (xAI) Key set: ${!!GROK_API_KEY}`);
+console.log(`🌎 عالم التحديات — Fallback Mode`);
+PROVIDERS.forEach(p => {
+  console.log(`   ${p.name}: ${p.key ? "✅ مفتاح موجود" : "❌ لا يوجد مفتاح"}`);
+});
 
 // ─── System Prompt ───
 const SYSTEM = `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات".
@@ -59,7 +62,9 @@ function cleanJson(s) {
   throw new Error("لم يتم العثور على JSON صالح: " + s.slice(0, 300));
 }
 
-// ─── 1. استدعاء Gemini ───
+// ─── دوال المزودين ───
+
+// 1. Gemini
 async function callGemini(prompt) {
   if (!GEMINI_API_KEY) throw new Error("GEMINI_API_KEY غير محددة");
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
@@ -78,10 +83,11 @@ async function callGemini(prompt) {
   const json = await res.json();
   const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
   if (!text) throw new Error("لم يرد Gemini بنص");
+  console.log("📝 Gemini raw (first 150 chars):", text.slice(0, 150));
   return cleanJson(text);
 }
 
-// ─── 2. استدعاء OpenRouter (متوافق مع OpenAI) ───
+// 2. OpenRouter
 async function callOpenRouter(prompt) {
   if (!OPENROUTER_API_KEY) throw new Error("OPENROUTER_API_KEY غير محددة");
   const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -91,7 +97,7 @@ async function callOpenRouter(prompt) {
       "Authorization": `Bearer ${OPENROUTER_API_KEY}`
     },
     body: JSON.stringify({
-      model: OPENROUTER_MODEL,
+      model: process.env.OPENROUTER_MODEL || "openrouter/free",
       messages: [
         { role: "system", content: SYSTEM },
         { role: "user", content: prompt }
@@ -106,20 +112,21 @@ async function callOpenRouter(prompt) {
   const json = await res.json();
   const content = json.choices?.[0]?.message?.content || "";
   if (!content) throw new Error("لم يرد OpenRouter بنص");
+  console.log("📝 OpenRouter raw (first 150 chars):", content.slice(0, 150));
   return cleanJson(content);
 }
 
-// ─── 3. استدعاء Grok (xAI - متوافق مع OpenAI) ───
-async function callGrok(prompt) {
-  if (!GROK_API_KEY) throw new Error("GROK_API_KEY غير محددة");
-  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+// 3. Groq
+async function callGroq(prompt) {
+  if (!GROQ_API_KEY) throw new Error("GROQ_API_KEY غير محددة");
+  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${GROK_API_KEY}`
+      "Authorization": `Bearer ${GROQ_API_KEY}`
     },
     body: JSON.stringify({
-      model: GROK_MODEL,
+      model: process.env.GROQ_MODEL || "llama3-70b-8192",
       messages: [
         { role: "system", content: SYSTEM },
         { role: "user", content: prompt }
@@ -129,12 +136,36 @@ async function callGrok(prompt) {
   });
   if (!res.ok) {
     const errText = await res.text();
-    throw new Error(`Grok HTTP ${res.status}: ${errText.slice(0, 200)}`);
+    throw new Error(`Groq HTTP ${res.status}: ${errText.slice(0, 200)}`);
   }
   const json = await res.json();
   const content = json.choices?.[0]?.message?.content || "";
-  if (!content) throw new Error("لم يرد Grok بنص");
+  if (!content) throw new Error("لم يرد Groq بنص");
+  console.log("📝 Groq raw (first 150 chars):", content.slice(0, 150));
   return cleanJson(content);
+}
+
+// ─── الدالة الأساسية مع Fallback ───
+async function callWithFallback(prompt) {
+  const errors = [];
+  for (const provider of PROVIDERS) {
+    if (!provider.key) {
+      console.log(`⏭️  تخطي ${provider.name} (لا يوجد مفتاح)`);
+      continue;
+    }
+    try {
+      console.log(`🔄 محاولة استخدام ${provider.name}...`);
+      const result = await provider.call(prompt);
+      console.log(`✅ نجح ${provider.name}!`);
+      return result;
+    } catch (err) {
+      console.log(`❌ فشل ${provider.name}: ${err.message}`);
+      errors.push({ provider: provider.name, error: err.message });
+    }
+  }
+  // إذا فشل الكل
+  const summary = errors.map(e => `${e.provider}: ${e.error}`).join(" | ");
+  throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
 // ─── API endpoint ───
@@ -146,19 +177,7 @@ app.post("/api/questions", async (req, res) => {
 لا تستخدم هذه الأسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 أعد مصفوفة JSON فقط.`;
 
-    let data;
-    switch (AI_PROVIDER) {
-      case "openrouter":
-        data = await callOpenRouter(prompt);
-        break;
-      case "grok":
-        data = await callGrok(prompt);
-        break;
-      case "gemini":
-      default:
-        data = await callGemini(prompt);
-        break;
-    }
+    const data = await callWithFallback(prompt);
 
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error("تم توليد 0 سؤال، حاول مرة أخرى.");
@@ -167,8 +186,7 @@ app.post("/api/questions", async (req, res) => {
     res.json({ questions: data });
   } catch (e) {
     console.error("❌ API Error:", e.message);
-    // إرسال الخطأ التفصيلي للعميل مع رسالة مفهومة
-    res.status(500).json({ error: e.message, details: e.stack });
+    res.status(500).json({ error: e.message });
   }
 });
 
@@ -176,10 +194,10 @@ app.post("/api/questions", async (req, res) => {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    provider: AI_PROVIDER,
-    geminiKeySet: !!GEMINI_API_KEY,
-    openrouterKeySet: !!OPENROUTER_API_KEY,
-    grokKeySet: !!GROK_API_KEY
+    providers: PROVIDERS.map(p => ({
+      name: p.name,
+      keySet: !!p.key
+    }))
   });
 });
 
@@ -190,8 +208,8 @@ app.use((req, res) => {
 
 // ─── بدء الخادم ───
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  console.log(`🌎 عالم التحديات — LIVE GAME SHOW`);
+app.listen(PORT, () => {
+  console.log(`🌎 عالم التحديات — LIVE GAME SHOW (Fallback Mode)`);
   console.log(`   Server running on http://localhost:${PORT}`);
-  console.log(`   AI Provider: ${AI_PROVIDER}`);
+  console.log(`   ترتيب المزودين: ${PROVIDERS.map(p => p.name).join(" → ")}`);
 });
