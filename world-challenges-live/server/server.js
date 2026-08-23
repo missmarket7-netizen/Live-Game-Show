@@ -120,7 +120,7 @@ const PROVIDERS = [
           },
           signal: controller.signal,
           body: JSON.stringify({
-            model: process.env.OPENROUTER_MODEL || "deepseek/deepseek-chat:free",
+            model: process.env.OPENROUTER_MODEL || "meta-llama/llama-3.1-8b-instruct:free",
             messages: [
               { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
@@ -160,7 +160,7 @@ const PROVIDERS = [
           },
           signal: controller.signal,
           body: JSON.stringify({
-            model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile",
+            model: process.env.GROQ_MODEL || "llama-3.1-70b-versatile",
             messages: [
               { role: "system", content: buildSystemPrompt(count) },
               { role: "user", content: prompt }
