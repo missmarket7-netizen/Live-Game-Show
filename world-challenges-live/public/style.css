@@ -366,3 +366,18 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   .battle-arena { gap: 16px; }
   .team-character img { max-width: 180px; }
 }
+/* تعديلات جديدة: الهيدر واللوجو */
+.setup-header .logo-img { width: 220px; height: 220px; filter: drop-shadow(0 0 40px rgba(255,215,0,0.6)); }
+.host-name { font-size: 22px; font-weight: 900; color: var(--white); margin-top: 10px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+.host-bio { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin-top: 10px; max-width: 600px; margin-inline: auto; }
+.tagline { display: inline-block; margin-top: 12px; font-size: 16px; font-weight: 800; color: var(--gold); background: rgba(255,215,0,0.15); padding: 6px 18px; border-radius: 30px; border: 2px solid var(--gold); }
+
+/* تنسيق صندوق النقاط السالبة (عداد -1) */
+.negative-counter { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px; background: var(--bg-card); padding: 6px; border-radius: 12px; width: fit-content; margin-inline: auto; }
+.neg-btn { width: 28px; height: 28px; background: var(--bg-light); border: 2px solid var(--text-dim); color: var(--text); border-radius: 8px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+.neg-btn:hover { border-color: var(--pink); color: var(--pink); }
+#negGirlsValue, #negBoysValue { font-size: 20px; font-weight: 900; width: 30px; text-align: center; color: var(--pink); }
+#negBoysValue { color: var(--blue); }
+
+/* تكبير أزرار الجولة التالية وتمييزها */
+#nextRoundBtn { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-color: transparent; color: var(--bg); font-weight: 900; }

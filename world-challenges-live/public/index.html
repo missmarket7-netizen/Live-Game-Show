@@ -19,7 +19,9 @@
       <div class="setup-header">
         <img src="/images/logo.png" alt="عالم التحديات" class="logo-img">
         <h1>مسابقة عالم التحديات</h1>
-        <p>جهّز جولتك وابدأ التحدي!</p>
+        <h2 class="host-name">المضيف / مروان حكيم</h2>
+        <p class="host-bio">في رحلة حماسية وتحديات مثيرة، نلتقي اليوم لتتألق مواهب فريق البنات وفريق الشباب في "لايف عالم التحديات". استعدوا لتحدي الذكاء، المعلومات، والحماس! اكتفِ بإبداء التحدي وكن نجم الجمهور!</p>
+        <p class="tagline">اكتفِ بإبداء التحدي!</p>
       </div>
 
       <div class="setup-card">
@@ -88,7 +90,7 @@
         </button>
 
         <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn">
-          <span>📚</span> الأسئلة المحفوظة
+          <span>📚</span> استخدم أسئلة محفوظة
         </button>
       </div>
     </section>
@@ -96,31 +98,35 @@
     <!-- ===== GAME SCREEN ===== -->
     <section id="gameScreen" class="screen hidden">
 
-      <!-- Gifts Bar -->
+      <!-- Gifts Bar (الترتيب من الشمال لليمين في العرض هو: Corgi, Donut, Rose, Heart, Crown, Cat, TikTok) -->
       <div class="gifts-bar">
-        <div class="gift-item" data-gift="shield" title="درع الحماية - يحمي من خسارة النقطة">
-          <img src="/images/gift-shield.png" alt="درع">
-          <span class="gift-name">درع الحماية</span>
+        <div class="gift-item" data-gift="tiktok" title="🎵 تيك توك - خصم نقطة من الفريق الآخر">
+          <img src="/images/gift-tiktok.png" alt="تيك توك">
+          <span class="gift-name">-1 نقطة</span>
         </div>
-        <div class="gift-item" data-gift="trophy" title="كأس النصر - نقطة إضافية">
-          <img src="/images/gift-trophy.png" alt="كأس">
-          <span class="gift-name">كأس النصر</span>
+        <div class="gift-item" data-gift="cat" title="🐱 قطة سحرية - ربح جولة">
+          <img src="/images/gift-cat.png" alt="قطة سحرية">
+          <span class="gift-name">1+ جولة</span>
         </div>
-        <div class="gift-item" data-gift="time" title="ساعة الزمن - 10 ثواني إضافية">
-          <img src="/images/gift-time.png" alt="زمن">
-          <span class="gift-name">ساعة الزمن</span>
+        <div class="gift-item" data-gift="crown" title="👑 تاج ملكي - ربح 10 جولات">
+          <img src="/images/gift-crown.png" alt="تاج ملكي">
+          <span class="gift-name">+10 جولات</span>
         </div>
-        <div class="gift-item" data-gift="megaphone" title="مكبر الصوت - تشجيع الفريق">
-          <img src="/images/gift-megaphone.png" alt="مكبر">
-          <span class="gift-name">مكبر الصوت</span>
+        <div class="gift-item" data-gift="heart" title="❤️ قلب أحمر - احمي فريقك من الخصم">
+          <img src="/images/gift-heart.png" alt="قلب أحمر">
+          <span class="gift-name">احمي فريقك</span>
         </div>
-        <div class="gift-item" data-gift="star" title="نجمة مضاعفة - نقطة x2">
-          <img src="/images/gift-star.png" alt="نجمة">
-          <span class="gift-name">نجمة مضاعفة</span>
+        <div class="gift-item" data-gift="rose" title="🌹 وردة حمراء - خصم نقطة">
+          <img src="/images/gift-rose.png" alt="وردة حمراء">
+          <span class="gift-name">1- نقطة</span>
         </div>
-        <div class="gift-item" data-gift="bomb" title="قنبلة - حذف إجابة خاطئة">
-          <img src="/images/gift-bomb.png" alt="قنبلة">
-          <span class="gift-name">قنبلة</span>
+        <div class="gift-item" data-gift="donut" title="🍩 دونات وردي - ربح جولة">
+          <img src="/images/gift-donut.png" alt="دونات وردي">
+          <span class="gift-name">1+ جولة</span>
+        </div>
+        <div class="gift-item" data-gift="corgi" title="🐶 كلب كورجي - ربح 10 جولات">
+          <img src="/images/gift-corgi.png" alt="كلب كورجي">
+          <span class="gift-name">+10 جولات</span>
         </div>
       </div>
 
@@ -139,6 +145,12 @@
             <div class="score-box"></div>
             <div class="score-box"></div>
             <div class="score-box"></div>
+          </div>
+          <!-- عداد النقاط السالبة -->
+          <div class="negative-counter">
+            <button class="neg-btn" data-team="girls" data-action="minus">-</button>
+            <span id="negGirlsValue">0</span>
+            <button class="neg-btn" data-team="girls" data-action="plus">+</button>
           </div>
         </div>
 
@@ -162,6 +174,12 @@
             <div class="score-box"></div>
             <div class="score-box"></div>
             <div class="score-box"></div>
+          </div>
+          <!-- عداد النقاط السالبة -->
+          <div class="negative-counter">
+            <button class="neg-btn" data-team="boys" data-action="minus">-</button>
+            <span id="negBoysValue">0</span>
+            <button class="neg-btn" data-team="boys" data-action="plus">+</button>
           </div>
         </div>
       </div>
@@ -188,8 +206,8 @@
         <button id="girlsMinusBtn" class="ctrl-btn girls-minus">👧 -1</button>
         <button id="boysPlusBtn" class="ctrl-btn boys">👦 +1</button>
         <button id="boysMinusBtn" class="ctrl-btn boys-minus">👦 -1</button>
-        <button id="endRoundBtn" class="ctrl-btn danger">🏁 انتهاء الجولة</button>
-        <button id="newRoundBtn" class="ctrl-btn ghost">🔄 جديد</button>
+        <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
+        <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>
 
     </section>
@@ -238,9 +256,6 @@
       </div>
     </div>
 
-  </div> <!-- إغلاق الـ app div -->
-</body>
-</html>
     <!-- ===== SAVED QUESTIONS MODAL ===== -->
     <div id="savedModal" class="saved-modal hidden">
       <div class="saved-modal-backdrop"></div>
