@@ -233,8 +233,6 @@ async function callWithFallback(prompt, count) {
     try {
       console.log(`محاولة استخدام ${provider.name}...`);
       const rawResponse = await provider.call(prompt, count);
-      console.log(`الرد الخام (اول 200 حرف):`, rawResponse.slice(0, 200));
-
       const parsed = extractAndParseJSON(rawResponse);
       console.log(`نجح ${provider.name}!`);
 
@@ -272,7 +270,6 @@ async function callWithFallback(prompt, count) {
   const summary = errors.map(e => `${e.provider}: ${e.error}`).join(" | ");
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
-
 // ─── API endpoint (مع منع الانهيار الكامل) ───
 app.post("/api/questions", async (req, res) => {
   console.log("تم استلام طلب /api/questions");
@@ -288,8 +285,6 @@ app.post("/api/questions", async (req, res) => {
 - لا تستخدم هذه الاسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 - كل سؤال يحتوي على: category, difficulty, question, options (4 خيارات), correctIndex (0-3), explanation
 - لا تضيف اي نص خارج JSON`;
-
-    console.log("المطالبة:", prompt.slice(0, 250) + "...");
 
     let result;
     try {
@@ -358,6 +353,36 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
+// ─── حفظ الأسئلة في الذاكرة (نسخة واحدة فقط بعد إزالة التكرار) ───
+let savedQuestions = [];
+
+app.post("/api/save-questions", (req, res) => {
+  const { questions } = req.body;
+  if (!Array.isArray(questions) || questions.length === 0) {
+    return res.status(400).json({ error: "لا يوجد اسئلة للحفظ" });
+  }
+  savedQuestions = [...savedQuestions, ...questions];
+  console.log(`تم حفظ ${questions.length} سؤال. الاجمالي: ${savedQuestions.length}`);
+  return res.json({ 
+    saved: questions.length, 
+    total: savedQuestions.length,
+    message: "تم حفظ الاسئلة بنجاح" 
+  });
+});
+
+app.get("/api/saved-questions", (req, res) => {
+  return res.json({ 
+    questions: savedQuestions, 
+    count: savedQuestions.length 
+  });
+});
+
+app.delete("/api/saved-questions", (req, res) => {
+  savedQuestions = [];
+  console.log("تم مسح جميع الاسئلة المحفوظة");
+  return res.json({ message: "تم مسح الاسئلة" });
+});
+
 // ─── استخدام المنفذ الديناميكي ───
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
@@ -365,94 +390,4 @@ app.listen(PORT, () => {
   console.log(`   الخادم يعمل على http://localhost:${PORT}`);
   console.log(`   المزودين المتاحين: ${PROVIDERS.filter(p => p.key).map(p => p.name).join(", ") || "لا يوجد"}`);
   console.log(`   ترتيب المحاولات: Gemini -> OpenRouter -> Groq -> Fallback`);
-});
-
-// ─── حفظ الأسئلة في الذاكرة ───
-let savedQuestions = [];
-
-app.post("/api/save-questions", (req, res) => {
-  const { questions } = req.body;
-  if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ error: "لا يوجد اسئلة للحفظ" });
-  }
-  savedQuestions = [...savedQuestions, ...questions];
-  console.log(`تم حفظ ${questions.length} سؤال. الاجمالي: ${savedQuestions.length}`);
-  return res.json({ 
-    saved: questions.length, 
-    total: savedQuestions.length,
-    message: "تم حفظ الاسئلة بنجاح" 
-  });
-});
-
-app.get("/api/saved-questions", (req, res) => {
-  return res.json({ 
-    questions: savedQuestions, 
-    count: savedQuestions.length 
-  });
-});
-
-app.delete("/api/saved-questions", (req, res) => {
-  savedQuestions = [];
-  console.log("تم مسح جميع الاسئلة المحفوظة");
-  return res.json({ message: "تم مسح الاسئلة" });
-});
-
-// ─── حفظ الأسئلة في الذاكرة ───
-let savedQuestions = [];
-
-app.post("/api/save-questions", (req, res) => {
-  const { questions } = req.body;
-  if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ error: "لا يوجد اسئلة للحفظ" });
-  }
-  savedQuestions = [...savedQuestions, ...questions];
-  console.log(`تم حفظ ${questions.length} سؤال. الاجمالي: ${savedQuestions.length}`);
-  return res.json({ 
-    saved: questions.length, 
-    total: savedQuestions.length,
-    message: "تم حفظ الاسئلة بنجاح" 
-  });
-});
-
-app.get("/api/saved-questions", (req, res) => {
-  return res.json({ 
-    questions: savedQuestions, 
-    count: savedQuestions.length 
-  });
-});
-
-app.delete("/api/saved-questions", (req, res) => {
-  savedQuestions = [];
-  console.log("تم مسح جميع الاسئلة المحفوظة");
-  return res.json({ message: "تم مسح الاسئلة" });
-});
-
-// ─── حفظ الأسئلة في الذاكرة ───
-let savedQuestions = [];
-
-app.post("/api/save-questions", (req, res) => {
-  const { questions } = req.body;
-  if (!Array.isArray(questions) || questions.length === 0) {
-    return res.status(400).json({ error: "لا يوجد اسئلة للحفظ" });
-  }
-  savedQuestions = [...savedQuestions, ...questions];
-  console.log(`تم حفظ ${questions.length} سؤال. الاجمالي: ${savedQuestions.length}`);
-  return res.json({ 
-    saved: questions.length, 
-    total: savedQuestions.length,
-    message: "تم حفظ الاسئلة بنجاح" 
-  });
-});
-
-app.get("/api/saved-questions", (req, res) => {
-  return res.json({ 
-    questions: savedQuestions, 
-    count: savedQuestions.length 
-  });
-});
-
-app.delete("/api/saved-questions", (req, res) => {
-  savedQuestions = [];
-  console.log("تم مسح جميع الاسئلة المحفوظة");
-  return res.json({ message: "تم مسح الاسئلة" });
 });

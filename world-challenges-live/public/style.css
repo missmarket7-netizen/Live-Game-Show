@@ -131,6 +131,15 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .generate-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(255,77,141,0.5); }
 .generate-btn:disabled { opacity: 0.6; transform: none; }
 
+.saved-questions-btn {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark)) !important;
+  color: var(--bg) !important;
+  margin-top: 12px;
+}
+.saved-questions-btn:hover {
+  box-shadow: 0 8px 30px rgba(255,215,0,0.4) !important;
+}
+
 /* ═══ GAME SCREEN ═══ */
 
 /* Gifts Bar */
@@ -149,15 +158,8 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .gift-item:hover { transform: translateY(-4px) scale(1.05); border-color: var(--gold); box-shadow: 0 4px 15px var(--gold-glow); }
 .gift-item:active { transform: scale(0.95); }
 .gift-item.active { border-color: var(--gold); box-shadow: 0 0 20px var(--gold-glow); animation: pulse 1s ease-in-out infinite; }
-.gift-item img {
-  width: 44px; height: 44px; object-fit: contain;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
-  border: 2px solid var(--gold);
-  border-radius: 50%;
-  padding: 2px;
-  background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,215,0,0.05));
-}
-.gift-item .gift-name { display: block; font-size: 9px; color: var(--gold); margin-top: 4px; font-weight: 700; text-shadow: 0 0 6px rgba(255,215,0,0.4); }
+.gift-item img { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3)); }
+.gift-item .gift-name { display: block; font-size: 9px; color: var(--text-dim); margin-top: 4px; font-weight: 600; }
 
 /* Battle Arena */
 .battle-arena {
@@ -302,6 +304,28 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .round-end-team span:last-child { font-size: 32px; font-weight: 900; }
 .round-end-vs { font-size: 20px; font-weight: 900; color: var(--gold); }
 
+/* ═══ SAVED QUESTIONS MODAL ═══ */
+.saved-modal { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.saved-modal.hidden { display: none !important; }
+.saved-modal-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); }
+.saved-modal-content { position: relative; background: var(--bg-card); border-radius: var(--radius); width: 90%; max-width: 600px; max-height: 80vh; overflow: hidden; border: 2px solid var(--gold); box-shadow: 0 20px 60px rgba(0,0,0,0.6); animation: fadeInScale 0.3s ease; }
+.saved-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--bg-light); }
+.saved-modal-header h3 { color: var(--gold); font-size: 18px; font-weight: 900; }
+.saved-modal-close { background: none; border: none; color: var(--text-dim); font-size: 24px; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; transition: all 0.3s; }
+.saved-modal-close:hover { background: var(--bg-light); color: var(--gold); }
+.saved-list { overflow-y: auto; max-height: calc(80vh - 70px); padding: 12px; }
+.saved-item { background: var(--bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; border: 2px solid transparent; transition: all 0.3s; }
+.saved-item:hover { border-color: var(--gold); transform: translateY(-2px); }
+.saved-item-title { font-weight: 800; color: var(--white); font-size: 15px; }
+.saved-item-meta { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+.saved-item-actions { display: flex; gap: 8px; margin-top: 10px; }
+.saved-item-btn { padding: 8px 16px; border-radius: 10px; border: none; font-family: var(--font); font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+.saved-item-use { background: linear-gradient(135deg, var(--pink), var(--blue)); color: var(--white); }
+.saved-item-use:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,77,141,0.3); }
+.saved-item-delete { background: linear-gradient(135deg, #ff4757, #c0392b); color: var(--white); }
+.saved-item-delete:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(255,71,87,0.3); }
+.saved-empty { text-align: center; color: var(--text-dim); padding: 40px; font-size: 16px; }
+
 /* ═══ UTILITIES ═══ */
 .hidden { display: none !important; }
 
@@ -324,6 +348,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   .round-end-card { padding: 30px 20px; }
   .round-end-trophy { font-size: 48px; }
   .round-end-team span:last-child { font-size: 24px; }
+  .saved-modal-content { width: 95%; max-height: 85vh; }
 }
 
 @media (min-width: 768px) {
