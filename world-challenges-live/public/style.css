@@ -1,6 +1,5 @@
 /* ═══════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW
-   تصميم احترافي للبث المباشر على TikTok
+   🌎 عالم التحديات — LIVE GAME SHOW (تعديلات 14 نقطة)
    ═══════════════════════════════════════════════ */
 
 :root {
@@ -25,7 +24,6 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
 body {
   font-family: var(--font);
   background: var(--bg);
@@ -40,7 +38,7 @@ body {
   min-height: 100vh;
 }
 
-/* ─── Animations ─── */
+/* Animations */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes fadeInScale { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
@@ -54,9 +52,21 @@ body {
 
 /* ═══ SETUP SCREEN ═══ */
 .setup-header { text-align: center; padding: 20px 0; animation: fadeIn 0.6s ease; }
-.setup-header .logo-img { width: 140px; height: 140px; object-fit: contain; filter: drop-shadow(0 0 30px rgba(255,215,0,0.4)); animation: float 3s ease-in-out infinite; }
-.setup-header h1 { font-size: 28px; font-weight: 900; color: var(--gold); margin-top: 12px; text-shadow: 0 0 20px rgba(255,215,0,0.3); }
-.setup-header p { color: var(--text-dim); font-size: 15px; margin-top: 4px; }
+
+/* (نقطة 1: تكبير اللوجو) */
+.setup-header .logo-img { width: 240px; height: 240px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(255,215,0,0.5)); animation: float 3s ease-in-out infinite; }
+
+/* (نقطة 4: خط أنيق للعنوان) */
+.main-title { font-family: 'Cairo', sans-serif; font-size: 32px; font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--white)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 15px rgba(255,215,0,0.5)); margin-top: 15px; letter-spacing: 1px; }
+
+/* (نقطة 2: اسم المضيف) */
+.host-name { font-size: 18px; font-weight: 800; color: var(--white); margin-top: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
+
+/* (نقطة 3: البايو) */
+.host-bio { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin: 12px auto; max-width: 650px; padding: 0 15px; }
+
+/* (نقطة 5: اكتفي بإبداء التحدي) */
+.tagline { display: inline-block; font-size: 18px; font-weight: 900; color: var(--gold); background: rgba(255,215,0,0.1); border: 2px solid var(--gold); padding: 8px 20px; border-radius: 30px; margin-top: 10px; animation: pulse 2s infinite; }
 
 .setup-card {
   background: var(--bg-card);
@@ -136,17 +146,16 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   color: var(--bg) !important;
   margin-top: 12px;
 }
-.saved-questions-btn:hover {
-  box-shadow: 0 8px 30px rgba(255,215,0,0.4) !important;
-}
+.saved-questions-btn:hover { box-shadow: 0 8px 30px rgba(255,215,0,0.4) !important; }
 
 /* ═══ GAME SCREEN ═══ */
 
-/* Gifts Bar */
+/* (نقطة 6: تنسيق الهدايا) */
 .gifts-bar {
   display: flex; gap: 8px; overflow-x: auto;
   padding: 10px 4px; margin-bottom: 12px;
   scrollbar-width: none;
+  justify-content: flex-start;
 }
 .gifts-bar::-webkit-scrollbar { display: none; }
 .gift-item {
@@ -190,6 +199,13 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .score-box.filled-girls { background: linear-gradient(135deg, var(--pink), var(--pink-light)); color: var(--white); border-color: var(--pink); box-shadow: 0 4px 15px var(--pink-glow); animation: popIn 0.4s ease; }
 .score-box.filled-boys { background: linear-gradient(135deg, var(--blue), var(--blue-light)); color: var(--white); border-color: var(--blue); box-shadow: 0 4px 15px var(--blue-glow); animation: popIn 0.4s ease; }
 
+/* (نقطة 8: تنسيق العداد السالب) */
+.negative-counter { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px; background: var(--bg-card); padding: 6px; border-radius: 12px; width: fit-content; margin-inline: auto; }
+.neg-btn { width: 28px; height: 28px; background: var(--bg-light); border: 2px solid var(--text-dim); color: var(--text); border-radius: 8px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+.neg-btn:hover { border-color: var(--pink); color: var(--pink); }
+#negGirlsValue, #negBoysValue { font-size: 20px; font-weight: 900; width: 30px; text-align: center; color: var(--pink); }
+#negBoysValue { color: var(--blue); }
+
 /* VS Center */
 .vs-center { text-align: center; padding-bottom: 20px; }
 .round-display {
@@ -216,6 +232,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   transition: all 0.3s;
 }
 .timer-display.urgent { border-color: var(--pink); color: var(--pink); animation: pulse 0.5s ease-in-out infinite; box-shadow: 0 0 25px var(--pink-glow); }
+
 
 /* Question Area */
 .question-area {
@@ -263,7 +280,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .ctrl-btn.boys { background: linear-gradient(135deg, var(--blue), var(--blue-light)); border-color: transparent; }
 .ctrl-btn.girls-minus { background: linear-gradient(135deg, #ff4757, #c0392b); border-color: transparent; }
 .ctrl-btn.boys-minus { background: linear-gradient(135deg, #ff4757, #c0392b); border-color: transparent; }
-.ctrl-btn.danger { background: linear-gradient(135deg, #ff4757, #c0392b); border-color: transparent; color: var(--white); }
+.ctrl-btn.danger { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-color: transparent; color: var(--bg); font-weight: 900; }
 .ctrl-btn.ghost { color: var(--text-dim); }
 .ctrl-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
@@ -332,8 +349,8 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 /* ═══ RESPONSIVE ═══ */
 @media (max-width: 600px) {
   .app { padding: 8px; }
-  .setup-header .logo-img { width: 100px; height: 100px; }
-  .setup-header h1 { font-size: 22px; }
+  .setup-header .logo-img { width: 160px; height: 160px; }
+  .main-title { font-size: 24px; }
   .team-character img { max-width: 100px; }
   .question-text { font-size: 18px; }
   .options-grid { grid-template-columns: 1fr; }
@@ -353,31 +370,10 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 
 @media (min-width: 768px) {
   .app { padding: 20px; }
-  .setup-header .logo-img { width: 180px; height: 180px; }
+  .setup-header .logo-img { width: 280px; height: 280px; }
   .team-character img { max-width: 200px; }
   .question-text { font-size: 28px; }
   .gift-item { width: 80px; }
   .gift-item img { width: 50px; height: 50px; }
   .game-controls { grid-template-columns: repeat(6, 1fr); }
 }
-
-@media (min-width: 1024px) {
-  .app { max-width: 800px; }
-  .battle-arena { gap: 16px; }
-  .team-character img { max-width: 180px; }
-}
-/* تعديلات جديدة: الهيدر واللوجو */
-.setup-header .logo-img { width: 220px; height: 220px; filter: drop-shadow(0 0 40px rgba(255,215,0,0.6)); }
-.host-name { font-size: 22px; font-weight: 900; color: var(--white); margin-top: 10px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
-.host-bio { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin-top: 10px; max-width: 600px; margin-inline: auto; }
-.tagline { display: inline-block; margin-top: 12px; font-size: 16px; font-weight: 800; color: var(--gold); background: rgba(255,215,0,0.15); padding: 6px 18px; border-radius: 30px; border: 2px solid var(--gold); }
-
-/* تنسيق صندوق النقاط السالبة (عداد -1) */
-.negative-counter { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px; background: var(--bg-card); padding: 6px; border-radius: 12px; width: fit-content; margin-inline: auto; }
-.neg-btn { width: 28px; height: 28px; background: var(--bg-light); border: 2px solid var(--text-dim); color: var(--text); border-radius: 8px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-.neg-btn:hover { border-color: var(--pink); color: var(--pink); }
-#negGirlsValue, #negBoysValue { font-size: 20px; font-weight: 900; width: 30px; text-align: center; color: var(--pink); }
-#negBoysValue { color: var(--blue); }
-
-/* تكبير أزرار الجولة التالية وتمييزها */
-#nextRoundBtn { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); border-color: transparent; color: var(--bg); font-weight: 900; }

@@ -18,15 +18,18 @@
     <section id="setupScreen" class="screen">
       <div class="setup-header">
         <img src="/images/logo.png" alt="عالم التحديات" class="logo-img">
-        <h1>مسابقة عالم التحديات</h1>
+        <!-- (نقطة 1: اللوجو مكبر في CSS) -->
+        <!-- (نقطة 2 و 3 و 5: المضيف والـ Bio) -->
+        <h1 class="main-title">مسابقة عالم التحديات</h1>
         <h2 class="host-name">المضيف / مروان حكيم</h2>
-        <p class="host-bio">في رحلة حماسية وتحديات مثيرة، نلتقي اليوم لتتألق مواهب فريق البنات وفريق الشباب في "لايف عالم التحديات". استعدوا لتحدي الذكاء، المعلومات، والحماس! اكتفِ بإبداء التحدي وكن نجم الجمهور!</p>
-        <p class="tagline">اكتفِ بإبداء التحدي!</p>
+        <p class="host-bio">في رحلة حماسية ومليئة بالتحديات، نلتقي اليوم لتتألق مواهب فريق البنات وفريق الشباب في لايف عالم التحديات. استعدوا لتحدي الذكاء والمعلومات في أجواء مليئة بالحماس والتشجيع!</p>
+        <p class="tagline">✨ اكتفِ بإبداء التحدي ✨</p>
       </div>
 
       <div class="setup-card">
         <div class="form-group">
           <label>طريقة اللعب</label>
+          <!-- (نقطة 4: تصميم أنيق) -->
           <div class="mode-tabs">
             <button class="tab active" data-mode="single">🎯 جولة واحدة</button>
             <button class="tab" data-mode="fullshow">🎬 لايف كامل</button>
@@ -98,9 +101,9 @@
     <!-- ===== GAME SCREEN ===== -->
     <section id="gameScreen" class="screen hidden">
 
-      <!-- Gifts Bar (الترتيب من الشمال لليمين في العرض هو: Corgi, Donut, Rose, Heart, Crown, Cat, TikTok) -->
+      <!-- (نقطة 6: الهدايا بالترتيب من اليمين (تيك توك) إلى اليسار (كورجي)) -->
       <div class="gifts-bar">
-        <div class="gift-item" data-gift="tiktok" title="🎵 تيك توك - خصم نقطة من الفريق الآخر">
+        <div class="gift-item" data-gift="tiktok" title="🎵 تيك توك - خصم نقطة">
           <img src="/images/gift-tiktok.png" alt="تيك توك">
           <span class="gift-name">-1 نقطة</span>
         </div>
@@ -112,7 +115,7 @@
           <img src="/images/gift-crown.png" alt="تاج ملكي">
           <span class="gift-name">+10 جولات</span>
         </div>
-        <div class="gift-item" data-gift="heart" title="❤️ قلب أحمر - احمي فريقك من الخصم">
+        <div class="gift-item" data-gift="heart" title="❤️ قلب أحمر - احمي فريقك">
           <img src="/images/gift-heart.png" alt="قلب أحمر">
           <span class="gift-name">احمي فريقك</span>
         </div>
@@ -146,7 +149,7 @@
             <div class="score-box"></div>
             <div class="score-box"></div>
           </div>
-          <!-- عداد النقاط السالبة -->
+          <!-- (نقطة 8 و 9: العداد السالب بجوار مربعات النقاط) -->
           <div class="negative-counter">
             <button class="neg-btn" data-team="girls" data-action="minus">-</button>
             <span id="negGirlsValue">0</span>
@@ -175,7 +178,7 @@
             <div class="score-box"></div>
             <div class="score-box"></div>
           </div>
-          <!-- عداد النقاط السالبة -->
+          <!-- (نقطة 8 و 9: العداد السالب بجوار مربعات النقاط) -->
           <div class="negative-counter">
             <button class="neg-btn" data-team="boys" data-action="minus">-</button>
             <span id="negBoysValue">0</span>
@@ -206,6 +209,7 @@
         <button id="girlsMinusBtn" class="ctrl-btn girls-minus">👧 -1</button>
         <button id="boysPlusBtn" class="ctrl-btn boys">👦 +1</button>
         <button id="boysMinusBtn" class="ctrl-btn boys-minus">👦 -1</button>
+        <!-- (نقطة 7: زر الجولة التالية) -->
         <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
         <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>

@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v4 (معدل)
+   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v5
    ═══════════════════════════════════════════════ */
 
 const state = {
@@ -29,9 +29,9 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ─── Saved Questions System ───
+// ─── Saved Questions System (نقطة 10: حد أقصى 20) ───
 const SAVED_KEY = 'wcq_saved_questions';
-const MAX_SAVED = 20; // حد أقصى 20 مجموعة
+const MAX_SAVED = 20;
 
 function getSavedQuestions() {
   try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); }
@@ -151,7 +151,7 @@ function startTimer() {
 }
 function stopTimer() { clearInterval(state.timerInterval); state.isTimerRunning = false; $('startTimerBtn').disabled = false; }
 
-// ─── Score Boxes & Negative Counters ───
+// ─── Score Boxes & Negative Counters (نقطة 8 و 9) ───
 function updateScoreBoxes() {
   const girlsBoxes = $$('#girlsScoreBoxes .score-box');
   const boysBoxes = $$('#boysScoreBoxes .score-box');
@@ -171,12 +171,14 @@ function addPoint(team) {
   updateScoreBoxes(); state.activeGift = null;
 }
 
-function minusPoint(team) { // أزرار -1 للمقدم
+// أزرار -1
+function minusPoint(team) {
   if (team === 'girls') { if (state.girlsScore > 0) { state.girlsScore--; playSound('click', 0.3); } }
   else { if (state.boysScore > 0) { state.boysScore--; playSound('click', 0.3); } }
   updateScoreBoxes();
 }
 
+// العداد السالب (يتراوح من 0 إلى -5)
 function updateNegative(team, action) {
   if (team === 'girls') {
     if (action === 'minus') state.negGirls = Math.max(-5, state.negGirls - 1);
@@ -198,7 +200,6 @@ function initGifts() {
       setTimeout(() => {
         if (gift === 'bomb') eliminateWrongAnswer();
         else if (gift === 'time') { state.timerDuration += 10; state.timerValue = state.timerDuration; updateTimerDisplay(); }
-        // يمكن إضافة منطق الهدايا الجديدة هنا حسب رغبتك (كأس، قلب، وغيرها)
       }, 300);
     });
   });
@@ -252,7 +253,7 @@ function revealAnswer() {
   $('explanationText').textContent = q.explanation || 'لا يوجد شرح إضافي.'; $('revealBtn').disabled = true; state.answeredQuestions++;
 }
 
-// ─── Next Question & Round Navigation ───
+// ─── Next Question & Round Navigation (نقطة 7) ───
 function nextQuestion() {
   if (state.currentIndex < state.questions.length - 1) { state.currentIndex++; renderQuestion(); }
   else {
@@ -265,10 +266,8 @@ function nextQuestion() {
   }
 }
 
-// زر الجولة التالية (يحسب الجولة للفريق المكتمل النقاط)
 function nextRoundManually() {
   stopTimer();
-  // تحديد الفريق الفائز بالجولة (الأعلى نقاطاً أو من أكمل 5 نقاط)
   let winnerText = '';
   if (state.girlsScore >= state.boysScore) {
     if (state.girlsScore > 0) { state.girlsRounds++; winnerText = '🎉 مبروك للبنات!'; }
@@ -281,7 +280,6 @@ function nextRoundManually() {
   updateScoreBoxes();
   fireConfetti(); playSound('win', 0.6);
 
-  // التحضير للجولة التالية: تصفير النقاط والعدادات والانتقال للسؤال التالي
   state.girlsScore = 0; state.boysScore = 0;
   state.negGirls = 0; state.negBoys = 0;
   updateScoreBoxes();
@@ -290,7 +288,6 @@ function nextRoundManually() {
     state.currentIndex++;
     renderQuestion();
   } else {
-    // إذا انتهت الأسئلة، ننتقل للجولة التالية في وضع اللايف الكامل أو نعرض النتائج
     if (state.mode === 'fullshow' && state.currentRoundIndex < state.fullShowRounds.length - 1) {
       state.currentRoundIndex++;
       state.questions = state.fullShowRounds[state.currentRoundIndex].questions;
@@ -426,21 +423,14 @@ function initGameUI() {
   $('startTimerBtn').addEventListener('click', startTimer);
   $('revealBtn').addEventListener('click', revealAnswer);
   $('nextBtn').addEventListener('click', nextQuestion);
-  
-  // أزرار الجولات والنقاط
   $('girlsPlusBtn').addEventListener('click', () => addPoint('girls'));
   $('girlsMinusBtn').addEventListener('click', () => minusPoint('girls'));
   $('boysPlusBtn').addEventListener('click', () => addPoint('boys'));
   $('boysMinusBtn').addEventListener('click', () => minusPoint('boys'));
-  
-  // أزرار العدادات السالبة (-5 إلى 0)
   $$('.neg-btn').forEach(btn => {
     btn.addEventListener('click', () => updateNegative(btn.dataset.team, btn.dataset.action));
   });
-
-  // زر الجولة التالية
   $('nextRoundBtn').addEventListener('click', nextRoundManually);
-
   $('endRoundBtn').addEventListener('click', endRound);
   $('newRoundBtn').addEventListener('click', () => location.reload());
   $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
