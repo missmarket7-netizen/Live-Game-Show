@@ -29,7 +29,7 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ─── Saved Questions System (نقاط 10-14) ───
+// ─── Saved Questions System (نقاط 13, 14, 15) ───
 const SAVED_KEY = 'wcq_saved_questions';
 const MAX_SAVED = 20;
 
@@ -173,14 +173,12 @@ function addPoint(team) {
   updateScoreBoxes(); state.activeGift = null;
 }
 
-// أزرار -1 (نقطة 9)
 function minusPoint(team) {
   if (team === 'girls') { if (state.girlsScore > 0) { state.girlsScore--; playSound('click', 0.3); } }
   else { if (state.boysScore > 0) { state.boysScore--; playSound('click', 0.3); } }
   updateScoreBoxes();
 }
 
-// العداد السالب (نقطة 8: يتراوح من 0 إلى -5)
 function updateNegative(team, action) {
   if (team === 'girls') {
     if (action === 'minus') state.negGirls = Math.max(-5, state.negGirls - 1);
@@ -234,6 +232,8 @@ function renderQuestion() {
   $$('.option-btn').forEach(b => { b.style.opacity = '1'; b.disabled = false; });
   playSound('suspense', 0.3);
 }
+
+
 function getCategoryEmoji(cat) { const map = { 'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'أماكن سياحية': '✈️', 'أفلام': '🎬', 'رياضة': '⚽', 'تكنولوجيا': '💻', 'اختيارات متنوعة': '🎲' }; return map[cat] || '🎯'; }
 
 function selectOption(index) {
@@ -296,6 +296,21 @@ function nextRoundManually() {
   updateScoreBoxes();
 }
 
+// نقطة 7: دالة تعديل عدد الجولات يدوياً عبر زر Edit
+function editRounds(team) {
+  const current = team === 'girls' ? state.girlsRounds : state.boysRounds;
+  const newValue = prompt(`أدخل عدد الجولات الجديد لفريق ${team === 'girls' ? 'البنات' : 'الشباب'}:`, current);
+  if (newValue !== null && newValue !== '') {
+    const num = parseInt(newValue, 10);
+    if (!isNaN(num) && num >= 0) {
+      if (team === 'girls') state.girlsRounds = num;
+      else state.boysRounds = num;
+      updateScoreBoxes();
+    }
+  }
+}
+window.editRounds = editRounds; // لجعلها متاحة في onclick
+
 function recordRoundWinner() {
   if (state.girlsScore > state.boysScore) state.girlsRounds++;
   else if (state.boysScore > state.girlsScore) state.boysRounds++;
@@ -341,6 +356,8 @@ function showResults() {
   else if (state.boysRounds > state.girlsRounds) { winnerText.textContent = '🎉 فريق الشباب فاز! 👑'; winnerText.style.color = 'var(--blue)'; }
   else { winnerText.textContent = '🤝 تعادل! كل الفرق رائعة!'; winnerText.style.color = 'var(--gold)'; }
 }
+
+
 // ─── Full Show Generator ───
 function generateFullShowPlan(duration) {
   const categories = ['معلومات عامة', 'جغرافيا', 'علوم', 'تاريخ', 'أسئلة دينية', 'ألغاز', 'رياضة', 'تكنولوجيا'];
@@ -373,7 +390,7 @@ async function generateSingleRound() {
     state.girlsRounds = 0; state.boysRounds = 0; state.totalQuestions = questions.length; state.answeredQuestions = 0;
     state.mode = 'single'; state.history = [...state.history, ...questions.map(q => q.question)].slice(-500);
     localStorage.setItem('wcq_history', JSON.stringify(state.history));
-    // نقطة 12: حفظ تلقائي في localStorage
+    // نقطة 10 و 13: حفظ تلقائي في localStorage
     saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category, difficulty, count, questions });
     updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('start', 0.5);
   } catch (e) { alert(e.message); } finally { hideLoading(); }
@@ -412,7 +429,7 @@ function initSetupUI() {
     chip.addEventListener('click', () => { $$('[data-timer]').forEach(c => c.classList.remove('active')); chip.classList.add('active'); state.timerDuration = Number(chip.dataset.timer); });
   });
   $('generateBtn').addEventListener('click', async () => { if (state.mode === 'fullshow') await generateFullShow(); else await generateSingleRound(); });
-  // نقطة 11: زر استخدم أسئلة محفوظة
+  // نقطة 12: زر استخدم أسئلة محفوظة
   $('savedQuestionsBtn').addEventListener('click', openSavedModal);
   $('closeSavedBtn').addEventListener('click', closeSavedModal);
   $('savedModal').addEventListener('click', (e) => { if (e.target === $('savedModal') || e.target.classList.contains('saved-modal-backdrop')) { closeSavedModal(); } });

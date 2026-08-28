@@ -150,7 +150,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 
 /* ═══ GAME SCREEN ═══ */
 
-/* نقطة 6: تنسيق الهدايا */
+/* نقطة 6: تنسيق الهدايا الجديدة */
 .gifts-bar {
   display: flex; gap: 8px; overflow-x: auto;
   padding: 10px 4px; margin-bottom: 12px;
@@ -183,7 +183,27 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .team-name-girls { font-size: 20px; font-weight: 900; color: var(--pink); text-shadow: 0 0 15px var(--pink-glow); }
 .team-name-boys { font-size: 20px; font-weight: 900; color: var(--blue); text-shadow: 0 0 15px var(--blue-glow); }
 
-.rounds-won { font-size: 14px; font-weight: 700; color: var(--gold); margin: 4px 0; animation: glow 2s ease-in-out infinite; display: inline-block; padding: 4px 12px; border-radius: 12px; background: rgba(255,215,0,0.1); }
+/* نقطة 11: تنسيق مستطيلات الكابتن والداعمين */
+.support-boxes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+.captain-box {
+  background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+  color: var(--bg); font-weight: 900; font-size: 16px;
+  padding: 8px 12px; border-radius: 10px;
+  border: 2px solid var(--white); cursor: text; outline: none;
+}
+.supporter-box {
+  background: rgba(255,255,255,0.1); border: 1px solid var(--text-dim);
+  color: var(--white); font-weight: 700; font-size: 14px;
+  padding: 6px 12px; border-radius: 8px; cursor: text; outline: none;
+}
+.team-girls .supporter-box:focus { border-color: var(--pink); color: var(--pink-light); }
+.team-boys .supporter-box:focus { border-color: var(--blue); color: var(--blue-light); }
+
+/* نقطة 7: تنسيق عداد الجولات مع زر Edit */
+.rounds-won-container { display: flex; justify-content: center; align-items: center; gap: 6px; margin: 4px 0; }
+.rounds-won { font-size: 14px; font-weight: 700; color: var(--gold); animation: glow 2s ease-in-out infinite; display: inline-block; padding: 4px 12px; border-radius: 12px; background: rgba(255,215,0,0.1); }
+.edit-round-btn { background: var(--bg-light); border: 1px solid var(--gold); color: var(--gold); border-radius: 6px; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: grid; place-items: center; transition: 0.3s; }
+.edit-round-btn:hover { background: var(--gold); color: var(--bg); }
 
 .score-boxes {
   display: flex; flex-direction: column; gap: 6px;
@@ -232,6 +252,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   transition: all 0.3s;
 }
 .timer-display.urgent { border-color: var(--pink); color: var(--pink); animation: pulse 0.5s ease-in-out infinite; box-shadow: 0 0 25px var(--pink-glow); }
+
 
 /* Question Area */
 .question-area {
@@ -320,6 +341,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .round-end-team span:last-child { font-size: 32px; font-weight: 900; }
 .round-end-vs { font-size: 20px; font-weight: 900; color: var(--gold); }
 
+
 /* ═══ SAVED QUESTIONS MODAL ═══ */
 .saved-modal { position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; }
 .saved-modal.hidden { display: none !important; }
@@ -365,6 +387,8 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   .round-end-trophy { font-size: 48px; }
   .round-end-team span:last-child { font-size: 24px; }
   .saved-modal-content { width: 95%; max-height: 85vh; }
+  .support-boxes { gap: 4px; }
+  .captain-box, .supporter-box { font-size: 12px; padding: 4px 8px; }
 }
 
 @media (min-width: 768px) {

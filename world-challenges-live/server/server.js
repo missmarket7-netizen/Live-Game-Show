@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import path from "node:path";
+import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -18,6 +19,48 @@ app.use(express.static(path.join(__dirname, "../public")));
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
+
+// ─── نظام بنك الأسئلة (الخطة الجديدة) ───
+const QUESTIONS_DIR = path.join(__dirname, "questions");
+const GENERATED_FILE = path.join(QUESTIONS_DIR, "generated_questions.json");
+
+// دالة قراءة ملفات البنك الخمسة ودمجها
+function loadBankQuestions() {
+  let all = [];
+  for (let i = 1; i <= 5; i++) {
+    try {
+      const filePath = path.join(QUESTIONS_DIR, `db${i}.json`);
+      if (fs.existsSync(filePath)) {
+        const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
+        if (Array.isArray(data)) all = all.concat(data);
+      }
+    } catch (e) {}
+  }
+  return all;
+}
+
+// دالة قراءة الأسئلة المولدة
+function loadGeneratedQuestions() {
+  try {
+    if (fs.existsSync(GENERATED_FILE)) {
+      return JSON.parse(fs.readFileSync(GENERATED_FILE, "utf8"));
+    }
+  } catch (e) {}
+  return [];
+}
+
+// دالة حفظ الأسئلة المولدة تلقائياً
+function saveGeneratedQuestions(questions) {
+  try {
+    const existing = loadGeneratedQuestions();
+    const merged = [...questions, ...existing];
+    // حد أقصى 5000 سؤال في الملف لتجنب الحجم الضخم
+    const limited = merged.slice(0, 5000);
+    fs.writeFileSync(GENERATED_FILE, JSON.stringify(limited, null, 2), "utf8");
+  } catch (e) {
+    console.error("خطأ في حفظ الأسئلة المولدة:", e.message);
+  }
+}
 
 // ─── دالة بناء System Prompt (ديناميكية) ───
 function buildSystemPrompt(count) {
@@ -273,71 +316,74 @@ async function callWithFallback(prompt, count) {
   throw new Error(`جميع المزودين فشلوا: ${summary}`);
 }
 
-// ─── API endpoint (مع منع الانهيار الكامل) ───
+// ─── API endpoint (مع البنك الجديد والحفظ التلقائي) ───
 app.post("/api/questions", async (req, res) => {
   console.log("تم استلام طلب /api/questions");
-  console.log("البيانات:", JSON.stringify(req.body, null, 2));
 
   try {
     const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
 
-    const prompt = `انشئ بالضبط ${n} اسئلة من فئة "${category}" بمستوى "${difficulty}".
+    // 1. أولاً: التحقق من البنك (البنك الأساسي + المولدة)
+    let bank = [...loadBankQuestions(), ...loadGeneratedQuestions()];
+    // منع التكرار مع الأسئلة السابقة
+    const avoidSet = new Set((Array.isArray(avoid) ? avoid : []).map(q => String(q)));
+    
+    // تصفية الأسئلة حسب الفئة والصعوبة
+    let filtered = bank.filter(q => {
+      const isCat = category === "معلومات عامة" || q.category === category || q.category === "معلومات عامة";
+      const isDiff = q.difficulty === difficulty;
+      const isNotAvoided = !avoidSet.has(q.question);
+      return isCat && isDiff && isNotAvoided;
+    });
+
+    // خلط عشوائي
+    const shuffledBank = filtered.sort(() => 0.5 - Math.random());
+    let selected = shuffledBank.slice(0, n);
+
+    // 2. إذا لم تكن الكمية كافية من البنك، نستدعي الـ AI
+    if (selected.length < n) {
+      const missingCount = n - selected.length;
+      const prompt = `انشئ بالضبط ${missingCount} اسئلة من فئة "${category}" بمستوى "${difficulty}".
 قواعد:
 - اخرج مصفوفة JSON فقط
 - لا تستخدم هذه الاسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
 - كل سؤال يحتوي على: category, difficulty, question, options (4 خيارات), correctIndex (0-3), explanation
 - لا تضيف اي نص خارج JSON`;
 
-    console.log("المطالبة:", prompt.slice(0, 250) + "...");
-
-    let result;
-    try {
-      result = await callWithFallback(prompt, n);
-    } catch (aiErr) {
-      console.log(`فشلت كل المزودين، استخدام الاسئلة الاحتياطية...`);
-      const fallbackQuestions = getFallbackQuestions(category, n, difficulty);
-      result = {
-        questions: fallbackQuestions,
-        provider: "none",
-        source: "fallback"
-      };
-      console.log(`تم استخدام ${fallbackQuestions.length} سؤال احتياطي`);
+      try {
+        const aiResult = await callWithFallback(prompt, missingCount);
+        // حفظ الأسئلة الجديدة في الملف المولد
+        saveGeneratedQuestions(aiResult.questions);
+        // دمجها مع المحددة
+        selected = [...selected, ...aiResult.questions];
+      } catch (aiErr) {
+        // 3. إذا فشل الـ AI، نستخدم الاحتياطي
+        console.log(`فشل الـ AI، استخدام الاحتياطي...`);
+        const fallback = getFallbackQuestions(category, missingCount, difficulty);
+        selected = [...selected, ...fallback];
+      }
     }
 
-    if (!Array.isArray(result.questions) || result.questions.length === 0) {
+    if (!Array.isArray(selected) || selected.length === 0) {
       throw new Error("لم يتم توليد اي اسئلة.");
     }
 
     const generatedAt = new Date().toISOString();
-    const enriched = result.questions.map((q, i) => ({
+    const enriched = selected.map((q, i) => ({
       ...q,
       id: `q_${Date.now()}_${i}`,
       category: q.category || category,
       difficulty: q.difficulty || difficulty,
       generatedAt: generatedAt,
-      source: result.source,
-      provider: result.provider
+      source: q.source || "bank"
     }));
 
-    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح (المصدر: ${result.source}, المزود: ${result.provider}).`);
-    return res.json({
-      questions: enriched,
-      meta: {
-        source: result.source,
-        provider: result.provider,
-        generatedAt: generatedAt,
-        count: enriched.length,
-        requestedCategory: category,
-        requestedDifficulty: difficulty
-      }
-    });
+    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح.`);
+    return res.json({ questions: enriched, meta: { count: enriched.length } });
   } catch (err) {
     console.error("خطأ في الـ API:", err.message);
-    return res.status(500).json({
-      error: "فشل في توليد الاسئلة",
-      details: err.message
-    });
+    return res.status(500).json({ error: "فشل في توليد الاسئلة", details: err.message });
   }
 });
 
@@ -345,11 +391,8 @@ app.post("/api/questions", async (req, res) => {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    providers: PROVIDERS.map(p => ({
-      name: p.name,
-      keySet: !!p.key,
-      available: !!p.key
-    }))
+    providers: PROVIDERS.map(p => ({ name: p.name, keySet: !!p.key, available: !!p.key })),
+    bankCount: loadBankQuestions().length + loadGeneratedQuestions().length
   });
 });
 
@@ -363,6 +406,6 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`عالم التحديات — LIVE GAME SHOW`);
   console.log(`   الخادم يعمل على http://localhost:${PORT}`);
-  console.log(`   المزودين المتاحين: ${PROVIDERS.filter(p => p.key).map(p => p.name).join(", ") || "لا يوجد"}`);
-  console.log(`   ترتيب المحاولات: Gemini -> OpenRouter -> Groq -> Fallback`);
+  console.log(`   البنك يحتوي على: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`);
+  console.log(`   ترتيب المحاولات: Bank -> AI -> Fallback`);
 });
