@@ -53,19 +53,19 @@ body {
 /* ═══ SETUP SCREEN ═══ */
 .setup-header { text-align: center; padding: 20px 0; animation: fadeIn 0.6s ease; }
 
-/* (نقطة 1: تكبير اللوجو) */
+/* نقطة 1: تكبير اللوجو */
 .setup-header .logo-img { width: 240px; height: 240px; object-fit: contain; filter: drop-shadow(0 0 40px rgba(255,215,0,0.5)); animation: float 3s ease-in-out infinite; }
 
-/* (نقطة 4: خط أنيق للعنوان) */
+/* نقطة 4: خط أنيق للعنوان */
 .main-title { font-family: 'Cairo', sans-serif; font-size: 32px; font-weight: 900; background: linear-gradient(135deg, var(--gold), var(--white)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; filter: drop-shadow(0 0 15px rgba(255,215,0,0.5)); margin-top: 15px; letter-spacing: 1px; }
 
-/* (نقطة 2: اسم المضيف) */
+/* نقطة 2: اسم المضيف */
 .host-name { font-size: 18px; font-weight: 800; color: var(--white); margin-top: 8px; text-shadow: 0 0 10px rgba(255,255,255,0.3); }
 
-/* (نقطة 3: البايو) */
+/* نقطة 3: البايو */
 .host-bio { font-size: 14px; color: var(--text-dim); line-height: 1.8; margin: 12px auto; max-width: 650px; padding: 0 15px; }
 
-/* (نقطة 5: اكتفي بإبداء التحدي) */
+/* نقطة 5: اكتفي بإبداء التحدي */
 .tagline { display: inline-block; font-size: 18px; font-weight: 900; color: var(--gold); background: rgba(255,215,0,0.1); border: 2px solid var(--gold); padding: 8px 20px; border-radius: 30px; margin-top: 10px; animation: pulse 2s infinite; }
 
 .setup-card {
@@ -150,7 +150,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 
 /* ═══ GAME SCREEN ═══ */
 
-/* (نقطة 6: تنسيق الهدايا) */
+/* نقطة 6: تنسيق الهدايا */
 .gifts-bar {
   display: flex; gap: 8px; overflow-x: auto;
   padding: 10px 4px; margin-bottom: 12px;
@@ -199,7 +199,7 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
 .score-box.filled-girls { background: linear-gradient(135deg, var(--pink), var(--pink-light)); color: var(--white); border-color: var(--pink); box-shadow: 0 4px 15px var(--pink-glow); animation: popIn 0.4s ease; }
 .score-box.filled-boys { background: linear-gradient(135deg, var(--blue), var(--blue-light)); color: var(--white); border-color: var(--blue); box-shadow: 0 4px 15px var(--blue-glow); animation: popIn 0.4s ease; }
 
-/* (نقطة 8: تنسيق العداد السالب) */
+/* نقطة 8: تنسيق العداد السالب */
 .negative-counter { display: flex; justify-content: center; align-items: center; gap: 6px; margin-top: 10px; background: var(--bg-card); padding: 6px; border-radius: 12px; width: fit-content; margin-inline: auto; }
 .neg-btn { width: 28px; height: 28px; background: var(--bg-light); border: 2px solid var(--text-dim); color: var(--text); border-radius: 8px; font-size: 18px; font-weight: 900; cursor: pointer; transition: 0.3s; }
 .neg-btn:hover { border-color: var(--pink); color: var(--pink); }
@@ -232,7 +232,6 @@ select:focus, input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgb
   transition: all 0.3s;
 }
 .timer-display.urgent { border-color: var(--pink); color: var(--pink); animation: pulse 0.5s ease-in-out infinite; box-shadow: 0 0 25px var(--pink-glow); }
-
 
 /* Question Area */
 .question-area {

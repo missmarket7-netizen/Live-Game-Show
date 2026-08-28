@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v5
+   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v6
    ═══════════════════════════════════════════════ */
 
 const state = {
@@ -29,7 +29,7 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ─── Saved Questions System (نقطة 10: حد أقصى 20) ───
+// ─── Saved Questions System (نقاط 10-14) ───
 const SAVED_KEY = 'wcq_saved_questions';
 const MAX_SAVED = 20;
 
@@ -60,6 +60,8 @@ function useSavedSet(id) {
   state.boysScore = 0;
   state.girlsRounds = 0;
   state.boysRounds = 0;
+  state.negGirls = 0;
+  state.negBoys = 0;
   state.mode = 'single';
   state.totalQuestions = entry.questions.length;
   state.answeredQuestions = 0;
@@ -171,14 +173,14 @@ function addPoint(team) {
   updateScoreBoxes(); state.activeGift = null;
 }
 
-// أزرار -1
+// أزرار -1 (نقطة 9)
 function minusPoint(team) {
   if (team === 'girls') { if (state.girlsScore > 0) { state.girlsScore--; playSound('click', 0.3); } }
   else { if (state.boysScore > 0) { state.boysScore--; playSound('click', 0.3); } }
   updateScoreBoxes();
 }
 
-// العداد السالب (يتراوح من 0 إلى -5)
+// العداد السالب (نقطة 8: يتراوح من 0 إلى -5)
 function updateNegative(team, action) {
   if (team === 'girls') {
     if (action === 'minus') state.negGirls = Math.max(-5, state.negGirls - 1);
@@ -190,7 +192,7 @@ function updateNegative(team, action) {
   updateScoreBoxes();
 }
 
-// ─── Gift System ───
+// ─── Gift System (نقطة 6) ───
 function initGifts() {
   $$('.gift-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -232,7 +234,6 @@ function renderQuestion() {
   $$('.option-btn').forEach(b => { b.style.opacity = '1'; b.disabled = false; });
   playSound('suspense', 0.3);
 }
-
 function getCategoryEmoji(cat) { const map = { 'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'أماكن سياحية': '✈️', 'أفلام': '🎬', 'رياضة': '⚽', 'تكنولوجيا': '💻', 'اختيارات متنوعة': '🎲' }; return map[cat] || '🎯'; }
 
 function selectOption(index) {
@@ -266,36 +267,34 @@ function nextQuestion() {
   }
 }
 
+// نقطة 7: زر الجولة التالية - يحتسب الجولة للفريق المكتمل ويسجلها ثم ينتقل
 function nextRoundManually() {
   stopTimer();
   let winnerText = '';
-  if (state.girlsScore >= state.boysScore) {
-    if (state.girlsScore > 0) { state.girlsRounds++; winnerText = '🎉 مبروك للبنات!'; }
-  } 
-  if (state.boysScore >= state.girlsScore) {
-    if (state.boysScore > 0) { state.boysRounds++; winnerText = '🎉 مبروك للشباب!'; }
+  if (state.girlsScore > state.boysScore) {
+    state.girlsRounds++; winnerText = '🎉 مبروك لفريق البنات!';
+  } else if (state.boysScore > state.girlsScore) {
+    state.boysRounds++; winnerText = '🎉 مبروك لفريق الشباب!';
+  } else {
+    winnerText = '🤝 تعادل! جولة رائعة من الفريقين!';
   }
-  if (winnerText === '') winnerText = '🤝 لا توجد نقاط مكتملة!';
 
   updateScoreBoxes();
   fireConfetti(); playSound('win', 0.6);
 
+  $('roundEndNumber').textContent = `الجولة ${state.mode === 'fullshow' ? state.currentRoundIndex + 1 : 1}`;
+  $('roundEndWinner').textContent = winnerText;
+  $('roundEndGirlsScore').textContent = state.girlsScore;
+  $('roundEndBoysScore').textContent = state.boysScore;
+  const girlsScoreEl = $('roundEndGirlsScore'); const boysScoreEl = $('roundEndBoysScore');
+  girlsScoreEl.style.color = state.girlsScore > state.boysScore ? 'var(--pink)' : (state.girlsScore === state.boysScore ? 'var(--gold)' : 'var(--text-dim)');
+  boysScoreEl.style.color = state.boysScore > state.girlsScore ? 'var(--blue)' : (state.girlsScore === state.boysScore ? 'var(--gold)' : 'var(--text-dim)');
+  $('roundEndOverlay').classList.remove('hidden');
+
   state.girlsScore = 0; state.boysScore = 0;
   state.negGirls = 0; state.negBoys = 0;
   updateScoreBoxes();
-
-  if (state.currentIndex < state.questions.length - 1) {
-    state.currentIndex++;
-    renderQuestion();
-  } else {
-    if (state.mode === 'fullshow' && state.currentRoundIndex < state.fullShowRounds.length - 1) {
-      state.currentRoundIndex++;
-      state.questions = state.fullShowRounds[state.currentRoundIndex].questions;
-      state.currentIndex = 0; renderQuestion();
-    } else { showResults(); }
-  }
 }
-
 
 function recordRoundWinner() {
   if (state.girlsScore > state.boysScore) state.girlsRounds++;
@@ -342,7 +341,6 @@ function showResults() {
   else if (state.boysRounds > state.girlsRounds) { winnerText.textContent = '🎉 فريق الشباب فاز! 👑'; winnerText.style.color = 'var(--blue)'; }
   else { winnerText.textContent = '🤝 تعادل! كل الفرق رائعة!'; winnerText.style.color = 'var(--gold)'; }
 }
-
 // ─── Full Show Generator ───
 function generateFullShowPlan(duration) {
   const categories = ['معلومات عامة', 'جغرافيا', 'علوم', 'تاريخ', 'أسئلة دينية', 'ألغاز', 'رياضة', 'تكنولوجيا'];
@@ -375,6 +373,7 @@ async function generateSingleRound() {
     state.girlsRounds = 0; state.boysRounds = 0; state.totalQuestions = questions.length; state.answeredQuestions = 0;
     state.mode = 'single'; state.history = [...state.history, ...questions.map(q => q.question)].slice(-500);
     localStorage.setItem('wcq_history', JSON.stringify(state.history));
+    // نقطة 12: حفظ تلقائي في localStorage
     saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category, difficulty, count, questions });
     updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('start', 0.5);
   } catch (e) { alert(e.message); } finally { hideLoading(); }
@@ -413,6 +412,7 @@ function initSetupUI() {
     chip.addEventListener('click', () => { $$('[data-timer]').forEach(c => c.classList.remove('active')); chip.classList.add('active'); state.timerDuration = Number(chip.dataset.timer); });
   });
   $('generateBtn').addEventListener('click', async () => { if (state.mode === 'fullshow') await generateFullShow(); else await generateSingleRound(); });
+  // نقطة 11: زر استخدم أسئلة محفوظة
   $('savedQuestionsBtn').addEventListener('click', openSavedModal);
   $('closeSavedBtn').addEventListener('click', closeSavedModal);
   $('savedModal').addEventListener('click', (e) => { if (e.target === $('savedModal') || e.target.classList.contains('saved-modal-backdrop')) { closeSavedModal(); } });
@@ -430,8 +430,8 @@ function initGameUI() {
   $$('.neg-btn').forEach(btn => {
     btn.addEventListener('click', () => updateNegative(btn.dataset.team, btn.dataset.action));
   });
+  // نقطة 7: زر الجولة التالية
   $('nextRoundBtn').addEventListener('click', nextRoundManually);
-  $('endRoundBtn').addEventListener('click', endRound);
   $('newRoundBtn').addEventListener('click', () => location.reload());
   $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
 }
