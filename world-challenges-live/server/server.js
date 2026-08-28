@@ -20,7 +20,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// ─── نظام بنك الأسئلة (الخطة الجديدة) ───
+// ─── نظام بنك الأسئلة (البنك الأساسي + المولد) ───
 const QUESTIONS_DIR = path.join(__dirname, "questions");
 const GENERATED_FILE = path.join(QUESTIONS_DIR, "generated_questions.json");
 
@@ -234,24 +234,17 @@ const PROVIDERS = [
   }
 ];
 
-// ─── اسئلة احتياطية جاهزة (لو فشلت كل المزودين) ───
+// ─── اسئلة احتياطية جاهزة (لو فشل كل شيء) ───
 function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة المملكة العربية السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة السياسية والادارية للمملكة منذ عام 1932." },
     { category: "معلومات عامة", difficulty: "سهل", question: "كم عدد ايام السنة الميلادية؟", options: ["365", "364", "366", "360"], correctIndex: 0, explanation: "السنة الميلادية العادية تتكون من 365 يوما." },
     { category: "معلومات عامة", difficulty: "متوسط", question: "ما هو اطول نهر في العالم؟", options: ["النيل", "الامازون", "الفرات", "اليانغتسي"], correctIndex: 0, explanation: "نهر النيل يبلغ طوله حوالي 6650 كم، وهو الاطول في العالم." },
     { category: "رياضة", difficulty: "سهل", question: "كم عدد لاعبي فريق كرة القدم في الملعب؟", options: ["10", "11", "12", "9"], correctIndex: 1, explanation: "يتكون فريق كرة القدم من 11 لاعبا في الملعب." },
-    { category: "رياضة", difficulty: "متوسط", question: "في اي اقيمت اول بطولة كاس عالم؟", options: ["1928", "1930", "1934", "1926"], correctIndex: 1, explanation: "اقيمت اول بطولة كاس عالم لكرة القدم في الاوروغواي عام 1930." },
-    { category: "علوم", difficulty: "سهل", question: "ما هو اقرب كوكب الى الشمس؟", options: ["الارض", "الزهرة", "عطارد", "المريخ"], correctIndex: 2, explanation: "عطارد هو اقرب كوكب الى الشمس وثاني اصغر كواكب المجموعة الشمسية." },
-    { category: "علوم", difficulty: "متوسط", question: "ما هو العنصر الكيميائي الذي يرمز له بـ Au؟", options: ["الفضة", "النحاس", "الذهب", "الالمنيوم"], correctIndex: 2, explanation: "Au هو الرمز الكيميائي للذهب من الكلمة اللاتينية Aurum." },
-    { category: "تاريخ", difficulty: "سهل", question: "في اي عام تأسست المملكة العربية السعودية؟", options: ["1925", "1930", "1932", "1935"], correctIndex: 2, explanation: "توحدت المملكة العربية السعودية تحت حكم الملك عبدالعزيز عام 1932." },
-    { category: "تاريخ", difficulty: "متوسط", question: "من هو مكتشف امريكا؟", options: ["فاسكو دا غاما", "كولومبوس", "ماجلان", "كوك"], correctIndex: 1, explanation: "اكتشف كريستوفر كولومبوس الامريكتين عام 1492." },
-    { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["ركعتان", "اربع ركعات", "ثلاث ركعات", "ركعة"], correctIndex: 0, explanation: "صلاة الفجر ركعتان فرض." },
-    { category: "دين", difficulty: "متوسط", question: "في اي شهر نزل القران الكريم؟", options: ["شعبان", "رمضان", "شوال", "رجب"], correctIndex: 1, explanation: "نزل القران الكريم في شهر رمضان المبارك." },
-    { category: "تقنية", difficulty: "سهل", question: "ما هي شركة التقنية التي اسسها بيل جيتس؟", options: ["Apple", "Google", "Microsoft", "IBM"], correctIndex: 2, explanation: "اسس بيل جيتس شركة مايكروسوفت عام 1975 مع بول ألين." },
-    { category: "تقنية", difficulty: "متوسط", question: "ما هو اختصار HTML؟", options: ["Hyper Text Markup Language", "High Tech Modern Language", "Home Tool Markup Language", "Hyperlinks Text Mode Language"], correctIndex: 0, explanation: "HTML تعني لغة ترميز النصوص التشعبية." },
-    { category: "جغرافيا", difficulty: "سهل", question: "ما هي اكبر قارة في العالم من حيث المساحة؟", options: ["افريقيا", "اسيا", "امريكا الشمالية", "اوروبا"], correctIndex: 1, explanation: "اسيا هي اكبر قارة في العالم وتغطي حوالي 30% من مساحة اليابسة." },
-    { category: "جغرافيا", difficulty: "متوسط", question: "ما هو اعمق نقطة في المحيطات؟", options: ["خندق ماريانا", "خندق بورتوريكو", "خندق تونغا", "خندق الفلبين"], correctIndex: 0, explanation: "خندق ماريانا في المحيط الهادئ هو اعمق نقطة معروفة في المحيطات." }
+    { category: "علوم", difficulty: "سهل", question: "ما هو اقرب كوكب الى الشمس؟", options: ["الارض", "الزهرة", "عطارد", "المريخ"], correctIndex: 2, explanation: "عطارد هو اقرب كوكب الى الشمس." },
+    { category: "تاريخ", difficulty: "سهل", question: "في اي عام تأسست المملكة العربية السعودية؟", options: ["1925", "1930", "1932", "1935"], correctIndex: 2, explanation: "توحدت المملكة عام 1932." },
+    { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["ركعتان", "اربع ركعات", "ثلاث ركعات", "ركعة"], correctIndex: 0, explanation: "صلاة الفجر ركعتان." },
+    { category: "جغرافيا", difficulty: "سهل", question: "ما هي اكبر قارة في العالم؟", options: ["افريقيا", "اسيا", "امريكا", "اوروبا"], correctIndex: 1, explanation: "اسيا هي الاكبر." }
   ];
 
   let filtered = allQuestions.filter(q => q.difficulty === difficulty);
@@ -260,9 +253,7 @@ function getFallbackQuestions(category, count, difficulty) {
     const catFiltered = filtered.filter(q => q.category === category || q.category === "معلومات عامة");
     if (catFiltered.length > 0) filtered = catFiltered;
   }
-
-  const shuffled = filtered.sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, Math.min(count, shuffled.length));
+  return filtered.sort(() => 0.5 - Math.random()).slice(0, Math.min(count, filtered.length));
 }
 
 // ─── دالة الاحتياطي المحسنة ───
@@ -276,8 +267,6 @@ async function callWithFallback(prompt, count) {
     try {
       console.log(`محاولة استخدام ${provider.name}...`);
       const rawResponse = await provider.call(prompt, count);
-      console.log(`الرد الخام (اول 200 حرف):`, rawResponse.slice(0, 200));
-
       const parsed = extractAndParseJSON(rawResponse);
       console.log(`نجح ${provider.name}!`);
 
@@ -285,11 +274,7 @@ async function callWithFallback(prompt, count) {
       if (Array.isArray(parsed)) {
         questions = parsed;
       } else if (parsed && typeof parsed === "object") {
-        if (parsed.questions && Array.isArray(parsed.questions)) {
-          questions = parsed.questions;
-        } else {
-          questions = [parsed];
-        }
+        questions = parsed.questions || [parsed];
       } else {
         throw new Error("الرد ليس مصفوفة ولا كائن صالح");
       }
@@ -299,37 +284,28 @@ async function callWithFallback(prompt, count) {
         typeof q.correctIndex === "number" && q.correctIndex >= 0 && q.correctIndex <= 3
       );
 
-      if (validQuestions.length === 0) {
-        throw new Error("لم يتم استخراج اسئلة صالحة من الرد");
-      }
-
+      if (validQuestions.length === 0) throw new Error("لم يتم استخراج اسئلة صالحة");
       console.log(`${provider.name} ارجع ${validQuestions.length} سؤال صالح`);
       return { questions: validQuestions, provider: provider.name, source: "ai" };
-
     } catch (err) {
       console.log(`فشل ${provider.name}: ${err.message}`);
       errors.push({ provider: provider.name, error: err.message });
     }
   }
-
-  const summary = errors.map(e => `${e.provider}: ${e.error}`).join(" | ");
-  throw new Error(`جميع المزودين فشلوا: ${summary}`);
+  throw new Error(`جميع المزودين فشلوا: ${errors.map(e => e.error).join(" | ")}`);
 }
 
-// ─── API endpoint (مع البنك الجديد والحفظ التلقائي) ───
+// ─── API endpoint (البنك أولاً، ثم AI، ثم Fallback) ───
 app.post("/api/questions", async (req, res) => {
   console.log("تم استلام طلب /api/questions");
-
   try {
     const { category = "معلومات عامة", count = 10, difficulty = "سهل", avoid = [] } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
 
-    // 1. أولاً: التحقق من البنك (البنك الأساسي + المولدة)
+    // 1. تجهيز البنك (الملفات الخمسة + المولد)
     let bank = [...loadBankQuestions(), ...loadGeneratedQuestions()];
-    // منع التكرار مع الأسئلة السابقة
     const avoidSet = new Set((Array.isArray(avoid) ? avoid : []).map(q => String(q)));
     
-    // تصفية الأسئلة حسب الفئة والصعوبة
     let filtered = bank.filter(q => {
       const isCat = category === "معلومات عامة" || q.category === category || q.category === "معلومات عامة";
       const isDiff = q.difficulty === difficulty;
@@ -337,49 +313,39 @@ app.post("/api/questions", async (req, res) => {
       return isCat && isDiff && isNotAvoided;
     });
 
-    // خلط عشوائي
     const shuffledBank = filtered.sort(() => 0.5 - Math.random());
     let selected = shuffledBank.slice(0, n);
+    console.log(`✅ تم جلب ${selected.length} سؤال من البنك.`);
 
-    // 2. إذا لم تكن الكمية كافية من البنك، نستدعي الـ AI
+    // 2. إذا لم تكفِ كمية البنك
     if (selected.length < n) {
       const missingCount = n - selected.length;
-      const prompt = `انشئ بالضبط ${missingCount} اسئلة من فئة "${category}" بمستوى "${difficulty}".
-قواعد:
-- اخرج مصفوفة JSON فقط
-- لا تستخدم هذه الاسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.
-- كل سؤال يحتوي على: category, difficulty, question, options (4 خيارات), correctIndex (0-3), explanation
-- لا تضيف اي نص خارج JSON`;
+      console.log(`❌ البنك لم يكفِ، سيتم توليد ${missingCount} سؤال من الذكاء الاصطناعي.`);
+
+      const prompt = `انشئ بالضبط ${missingCount} اسئلة من فئة "${category}" بمستوى "${difficulty}".\nقواعد:\n- اخرج مصفوفة JSON فقط\n- لا تستخدم هذه الاسئلة: ${(Array.isArray(avoid) ? avoid.slice(-80) : []).join(" | ")}.\n- كل سؤال يحتوي على: category, difficulty, question, options (4 خيارات), correctIndex (0-3), explanation\n- لا تضيف اي نص خارج JSON`;
 
       try {
         const aiResult = await callWithFallback(prompt, missingCount);
-        // حفظ الأسئلة الجديدة في الملف المولد
+        // حفظ الأسئلة الجديدة تلقائياً
         saveGeneratedQuestions(aiResult.questions);
-        // دمجها مع المحددة
         selected = [...selected, ...aiResult.questions];
       } catch (aiErr) {
-        // 3. إذا فشل الـ AI، نستخدم الاحتياطي
-        console.log(`فشل الـ AI، استخدام الاحتياطي...`);
+        console.log(`⚠️ فشل الـ AI، سيتم استخدام الاحتياطي الثابت.`);
         const fallback = getFallbackQuestions(category, missingCount, difficulty);
         selected = [...selected, ...fallback];
       }
     }
 
-    if (!Array.isArray(selected) || selected.length === 0) {
-      throw new Error("لم يتم توليد اي اسئلة.");
-    }
+    if (selected.length === 0) throw new Error("لم يتم توليد اي اسئلة.");
 
     const generatedAt = new Date().toISOString();
     const enriched = selected.map((q, i) => ({
       ...q,
       id: `q_${Date.now()}_${i}`,
-      category: q.category || category,
-      difficulty: q.difficulty || difficulty,
-      generatedAt: generatedAt,
-      source: q.source || "bank"
+      source: q.source || "bank",
+      generatedAt
     }));
 
-    console.log(`تم ارجاع ${enriched.length} سؤال بنجاح.`);
     return res.json({ questions: enriched, meta: { count: enriched.length } });
   } catch (err) {
     console.error("خطأ في الـ API:", err.message);
@@ -391,8 +357,8 @@ app.post("/api/questions", async (req, res) => {
 app.get("/api/health", (req, res) => {
   res.json({
     status: "ok",
-    providers: PROVIDERS.map(p => ({ name: p.name, keySet: !!p.key, available: !!p.key })),
-    bankCount: loadBankQuestions().length + loadGeneratedQuestions().length
+    bankCount: loadBankQuestions().length + loadGeneratedQuestions().length,
+    providers: PROVIDERS.map(p => ({ name: p.name, keySet: !!p.key, available: !!p.key }))
   });
 });
 

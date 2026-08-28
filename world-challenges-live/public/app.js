@@ -480,3 +480,55 @@ function init() {
   hideLoading();
 }
 document.addEventListener('DOMContentLoaded', init);
+
+// ─── منطق الاحتفال عند اكتمال 5 نقاط وبدء جولة جديدة ───
+function checkRoundCompletion() {
+  // إذا أكمل فريق 5 نقاط، يتم الاحتفال وتسجيل الجولة
+  if (state.girlsScore >= 5 || state.boysScore >= 5) {
+    // تحديد الفريق الفائز
+    let winnerText = '';
+    if (state.girlsScore >= 5) {
+      state.girlsRounds++;
+      winnerText = '🎉 مبروك لفريق البنات! أكملوا 5 نقاط!';
+    } else if (state.boysScore >= 5) {
+      state.boysRounds++;
+      winnerText = '🎉 مبروك لفريق الشباب! أكملوا 5 نقاط!';
+    }
+    
+    // عرض الاحتفال
+    updateScoreBoxes();
+    fireConfetti();
+    playSound('win', 0.6);
+    
+    $('roundEndNumber').textContent = `الجولة ${state.mode === 'fullshow' ? state.currentRoundIndex + 1 : 1}`;
+    $('roundEndWinner').textContent = winnerText;
+    $('roundEndGirlsScore').textContent = state.girlsScore;
+    $('roundEndBoysScore').textContent = state.boysScore;
+    $('roundEndOverlay').classList.remove('hidden');
+
+    // تصفير النقاط استعداداً للجولة التالية
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    state.negGirls = 0;
+    state.negBoys = 0;
+    updateScoreBoxes();
+    
+    return true; // تم إكمال الجولة
+  }
+  return false;
+}
+
+// استدعاء الدالة عند الضغط على زر "التالي"
+function nextQuestionWithCheck() {
+  // قبل الانتقال للسؤال التالي، نتحقق من اكتمال العلامات
+  if (checkRoundCompletion()) {
+    // إذا اكتملت الجولة، يتم إيقاف الانتقال والانتظار حتى يضغط "متابعة"
+    return;
+  }
+  
+  // إذا لم تكتمل، ننتقل للسؤال التالي كالمعتاد
+  nextQuestion();
+}
+
+// ربط زر "التالي" بالدالة الجديدة
+$('nextBtn').addEventListener('click', nextQuestionWithCheck);
