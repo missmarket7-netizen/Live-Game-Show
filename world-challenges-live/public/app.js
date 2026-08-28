@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v6
+   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v7 (معدل نهائي)
    ═══════════════════════════════════════════════ */
 
 const state = {
@@ -29,7 +29,7 @@ const state = {
 const $ = (id) => document.getElementById(id);
 const $$ = (sel) => document.querySelectorAll(sel);
 
-// ─── Saved Questions System (نقاط 13, 14, 15) ───
+// ─── Saved Questions System (حفظ تلقائي + عرض صحيح) ───
 const SAVED_KEY = 'wcq_saved_questions';
 const MAX_SAVED = 20;
 
@@ -38,6 +38,7 @@ function getSavedQuestions() {
   catch { return []; }
 }
 
+// نقطة 10 و 13: حفظ تلقائي فوري في localStorage
 function saveQuestionSet(entry) {
   const saved = getSavedQuestions();
   saved.unshift(entry);
@@ -75,10 +76,13 @@ function useSavedSet(id) {
 function renderSavedList() {
   const list = $('savedList');
   const saved = getSavedQuestions();
+  
+  // إصلاح مشكلة النافذة الفارغة
   if (saved.length === 0) {
-    list.innerHTML = '<div class="saved-empty">📭 لا توجد أسئلة محفوظة</div>';
+    list.innerHTML = '<div class="saved-empty">📭 لا توجد أسئلة محفوظة بعد. قم بتوليد جولة أولاً وسيتم حفظها تلقائياً!</div>';
     return;
   }
+  
   list.innerHTML = saved.map(s => {
     const dateStr = s.date || 'غير معروف';
     const cat = s.category || 'غير محدد';
@@ -153,7 +157,7 @@ function startTimer() {
 }
 function stopTimer() { clearInterval(state.timerInterval); state.isTimerRunning = false; $('startTimerBtn').disabled = false; }
 
-// ─── Score Boxes & Negative Counters (نقطة 8 و 9) ───
+// ─── Score Boxes & Negative Counters ───
 function updateScoreBoxes() {
   const girlsBoxes = $$('#girlsScoreBoxes .score-box');
   const boysBoxes = $$('#boysScoreBoxes .score-box');
@@ -190,7 +194,7 @@ function updateNegative(team, action) {
   updateScoreBoxes();
 }
 
-// ─── Gift System (نقطة 6) ───
+// ─── Gift System ───
 function initGifts() {
   $$('.gift-item').forEach(item => {
     item.addEventListener('click', () => {
@@ -233,7 +237,6 @@ function renderQuestion() {
   playSound('suspense', 0.3);
 }
 
-
 function getCategoryEmoji(cat) { const map = { 'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'أماكن سياحية': '✈️', 'أفلام': '🎬', 'رياضة': '⚽', 'تكنولوجيا': '💻', 'اختيارات متنوعة': '🎲' }; return map[cat] || '🎯'; }
 
 function selectOption(index) {
@@ -254,7 +257,7 @@ function revealAnswer() {
   $('explanationText').textContent = q.explanation || 'لا يوجد شرح إضافي.'; $('revealBtn').disabled = true; state.answeredQuestions++;
 }
 
-// ─── Next Question & Round Navigation (نقطة 7) ───
+// ─── Next Question & Round Navigation ───
 function nextQuestion() {
   if (state.currentIndex < state.questions.length - 1) { state.currentIndex++; renderQuestion(); }
   else {
@@ -267,7 +270,7 @@ function nextQuestion() {
   }
 }
 
-// نقطة 7: زر الجولة التالية - يحتسب الجولة للفريق المكتمل ويسجلها ثم ينتقل
+// زر الجولة التالية
 function nextRoundManually() {
   stopTimer();
   let winnerText = '';
@@ -296,7 +299,6 @@ function nextRoundManually() {
   updateScoreBoxes();
 }
 
-// نقطة 7: دالة تعديل عدد الجولات يدوياً عبر زر Edit
 function editRounds(team) {
   const current = team === 'girls' ? state.girlsRounds : state.boysRounds;
   const newValue = prompt(`أدخل عدد الجولات الجديد لفريق ${team === 'girls' ? 'البنات' : 'الشباب'}:`, current);
@@ -309,7 +311,7 @@ function editRounds(team) {
     }
   }
 }
-window.editRounds = editRounds; // لجعلها متاحة في onclick
+window.editRounds = editRounds;
 
 function recordRoundWinner() {
   if (state.girlsScore > state.boysScore) state.girlsRounds++;
@@ -357,19 +359,20 @@ function showResults() {
   else { winnerText.textContent = '🤝 تعادل! كل الفرق رائعة!'; winnerText.style.color = 'var(--gold)'; }
 }
 
-
-// ─── Full Show Generator ───
-function generateFullShowPlan(duration) {
+// ─── Full Show Generator (توليد 20 جولة × 10 أسئلة وحفظها) ───
+function generateFullShowPlan() {
+  // نقلة 4: توليد 20 جولة، كل جولة 10 أسئلة (200 سؤال)
+  const numRounds = 20;
+  const questionsPerRound = 10;
   const categories = ['معلومات عامة', 'جغرافيا', 'علوم', 'تاريخ', 'أسئلة دينية', 'ألغاز', 'رياضة', 'تكنولوجيا'];
-  const difficulties = ['سهل', 'متوسط', 'صعب']; const questionsPerMin = 2;
-  const totalQuestions = Math.floor(duration / 60 * questionsPerMin); const questionsPerRound = 10;
-  const numRounds = Math.ceil(totalQuestions / questionsPerRound); const rounds = [];
+  const difficulties = ['سهل', 'متوسط', 'صعب'];
+
+  const rounds = [];
   for (let i = 0; i < numRounds; i++) {
-    const isGolden = i === numRounds - 1; const cat = isGolden ? 'اختيارات متنوعة' : categories[i % categories.length];
+    const isGolden = i === numRounds - 1;
+    const cat = isGolden ? 'اختيارات متنوعة' : categories[i % categories.length];
     const diff = isGolden ? 'صعب' : difficulties[i % difficulties.length];
-    const count = isGolden ? Math.min(5, totalQuestions - i * questionsPerRound) : Math.min(questionsPerRound, totalQuestions - i * questionsPerRound);
-    if (count <= 0) break;
-    rounds.push({ title: isGolden ? 'الجولة الذهبية 🔥' : `الجولة ${i + 1}`, category: cat, difficulty: diff, count, emoji: getCategoryEmoji(cat) });
+    rounds.push({ title: isGolden ? 'الجولة الذهبية 🔥' : `الجولة ${i + 1}`, category: cat, difficulty: diff, count: questionsPerRound });
   }
   return rounds;
 }
@@ -390,22 +393,36 @@ async function generateSingleRound() {
     state.girlsRounds = 0; state.boysRounds = 0; state.totalQuestions = questions.length; state.answeredQuestions = 0;
     state.mode = 'single'; state.history = [...state.history, ...questions.map(q => q.question)].slice(-500);
     localStorage.setItem('wcq_history', JSON.stringify(state.history));
-    // نقطة 10 و 13: حفظ تلقائي في localStorage
+    
+    // نقطة 10 و 13: حفظ تلقائي فوري في اللحظة التي يتم توليدها
     saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category, difficulty, count, questions });
+    
     updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('start', 0.5);
   } catch (e) { alert(e.message); } finally { hideLoading(); }
 }
 
 async function generateFullShow() {
-  const duration = state.fullShowDuration || 120; const plan = generateFullShowPlan(duration);
-  state.fullShowRounds = []; state.currentRoundIndex = 0; showLoading('جاري تجهيز اللايف الكامل...');
+  // نقطة 4: توليد 20 جولة × 10 أسئلة وحفظها تلقائياً
+  const plan = generateFullShowPlan();
+  state.fullShowRounds = []; state.currentRoundIndex = 0; showLoading('جاري تجهيز اللايف الكامل (20 جولة)...');
   try {
     for (let i = 0; i < plan.length; i++) {
       $('loadingText').textContent = `جاري تجهيز الجولة ${i + 1} من ${plan.length}...`;
       const questions = await fetchQuestions({ category: plan[i].category, difficulty: plan[i].difficulty, count: plan[i].count, avoid: state.history.slice(-200) });
       state.fullShowRounds.push({ ...plan[i], questions });
       state.history = [...state.history, ...questions.map(q => q.question)].slice(-500);
+      
+      // نقطة 10 و 13: حفظ كل جولة فور توليدها حتى لو لم تكتمل الجولة
+      saveQuestionSet({
+        id: Date.now() + i,
+        date: new Date().toLocaleString('ar-SA'),
+        category: plan[i].category,
+        difficulty: plan[i].difficulty,
+        count: plan[i].count,
+        questions: questions
+      });
     }
+    
     localStorage.setItem('wcq_history', JSON.stringify(state.history));
     state.questions = state.fullShowRounds[0].questions; state.currentIndex = 0;
     state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
@@ -429,7 +446,7 @@ function initSetupUI() {
     chip.addEventListener('click', () => { $$('[data-timer]').forEach(c => c.classList.remove('active')); chip.classList.add('active'); state.timerDuration = Number(chip.dataset.timer); });
   });
   $('generateBtn').addEventListener('click', async () => { if (state.mode === 'fullshow') await generateFullShow(); else await generateSingleRound(); });
-  // نقطة 12: زر استخدم أسئلة محفوظة
+  // نقطة 11: فتح الأسئلة المحفوظة
   $('savedQuestionsBtn').addEventListener('click', openSavedModal);
   $('closeSavedBtn').addEventListener('click', closeSavedModal);
   $('savedModal').addEventListener('click', (e) => { if (e.target === $('savedModal') || e.target.classList.contains('saved-modal-backdrop')) { closeSavedModal(); } });
@@ -447,7 +464,6 @@ function initGameUI() {
   $$('.neg-btn').forEach(btn => {
     btn.addEventListener('click', () => updateNegative(btn.dataset.team, btn.dataset.action));
   });
-  // نقطة 7: زر الجولة التالية
   $('nextRoundBtn').addEventListener('click', nextRoundManually);
   $('newRoundBtn').addEventListener('click', () => location.reload());
   $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
