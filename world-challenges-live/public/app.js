@@ -532,3 +532,60 @@ function nextQuestionWithCheck() {
 
 // ربط زر "التالي" بالدالة الجديدة
 $('nextBtn').addEventListener('click', nextQuestionWithCheck);
+
+// دالة بدء الأسئلة تلقائياً من البنك (خلطة عشوائية)
+function startRandomQuestions() {
+  showLoading('جاري تجهيز أسئلة خليط عشوائية من البنك وأسئلة AI المحفوظة...');
+  
+  const category = $('category') ? $('category').value : 'معلومات عامة';
+  const difficulty = $('difficulty') ? $('difficulty').value : 'سهل';
+  const count = Number($('count') ? $('count').value : 10) || 10;
+
+  fetch('/api/questions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ category, difficulty, count, avoid: state.history.slice(-200) })
+  })
+  .then(res => res.json())
+  .then(data => {
+    hideLoading();
+    if (data.error) throw new Error(data.error);
+    if (data.questions && data.questions.length > 0) {
+      // بدء اللعبة فوراً
+      state.questions = data.questions;
+      state.currentIndex = 0;
+      state.girlsScore = 0;
+      state.boysScore = 0;
+      state.girlsRounds = 0;
+      state.boysRounds = 0;
+      state.mode = 'single';
+      state.history = [...state.history, ...data.questions.map(q => q.question)].slice(-500);
+      
+      // حفظ تلقائي في localStorage (طبقة إضافية)
+      saveQuestionSet({
+        id: Date.now(),
+        date: new Date().toLocaleString('ar-SA'),
+        category: 'خليط عشوائي',
+        difficulty: 'متنوع',
+        count: data.questions.length,
+        questions: data.questions
+      });
+      
+      updateScoreBoxes();
+      showScreen('gameScreen');
+      renderQuestion();
+      playSound('start', 0.5);
+    } else {
+      alert('لا توجد أسئلة متاحة حالياً.');
+    }
+  })
+  .catch(err => {
+    hideLoading();
+    alert('خطأ في التحميل: ' + err.message);
+  });
+}
+
+// جعل زر "ابدأ الأسئلة" يستدعي الدالة الجديدة
+if ($('savedQuestionsBtn')) {
+  $('savedQuestionsBtn').addEventListener('click', startRandomQuestions);
+}
