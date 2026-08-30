@@ -4,6 +4,27 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .app { max-width: 1000px; margin: 0 auto; padding: 12px; }
 .hidden { display: none !important; }
 
+/* تنسيق الهدايا الجديد */
+.gifts-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; margin-bottom: 16px; gap: 8px; }
+.gift-column { display: flex; flex-direction: column; gap: 8px; width: 25%; }
+.gift-center { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 50%; }
+.gift-item { text-align: center; cursor: pointer; background: var(--bg-card); border-radius: 14px; padding: 6px; border: 2px solid transparent; transition: 0.3s; }
+.gift-item:hover { border-color: var(--gold); transform: translateY(-4px); }
+.gift-item img { width: 44px; height: 44px; object-fit: contain; }
+.gift-item.center img { width: 60px; height: 60px; }
+.gift-row-bottom { display: flex; gap: 8px; }
+.gift-row-bottom .gift-item img { width: 40px; height: 40px; }
+.gift-name { font-size: 9px; color: var(--text-dim); display: block; font-weight: 700; }
+
+/* نافذة اختيار الفريق */
+.team-picker { position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: center; z-index: 3000; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); }
+.picker-content { background: var(--bg-card); padding: 20px; border-radius: 20px; text-align: center; border: 2px solid var(--gold); width: 300px; }
+.picker-buttons { display: flex; gap: 15px; margin-top: 20px; justify-content: center; }
+.picker-btn { padding: 10px 15px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; font-size: 16px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.picker-btn img { width: 60px; }
+.picker-girls { background: var(--pink); color: white; }
+.picker-boys { background: var(--blue); color: white; }
+/* باقي التنسيقات */
 @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
@@ -19,12 +40,6 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .setup-card { background: var(--bg-card); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); }
 .generate-btn { width: 100%; padding: 18px; border-radius: 18px; border: none; background: linear-gradient(135deg, var(--pink), var(--blue)); color: #fff; font-size: 18px; font-weight: 800; cursor: pointer; margin-top: 8px; }
 .saved-questions-btn { background: linear-gradient(135deg, var(--gold), #b8960c) !important; color: var(--bg) !important; margin-top: 12px; }
-
-.gifts-bar { display: flex; gap: 8px; overflow-x: auto; padding: 10px; }
-.gift-item { flex-shrink: 0; width: 70px; text-align: center; cursor: pointer; background: var(--bg-card); border-radius: 14px; padding: 6px; border: 2px solid transparent; }
-.gift-item:hover { border-color: var(--gold); transform: translateY(-4px); }
-.gift-item img { width: 44px; height: 44px; }
-.gift-name { font-size: 9px; color: var(--text-dim); display: block; }
 
 .battle-arena { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: end; margin-bottom: 16px; }
 .team-side { text-align: center; position: relative; }
@@ -57,25 +72,28 @@ body { font-family: var(--font); background: var(--bg); color: var(--text); min-
 .ctrl-btn.girls { background: var(--pink); }
 .ctrl-btn.boys { background: var(--blue); }
 .ctrl-btn.danger { background: var(--gold); color: var(--bg); }
-.support-boxes { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+
 .captain-box { background: linear-gradient(135deg, var(--gold), #b8960c); color: var(--bg); font-weight: 900; padding: 8px; border-radius: 10px; }
 .supporter-box { background: rgba(255,255,255,0.1); border: 1px solid var(--text-dim); color: var(--white); padding: 6px; border-radius: 8px; }
-
-.shield-modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 3000; }
-.shield-content { background: var(--bg-card); padding: 30px; border-radius: 20px; text-align: center; border: 2px solid var(--gold); }
-.shield-buttons { display: flex; gap: 15px; margin-top: 20px; }
-.shield-btn { padding: 15px 30px; border-radius: 15px; border: none; font-weight: 900; cursor: pointer; font-size: 18px; }
-.shield-btn.girls { background: var(--pink); color: white; }
-.shield-btn.boys { background: var(--blue); color: white; }
+.team-shield { position: absolute; top: 50%; transform: translateY(-50%); font-size: 40px; animation: pulse 1s infinite; z-index: 100; filter: drop-shadow(0 0 15px var(--blue-glow)); }
 
 .celebration-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 2500; }
 .celebration-content { text-align: center; animation: popIn 0.5s ease; background: rgba(0,0,0,0.7); padding: 20px 40px; border-radius: 20px; }
 .celebration-content img { width: 100px; height: 100px; animation: float 1s infinite; }
 .celebration-text { font-size: 24px; font-weight: 900; color: var(--gold); margin-top: 10px; }
 
-.team-shield { position: absolute; top: 50%; transform: translateY(-50%); font-size: 40px; animation: pulse 1s infinite; z-index: 100; filter: drop-shadow(0 0 15px var(--blue-glow)); }
-
 .loading-overlay { position: fixed; inset: 0; background: rgba(10,14,39,0.95); display: grid; place-items: center; z-index: 1000; }
 .spinner { width: 60px; height: 60px; border: 4px solid var(--bg-light); border-top-color: var(--gold); border-radius: 50%; animation: spin 1s linear infinite; }
 
-@media (max-width: 600px) { .app { padding: 8px; } .setup-header .logo-img { width: 160px; } .options-grid { grid-template-columns: 1fr; } .game-controls { grid-template-columns: repeat(3, 1fr); } }
+/* شاشة النتائج وغرفة التحكم */
+.results-card { text-align: center; padding: 20px; }
+.results-logo { width: 120px; }
+.final-battle { display: flex; justify-content: space-around; align-items: center; margin: 20px 0; }
+.final-score { font-size: 40px; font-weight: 900; }
+.winner-text { font-size: 24px; font-weight: 900; color: var(--gold); margin: 10px 0; }
+.sound-board { background: var(--bg-card); border-radius: 16px; padding: 20px; margin-top: 20px; border: 2px solid var(--gold); }
+.sound-buttons-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+.sound-buttons-grid button { background: var(--bg-light); border: none; color: var(--white); padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 12px; }
+.sound-buttons-grid button:hover { background: var(--gold); color: var(--bg); }
+
+@media (max-width: 600px) { .app { padding: 8px; } .setup-header .logo-img { width: 160px; } .options-grid { grid-template-columns: 1fr; } .game-controls { grid-template-columns: repeat(3, 1fr); } .sound-buttons-grid { grid-template-columns: repeat(2, 1fr); } }
