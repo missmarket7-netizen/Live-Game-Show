@@ -7,10 +7,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.use((req, res, next) => {
-  if (req.body === undefined) req.body = {};
-  next();
-});
+app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "1mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
@@ -18,17 +15,8 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// دالة خلط المصفوفات (لتظهر الأسئلة خليط عشوائي)
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
+function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-// قراءة ملفات البنك (db1 إلى db5)
 function loadBankQuestions() {
   let all = [];
   for (let i = 1; i <= 5; i++) {
@@ -43,27 +31,21 @@ function loadBankQuestions() {
   return all;
 }
 
-// قراءة الأسئلة المولدة من AI
 function loadGeneratedQuestions() {
   try {
     const filePath = path.join(__dirname, "questions", "generated_questions.json");
-    if (fs.existsSync(filePath)) {
-      return JSON.parse(fs.readFileSync(filePath, "utf8"));
-    }
+    if (fs.existsSync(filePath)) return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (e) {}
   return [];
 }
 
-// حفظ الأسئلة الجديدة بشكل دائم
 function saveGeneratedQuestions(questions) {
   try {
     const existing = loadGeneratedQuestions();
     const merged = [...questions, ...existing];
     const limited = merged.slice(0, 5000);
     fs.writeFileSync(path.join(__dirname, "questions", "generated_questions.json"), JSON.stringify(limited, null, 2), "utf8");
-  } catch (e) {
-    console.error("خطأ في الحفظ:", e.message);
-  }
+  } catch (e) { console.error("خطأ في الحفظ:", e.message); }
 }
 
 function buildSystemPrompt(count) {
@@ -71,20 +53,10 @@ function buildSystemPrompt(count) {
 قواعد صارمة:
 1. اخرج JSON فقط بدون اي نص قبل او بعد
 2. الشكل المطلوب: مصفوفة JSON تحتوي على ${count} كائنات
-3. كل كائن يحتوي على:
-   - "category": نص الفئة
-   - "difficulty": "سهل" او "متوسط" او "صعب"
-   - "question": نص السؤال بالعربية الفصحى الواضحة
-   - "options": ["الخيار أ", "الخيار ب", "الخيار ج", "الخيار د"]
-   - "correctIndex": رقم من 0 الى 3
-   - "explanation": شرح مختصر للمقدم
-4. الاسئلة واضحة، تجنب المختلف عليه
-5. في الدين: معلومات اساسية مشهورة فقط
-6. لا تكرر الاسئلة
-7. الخيارات متقاربة منطقيا لكن واحد فقط صحيح
-
-مثال:
-[{"category":"معلومات عامة","difficulty":"سهل","question":"ما هي عاصمة السعودية؟","options":["جدة","الرياض","مكة","الدمام"],"correctIndex":1,"explanation":"الرياض"}]`;
+3. كل كائن يحتوي على: category, difficulty, question, options (4), correctIndex (0-3), explanation
+4. تنويع في الفئات (دين، جغرافيا، علوم، ألغاز، تاريخ، رياضة)
+5. لا تكرر الاسئلة
+مثال: [{"category":"معلومات عامة","difficulty":"سهل","question":"ما هي عاصمة السعودية؟","options":["جدة","الرياض","مكة","الدمام"],"correctIndex":1,"explanation":"الرياض"}]`;
 }
 
 function extractAndParseJSON(rawText) {
@@ -156,8 +128,7 @@ function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض" },
     { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["2", "3", "4", "5"], correctIndex: 0, explanation: "ركعتان" },
-    { category: "جغرافيا", difficulty: "سهل", question: "ما هو أطول نهر في العالم؟", options: ["الفرات", "النيل", "دجلة", "الأمازون"], correctIndex: 1, explanation: "النيل" },
-    { category: "علوم", difficulty: "سهل", question: "ما هو الكوكب الأحمر؟", options: ["الزهرة", "المريخ", "المشتري", "عطارد"], correctIndex: 1, explanation: "المريخ" }
+    { category: "جغرافيا", difficulty: "سهل", question: "ما هو أطول نهر في العالم؟", options: ["الفرات", "النيل", "دجلة", "الأمازون"], correctIndex: 1, explanation: "النيل" }
   ];
   let filtered = allQuestions.filter(q => q.difficulty === difficulty);
   if (filtered.length === 0) filtered = allQuestions;
@@ -173,7 +144,6 @@ async function callWithFallback(prompt, count) {
   for (const provider of PROVIDERS) {
     if (!provider.key) continue;
     try {
-      console.log(`محاولة ${provider.name}...`);
       const rawResponse = await provider.call(prompt, count);
       const parsed = extractAndParseJSON(rawResponse);
       let questions;
@@ -182,74 +152,68 @@ async function callWithFallback(prompt, count) {
       else questions = [parsed];
       const valid = questions.filter(q => q.question && Array.isArray(q.options) && q.options.length === 4 && typeof q.correctIndex === "number");
       if (valid.length > 0) return { questions: valid, source: "ai" };
-      else throw new Error("أسئلة غير صالحة");
-    } catch (err) { errors.push(`${provider.name}: ${err.message}`); }
+    } catch (err) { errors.push(err.message); }
   }
   throw new Error(`فشل الجميع: ${errors.join(" | ")}`);
 }
 
-// ─── API: جلب أسئلة خليط عشوائية وبدء اللعبة تلقائياً ───
+// ─── Zero API: جلب أسئلة خليط من البنك (بدون AI تلقائي) ───
 app.post("/api/questions", async (req, res) => {
   try {
-    const { count = 10, avoid = [] } = req.body;
+    const { count = 10, avoid = [], generateNew = false } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
     const avoidSet = new Set((Array.isArray(avoid) ? avoid : []).map(q => String(q)));
 
-    // 1. دمج البنك الثابت + المولد
     let allBank = [...loadBankQuestions(), ...loadGeneratedQuestions()];
-    // تصفية الأسئلة غير المكررة
     let filtered = allBank.filter(q => !avoidSet.has(q.question));
-    // خلط عشوائي (خليط من كل الفئات)
     let selected = shuffleArray(filtered).slice(0, n);
+    console.log(`✅ تم جلب ${selected.length} سؤال من البنك (Zero API).`);
 
-    console.log(`✅ تم جلب ${selected.length} سؤال خليط من البنك.`);
-
-    // 2. إذا نقصت الكمية، نولد من AI
-    if (selected.length < n) {
+    // توليد يدوي إذا طلبه المضيف
+    if (generateNew && selected.length < n) {
       const missingCount = n - selected.length;
-      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة (خلط بين الفئات: دين، جغرافيا، علوم، ألغاز، تاريخ، رياضة، تكنولوجيا، معلومات عامة) بمستويات صعوبة متنوعة.\nقواعد:\n- اخرج مصفوفة JSON فقط\n- لا تستخدم هذه الاسئلة: ${[...avoidSet].slice(-80).join(" | ")}.\n- كل سؤال يحتوي على: category, difficulty, question, options (4), correctIndex (0-3), explanation`;
-
+      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة جديدة تماماً.`;
       try {
         const aiResult = await callWithFallback(prompt, missingCount);
-        // حفظ تلقائي فوري للأسئلة الجديدة (لن تُحذف أبداً)
         saveGeneratedQuestions(aiResult.questions);
         selected = [...selected, ...aiResult.questions];
-        console.log(`🎉 تم توليد ${aiResult.questions.length} سؤال من AI وحفظها.`);
-      } catch (aiErr) {
-        const fallback = getFallbackQuestions("معلومات عامة", missingCount, "سهل");
-        selected = [...selected, ...fallback];
-      }
+      } catch (e) { console.log("فشل التوليد اليدوي."); }
     }
 
-    if (selected.length === 0) throw new Error("لم يتم توليد أي أسئلة.");
+    // حالات طوارئ
+    if (selected.length === 0) {
+      selected = getFallbackQuestions("معلومات عامة", n, "سهل");
+    }
 
-    const enriched = selected.map((q, i) => ({
-      ...q,
-      id: `q_${Date.now()}_${i}`,
-      source: q.source || "bank"
-    }));
-
-    return res.json({ questions: enriched });
+    const enriched = selected.map((q, i) => ({ ...q, id: `q_${Date.now()}_${i}`, source: q.source || "bank" }));
+    return res.json({ questions: enriched, mode: "zero-api" });
   } catch (err) {
-    console.error("خطأ:", err.message);
-    return res.status(500).json({ error: "فشل في توليد الأسئلة", details: err.message });
+    return res.status(500).json({ error: "فشل في جلب الأسئلة", details: err.message });
   }
 });
 
-// ─── Health Check ───
+// مسار لتوليد أسئلة يدوياً وملء البنك
+app.post("/api/generate-new", async (req, res) => {
+  try {
+    const { count = 10 } = req.body;
+    const prompt = `انشئ بالضبط ${count} اسئلة متنوعة جديدة تماماً.`;
+    const aiResult = await callWithFallback(prompt, count);
+    saveGeneratedQuestions(aiResult.questions);
+    res.json({ success: true, count: aiResult.questions.length });
+  } catch (err) {
+    res.status(500).json({ error: "فشل التوليد", details: err.message });
+  }
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", bankCount: loadBankQuestions().length + loadGeneratedQuestions().length });
 });
 
-// ─── SPA Fallback ───
 app.use((req, res) => {
   res.sendFile(path.join(__dirname, "../public", "index.html"));
 });
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`عالم التحديات — LIVE GAME SHOW`);
-  console.log(`   الخادم يعمل على http://localhost:${PORT}`);
-  console.log(`   البنك يحتوي على: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`);
-  console.log(`   الترتيب: Bank -> AI -> Fallback`);
+  console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`);
 });
