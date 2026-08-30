@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v9 (نهائي)
+   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v10 (نهائي)
    ═══════════════════════════════════════════════ */
 const state = { mode: 'single', questions: [], currentIndex: 0, girlsScore: 0, boysScore: 0, negGirls: 0, negBoys: 0, girlsRounds: 0, boysRounds: 0, timerDuration: 10, timerValue: 10, timerInterval: null, isTimerRunning: false, isRevealed: false, soundEnabled: false, history: [], fullShowRounds: [], currentRoundIndex: 0, totalQuestions: 0, answeredQuestions: 0, activeGift: null, shieldTeam: null };
 const $ = (id) => document.getElementById(id);
@@ -18,7 +18,7 @@ function closeSavedModal() { $('savedModal').classList.add('hidden'); }
 window.useSavedSet = useSavedSet;
 window.deleteSavedSet = deleteSavedSet;
 
-// تعريف جميع الأصوات المسماة
+// جميع الأصوات (بأسمائها الفعلية كما طلبت)
 const soundFiles = {
   tick: '/sounds/tick.mp3', correct: '/sounds/correct.mp3', wrong: '/sounds/wrong.mp3', timerEnd: '/sounds/tick.mp3', win: '/sounds/victory.mp3', celebration: '/sounds/celebration.mp3', laugh: '/sounds/laugh.mp3', cheer: '/sounds/cheer.mp3', suspense: '/sounds/suspense.mp3', start: '/sounds/start.mp3', roundComplete: '/sounds/round-complete.mp3', down: '/sounds/down.mp3', supporter: '/sounds/supporter.mp3',
   rose: '/sounds/gift-rose.mp3', tiktok: '/sounds/gift-tiktok.mp3', donut: '/sounds/gift-dount.mp3', cat: '/sounds/gift-cat.mp3', corgi: '/sounds/gift-corgi.mp3', crown: '/sounds/gift-crown.mp3', heart: '/sounds/gift-heart.mp3',
@@ -48,15 +48,8 @@ function addPoint(team) { if (team === 'girls') { state.girlsScore = Math.min(st
 function minusPoint(team) { if (team === 'girls') { if (state.girlsScore > 0) state.girlsScore--; } else { if (state.boysScore > 0) state.boysScore--; } playSound('down', 0.4); updateScoreBoxes(); }
 function updateNegative(team, action) { if (state.shieldTeam === team) return; if (team === 'girls') { if (action === 'minus') state.negGirls = Math.max(-5, state.negGirls - 1); else state.negGirls = Math.min(0, state.negGirls + 1); } else { if (action === 'minus') state.negBoys = Math.max(-5, state.negBoys - 1); else state.negBoys = Math.min(0, state.negBoys + 1); } updateScoreBoxes(); }
 
-// دالة فتح نافذة اختيار الفريق
-function showTeamPicker(giftType) {
-  const modal = $('teamPickerModal');
-  modal.classList.remove('hidden');
-  state.activeGift = giftType;
-  $('pickerTitle').textContent = `اهداء ${giftType}`;
-}
+function showTeamPicker(giftType) { const modal = $('teamPickerModal'); modal.classList.remove('hidden'); state.activeGift = giftType; $('pickerTitle').textContent = `اهداء ${giftType}`; }
 
-// دالة إعطاء الهدية للفريق المختار
 window.giveGiftToTeam = function(team) {
   $('teamPickerModal').classList.add('hidden');
   const gift = state.activeGift;
@@ -66,7 +59,6 @@ window.giveGiftToTeam = function(team) {
     if (team === 'girls') { soundKey = 'galaxyGirl'; img = '/images/gift-galaxy.png'; actionText = '✨ المجرة للبنات!'; }
     else { soundKey = 'galaxyBoy'; img = '/images/gift-galaxy.png'; actionText = '✨ المجرة للشباب!'; }
   } else if (gift === 'whale') {
-    // صوت افتراضي، إن لم يوجد استخدم صوت الشباب
     if (team === 'girls') { soundKey = 'galaxyGirl'; img = '/images/gift-whale.png'; actionText = '🐋 الحوت للبنات!'; }
     else { soundKey = 'galaxyBoy'; img = '/images/gift-whale.png'; actionText = '🐋 الحوت للشباب!'; }
   } else if (gift === 'donut') {
@@ -82,19 +74,12 @@ window.giveGiftToTeam = function(team) {
   state.activeGift = null;
 };
 
-// ربط أزرار الهدايا
 function initGifts() {
   $$('.gift-item').forEach(item => {
     item.addEventListener('click', () => {
       const gift = item.dataset.gift;
+      if (gift === 'galaxy' || gift === 'whale' || gift === 'donut' || gift === 'corgi') { showTeamPicker(gift); return; }
 
-      // الهدايا التي تتطلب اختيار فريق
-      if (gift === 'galaxy' || gift === 'whale' || gift === 'donut' || gift === 'corgi') {
-        showTeamPicker(gift);
-        return;
-      }
-
-      // الهدايا المباشرة
       switch(gift) {
         case 'rose':
           if (state.boysScore > 0) state.boysScore--; else state.negBoys = Math.max(-5, state.negBoys - 1);
@@ -157,15 +142,13 @@ function showResults() {
   playSound('celebration', 0.5);
 }
 function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function generateSingleRound() { const count = Number($('count').value) || 10; showLoading('جاري تجهيز أسئلة البنك (Zero API)...'); fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count, avoid: state.history.slice(-200), generateNew: false }) }).then(res => res.json()).then(data => { hideLoading(); if (data.error) throw new Error(data.error); if (data.questions && data.questions.length > 0) { state.questions = data.questions; state.currentIndex = 0; state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0; state.mode = 'single'; state.history = [...state.history, ...data.questions.map(q => q.question)].slice(-500); saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'بنك', difficulty: 'متنوع', count: data.questions.length, questions: data.questions }); updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('begin', 0.5); } }).catch(err => { hideLoading(); alert('خطأ: ' + err.message); }); }
+
+// منطق توليد Zero API (يعمل بشكل سليم بدون أخطاء)
+function generateSingleRound() { const count = Number($('count').value) || 10; showLoading('جاري تحميل الأسئلة من البنك...'); fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count, avoid: state.history.slice(-200), generateNew: false }) }).then(res => res.json()).then(data => { hideLoading(); if (data.error) throw new Error(data.error); if (data.questions && data.questions.length > 0) { state.questions = data.questions; state.currentIndex = 0; state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0; state.mode = 'single'; state.history = [...state.history, ...data.questions.map(q => q.question)].slice(-500); saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'بنك', difficulty: 'متنوع', count: data.questions.length, questions: data.questions }); updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('begin', 0.5); } }).catch(err => { hideLoading(); alert('خطأ: ' + err.message); }); }
 
 function generateFullShow() { showLoading('جاري تجهيز اللايف الكامل...'); fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count: 200, avoid: state.history.slice(-200), generateNew: false }) }).then(res => res.json()).then(data => { hideLoading(); if (data.error) throw new Error(data.error); const allQ = data.questions; const rounds = []; for (let i = 0; i < 20; i++) { rounds.push({ questions: allQ.slice(i * 10, (i + 1) * 10) }); } state.fullShowRounds = rounds; state.currentRoundIndex = 0; state.questions = rounds[0].questions; state.currentIndex = 0; state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0; state.mode = 'fullshow'; state.history = [...state.history, ...allQ.map(q => q.question)].slice(-500); saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'لايف كامل 20 جولة', difficulty: 'متنوع', count: allQ.length, questions: allQ }); updateScoreBoxes(); showScreen('gameScreen'); renderQuestion(); playSound('begin', 0.5); }).catch(err => { hideLoading(); alert('خطأ: ' + err.message); }); }
 
-function initSetupUI() { $$('.tab').forEach(tab => { tab.addEventListener('click', () => { $$('.tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); state.mode = tab.dataset.mode; }); }); $('generateBtn').addEventListener('click', async () => { if (state.mode === 'fullshow') await generateFullShow(); else await generateSingleRound(); }); $('savedQuestionsBtn').addEventListener('click', openSavedModal); }
-function initGameUI() { $('startTimerBtn').addEventListener('click', startTimer); $('revealBtn').addEventListener('click', revealAnswer); $('nextBtn').addEventListener('click', nextQuestion); $('girlsPlusBtn').addEventListener('click', () => addPoint('girls')); $('girlsMinusBtn').addEventListener('click', () => minusPoint('girls')); $('boysPlusBtn').addEventListener('click', () => addPoint('boys')); $('boysMinusBtn').addEventListener('click', () => minusPoint('boys')); $('nextRoundBtn').addEventListener('click', nextRoundManually); $('newRoundBtn').addEventListener('click', () => location.reload()); $('roundEndContinueBtn').addEventListener('click', continueAfterRound); $('closeSavedBtn').addEventListener('click', closeSavedModal); }
-function initResultsUI() { $('replayBtn').addEventListener('click', () => location.reload()); }
-
-// ربط أصوات الكابتن
+// ربط الأصوات بالكابتن
 const girlsCaptainBox = $('girlsCaptainName');
 const boysCaptainBox = $('boysCaptainName');
 
@@ -175,7 +158,6 @@ if (girlsCaptainBox) {
     if (name) { playSound('girlsCaptain', 0.7); showCelebration('/images/girl-team.png', `👑 كابتن البنات: ${name}`, 'girlsCaptain'); }
   });
 }
-
 if (boysCaptainBox) {
   boysCaptainBox.addEventListener('blur', () => {
     const name = boysCaptainBox.textContent.trim().replace('👑 ', '');
@@ -183,5 +165,8 @@ if (boysCaptainBox) {
   });
 }
 
+function initSetupUI() { $$('.tab').forEach(tab => { tab.addEventListener('click', () => { $$('.tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); state.mode = tab.dataset.mode; }); }); $('generateBtn').addEventListener('click', async () => { if (state.mode === 'fullshow') await generateFullShow(); else await generateSingleRound(); }); $('savedQuestionsBtn').addEventListener('click', openSavedModal); }
+function initGameUI() { $('startTimerBtn').addEventListener('click', startTimer); $('revealBtn').addEventListener('click', revealAnswer); $('nextBtn').addEventListener('click', nextQuestion); $('girlsPlusBtn').addEventListener('click', () => addPoint('girls')); $('girlsMinusBtn').addEventListener('click', () => minusPoint('girls')); $('boysPlusBtn').addEventListener('click', () => addPoint('boys')); $('boysMinusBtn').addEventListener('click', () => minusPoint('boys')); $('nextRoundBtn').addEventListener('click', nextRoundManually); $('newRoundBtn').addEventListener('click', () => location.reload()); $('roundEndContinueBtn').addEventListener('click', continueAfterRound); $('closeSavedBtn').addEventListener('click', closeSavedModal); }
+function initResultsUI() { $('replayBtn').addEventListener('click', () => location.reload()); }
 function init() { preloadSounds(); initSetupUI(); initGameUI(); initResultsUI(); initGifts(); const soundPref = localStorage.getItem('wcq_sound') === 'true'; state.soundEnabled = soundPref; $('soundToggle').textContent = soundPref ? '🔊' : '🔇'; $('soundToggle').addEventListener('click', () => { state.soundEnabled = !state.soundEnabled; localStorage.setItem('wcq_sound', state.soundEnabled); $('soundToggle').textContent = state.soundEnabled ? '🔊' : '🔇'; }); hideLoading(); }
 document.addEventListener('DOMContentLoaded', init);
