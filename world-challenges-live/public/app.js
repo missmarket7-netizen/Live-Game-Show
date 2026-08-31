@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v11.2 FINAL (فيه كل الإصلاحات)
+   🌎 عالم التحديات — LIVE GAME SHOW ENGINE v11.2 FINAL
    ═══════════════════════════════════════════════════════════════════ */
 
 const state = { mode: 'single', questions: [], currentIndex: 0, girlsScore: 0, boysScore: 0, negGirls: 0, negBoys: 0, girlsRounds: 0, boysRounds: 0, timerDuration: 10, timerValue: 10, timerInterval: null, isTimerRunning: false, isRevealed: false, soundEnabled: false, history: [], fullShowRounds: [], currentRoundIndex: 0, totalQuestions: 0, answeredQuestions: 0, activeGift: null, shieldTeam: null };
@@ -43,45 +43,69 @@ function initGifts() { $$('.gift-item').forEach(item => { item.addEventListener(
 function renderQuestion() { const q = state.questions[state.currentIndex]; if (!q) return; state.isRevealed = false; stopTimer(); $('questionCounter').textContent = `السؤال ${state.currentIndex + 1} / ${state.questions.length}`; $('questionText').textContent = q.question; const grid = $('optionsGrid'); grid.innerHTML = ''; (q.options || []).forEach((opt, i) => { const btn = document.createElement('button'); btn.className = 'option-btn'; btn.textContent = opt; btn.onclick = () => selectOption(i); grid.appendChild(btn); }); $('answerReveal').classList.add('hidden'); playSound('suspense', 0.3); }
 function selectOption(index) { if (state.isRevealed) return; const q = state.questions[state.currentIndex]; const btns = $$('.option-btn'); btns.forEach((b, i) => { b.classList.remove('correct', 'wrong'); if (i === q.correctIndex) b.classList.add('correct'); if (i === index && i !== q.correctIndex) b.classList.add('wrong'); }); if (index === q.correctIndex) playSound('correct', 0.5); else playSound('wrong', 0.4); revealAnswer(); }
 function revealAnswer() { if (state.isRevealed) return; state.isRevealed = true; const q = state.questions[state.currentIndex]; $('answerReveal').classList.remove('hidden'); $('answerText').textContent = `${String.fromCharCode(65 + q.correctIndex)}. ${q.options[q.correctIndex]}`; $('explanationText').textContent = q.explanation || 'لا يوجد شرح إضافي.'; $('revealBtn').disabled = true; }
-// إصلاح الجولة: لا تنتهي إلا بـ 5 نقاط أو زر الجولة التالية
+// إصلاح 1: لا تنتهي الجولة إلا باكتمال 5 نقاط أو زر الجولة التالية
 function nextQuestion() {
   if (state.girlsScore >= 5 || state.boysScore >= 5) { showRoundResult(); return; }
   if (state.currentIndex < state.questions.length - 1) { state.currentIndex++; renderQuestion(); }
-  else { showRoundResult(); }
+  else { // أعد خلط الأسئلة الحالية لضمان عدم التكرار
+    state.questions = shuffleArray([...state.questions]);
+    state.currentIndex = 0;
+    renderQuestion();
+  }
 }
 
-// إصلاح منع تكرار الأسئلة (خلط عشوائي قبل كل جولة)
+// إصلاح منع تكرار الأسئلة عبر الخلط
 function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function editRounds(team) { const current = team === 'girls' ? state.girlsRounds : state.boysRounds; const newVal = prompt(`أدخل عدد الجولات لـ ${team === 'girls' ? 'البنات' : 'الشباب'}:`, current); if (newVal !== null && !isNaN(parseInt(newVal)) && parseInt(newVal) >= 0) { if (team === 'girls') state.girlsRounds = parseInt(newVal); else state.boysRounds = parseInt(newVal); updateScoreBoxes(); } }
 window.editRounds = editRounds;
 
-// إصلاح الأصوات المتتالية: الفائز أولاً ثم الخاسر
+// إصلاح 2: إعلان النتيجة بالترتيب الجديد والأصوات المتسلسلة
 function showRoundResult() {
   stopTimer();
   let winnerText = '';
+  let winnerSound = '';
+  let loserSound = '';
+
   if (state.girlsScore > state.boysScore) {
     state.girlsRounds++;
-    winnerText = '🎉 مبروك للبنات!';
-    playSound('girlsRound');
-    setTimeout(() => { playSound('boysLose'); }, 2500); // بعد انتهاء صوت الفائز تقريباً
+    winnerText = '🎉 فوز فريق البنات!';
+    winnerSound = 'girlsRound';
+    loserSound = 'boysLose';
   } else if (state.boysScore > state.girlsScore) {
     state.boysRounds++;
-    winnerText = '🎉 مبروك للشباب!';
-    playSound('boysRound');
-    setTimeout(() => { playSound('girlsLose'); }, 2500);
+    winnerText = '🎉 فوز فريق الشباب!';
+    winnerSound = 'boysRound';
+    loserSound = 'girlsLose';
   } else {
     winnerText = '🤝 تعادل!';
   }
-  
+
   updateScoreBoxes();
-  fireConfetti(); playSound('win', 0.6);
-  $('roundEndNumber').textContent = `الجولة ${state.mode === 'fullshow' ? state.currentRoundIndex + 1 : 1}`;
+  fireConfetti();
+
+  // عرض النتائج بالترتيب (شباب ثم بنات)
+  $('roundEndNumber').textContent = `الجولة ${state.mode === 'fullshow' ? state.currentRoundIndex + 1 : (state.girlsRounds + state.boysRounds + 1)}`;
   $('roundEndWinner').textContent = winnerText;
-  $('roundEndGirlsScore').textContent = state.girlsScore;
   $('roundEndBoysScore').textContent = state.boysScore;
+  $('roundEndGirlsScore').textContent = state.girlsScore;
+
+  // الأصوات: الفائز أولاً ثم الخاسر بعده بفارق زمني
+  playSound('win', 0.6);
+  if (winnerSound) {
+    setTimeout(() => {
+      playSound(winnerSound, 0.7);
+      setTimeout(() => {
+        playSound(loserSound, 0.7);
+      }, 2500);
+    }, 500);
+  } else {
+    setTimeout(() => playSound('end', 0.6), 500);
+  }
+
   $('roundEndOverlay').classList.remove('hidden');
-  
+
+  // تصفير النقاط
   state.girlsScore = 0; state.boysScore = 0;
   state.negGirls = 0; state.negBoys = 0;
   state.shieldTeam = null;
@@ -91,66 +115,50 @@ function showRoundResult() {
 
 function continueAfterRound() {
   $('roundEndOverlay').classList.add('hidden');
-  if (state.questions && state.questions.length > 0) {
-    state.questions = shuffleArray([...state.questions]);
-  }
+  if (state.questions && state.questions.length > 0) { state.questions = shuffleArray([...state.questions]); }
   state.currentIndex = 0;
   updateScoreBoxes();
   renderQuestion();
 }
 
-// إصلاح زر توليد AI (يعمل كما هو)
+// إصلاح 4: زر توليد أسئلة AI يعمل (وضع Zero API لا يولد AI تلقائياً)
 function generateSingleRound() {
   const count = Number($('count').value) || 10;
   showLoading('جاري تحميل الأسئلة من البنك...');
-  fetch('/api/questions', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ count, avoid: state.history.slice(-200), generateNew: false })
-  })
+  fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count: 50, avoid: state.history.slice(-200), generateNew: false }) })
   .then(res => res.json())
   .then(data => {
     hideLoading();
     if (data.error) throw new Error(data.error);
     if (data.questions && data.questions.length > 0) {
-      state.questions = data.questions;
+      state.questions = shuffleArray(data.questions);
       state.currentIndex = 0;
       state.girlsScore = 0; state.boysScore = 0;
       state.girlsRounds = 0; state.boysRounds = 0;
       state.mode = 'single';
       state.history = [...state.history, ...data.questions.map(q => q.question)].slice(-500);
       saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'بنك', difficulty: 'متنوع', count: data.questions.length, questions: data.questions });
-      updateScoreBoxes();
-      showScreen('gameScreen');
-      renderQuestion();
+      updateScoreBoxes(); showScreen('gameScreen'); renderQuestion();
     }
   }).catch(err => { hideLoading(); alert('خطأ: ' + err.message); });
 }
 
 function generateFullShow() {
   showLoading('جاري تجهيز اللايف الكامل...');
-  fetch('/api/questions', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ count: 200, avoid: state.history.slice(-200), generateNew: false })
-  })
+  fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ count: 200, avoid: state.history.slice(-200), generateNew: false }) })
   .then(res => res.json())
   .then(data => {
     hideLoading();
     if (data.error) throw new Error(data.error);
-    const allQ = data.questions;
+    const allQ = shuffleArray(data.questions);
     const rounds = [];
     for (let i = 0; i < 20; i++) rounds.push({ questions: allQ.slice(i * 10, (i + 1) * 10) });
     state.fullShowRounds = rounds;
-    state.currentRoundIndex = 0;
-    state.questions = rounds[0].questions;
-    state.currentIndex = 0;
-    state.girlsScore = 0; state.boysScore = 0;
-    state.girlsRounds = 0; state.boysRounds = 0;
-    state.mode = 'fullshow';
+    state.currentRoundIndex = 0; state.questions = rounds[0].questions; state.currentIndex = 0;
+    state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0; state.mode = 'fullshow';
     state.history = [...state.history, ...allQ.map(q => q.question)].slice(-500);
-    saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'لايف كامل 20 جولة', difficulty: 'متنوع', count: allQ.length, questions: allQ });
-    updateScoreBoxes();
-    showScreen('gameScreen');
-    renderQuestion();
+    saveQuestionSet({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), category: 'لايف كامل', difficulty: 'متنوع', count: allQ.length, questions: allQ });
+    updateScoreBoxes(); showScreen('gameScreen'); renderQuestion();
   }).catch(err => { hideLoading(); alert('خطأ: ' + err.message); });
 }
 
@@ -168,31 +176,14 @@ function initSetupUI() { $$('.tab').forEach(tab => { tab.addEventListener('click
 function initGameUI() { $('startTimerBtn').addEventListener('click', startTimer); $('revealBtn').addEventListener('click', revealAnswer); $('nextBtn').addEventListener('click', nextQuestion); $('girlsPlusBtn').addEventListener('click', () => addPoint('girls')); $('boysPlusBtn').addEventListener('click', () => addPoint('boys')); $('nextRoundBtn').addEventListener('click', showRoundResult); $('newRoundBtn').addEventListener('click', () => location.reload()); $('roundEndContinueBtn').addEventListener('click', continueAfterRound); $('closeSavedBtn').addEventListener('click', closeSavedModal); $$('.neg-btn').forEach(btn => { btn.addEventListener('click', () => updateNegative(btn.dataset.team, btn.dataset.action)); }); }
 function initResultsUI() { $('replayBtn').addEventListener('click', () => location.reload()); }
 
-// الإصلاح: صوت begin يعمل بعد 5 ثوانٍ من فتح اللينك، وليس عند الضغط على الأزرار
+// إصلاح 1: صوت begin يعمل فقط بعد 5 ثوانٍ من فتح الرابط
 function init() {
   preloadSounds();
-  initSetupUI();
-  initGameUI();
-  initResultsUI();
-  initGifts();
-  
-  const soundPref = localStorage.getItem('wcq_sound') === 'true';
-  state.soundEnabled = soundPref;
+  initSetupUI(); initGameUI(); initResultsUI(); initGifts();
+  const soundPref = localStorage.getItem('wcq_sound') === 'true'; state.soundEnabled = soundPref;
   $('soundToggle').textContent = soundPref ? '🔊' : '🔇';
-  $('soundToggle').addEventListener('click', () => {
-    state.soundEnabled = !state.soundEnabled;
-    localStorage.setItem('wcq_sound', state.soundEnabled);
-    $('soundToggle').textContent = state.soundEnabled ? '🔊' : '🔇';
-  });
-  
+  $('soundToggle').addEventListener('click', () => { state.soundEnabled = !state.soundEnabled; localStorage.setItem('wcq_sound', state.soundEnabled); $('soundToggle').textContent = state.soundEnabled ? '🔊' : '🔇'; });
   hideLoading();
-  
-  // تشغيل begin فقط مرة واحدة بعد فتح الصفحة بـ 5 ثوانٍ
-  setTimeout(() => {
-    if (state.soundEnabled) {
-      playSound('begin', 0.6);
-    }
-  }, 5000);
+  setTimeout(() => { if (state.soundEnabled) playSound('begin', 0.6); }, 5000);
 }
-
 document.addEventListener('DOMContentLoaded', init);
