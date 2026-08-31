@@ -11,8 +11,6 @@
 </head>
 <body>
   <div class="app">
-
-    <!-- ===== SETUP SCREEN ===== -->
     <section id="setupScreen" class="screen">
       <div class="setup-header">
         <div class="logo-glow"><img src="/images/logo.png" class="logo-img" alt="عالم التحديات"></div>
@@ -21,7 +19,6 @@
         <h1 class="main-title">مسابقة عالم التحديات</h1>
         <div class="tagline">✨ ابدأ التحدي ✨</div>
       </div>
-
       <div class="setup-card">
         <div class="form-group">
           <label>طريقة اللعب</label>
@@ -43,91 +40,82 @@
       </div>
     </section>
 
-    <!-- ===== GAME SCREEN ===== -->
     <section id="gameScreen" class="screen hidden">
-
-      <!-- ===== GIFTS BAR ===== -->
       <div class="gifts-bar">
-        <!-- يمين الشاشة -->
         <div class="gift-column gift-right">
           <div class="gift-item" data-gift="corgi" data-picker="true">
             <div class="gift-glow"></div>
-            <img src="/images/gift-corgi.png" alt="corgi">
+            <img src="/images/gift-corgi.png" alt="corgi" onerror="this.style.display='none'">
             <span class="gift-name">+10</span>
           </div>
           <div class="gift-item" data-gift="donut" data-picker="true">
             <div class="gift-glow"></div>
-            <img src="/images/gift-donut.png" alt="donut">
+            <img src="/images/gift-donut.png" alt="donut" onerror="this.style.display='none'">
             <span class="gift-name">+1</span>
           </div>
           <div class="gift-item" data-gift="rose">
             <div class="gift-glow"></div>
-            <img src="/images/gift-rose.png" alt="rose">
+            <img src="/images/gift-rose.png" alt="rose" onerror="this.style.display='none'">
             <span class="gift-name">-1</span>
           </div>
         </div>
-
-        <!-- وسط الشاشة -->
         <div class="gift-center">
           <div class="gift-item center" data-gift="heart">
             <div class="gift-glow heart-glow"></div>
-            <img src="/images/gift-heart.png" alt="heart">
+            <img src="/images/gift-heart.png" alt="heart" onerror="this.style.display='none'">
             <span class="gift-name">درع</span>
           </div>
           <div class="gift-row-bottom">
             <div class="gift-item" data-gift="galaxy" data-picker="true">
               <div class="gift-glow"></div>
-              <img src="/images/gift-galaxy.png" alt="galaxy">
+              <img src="/images/gift-galaxy.png" alt="galaxy" onerror="this.style.display='none'">
               <span class="gift-name">+40</span>
               <span class="gift-sublabel">فريقك البطل</span>
             </div>
             <div class="gift-item" data-gift="whale" data-picker="true">
               <div class="gift-glow"></div>
-              <img src="/images/gift-whale.png" alt="whale">
+              <img src="/images/gift-whale.png" alt="whale" onerror="this.style.display='none'">
               <span class="gift-name">+100</span>
               <span class="gift-sublabel">فريقك البطل</span>
             </div>
           </div>
         </div>
-
-        <!-- يسار الشاشة -->
         <div class="gift-column gift-left">
           <div class="gift-item" data-gift="tiktok">
             <div class="gift-glow"></div>
-            <img src="/images/gift-tiktok.png" alt="tiktok">
+            <img src="/images/gift-tiktok.png" alt="tiktok" onerror="this.style.display='none'">
             <span class="gift-name">-1</span>
           </div>
           <div class="gift-item" data-gift="cat">
             <div class="gift-glow"></div>
-            <img src="/images/gift-cat.png" alt="cat">
+            <img src="/images/gift-cat.png" alt="cat" onerror="this.style.display='none'">
             <span class="gift-name">+1</span>
           </div>
           <div class="gift-item" data-gift="crown">
             <div class="gift-glow"></div>
-            <img src="/images/gift-crown.png" alt="crown">
+            <img src="/images/gift-crown.png" alt="crown" onerror="this.style.display='none'">
             <span class="gift-name">+10</span>
           </div>
         </div>
       </div>
 
-      <!-- ===== TEAM PICKER MODAL ===== -->
       <div id="teamPickerModal" class="team-picker hidden">
         <div class="picker-backdrop"></div>
         <div class="picker-content">
           <h3 id="pickerTitle">اختر الفريق</h3>
           <div class="picker-buttons">
             <button class="picker-btn picker-girls" onclick="giveGiftToTeam('girls')">
-              <div class="picker-face"><img src="/images/girl-face.png" alt="بنت"></div>
+              <div class="picker-face"><img src="/images/girl-face.png" alt="بنت" onerror="this.style.display='none'"></div>
               <span class="picker-label">بنات</span>
             </button>
             <button class="picker-btn picker-boys" onclick="giveGiftToTeam('boys')">
-              <div class="picker-face"><img src="/images/boy-face.png" alt="ولد"></div>
+              <div class="picker-face"><img src="/images/boy-face.png" alt="ولد" onerror="this.style.display='none'"></div>
               <span class="picker-label">شباب</span>
             </button>
           </div>
         </div>
       </div>
-      <!-- ===== TEAMS BATTLE AREA ===== -->
+
       <div class="battle-arena">
         <div class="team-side team-girls">
           <div class="support-boxes">
@@ -136,20 +124,18 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/girl-team.png"></div>
+          <div class="team-character"><img src="/images/girl-team.png" alt="فريق البنات" onerror="this.style.display='none'"></div>
           <div class="team-name-girls">البنات</div>
           <div class="rounds-won-container"><span class="rounds-won" id="girlsRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('girls')">✏️</button></div>
           <div class="score-boxes" id="girlsScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
           <div class="negative-counter"><button class="neg-btn" data-team="girls" data-action="minus">-</button><span id="negGirlsValue">0</span><button class="neg-btn" data-team="girls" data-action="plus">+</button></div>
           <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
         </div>
-
         <div class="vs-center">
           <div class="round-display" id="roundDisplay">الجولة 1</div>
           <div class="vs-text">VS</div>
           <div class="timer-display" id="timerDisplay">10</div>
         </div>
-
         <div class="team-side team-boys">
           <div class="support-boxes">
             <div class="captain-box" id="boysCaptainName" contenteditable="true">👑 كابتن الفريق</div>
@@ -157,7 +143,7 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/boy-team.png"></div>
+          <div class="team-character"><img src="/images/boy-team.png" alt="فريق الشباب" onerror="this.style.display='none'"></div>
           <div class="team-name-boys">الشباب</div>
           <div class="rounds-won-container"><span class="rounds-won" id="boysRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('boys')">✏️</button></div>
           <div class="score-boxes" id="boysScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
@@ -166,7 +152,6 @@
         </div>
       </div>
 
-      <!-- ===== QUESTION AREA ===== -->
       <div class="question-area">
         <div class="question-meta">
           <div class="question-counter" id="questionCounter">السؤال 1 / 10</div>
@@ -181,20 +166,16 @@
         </div>
       </div>
 
-      <!-- ===== CONTROLS (حذف زري -1) ===== -->
       <div class="game-controls">
         <button id="startTimerBtn" class="ctrl-btn primary">⏱️ ابدأ</button>
         <button id="revealBtn" class="ctrl-btn success">✅ كشف</button>
         <button id="nextBtn" class="ctrl-btn primary">➡️ التالي</button>
         <button id="girlsPlusBtn" class="ctrl-btn girls">👧 +1</button>
-        <!-- حذف girlsMinusBtn -->
         <button id="boysPlusBtn" class="ctrl-btn boys">👦 +1</button>
-        <!-- حذف boysMinusBtn -->
         <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
         <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>
 
-      <!-- زر فتح لوحة الصوت العائمة -->
       <button id="floatingSoundBtn" class="floating-sound-btn">🎛️</button>
       <div id="floatingSoundBoard" class="floating-sound-board hidden">
         <div class="sound-board-header"><h4>مؤثرات فورية</h4><button id="closeFloatingSound" class="sound-close-btn">✕</button></div>
@@ -218,19 +199,16 @@
       </div>
     </section>
 
-    <!-- ===== RESULTS SCREEN ===== -->
     <section id="resultsScreen" class="screen hidden">
       <div class="results-card">
-        <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo"></div>
+        <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo" onerror="this.style.display='none'"></div>
         <h2 class="results-title">🏆 انتهى اللايف!</h2>
         <div class="final-battle">
-          <div class="final-team"><img src="/images/girl-team.png"><span class="final-name">البنات</span><span class="final-score" id="finalGirlsScore">0</span></div>
+          <div class="final-team"><img src="/images/girl-team.png" onerror="this.style.display='none'"><span class="final-name">البنات</span><span class="final-score" id="finalGirlsScore">0</span></div>
           <div class="final-vs">VS</div>
-          <div class="final-team"><img src="/images/boy-team.png"><span class="final-name">الشباب</span><span class="final-score" id="finalBoysScore">0</span></div>
+          <div class="final-team"><img src="/images/boy-team.png" onerror="this.style.display='none'"><span class="final-name">الشباب</span><span class="final-score" id="finalBoysScore">0</span></div>
         </div>
         <div class="winner-text" id="winnerText"></div>
-
-        <!-- لوحة الصوت الكاملة -->
         <div class="sound-board">
           <h3>🎛️ لوحة المؤثرات الصوتية الكاملة</h3>
           <div class="sound-buttons-grid">
@@ -251,12 +229,10 @@
             <button onclick="playSound('fight')">⚔️ Fight</button>
           </div>
         </div>
-
         <button id="replayBtn" class="generate-btn">🔄 جولة جديدة</button>
       </div>
     </section>
 
-    <!-- ===== ROUND END OVERLAY ===== -->
     <div id="roundEndOverlay" class="round-end-overlay hidden">
       <div class="round-end-card">
         <div class="round-end-trophy">🏆</div>
@@ -271,7 +247,6 @@
       </div>
     </div>
 
-    <!-- ===== SAVED QUESTIONS MODAL ===== -->
     <div id="savedModal" class="saved-modal hidden">
       <div class="saved-modal-backdrop"></div>
       <div class="saved-modal-content">
@@ -280,15 +255,13 @@
       </div>
     </div>
 
-    <!-- ===== CELEBRATION OVERLAY ===== -->
     <div id="celebrationOverlay" class="celebration-overlay hidden">
       <div class="celebration-content">
-        <img id="celebrationImg" src="">
+        <img id="celebrationImg" src="" onerror="this.style.display='none'">
         <div id="celebrationText" class="celebration-text"></div>
       </div>
     </div>
 
-    <!-- ===== LOADING OVERLAY ===== -->
     <div id="loadingOverlay" class="loading-overlay hidden">
       <div class="loading-box"><div class="spinner"></div><p id="loadingText">جاري التجهيز...</p></div>
     </div>
