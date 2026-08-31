@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>مسابقة عالم التحديات</title>
+  <title>عالم التحديات — LIVE GAME SHOW</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="icon" href="/images/logo.png">
   <link rel="stylesheet" href="/style.css">
@@ -15,11 +15,13 @@
     <!-- ===== SETUP SCREEN ===== -->
     <section id="setupScreen" class="screen">
       <div class="setup-header">
-        <img src="/images/logo.png" class="logo-img">
+        <div class="logo-glow">
+          <img src="/images/logo.png" class="logo-img" alt="عالم التحديات">
+        </div>
         <h2 class="host-name">المضيف / مروان حكيم</h2>
         <p class="host-bio">في رحلة حماسية ومليئة بالتحديات، نلتقي اليوم لتتألق مواهب فريق البنات وفريق الشباب في لايف عالم التحديات. استعدوا لتحدي الذكاء والمعلومات!</p>
         <h1 class="main-title">مسابقة عالم التحديات</h1>
-        <p class="tagline">✨ إبداء التحدي ✨</p>
+        <div class="tagline">✨ ابدأ التحدي ✨</div>
       </div>
 
       <div class="setup-card">
@@ -38,47 +40,96 @@
             <button class="num-btn" data-action="plus">+</button>
           </div>
         </div>
-        <button id="generateBtn" class="generate-btn"><span>🤖</span> جهّز الجولة بالـ AI</button>
-        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn"><span>📚</span> إبدا الأسئلة</button>
+        <button id="generateBtn" class="generate-btn">
+          <span class="btn-icon">🤖</span>
+          <span class="btn-text">جهّز الجولة بالـ AI</span>
+        </button>
+        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn">
+          <span class="btn-icon">📚</span>
+          <span class="btn-text">ابدأ الأسئلة المحفوظة</span>
+        </button>
       </div>
     </section>
 
     <!-- ===== GAME SCREEN ===== -->
     <section id="gameScreen" class="screen hidden">
-      
-      <!-- توزيع الهدايا الجديد (يمين - وسط - يسار) -->
-      <div class="gifts-bar">
-        <!-- يمين الشاشة -->
-        <div class="gift-column">
-          <div class="gift-item" data-gift="corgi"><img src="/images/gift-corgi.png"><span class="gift-name">+10</span></div>
-          <div class="gift-item" data-gift="donut"><img src="/images/gift-donut.png"><span class="gift-name">+1</span></div>
-          <div class="gift-item" data-gift="rose"><img src="/images/gift-rose.png"><span class="gift-name">-1</span></div>
-        </div>
 
-        <!-- وسط الشاشة -->
-        <div class="gift-center">
-          <div class="gift-item center" data-gift="heart"><img src="/images/gift-heart.png"><span class="gift-name">درع</span></div>
-          <div class="gift-row-bottom">
-            <div class="gift-item" data-gift="galaxy"><img src="/images/gift-galaxy.png"><span class="gift-name">مجرة</span></div>
-            <div class="gift-item" data-gift="whale"><img src="/images/gift-whale.png"><span class="gift-name">حوت</span></div>
+      <!-- ===== GIFTS BAR (توزيع احترافي) ===== -->
+      <div class="gifts-bar">
+        <!-- يمين الشاشة: كورجي، دونات، وردة -->
+        <div class="gift-column gift-right">
+          <div class="gift-item" data-gift="corgi" data-picker="true">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-corgi.png" alt="corgi">
+            <span class="gift-name">+10</span>
+          </div>
+          <div class="gift-item" data-gift="donut" data-picker="true">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-donut.png" alt="donut">
+            <span class="gift-name">+1</span>
+          </div>
+          <div class="gift-item" data-gift="rose">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-rose.png" alt="rose">
+            <span class="gift-name">-1</span>
           </div>
         </div>
 
-        <!-- يسار الشاشة -->
-        <div class="gift-column">
-          <div class="gift-item" data-gift="tiktok"><img src="/images/gift-tiktok.png"><span class="gift-name">-1</span></div>
-          <div class="gift-item" data-gift="cat"><img src="/images/gift-cat.png"><span class="gift-name">+1</span></div>
-          <div class="gift-item" data-gift="crown"><img src="/images/gift-crown.png"><span class="gift-name">+10</span></div>
+        <!-- وسط الشاشة: القلب، المجرة، الحوت -->
+        <div class="gift-center">
+          <div class="gift-item center" data-gift="heart">
+            <div class="gift-glow heart-glow"></div>
+            <img src="/images/gift-heart.png" alt="heart">
+            <span class="gift-name">درع</span>
+          </div>
+          <div class="gift-row-bottom">
+            <div class="gift-item" data-gift="galaxy" data-picker="true">
+              <div class="gift-glow"></div>
+              <img src="/images/gift-galaxy.png" alt="galaxy">
+              <span class="gift-name">مجرة</span>
+            </div>
+            <div class="gift-item" data-gift="whale" data-picker="true">
+              <div class="gift-glow"></div>
+              <img src="/images/gift-whale.png" alt="whale">
+              <span class="gift-name">حوت</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- يسار الشاشة: تيك توك، كيتي، تاج -->
+        <div class="gift-column gift-left">
+          <div class="gift-item" data-gift="tiktok">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-tiktok.png" alt="tiktok">
+            <span class="gift-name">-1</span>
+          </div>
+          <div class="gift-item" data-gift="cat">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-cat.png" alt="cat">
+            <span class="gift-name">+1</span>
+          </div>
+          <div class="gift-item" data-gift="crown">
+            <div class="gift-glow"></div>
+            <img src="/images/gift-crown.png" alt="crown">
+            <span class="gift-name">+10</span>
+          </div>
         </div>
       </div>
 
-      <!-- نافذة اختيار الفريق (تظهر عند الحاجة) -->
+      <!-- ===== TEAM PICKER MODAL (أزرار الوجوه) ===== -->
       <div id="teamPickerModal" class="team-picker hidden">
+        <div class="picker-backdrop"></div>
         <div class="picker-content">
           <h3 id="pickerTitle">اختر الفريق</h3>
           <div class="picker-buttons">
-            <button class="picker-btn picker-girls" onclick="giveGiftToTeam('girls')"><img src="/images/girl-team.png"> بنات</button>
-            <button class="picker-btn picker-boys" onclick="giveGiftToTeam('boys')"><img src="/images/boy-team.png"> شباب</button>
+            <button class="picker-btn picker-girls" onclick="giveGiftToTeam('girls')">
+              <div class="picker-face"><img src="/images/girl-face.png" alt="بنت"></div>
+              <span class="picker-label">بنات</span>
+            </button>
+            <button class="picker-btn picker-boys" onclick="giveGiftToTeam('boys')">
+              <div class="picker-face"><img src="/images/boy-face.png" alt="ولد"></div>
+              <span class="picker-label">شباب</span>
+            </button>
           </div>
         </div>
       </div>
@@ -92,11 +143,21 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/girl-team.png"></div>
+          <div class="team-character"><img src="/images/girl-team.png" alt="فريق البنات"></div>
           <div class="team-name-girls">البنات</div>
-          <div class="rounds-won-container"><span class="rounds-won" id="girlsRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('girls')">✏️</button></div>
-          <div class="score-boxes" id="girlsScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
-          <div class="negative-counter"><button class="neg-btn" data-team="girls" data-action="minus">-</button><span id="negGirlsValue">0</span><button class="neg-btn" data-team="girls" data-action="plus">+</button></div>
+          <div class="rounds-won-container">
+            <span class="rounds-won" id="girlsRoundsWon">🏆 0</span>
+            <button class="edit-round-btn" onclick="editRounds('girls')">✏️</button>
+          </div>
+          <div class="score-boxes" id="girlsScoreBoxes">
+            <div class="score-box"></div><div class="score-box"></div><div class="score-box"></div>
+            <div class="score-box"></div><div class="score-box"></div>
+          </div>
+          <div class="negative-counter">
+            <button class="neg-btn" data-team="girls" data-action="minus">-</button>
+            <span id="negGirlsValue">0</span>
+            <button class="neg-btn" data-team="girls" data-action="plus">+</button>
+          </div>
           <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
         </div>
 
@@ -113,19 +174,31 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/boy-team.png"></div>
+          <div class="team-character"><img src="/images/boy-team.png" alt="فريق الشباب"></div>
           <div class="team-name-boys">الشباب</div>
-          <div class="rounds-won-container"><span class="rounds-won" id="boysRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('boys')">✏️</button></div>
-          <div class="score-boxes" id="boysScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
-          <div class="negative-counter"><button class="neg-btn" data-team="boys" data-action="minus">-</button><span id="negBoysValue">0</span><button class="neg-btn" data-team="boys" data-action="plus">+</button></div>
+          <div class="rounds-won-container">
+            <span class="rounds-won" id="boysRoundsWon">🏆 0</span>
+            <button class="edit-round-btn" onclick="editRounds('boys')">✏️</button>
+          </div>
+          <div class="score-boxes" id="boysScoreBoxes">
+            <div class="score-box"></div><div class="score-box"></div><div class="score-box"></div>
+            <div class="score-box"></div><div class="score-box"></div>
+          </div>
+          <div class="negative-counter">
+            <button class="neg-btn" data-team="boys" data-action="minus">-</button>
+            <span id="negBoysValue">0</span>
+            <button class="neg-btn" data-team="boys" data-action="plus">+</button>
+          </div>
           <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
         </div>
       </div>
 
       <!-- ===== QUESTION AREA ===== -->
       <div class="question-area">
-        <div class="question-counter" id="questionCounter">السؤال 1 / 10</div>
-        <div class="category-badge" id="categoryBadge">🧠 معلومات عامة</div>
+        <div class="question-meta">
+          <div class="question-counter" id="questionCounter">السؤال 1 / 10</div>
+          <div class="category-badge" id="categoryBadge">🧠 معلومات عامة</div>
+        </div>
         <h2 class="question-text" id="questionText"></h2>
         <div class="options-grid" id="optionsGrid"></div>
         <div class="answer-reveal hidden" id="answerReveal">
@@ -134,7 +207,7 @@
           <div class="explanation" id="explanationText"></div>
         </div>
       </div>
-      
+
       <!-- ===== CONTROLS ===== -->
       <div class="game-controls">
         <button id="startTimerBtn" class="ctrl-btn primary">⏱️ ابدأ</button>
@@ -147,40 +220,77 @@
         <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
         <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>
+
+      <!-- زر فتح لوحة الصوت العائمة أثناء العرض -->
+      <button id="floatingSoundBtn" class="floating-sound-btn">🎛️</button>
+      <!-- لوحة الصوت العائمة المصغرة -->
+      <div id="floatingSoundBoard" class="floating-sound-board hidden">
+        <div class="sound-board-header">
+          <h4>مؤثرات فورية</h4>
+          <button id="closeFloatingSound" class="sound-close-btn">✕</button>
+        </div>
+        <div class="sound-buttons-grid">
+          <button onclick="playSound('begin')">▶️ Begin</button>
+          <button onclick="playSound('end')">⏹️ End</button>
+          <button onclick="playSound('learn')">🎓 Learn</button>
+          <button onclick="playSound('boysMood')">😎 Boys Mood</button>
+          <button onclick="playSound('girls2captin')">👧 Girls2C</button>
+          <button onclick="playSound('captin2boys')">👦 Boys2C</button>
+          <button onclick="playSound('longway')">🛣️ Longway</button>
+          <button onclick="playSound('girlsReplayBoys')">👧 R 👦</button>
+          <button onclick="playSound('boysReplayGirls')">👦 R 👧</button>
+          <button onclick="playSound('advice')">💡 Advice</button>
+          <button onclick="playSound('teamwork')">🤝 Teamwork</button>
+          <button onclick="playSound('boom')">💥 Boom</button>
+          <button onclick="playSound('days')">📅 Days</button>
+          <button onclick="playSound('kontFeen')">🤔 Kont</button>
+          <button onclick="playSound('fight')">⚔️ Fight</button>
+        </div>
+      </div>
     </section>
 
-    <!-- ===== RESULTS SCREEN (مع لوحة الصوت) ===== -->
+    <!-- ===== RESULTS SCREEN ===== -->
     <section id="resultsScreen" class="screen hidden">
       <div class="results-card">
-        <img src="/images/logo.png" class="results-logo">
-        <h2>🏆 انتهى اللايف!</h2>
+        <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo" alt="logo"></div>
+        <h2 class="results-title">🏆 انتهى اللايف!</h2>
         <div class="final-battle">
-          <div class="final-team"><img src="/images/girl-team.png"><span class="final-name">البنات</span><span class="final-score" id="finalGirlsScore">0</span></div>
+          <div class="final-team">
+            <img src="/images/girl-team.png" alt="البنات">
+            <span class="final-name">البنات</span>
+            <span class="final-score" id="finalGirlsScore">0</span>
+          </div>
           <div class="final-vs">VS</div>
-          <div class="final-team"><img src="/images/boy-team.png"><span class="final-name">الشباب</span><span class="final-score" id="finalBoysScore">0</span></div>
+          <div class="final-team">
+            <img src="/images/boy-team.png" alt="الشباب">
+            <span class="final-name">الشباب</span>
+            <span class="final-score" id="finalBoysScore">0</span>
+          </div>
         </div>
         <div class="winner-text" id="winnerText"></div>
-        
-        <!-- لوحة المؤثرات الصوتية -->
+
+        <!-- لوحة الصوت الكاملة -->
         <div class="sound-board">
-          <h3>🎛️ لوحة المؤثرات الصوتية</h3>
+          <h3>🎛️ لوحة المؤثرات الصوتية الكاملة</h3>
           <div class="sound-buttons-grid">
+            <button onclick="playSound('begin')">▶️ Begin</button>
+            <button onclick="playSound('end')">⏹️ End</button>
             <button onclick="playSound('learn')">🎓 Learn</button>
-            <button onclick="playSound('boys-mood')">😎 Boys Mood</button>
-            <button onclick="playSound('girls2captin')">👧 كابتن 2</button>
-            <button onclick="playSound('captin2boys')">👦 كابتن 2</button>
+            <button onclick="playSound('boysMood')">😎 Boys Mood</button>
+            <button onclick="playSound('girls2captin')">👧 Girls2Captin</button>
+            <button onclick="playSound('captin2boys')">👦 Captin2Boys</button>
             <button onclick="playSound('longway')">🛣️ Longway</button>
-            <button onclick="playSound('girls-replay-boys')">👧 Replay 👦</button>
-            <button onclick="playSound('boys-replay-girls')">👦 Replay 👧</button>
+            <button onclick="playSound('girlsReplayBoys')">👧 Replay 👦</button>
+            <button onclick="playSound('boysReplayGirls')">👦 Replay 👧</button>
             <button onclick="playSound('advice')">💡 Advice</button>
             <button onclick="playSound('teamwork')">🤝 Teamwork</button>
             <button onclick="playSound('boom')">💥 Boom</button>
             <button onclick="playSound('days')">📅 Days</button>
-            <button onclick="playSound('kont-feen')">🤔 Kont Feen</button>
+            <button onclick="playSound('kontFeen')">🤔 Kont Feen</button>
             <button onclick="playSound('fight')">⚔️ Fight</button>
           </div>
         </div>
-        
+
         <button id="replayBtn" class="generate-btn">🔄 جولة جديدة</button>
       </div>
     </section>
@@ -209,8 +319,22 @@
       </div>
     </div>
 
-    <div id="celebrationOverlay" class="celebration-overlay hidden"><div class="celebration-content"><img id="celebrationImg" src=""><div id="celebrationText" class="celebration-text"></div></div></div>
-    <div id="loadingOverlay" class="loading-overlay hidden"><div class="spinner"></div><p id="loadingText">جاري التجهيز...</p></div>
+    <!-- ===== CELEBRATION OVERLAY ===== -->
+    <div id="celebrationOverlay" class="celebration-overlay hidden">
+      <div class="celebration-content">
+        <img id="celebrationImg" src="" alt="celebration">
+        <div id="celebrationText" class="celebration-text"></div>
+      </div>
+    </div>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p id="loadingText">جاري التجهيز...</p>
+      </div>
+    </div>
+
     <canvas id="confettiCanvas"></canvas>
     <button id="soundToggle" class="sound-toggle">🔊</button>
   </div>
