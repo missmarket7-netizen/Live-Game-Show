@@ -15,9 +15,7 @@
     <!-- ===== SETUP SCREEN ===== -->
     <section id="setupScreen" class="screen">
       <div class="setup-header">
-        <div class="logo-glow">
-          <img src="/images/logo.png" class="logo-img" alt="عالم التحديات">
-        </div>
+        <div class="logo-glow"><img src="/images/logo.png" class="logo-img" alt="عالم التحديات"></div>
         <h2 class="host-name">المضيف / مروان حكيم</h2>
         <p class="host-bio">في رحلة حماسية ومليئة بالتحديات، نلتقي اليوم لتتألق مواهب فريق البنات وفريق الشباب في لايف عالم التحديات. استعدوا لتحدي الذكاء والمعلومات!</p>
         <h1 class="main-title">مسابقة عالم التحديات</h1>
@@ -40,23 +38,17 @@
             <button class="num-btn" data-action="plus">+</button>
           </div>
         </div>
-        <button id="generateBtn" class="generate-btn">
-          <span class="btn-icon">🤖</span>
-          <span class="btn-text">جهّز الجولة بالـ AI</span>
-        </button>
-        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn">
-          <span class="btn-icon">📚</span>
-          <span class="btn-text">ابدأ الأسئلة المحفوظة</span>
-        </button>
+        <button id="generateBtn" class="generate-btn"><span class="btn-icon">🤖</span><span class="btn-text">جهّز الجولة بالـ AI</span></button>
+        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn"><span class="btn-icon">📚</span><span class="btn-text">ابدأ الأسئلة المحفوظة</span></button>
       </div>
     </section>
 
     <!-- ===== GAME SCREEN ===== -->
     <section id="gameScreen" class="screen hidden">
 
-      <!-- ===== GIFTS BAR (توزيع احترافي) ===== -->
+      <!-- ===== GIFTS BAR ===== -->
       <div class="gifts-bar">
-        <!-- يمين الشاشة: كورجي، دونات، وردة -->
+        <!-- يمين الشاشة -->
         <div class="gift-column gift-right">
           <div class="gift-item" data-gift="corgi" data-picker="true">
             <div class="gift-glow"></div>
@@ -75,7 +67,7 @@
           </div>
         </div>
 
-        <!-- وسط الشاشة: القلب، المجرة، الحوت -->
+        <!-- وسط الشاشة -->
         <div class="gift-center">
           <div class="gift-item center" data-gift="heart">
             <div class="gift-glow heart-glow"></div>
@@ -86,17 +78,19 @@
             <div class="gift-item" data-gift="galaxy" data-picker="true">
               <div class="gift-glow"></div>
               <img src="/images/gift-galaxy.png" alt="galaxy">
-              <span class="gift-name">مجرة</span>
+              <span class="gift-name">+40</span>
+              <span class="gift-sublabel">فريقك البطل</span>
             </div>
             <div class="gift-item" data-gift="whale" data-picker="true">
               <div class="gift-glow"></div>
               <img src="/images/gift-whale.png" alt="whale">
-              <span class="gift-name">حوت</span>
+              <span class="gift-name">+100</span>
+              <span class="gift-sublabel">فريقك البطل</span>
             </div>
           </div>
         </div>
 
-        <!-- يسار الشاشة: تيك توك، كيتي، تاج -->
+        <!-- يسار الشاشة -->
         <div class="gift-column gift-left">
           <div class="gift-item" data-gift="tiktok">
             <div class="gift-glow"></div>
@@ -116,7 +110,7 @@
         </div>
       </div>
 
-      <!-- ===== TEAM PICKER MODAL (أزرار الوجوه) ===== -->
+      <!-- ===== TEAM PICKER MODAL ===== -->
       <div id="teamPickerModal" class="team-picker hidden">
         <div class="picker-backdrop"></div>
         <div class="picker-content">
@@ -133,7 +127,6 @@
           </div>
         </div>
       </div>
-
       <!-- ===== TEAMS BATTLE AREA ===== -->
       <div class="battle-arena">
         <div class="team-side team-girls">
@@ -143,21 +136,11 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/girl-team.png" alt="فريق البنات"></div>
+          <div class="team-character"><img src="/images/girl-team.png"></div>
           <div class="team-name-girls">البنات</div>
-          <div class="rounds-won-container">
-            <span class="rounds-won" id="girlsRoundsWon">🏆 0</span>
-            <button class="edit-round-btn" onclick="editRounds('girls')">✏️</button>
-          </div>
-          <div class="score-boxes" id="girlsScoreBoxes">
-            <div class="score-box"></div><div class="score-box"></div><div class="score-box"></div>
-            <div class="score-box"></div><div class="score-box"></div>
-          </div>
-          <div class="negative-counter">
-            <button class="neg-btn" data-team="girls" data-action="minus">-</button>
-            <span id="negGirlsValue">0</span>
-            <button class="neg-btn" data-team="girls" data-action="plus">+</button>
-          </div>
+          <div class="rounds-won-container"><span class="rounds-won" id="girlsRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('girls')">✏️</button></div>
+          <div class="score-boxes" id="girlsScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
+          <div class="negative-counter"><button class="neg-btn" data-team="girls" data-action="minus">-</button><span id="negGirlsValue">0</span><button class="neg-btn" data-team="girls" data-action="plus">+</button></div>
           <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
         </div>
 
@@ -174,21 +157,11 @@
             <div class="supporter-box" contenteditable="true">داعم 2</div>
             <div class="supporter-box" contenteditable="true">داعم 3</div>
           </div>
-          <div class="team-character"><img src="/images/boy-team.png" alt="فريق الشباب"></div>
+          <div class="team-character"><img src="/images/boy-team.png"></div>
           <div class="team-name-boys">الشباب</div>
-          <div class="rounds-won-container">
-            <span class="rounds-won" id="boysRoundsWon">🏆 0</span>
-            <button class="edit-round-btn" onclick="editRounds('boys')">✏️</button>
-          </div>
-          <div class="score-boxes" id="boysScoreBoxes">
-            <div class="score-box"></div><div class="score-box"></div><div class="score-box"></div>
-            <div class="score-box"></div><div class="score-box"></div>
-          </div>
-          <div class="negative-counter">
-            <button class="neg-btn" data-team="boys" data-action="minus">-</button>
-            <span id="negBoysValue">0</span>
-            <button class="neg-btn" data-team="boys" data-action="plus">+</button>
-          </div>
+          <div class="rounds-won-container"><span class="rounds-won" id="boysRoundsWon">🏆 0</span><button class="edit-round-btn" onclick="editRounds('boys')">✏️</button></div>
+          <div class="score-boxes" id="boysScoreBoxes"><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div><div class="score-box"></div></div>
+          <div class="negative-counter"><button class="neg-btn" data-team="boys" data-action="minus">-</button><span id="negBoysValue">0</span><button class="neg-btn" data-team="boys" data-action="plus">+</button></div>
           <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
         </div>
       </div>
@@ -208,27 +181,23 @@
         </div>
       </div>
 
-      <!-- ===== CONTROLS ===== -->
+      <!-- ===== CONTROLS (حذف زري -1) ===== -->
       <div class="game-controls">
         <button id="startTimerBtn" class="ctrl-btn primary">⏱️ ابدأ</button>
         <button id="revealBtn" class="ctrl-btn success">✅ كشف</button>
         <button id="nextBtn" class="ctrl-btn primary">➡️ التالي</button>
         <button id="girlsPlusBtn" class="ctrl-btn girls">👧 +1</button>
-        <button id="girlsMinusBtn" class="ctrl-btn girls-minus">👧 -1</button>
+        <!-- حذف girlsMinusBtn -->
         <button id="boysPlusBtn" class="ctrl-btn boys">👦 +1</button>
-        <button id="boysMinusBtn" class="ctrl-btn boys-minus">👦 -1</button>
+        <!-- حذف boysMinusBtn -->
         <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
         <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>
 
-      <!-- زر فتح لوحة الصوت العائمة أثناء العرض -->
+      <!-- زر فتح لوحة الصوت العائمة -->
       <button id="floatingSoundBtn" class="floating-sound-btn">🎛️</button>
-      <!-- لوحة الصوت العائمة المصغرة -->
       <div id="floatingSoundBoard" class="floating-sound-board hidden">
-        <div class="sound-board-header">
-          <h4>مؤثرات فورية</h4>
-          <button id="closeFloatingSound" class="sound-close-btn">✕</button>
-        </div>
+        <div class="sound-board-header"><h4>مؤثرات فورية</h4><button id="closeFloatingSound" class="sound-close-btn">✕</button></div>
         <div class="sound-buttons-grid">
           <button onclick="playSound('begin')">▶️ Begin</button>
           <button onclick="playSound('end')">⏹️ End</button>
@@ -252,20 +221,12 @@
     <!-- ===== RESULTS SCREEN ===== -->
     <section id="resultsScreen" class="screen hidden">
       <div class="results-card">
-        <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo" alt="logo"></div>
+        <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo"></div>
         <h2 class="results-title">🏆 انتهى اللايف!</h2>
         <div class="final-battle">
-          <div class="final-team">
-            <img src="/images/girl-team.png" alt="البنات">
-            <span class="final-name">البنات</span>
-            <span class="final-score" id="finalGirlsScore">0</span>
-          </div>
+          <div class="final-team"><img src="/images/girl-team.png"><span class="final-name">البنات</span><span class="final-score" id="finalGirlsScore">0</span></div>
           <div class="final-vs">VS</div>
-          <div class="final-team">
-            <img src="/images/boy-team.png" alt="الشباب">
-            <span class="final-name">الشباب</span>
-            <span class="final-score" id="finalBoysScore">0</span>
-          </div>
+          <div class="final-team"><img src="/images/boy-team.png"><span class="final-name">الشباب</span><span class="final-score" id="finalBoysScore">0</span></div>
         </div>
         <div class="winner-text" id="winnerText"></div>
 
@@ -322,17 +283,14 @@
     <!-- ===== CELEBRATION OVERLAY ===== -->
     <div id="celebrationOverlay" class="celebration-overlay hidden">
       <div class="celebration-content">
-        <img id="celebrationImg" src="" alt="celebration">
+        <img id="celebrationImg" src="">
         <div id="celebrationText" class="celebration-text"></div>
       </div>
     </div>
 
     <!-- ===== LOADING OVERLAY ===== -->
     <div id="loadingOverlay" class="loading-overlay hidden">
-      <div class="loading-box">
-        <div class="spinner"></div>
-        <p id="loadingText">جاري التجهيز...</p>
-      </div>
+      <div class="loading-box"><div class="spinner"></div><p id="loadingText">جاري التجهيز...</p></div>
     </div>
 
     <canvas id="confettiCanvas"></canvas>
