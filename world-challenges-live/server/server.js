@@ -156,43 +156,48 @@ async function callWithFallback(prompt, count) {
   }
   throw new Error(`فشل الجميع: ${errors.join(" | ")}`);
 }
-
-// ─── Zero API: جلب أسئلة خليط من البنك (بدون AI تلقائي) ───
+// ─── API: بنك + توليد تلقائي (الإصلاح الشامل) ───
 app.post("/api/questions", async (req, res) => {
   try {
-    const { count = 10, avoid = [], generateNew = false } = req.body;
+    const { count = 10, avoid = [] } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
     const avoidSet = new Set((Array.isArray(avoid) ? avoid : []).map(q => String(q)));
 
+    // 1. جلب الأسئلة من البنك الكبير + المحفوظ من AI
     let allBank = [...loadBankQuestions(), ...loadGeneratedQuestions()];
     let filtered = allBank.filter(q => !avoidSet.has(q.question));
     let selected = shuffleArray(filtered).slice(0, n);
-    console.log(`✅ تم جلب ${selected.length} سؤال من البنك (Zero API).`);
+    
+    console.log(`✅ تم جلب ${selected.length} سؤال من البنك.`);
 
-    // توليد يدوي إذا طلبه المضيف
-    if (generateNew && selected.length < n) {
+    // 2. إذا لم تكفِ الكمية، قم بالتوليد الفوري بالـ AI وحفظه (يعمل زر التوليد!)
+    if (selected.length < n) {
       const missingCount = n - selected.length;
-      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة جديدة تماماً.`;
+      console.log(`⚠️ البنك لم يكفِ، جاري توليد ${missingCount} سؤال من AI...`);
+      const prompt = `انشئ بالضطف ${missingCount} اسئلة متنوعة جديدة تماماً.`;
       try {
         const aiResult = await callWithFallback(prompt, missingCount);
         saveGeneratedQuestions(aiResult.questions);
         selected = [...selected, ...aiResult.questions];
-      } catch (e) { console.log("فشل التوليد اليدوي."); }
+        console.log(`🎉 تم توليد ${aiResult.questions.length} سؤال وحفظها.`);
+      } catch (e) {
+        console.log("فشل AI، استخدام الاحتياطي.");
+        selected = [...selected, ...getFallbackQuestions("معلومات عامة", missingCount, "سهل")];
+      }
     }
 
-    // حالات طوارئ
     if (selected.length === 0) {
       selected = getFallbackQuestions("معلومات عامة", n, "سهل");
     }
 
     const enriched = selected.map((q, i) => ({ ...q, id: `q_${Date.now()}_${i}`, source: q.source || "bank" }));
-    return res.json({ questions: enriched, mode: "zero-api" });
+    return res.json({ questions: enriched, mode: "bank-ai" });
   } catch (err) {
     return res.status(500).json({ error: "فشل في جلب الأسئلة", details: err.message });
   }
 });
 
-// مسار لتوليد أسئلة يدوياً وملء البنك
+// مسار توليد أسئلة يدوياً (اختياري، يمكن استخدامه لملء البنك مسبقاً)
 app.post("/api/generate-new", async (req, res) => {
   try {
     const { count = 10 } = req.body;
