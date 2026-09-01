@@ -6,9 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
-app.use(express.json({ limit: "1mb" }));
+app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
@@ -30,7 +29,6 @@ function loadBankQuestions() {
   }
   return all;
 }
-
 function loadGeneratedQuestions() {
   try {
     const filePath = path.join(__dirname, "questions", "generated_questions.json");
@@ -38,7 +36,6 @@ function loadGeneratedQuestions() {
   } catch (e) {}
   return [];
 }
-
 function saveGeneratedQuestions(questions) {
   try {
     const existing = loadGeneratedQuestions();
@@ -58,7 +55,6 @@ function buildSystemPrompt(count) {
 5. لا تكرر الاسئلة
 مثال: [{"category":"معلومات عامة","difficulty":"سهل","question":"ما هي عاصمة السعودية؟","options":["جدة","الرياض","مكة","الدمام"],"correctIndex":1,"explanation":"الرياض"}]`;
 }
-
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== "string") throw new Error("الرد فارغ");
   let cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
@@ -128,7 +124,8 @@ function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض" },
     { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["2", "3", "4", "5"], correctIndex: 0, explanation: "ركعتان" },
-    { category: "جغرافيا", difficulty: "سهل", question: "ما هو أطول نهر في العالم؟", options: ["الفرات", "النيل", "دجلة", "الأمازون"], correctIndex: 1, explanation: "النيل" }
+    { category: "جغرافيا", difficulty: "سهل", question: "ما هو أطول نهر في العالم؟", options: ["الفرات", "النيل", "دجلة", "الأمازون"], correctIndex: 1, explanation: "النيل" },
+    { category: "معلومات عامة", difficulty: "متوسط", question: "ما عاصمة اليابان؟", options: ["أوساكا", "طوكيو", "كيوتو", "هيروشيما"], correctIndex: 1, explanation: "طوكيو" }
   ];
   let filtered = allQuestions.filter(q => q.difficulty === difficulty);
   if (filtered.length === 0) filtered = allQuestions;
@@ -156,69 +153,37 @@ async function callWithFallback(prompt, count) {
   }
   throw new Error(`فشل الجميع: ${errors.join(" | ")}`);
 }
-// ─── API: بنك + توليد تلقائي (الإصلاح الشامل) ───
 app.post("/api/questions", async (req, res) => {
   try {
-    const { count = 10, avoid = [] } = req.body;
+    const { count = 10, avoid = [], category = "اختيارات متنوعة", difficulty = "متوسط" } = req.body;
     const n = Math.min(Math.max(Number(count) || 10, 1), 50);
     const avoidSet = new Set((Array.isArray(avoid) ? avoid : []).map(q => String(q)));
 
-    // 1. جلب الأسئلة من البنك الكبير + المحفوظ من AI
     let allBank = [...loadBankQuestions(), ...loadGeneratedQuestions()];
     let filtered = allBank.filter(q => !avoidSet.has(q.question));
     let selected = shuffleArray(filtered).slice(0, n);
-    
-    console.log(`✅ تم جلب ${selected.length} سؤال من البنك.`);
 
-    // 2. إذا لم تكفِ الكمية، قم بالتوليد الفوري بالـ AI وحفظه (يعمل زر التوليد!)
     if (selected.length < n) {
       const missingCount = n - selected.length;
-      console.log(`⚠️ البنك لم يكفِ، جاري توليد ${missingCount} سؤال من AI...`);
-      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة جديدة تماماً.`; // تم تصحيح "بالضطف" إلى "بالضبط"
+      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة جديدة تماماً.`;
       try {
         const aiResult = await callWithFallback(prompt, missingCount);
         saveGeneratedQuestions(aiResult.questions);
         selected = [...selected, ...aiResult.questions];
-        console.log(`🎉 تم توليد ${aiResult.questions.length} سؤال وحفظها.`);
-      } catch (e) {
-        console.log("فشل AI، استخدام الاحتياطي.");
-        selected = [...selected, ...getFallbackQuestions("معلومات عامة", missingCount, "سهل")];
-      }
+      } catch (e) { selected = [...selected, ...getFallbackQuestions(category, missingCount, difficulty)]; }
     }
 
-    if (selected.length === 0) {
-      selected = getFallbackQuestions("معلومات عامة", n, "سهل");
-    }
+    if (selected.length === 0) selected = getFallbackQuestions("معلومات عامة", n, "سهل");
 
     const enriched = selected.map((q, i) => ({ ...q, id: `q_${Date.now()}_${i}`, source: q.source || "bank" }));
-    return res.json({ questions: enriched, mode: "bank-ai" });
+    return res.json({ questions: enriched, meta: { source: "bank-ai" } });
   } catch (err) {
     return res.status(500).json({ error: "فشل في جلب الأسئلة", details: err.message });
   }
 });
 
-// مسار توليد أسئلة يدوياً (اختياري، يمكن استخدامه لملء البنك مسبقاً)
-app.post("/api/generate-new", async (req, res) => {
-  try {
-    const { count = 10 } = req.body;
-    const prompt = `انشئ بالضبط ${count} اسئلة متنوعة جديدة تماماً.`;
-    const aiResult = await callWithFallback(prompt, count);
-    saveGeneratedQuestions(aiResult.questions);
-    res.json({ success: true, count: aiResult.questions.length });
-  } catch (err) {
-    res.status(500).json({ error: "فشل التوليد", details: err.message });
-  }
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok", bankCount: loadBankQuestions().length + loadGeneratedQuestions().length });
-});
-
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
-});
+app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: loadBankQuestions().length + loadGeneratedQuestions().length }));
+app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`);
-});
+app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`));
