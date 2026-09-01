@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
@@ -14,13 +15,19 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
+// (نقطة 10) دعم الحفظ الدائم عبر Volume إذا أُضيف لاحقاً، وإلا استخدم مجلد المشروع
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH 
+  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions") 
+  : path.join(__dirname, "questions");
+
 function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
+// تعريف واحد فقط للدوال (يتم استدعاؤها مرة واحدة فقط)
 function loadBankQuestions() {
   let all = [];
   for (let i = 1; i <= 5; i++) {
     try {
-      const filePath = path.join(__dirname, "questions", `db${i}.json`);
+      const filePath = path.join(DATA_DIR, `db${i}.json`);
       if (fs.existsSync(filePath)) {
         const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
         if (Array.isArray(data)) all = all.concat(data);
@@ -29,19 +36,22 @@ function loadBankQuestions() {
   }
   return all;
 }
+
 function loadGeneratedQuestions() {
   try {
-    const filePath = path.join(__dirname, "questions", "generated_questions.json");
+    const filePath = path.join(DATA_DIR, "generated_questions.json");
     if (fs.existsSync(filePath)) return JSON.parse(fs.readFileSync(filePath, "utf8"));
   } catch (e) {}
   return [];
 }
+
 function saveGeneratedQuestions(questions) {
   try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
     const existing = loadGeneratedQuestions();
     const merged = [...questions, ...existing];
     const limited = merged.slice(0, 5000);
-    fs.writeFileSync(path.join(__dirname, "questions", "generated_questions.json"), JSON.stringify(limited, null, 2), "utf8");
+    fs.writeFileSync(path.join(DATA_DIR, "generated_questions.json"), JSON.stringify(limited, null, 2), "utf8");
   } catch (e) { console.error("خطأ في الحفظ:", e.message); }
 }
 
@@ -55,6 +65,7 @@ function buildSystemPrompt(count) {
 5. لا تكرر الاسئلة
 مثال: [{"category":"معلومات عامة","difficulty":"سهل","question":"ما هي عاصمة السعودية؟","options":["جدة","الرياض","مكة","الدمام"],"correctIndex":1,"explanation":"الرياض"}]`;
 }
+
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== "string") throw new Error("الرد فارغ");
   let cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, "").trim();
@@ -65,7 +76,6 @@ function extractAndParseJSON(rawText) {
   try { return JSON.parse(cleaned); } catch (_) {}
   throw new Error(`تعذر تحليل JSON: ${rawText.slice(0, 200)}`);
 }
-
 const PROVIDERS = [
   {
     name: "gemini", key: GEMINI_API_KEY,
@@ -120,6 +130,7 @@ const PROVIDERS = [
     }
   }
 ];
+
 function getFallbackQuestions(category, count, difficulty) {
   const allQuestions = [
     { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض" },
@@ -187,33 +198,3 @@ app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`));
-// تحديث مسار الحفظ ليدعم الحجم الدائم (Volume) إذا تم إضافته في Railway
-const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'questions') : path.join(__dirname, 'questions');
-const GENERATED_FILE = path.join(DATA_DIR, 'generated_questions.json');
-const BANK_FILES = [1, 2, 3, 4, 5].map(i => path.join(DATA_DIR, `db${i}.json`));
-// إعادة تعريف دوال القراءة والكتابة
-function loadBankQuestions() {
-  let all = [];
-  for (let i = 1; i <= 5; i++) {
-    try {
-      const filePath = path.join(DATA_DIR, `db${i}.json`);
-      if (fs.existsSync(filePath)) { const data = JSON.parse(fs.readFileSync(filePath, "utf8")); if (Array.isArray(data)) all = all.concat(data); }
-    } catch (e) {}
-  }
-  return all;
-}
-function loadGeneratedQuestions() {
-  try {
-    if (fs.existsSync(GENERATED_FILE)) return JSON.parse(fs.readFileSync(GENERATED_FILE, "utf8"));
-  } catch (e) {}
-  return [];
-}
-function saveGeneratedQuestions(questions) {
-  try {
-    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
-    const existing = loadGeneratedQuestions();
-    const merged = [...questions, ...existing];
-    const limited = merged.slice(0, 5000);
-    fs.writeFileSync(GENERATED_FILE, JSON.stringify(limited, null, 2), "utf8");
-  } catch (e) { console.error("خطأ في الحفظ:", e.message); }
-}
