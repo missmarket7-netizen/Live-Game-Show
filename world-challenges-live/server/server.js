@@ -174,7 +174,7 @@ app.post("/api/questions", async (req, res) => {
     if (selected.length < n) {
       const missingCount = n - selected.length;
       console.log(`⚠️ البنك لم يكفِ، جاري توليد ${missingCount} سؤال من AI...`);
-      const prompt = `انشئ بالضطف ${missingCount} اسئلة متنوعة جديدة تماماً.`;
+      const prompt = `انشئ بالضبط ${missingCount} اسئلة متنوعة جديدة تماماً.`; // تم تصحيح "بالضطف" إلى "بالضبط"
       try {
         const aiResult = await callWithFallback(prompt, missingCount);
         saveGeneratedQuestions(aiResult.questions);

@@ -24,7 +24,7 @@
           <label>طريقة اللعب</label>
           <div class="mode-tabs">
             <button class="tab active" data-mode="single">🎯 جولة واحدة</button>
-            <button class="tab" data-mode="fullshow">🎬 لايف كامل</button>
+            <button class="tab" data-mode="fullshow">🎬 مسابقة</button> <!-- 1: استبدال لايف كامل بمسابقة -->
           </div>
         </div>
         <div class="form-group">
@@ -35,12 +35,13 @@
             <button class="num-btn" data-action="plus">+</button>
           </div>
         </div>
-        <button id="generateBtn" class="generate-btn"><span class="btn-icon">🤖</span><span class="btn-text">جهّز الجولة بالـ AI</span></button>
-        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn"><span class="btn-icon">📚</span><span class="btn-text">ابدأ الأسئلة المحفوظة</span></button>
+        <button id="generateBtn" class="generate-btn"><span class="btn-icon">🤖</span><span class="btn-text">أسئلة AI</span></button> <!-- 2: استبدال توليد أسئلة AI بأسئلة AI -->
+        <button id="savedQuestionsBtn" class="generate-btn saved-questions-btn"><span class="btn-icon">📚</span><span class="btn-text">ابدأ الأسئلة</span></button> <!-- 3: استبدال محفوظة بابدأ الأسئلة -->
       </div>
     </section>
 
     <section id="gameScreen" class="screen hidden">
+      <!-- الهدايا -->
       <div class="gifts-bar">
         <div class="gift-column gift-right">
           <div class="gift-item" data-gift="corgi" data-picker="true">
@@ -99,6 +100,7 @@
         </div>
       </div>
 
+      <!-- نافذة اختيار الفريق -->
       <div id="teamPickerModal" class="team-picker hidden">
         <div class="picker-backdrop"></div>
         <div class="picker-content">
@@ -115,13 +117,30 @@
           </div>
         </div>
       </div>
+
+      <!-- نافذة إضافة داعم -->
+      <div id="supporterModal" class="team-picker hidden">
+        <div class="picker-backdrop"></div>
+        <div class="picker-content">
+          <h3>💬 إضافة داعم</h3>
+          <input type="text" id="supporterName" placeholder="اكتب اسم الداعم..." class="supporter-input">
+          <div class="modal-actions">
+            <button class="modal-btn confirm" onclick="saveSupporter()">✔️ موافق</button>
+            <button class="modal-btn cancel" onclick="closeSupporterModal()">✖️ إلغاء</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- الفرق -->
       <div class="battle-arena">
         <div class="team-side team-girls">
           <div class="support-boxes">
-            <div class="captain-box" id="girlsCaptainName" contenteditable="true">👑 كابتن الفريق</div>
-            <div class="supporter-box" contenteditable="true">داعم 1</div>
-            <div class="supporter-box" contenteditable="true">داعم 2</div>
-            <div class="supporter-box" contenteditable="true">داعم 3</div>
+            <!-- الكابتن ثابت لا يتغير -->
+            <div class="captain-box">👑 كابتن الفريق</div>
+            <!-- الداعم يفتح نافذة -->
+            <div class="supporter-box" onclick="openSupporterModal('girls')">داعم 1</div>
+            <div class="supporter-box" onclick="openSupporterModal('girls')">داعم 2</div>
+            <div class="supporter-box" onclick="openSupporterModal('girls')">داعم 3</div>
           </div>
           <div class="team-character"><img src="/images/girl-team.png" alt="فريق البنات" onerror="this.style.display='none'"></div>
           <div class="team-name-girls">البنات</div>
@@ -130,17 +149,19 @@
           <div class="negative-counter"><button class="neg-btn" data-team="girls" data-action="minus">-</button><span id="negGirlsValue">0</span><button class="neg-btn" data-team="girls" data-action="plus">+</button></div>
           <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
         </div>
+
         <div class="vs-center">
           <div class="round-display" id="roundDisplay">الجولة 1</div>
           <div class="vs-text">VS</div>
           <div class="timer-display" id="timerDisplay">10</div>
         </div>
+
         <div class="team-side team-boys">
           <div class="support-boxes">
-            <div class="captain-box" id="boysCaptainName" contenteditable="true">👑 كابتن الفريق</div>
-            <div class="supporter-box" contenteditable="true">داعم 1</div>
-            <div class="supporter-box" contenteditable="true">داعم 2</div>
-            <div class="supporter-box" contenteditable="true">داعم 3</div>
+            <div class="captain-box">👑 كابتن الفريق</div>
+            <div class="supporter-box" onclick="openSupporterModal('boys')">داعم 1</div>
+            <div class="supporter-box" onclick="openSupporterModal('boys')">داعم 2</div>
+            <div class="supporter-box" onclick="openSupporterModal('boys')">داعم 3</div>
           </div>
           <div class="team-character"><img src="/images/boy-team.png" alt="فريق الشباب" onerror="this.style.display='none'"></div>
           <div class="team-name-boys">الشباب</div>
@@ -151,6 +172,7 @@
         </div>
       </div>
 
+      <!-- الأسئلة -->
       <div class="question-area">
         <div class="question-meta">
           <div class="question-counter" id="questionCounter">السؤال 1 / 10</div>
@@ -165,6 +187,7 @@
         </div>
       </div>
 
+      <!-- أزرار التحكم (مع زر النهاية الجديد) -->
       <div class="game-controls">
         <button id="startTimerBtn" class="ctrl-btn primary">⏱️ ابدأ</button>
         <button id="revealBtn" class="ctrl-btn success">✅ كشف</button>
@@ -172,9 +195,11 @@
         <button id="girlsPlusBtn" class="ctrl-btn girls">👧 +1</button>
         <button id="boysPlusBtn" class="ctrl-btn boys">👦 +1</button>
         <button id="nextRoundBtn" class="ctrl-btn danger">🏁 الجولة التالية</button>
+        <button id="endGameBtn" class="ctrl-btn end-game">🏆 النهاية</button> <!-- 6: زر النهاية -->
         <button id="newRoundBtn" class="ctrl-btn ghost">🔄 إعادة</button>
       </div>
 
+      <!-- لوحة الصوت -->
       <button id="floatingSoundBtn" class="floating-sound-btn">🎛️</button>
       <div id="floatingSoundBoard" class="floating-sound-board hidden">
         <div class="sound-board-header"><h4>مؤثرات فورية</h4><button id="closeFloatingSound" class="sound-close-btn">✕</button></div>
@@ -198,16 +223,23 @@
       </div>
     </section>
 
+    <!-- شاشة النتائج (محدثة) -->
     <section id="resultsScreen" class="screen hidden">
       <div class="results-card">
         <div class="results-logo-wrap"><img src="/images/logo.png" class="results-logo" onerror="this.style.display='none'"></div>
-        <h2 class="results-title">🏆 انتهى اللايف!</h2>
-        <div class="final-battle">
-          <div class="final-team"><img src="/images/girl-team.png" onerror="this.style.display='none'"><span class="final-name">البنات</span><span class="final-score" id="finalGirlsScore">0</span></div>
+        <h2 class="results-title">🏆 النتيجة النهائية</h2>
+        <div class="final-winner" id="finalWinnerText"></div>
+        <div class="final-teams">
+          <div class="final-team">
+            <span class="final-name">البنات</span>
+            <span class="final-score" id="finalGirlsScore">0</span>
+          </div>
           <div class="final-vs">VS</div>
-          <div class="final-team"><img src="/images/boy-team.png" onerror="this.style.display='none'"><span class="final-name">الشباب</span><span class="final-score" id="finalBoysScore">0</span></div>
+          <div class="final-team">
+            <span class="final-name">الشباب</span>
+            <span class="final-score" id="finalBoysScore">0</span>
+          </div>
         </div>
-        <div class="winner-text" id="winnerText"></div>
         <div class="sound-board">
           <h3>🎛️ لوحة المؤثرات الصوتية الكاملة</h3>
           <div class="sound-buttons-grid">
@@ -232,20 +264,27 @@
       </div>
     </section>
 
+    <!-- نافذة نتيجة الجولة (محدثة لتعرض التهنئة و VS والنتيجة) -->
     <div id="roundEndOverlay" class="round-end-overlay hidden">
       <div class="round-end-card">
         <div class="round-end-trophy">🏆</div>
-        <div class="round-end-number" id="roundEndNumber">الجولة 1</div>
-        <div class="round-end-winner" id="roundEndWinner">🎉 مبروك للفريق الفائز!</div>
-        <div class="round-end-scores">
-          <div class="round-end-team"><span>👦 الشباب</span><span id="roundEndBoysScore">0</span></div>
-          <div class="round-end-vs">VS</div>
-          <div class="round-end-team"><span>👧 البنات</span><span id="roundEndGirlsScore">0</span></div>
+        <div class="round-end-winner" id="roundEndWinner"></div>
+        <div class="final-teams">
+          <div class="final-team">
+            <span class="final-name">البنات</span>
+            <span class="final-score" id="roundEndGirlsScore">0</span>
+          </div>
+          <div class="final-vs">VS</div>
+          <div class="final-team">
+            <span class="final-name">الشباب</span>
+            <span class="final-score" id="roundEndBoysScore">0</span>
+          </div>
         </div>
         <button id="roundEndContinueBtn" class="generate-btn">متابعة</button>
       </div>
     </div>
 
+    <!-- النوافذ الأخرى -->
     <div id="savedModal" class="saved-modal hidden">
       <div class="saved-modal-backdrop"></div>
       <div class="saved-modal-content">
