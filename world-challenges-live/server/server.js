@@ -187,3 +187,33 @@ app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length + loadGeneratedQuestions().length} سؤال`));
+// تحديث مسار الحفظ ليدعم الحجم الدائم (Volume) إذا تم إضافته في Railway
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'questions') : path.join(__dirname, 'questions');
+const GENERATED_FILE = path.join(DATA_DIR, 'generated_questions.json');
+const BANK_FILES = [1, 2, 3, 4, 5].map(i => path.join(DATA_DIR, `db${i}.json`));
+// إعادة تعريف دوال القراءة والكتابة
+function loadBankQuestions() {
+  let all = [];
+  for (let i = 1; i <= 5; i++) {
+    try {
+      const filePath = path.join(DATA_DIR, `db${i}.json`);
+      if (fs.existsSync(filePath)) { const data = JSON.parse(fs.readFileSync(filePath, "utf8")); if (Array.isArray(data)) all = all.concat(data); }
+    } catch (e) {}
+  }
+  return all;
+}
+function loadGeneratedQuestions() {
+  try {
+    if (fs.existsSync(GENERATED_FILE)) return JSON.parse(fs.readFileSync(GENERATED_FILE, "utf8"));
+  } catch (e) {}
+  return [];
+}
+function saveGeneratedQuestions(questions) {
+  try {
+    if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
+    const existing = loadGeneratedQuestions();
+    const merged = [...questions, ...existing];
+    const limited = merged.slice(0, 5000);
+    fs.writeFileSync(GENERATED_FILE, JSON.stringify(limited, null, 2), "utf8");
+  } catch (e) { console.error("خطأ في الحفظ:", e.message); }
+}
