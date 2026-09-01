@@ -5,13 +5,12 @@ const state = {
   soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
   fullShowDuration: 120, shieldTeam: null, tempSupporterTeam: null
 };
-const SAVED_KEY = 'lgs_saved_sets_v4';
-const HISTORY_KEY = 'lgs_question_history_v4';
-const SOUND_KEY = 'lgs_sound_v4';
+const SAVED_KEY = 'lgs_saved_sets_v5';
+const HISTORY_KEY = 'lgs_question_history_v5';
+const SOUND_KEY = 'lgs_sound_v5';
 const $ = (id) => document.getElementById(id);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
-/* مطابقة أسماء الأصوات مع المستودع */
 const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
   'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
@@ -27,11 +26,10 @@ const audioCache = new Map();
 
 function preloadSounds() {
   Object.entries(soundFiles).forEach(([key, names]) => {
-    // دعم تعدد الأسماء للبحث عن الملف
     const candidates = names.map(name => `/sounds/${name}.mp3`);
     const audio = new Audio();
     audio.preload = 'none';
-    audio.src = candidates[0]; // سيتم تجربة الاسم الأول ثم البدائل عبر آلية error
+    audio.src = candidates[0];
     audio.dataset.candidates = JSON.stringify(candidates);
     audioCache.set(key, audio);
   });
@@ -54,8 +52,6 @@ function playSound(key, volume = .55) {
   if (!state.soundEnabled) return;
   const audio = audioCache.get(key);
   if (!audio) return;
-  
-  // منطق تجربة الأسماء البديلة
   const candidates = JSON.parse(audio.dataset.candidates || '[]');
   let attempt = 0;
   const tryPlay = () => {
@@ -88,13 +84,11 @@ function updateScores() {
   $('girlsProgress').style.width = `${Math.min(100, state.girlsScore * 10)}%`; $('boysProgress').style.width = `${Math.min(100, state.boysScore * 10)}%`;
   $('girlsRoundsWon').textContent = `${state.girlsRounds} جولات`; $('boysRoundsWon').textContent = `${state.boysRounds} جولات`;
   $('roundResults').textContent = `${state.girlsRounds} - ${state.boysRounds}`;
-  // تحديث إظهار الدرع
   $('teamShieldGirls').classList.toggle('hidden', state.shieldTeam !== 'girls');
   $('teamShieldBoys').classList.toggle('hidden', state.shieldTeam !== 'boys');
 }
 function updateTimer() { $('timerDisplay').textContent = state.timerValue; $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0); }
 function stopTimer() { clearInterval(state.timerInterval); state.timerInterval = null; state.isTimerRunning = false; $('startTimerBtn').disabled = false; }
-/* نقطة 8: الصوت يعمل فقط عند الضغط */
 function startTimer() {
   if (state.isTimerRunning || state.isRevealed) return;
   state.isTimerRunning = true; $('startTimerBtn').disabled = true; state.timerValue = state.timerDuration; updateTimer(); playSound('tick', .25);
@@ -122,7 +116,6 @@ function renderQuestion() {
   });
   $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
   $('activeGiftBanner').classList.add('hidden');
-  /* نقطة 8: إزالة الصوت التلقائي من renderQuestion - يعمل فقط عند الضغط */
 }
 function revealAnswer() {
   if (state.isRevealed) return;
@@ -139,7 +132,6 @@ function selectAnswer(index) {
   playSound(index === question.correctIndex ? 'correct' : 'wrong', .5); revealAnswer();
 }
 
-/* نقطة 3: منطق الهدايا مع الدرع */
 function applyPoint(team, points = 1) {
   if (team === 'girls') {
     if (state.girlsScore < 0) state.girlsScore = Math.min(0, state.girlsScore + points);
@@ -151,11 +143,7 @@ function applyPoint(team, points = 1) {
   updateScores(); playSound('correct', .28);
 }
 function subtractPoint(team) {
-  // الدرع يحمي من الخصم
-  if (state.shieldTeam === team) {
-    playSound('gift-heart', .4);
-    return;
-  }
+  if (state.shieldTeam === team) { playSound('gift-heart', .4); return; }
   if (team === 'girls') state.girlsScore = Math.max(-5, state.girlsScore - 1);
   else state.boysScore = Math.max(-5, state.boysScore - 1);
   updateScores(); playSound('wrong', .25);
@@ -170,8 +158,6 @@ function selectGift(gift) {
 }
 function resolveGift(team) {
   const gift = state.activeGift; if (!gift) return;
-
-  /* نقطة 3: هدية القلب (درع) */
   if (gift === 'heart') {
     state.shieldTeam = team;
     if (team === 'girls') { state.girlsScore = Math.max(0, state.girlsScore); }
@@ -182,8 +168,6 @@ function resolveGift(team) {
     $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
     updateScores(); return;
   }
-
-  /* نقطة 3: الهدايا التي تضيف جولات وتصفّر النقاط */
   if (gift === 'galaxy' || gift === 'whale' || gift === 'donut' || gift === 'corgi' || gift === 'cat' || gift === 'crown') {
     let roundsToAdd = 0;
     if (gift === 'galaxy') roundsToAdd = 50;
@@ -208,27 +192,18 @@ function resolveGift(team) {
     $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
     updateScores(); return;
   }
-
-  /* نقطة 3: الهدايا المباشرة (خصم) */
   if (gift === 'rose') { subtractPoint('boys'); playSound('gift-rose', .6); }
   else if (gift === 'tiktok') { subtractPoint('girls'); playSound('gift-tiktok', .6); }
   state.activeGift = null; $('activeGiftBanner').classList.add('hidden');
   $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
 }
-
-/* نقطة 1: تسجيل الكابتن */
 function confirmCaptain(team) {
   const inputs = document.querySelectorAll(`#${team}Captain1, #${team}Captain2, #${team}Captain3`);
   const captains = Array.from(inputs).map(input => input.value.trim()).filter(name => name);
   if (captains.length === 0) { showToast('اكتب اسم الكابتن أولاً', 'CAPTAIN ERROR'); return; }
-  
-  if (team === 'girls') playSound('girls-captin', .7);
-  else playSound('boys-captin', .7);
-  
+  if (team === 'girls') playSound('girls-captin', .7); else playSound('boys-captin', .7);
   captains.forEach((captain, index) => {
-    setTimeout(() => {
-      showToast(`${captain} دخلت المواجهة`, `${team === 'girls' ? 'GIRLS' : 'BOYS'} CAPTAIN`);
-    }, index * 1000);
+    setTimeout(() => { showToast(`${captain} دخلت المواجهة`, `${team === 'girls' ? 'GIRLS' : 'BOYS'} CAPTAIN`); }, index * 1000);
   });
 }
 function finishRound() {
@@ -300,26 +275,19 @@ function useSavedSet(id) {
 }
 function deleteSavedSet(id) { localStorage.setItem(SAVED_KEY, JSON.stringify(getSavedSets().filter((entry) => entry.id !== id))); renderSavedList(); }
 
-/* نقطة 2: إخفاء الزر في البداية وإظهاره في اللعبة/النتائج */
+// نقطة 2: ربط أزرار القائمة الصوتية
 function initFloatingSound() {
   const setupScreen = $('setupScreen');
   const gameScreen = $('gameScreen');
   const resultsScreen = $('resultsScreen');
-  
-  // الأزرار داخل كل شاشة
+
   const gameBtn = $('floatingSoundBtn');
   const gameBoard = $('floatingSoundBoard');
+  if (gameBtn) { gameBtn.addEventListener('click', () => gameBoard.classList.toggle('hidden')); if ($('closeFloatingSound')) $('closeFloatingSound').addEventListener('click', () => gameBoard.classList.add('hidden')); }
+
   const resultsBtn = $('floatingSoundBtnResults');
   const resultsBoard = $('floatingSoundBoardResults');
-  
-  if (gameBtn) {
-    gameBtn.addEventListener('click', () => gameBoard.classList.toggle('hidden'));
-    if ($('closeFloatingSound')) $('closeFloatingSound').addEventListener('click', () => gameBoard.classList.add('hidden'));
-  }
-  if (resultsBtn) {
-    resultsBtn.addEventListener('click', () => resultsBoard.classList.toggle('hidden'));
-    if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => resultsBoard.classList.add('hidden'));
-  }
+  if (resultsBtn) { resultsBtn.addEventListener('click', () => resultsBoard.classList.toggle('hidden')); if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => resultsBoard.classList.add('hidden')); }
 }
 
 function initSetup() {

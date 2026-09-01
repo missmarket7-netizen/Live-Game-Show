@@ -16,7 +16,6 @@
       <div class="ambient ambient-two"></div>
       <div class="grid-glow"></div>
 
-      <!-- ===== SETUP SCREEN ===== -->
       <main id="setupScreen" class="screen setup-screen">
         <header class="topbar setup-topbar">
           <div class="brand-lockup">
@@ -54,25 +53,25 @@
                 <img src="/images/girl-team.png" alt="فريق البنات" />
                 <span>أسلحة</span>
               </div>
-              <div class="weapon-row"><img src="/images/gift-rose.png" onerror="this.style.display='none'"><span>-1 من الشباب</span></div>
-              <div class="weapon-row"><img src="/images/gift-heart.png" onerror="this.style.display='none'"><span>درع الحماية</span></div>
-              <div class="weapon-row"><img src="/images/gift-donut.png" onerror="this.style.display='none'"><span>1+ جولة</span></div>
-              <div class="weapon-row"><img src="/images/gift-corgi.png" onerror="this.style.display='none'"><span>10+ جولات</span></div>
+              <div class="weapon-row"><img src="/images/gift-rose.png"><span>-1 من الشباب</span></div>
+              <div class="weapon-row"><img src="/images/gift-heart.png"><span>درع الحماية</span></div>
+              <div class="weapon-row"><img src="/images/gift-donut.png"><span>1+ جولة</span></div>
+              <div class="weapon-row"><img src="/images/gift-corgi.png"><span>10+ جولات</span></div>
             </div>
             <div class="weapons-column">
               <div class="weapon-team-head">
                 <img src="/images/boy-team.png" alt="فريق الشباب" />
                 <span>أسلحة</span>
               </div>
-              <div class="weapon-row"><img src="/images/gift-tiktok.png" onerror="this.style.display='none'"><span>-1 من البنات</span></div>
-              <div class="weapon-row"><img src="/images/gift-heart.png" onerror="this.style.display='none'"><span>درع الحماية</span></div>
-              <div class="weapon-row"><img src="/images/gift-cat.png" onerror="this.style.display='none'"><span>1+ جولة</span></div>
-              <div class="weapon-row"><img src="/images/gift-crown.png" onerror="this.style.display='none'"><span>10+ جولات</span></div>
+              <div class="weapon-row"><img src="/images/gift-tiktok.png"><span>-1 من البنات</span></div>
+              <div class="weapon-row"><img src="/images/gift-heart.png"><span>درع الحماية</span></div>
+              <div class="weapon-row"><img src="/images/gift-cat.png"><span>1+ جولة</span></div>
+              <div class="weapon-row"><img src="/images/gift-crown.png"><span>10+ جولات</span></div>
             </div>
             <div class="weapons-ultimate">
               <h4>الدمار الشامل</h4>
-              <div class="weapon-row ultimate"><img src="/images/gift-galaxy.png" onerror="this.style.display='none'"><span>+50 جولة</span></div>
-              <div class="weapon-row ultimate"><img src="/images/gift-wheel.png" onerror="this.style.display='none'"><span>+100 جولة</span></div>
+              <div class="weapon-row ultimate"><img src="/images/gift-galaxy.png"><span>+50 جولة</span></div>
+              <div class="weapon-row ultimate"><img src="/images/gift-wheel.png"><span>+100 جولة</span></div>
             </div>
           </div>
         </section>
@@ -147,25 +146,16 @@
           </div>
 
           <div class="setup-actions">
-            <button id="generateBtn" class="primary-cta" type="button">
-              <span class="cta-icon">🚀</span>
-              <span><b>افتح الاستوديو</b><small>توليد أسئلة AI والبدء</small></span>
-              <span class="cta-arrow">←</span>
-            </button>
-            <button id="savedStartBtn" class="primary-cta cta-secondary" type="button">
-              <span class="cta-icon">📚</span>
-              <span><b>ابدأ الأسئلة</b><small>اسحب من بنك الأسئلة</small></span>
-              <span class="cta-arrow">←</span>
-            </button>
+            <button id="generateBtn" class="primary-cta" type="button"><span class="cta-icon">🚀</span><span><b>افتح الاستوديو</b><small>توليد أسئلة AI والبدء</small></span><span class="cta-arrow">←</span></button>
+            <button id="savedStartBtn" class="primary-cta cta-secondary" type="button"><span class="cta-icon">📚</span><span><b>ابدأ الأسئلة</b><small>اسحب من بنك الأسئلة</small></span><span class="cta-arrow">←</span></button>
             <p class="privacy-note"><span>◌</span> يتجنب الأسئلة المستخدمة ويحفظ الجولة تلقائياً</p>
           </div>
         </section>
 
         <footer class="setup-footer">
-          <span>DESIGNED FOR VERTICAL LIVE</span><span class="footer-line"></span><span>v4.0 SHOW CONTROL</span>
+          <span>DESIGNED FOR VERTICAL LIVE</span><span class="footer-line"></span><span>v5.0 SHOW CONTROL</span>
         </footer>
       </main>
-      <!-- ===== GAME SCREEN ===== -->
       <main id="gameScreen" class="screen game-screen hidden">
         <header class="topbar live-topbar">
           <div class="brand-lockup compact-brand">
@@ -180,7 +170,6 @@
           <div class="stage-label"><span class="spark">✦</span><span>GIFT MOMENTS</span><span class="stage-label-line"></span><span>LIVE INTERACTION</span></div>
           <div class="gift-stage">
             <div class="gift-zone right-zone" aria-label="هدايا فريق البنات">
-              <!-- تم تصحيح الاسم إلى gift-donut -->
               <button class="gift-button gift-corgi" data-gift="corgi" type="button"><span class="gift-emoji">🐶</span><span class="gift-label">كورجي</span><small>+10</small></button>
               <button class="gift-button gift-donut" data-gift="donut" type="button"><span class="gift-emoji">🍩</span><span class="gift-label">دونتس</span><small>×1</small></button>
               <button class="gift-button gift-rose" data-gift="rose" type="button"><span class="gift-emoji">🌹</span><span class="gift-label">وردة</span><small>-1</small></button>
@@ -210,7 +199,6 @@
             <div class="team-score-top"><span class="team-tag">TEAM PINK</span><span class="team-rounds" id="girlsRoundsWon">0 جولات</span></div>
             <div class="team-score-main"><span class="team-title">البنات</span><strong id="girlsScoreValue">0</strong></div>
             <div class="score-track"><i id="girlsProgress"></i></div>
-            <!-- إضافة درع الحماية للبنات -->
             <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
           </article>
           <div class="round-puck">
@@ -223,7 +211,6 @@
             <div class="team-score-top"><span class="team-tag">TEAM CYAN</span><span class="team-rounds" id="boysRoundsWon">0 جولات</span></div>
             <div class="team-score-main"><span class="team-title">الشباب</span><strong id="boysScoreValue">0</strong></div>
             <div class="score-track"><i id="boysProgress"></i></div>
-            <!-- إضافة درع الحماية للشباب -->
             <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
           </article>
         </section>
@@ -253,7 +240,7 @@
 
         <footer class="game-footer"><span id="sourceBadge">LOCAL BANK READY</span><span>اسحب الهدية إلى اللحظة المناسبة</span><span id="questionSource">AUTO-SAVED</span></footer>
         
-        <!-- زر الصوت العائم (موجود فقط داخل شاشة اللعبة) -->
+        <!-- (نقطة 2) زر الصوت داخل اللعبة فقط -->
         <div class="floating-sound-controls">
           <button id="floatingSoundBtn" class="soundboard-icon-btn" type="button" aria-label="فتح المؤثرات الصوتية">🎛️</button>
           <div id="floatingSoundBoard" class="floating-soundboard-panel hidden">
@@ -280,7 +267,6 @@
           </div>
         </div>
       </main>
-      <!-- ===== RESULTS SCREEN ===== -->
       <main id="resultsScreen" class="screen results-screen hidden">
         <header class="topbar"><div class="brand-lockup"><img class="brand-mark" src="/images/logo.png" alt="شعار عالم التحديات" /><div><p class="eyebrow">FINAL BROADCAST</p><strong>عالم التحديات</strong></div></div><div class="live-status"><span class="live-dot"></span><b>SHOW END</b></div></header>
         <section class="results-hero"><div class="winner-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><img src="/images/logo.png" alt="كأس عالم التحديات" /></div><p class="section-kicker">THE FINAL SCORE</p><h1 id="winnerText">ليلة استثنائية</h1><p class="results-subtitle">انتهت الجولة، لكن لحظة الفوز تبقى على الهواء.</p></section>
@@ -292,7 +278,7 @@
         <section class="results-controls">
           <button id="replayBtn" class="primary-cta" type="button"><span class="cta-icon">↻</span><span><b>جولة جديدة</b><small>العودة إلى الاستوديو</small></span><span class="cta-arrow">←</span></button>
         </section>
-        <!-- زر الصوت العائم (موجود فقط داخل شاشة النتائج) -->
+        <!-- (نقطة 2) زر الصوت داخل النتائج فقط -->
         <div class="floating-sound-controls">
           <button id="floatingSoundBtnResults" class="soundboard-icon-btn" type="button" aria-label="فتح المؤثرات الصوتية">🎛️</button>
           <div id="floatingSoundBoardResults" class="floating-soundboard-panel hidden">
@@ -320,7 +306,6 @@
         </div>
       </main>
 
-      <!-- (النوافذ في منتصف الشاشة) -->
       <div id="captainToast" class="captain-toast hidden"><span class="toast-icon">✦</span><div><small id="captainToastKicker">CAPTAIN INTRO</small><strong id="captainToastText">كابتن لينا دخلت المواجهة</strong></div></div>
       <div id="roundEndOverlay" class="overlay hidden"><div class="overlay-card glass-card"><span class="overlay-kicker">ROUND COMPLETE</span><div class="overlay-trophy">✦</div><h2 id="roundEndNumber">الجولة 1</h2><p id="roundEndWinner">مبروك للفريق الفائز</p><div class="overlay-score"><span><b id="roundEndGirlsScore">0</b><small>البنات</small></span><i>VS</i><span><b id="roundEndBoysScore">0</b><small>الشباب</small></span></div><button id="roundEndContinueBtn" class="primary-cta" type="button"><span class="cta-icon">→</span><span><b>استمرار العرض</b><small>نبدأ الجولة التالية</small></span><span class="cta-arrow">←</span></button></div></div>
       <div id="savedModal" class="overlay hidden"><div class="overlay-card glass-card saved-card"><div class="modal-heading"><div><span class="section-kicker">QUESTION VAULT</span><h2>بنك الأسئلة</h2></div><button id="closeSavedBtn" class="close-button" type="button">×</button></div><div id="savedList" class="saved-list"></div></div></div>
