@@ -4,14 +4,16 @@ const state = {
   timerDuration: 30, timerValue: 30, timerInterval: null, isTimerRunning: false, isRevealed: false,
   soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
   fullShowDuration: 120, shieldTeam: null,
-  captains: { girls: ['', '', ''], boys: ['', '', ''] }
+  captains: { girls: ['', '', ''], boys: ['', '', ''] },
+  // تحسينات جديدة
+  audioQueue: [], isPlayingAudio: false, lastGiftClick: 0, questionAnalytics: {}
 };
-const SAVED_KEY = 'lgs_saved_sets_v6';
-const HISTORY_KEY = 'lgs_question_history_v6';
-const SOUND_KEY = 'lgs_sound_v6';
+const SAVED_KEY = 'lgs_saved_sets_v7';
+const HISTORY_KEY = 'lgs_question_history_v7';
+const SOUND_KEY = 'lgs_sound_v7';
+const ANALYTICS_KEY = 'lgs_analytics_v7';
 const $ = (id) => document.getElementById(id);
 const $$ = (selector) => Array.from(document.querySelectorAll(selector));
-
 const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
   'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
@@ -25,114 +27,289 @@ const soundFiles = {
 };
 const audioCache = {};
 
-/* الحل: تحميل كسول (lazy) — لا يتم إنشاء/تحميل أي ملف صوتي إلا عند أول تشغيل فعلي له */
+/* Audio Queue System - طابور ذكي للأصوات */
 function getAudio(key) {
-  if (audioCache[key]) return audioCache[key];
+  if (audioCache[key]) return audioCache[key].cloneNode();
   const candidates = soundFiles[key] || [key];
   const audio = new Audio(`/sounds/${candidates[0]}.mp3`);
-  audio.preload = 'none';
+  audio.preload = 'auto';
   let candidateIndex = 0;
   audio.addEventListener('error', () => {
     candidateIndex += 1;
     if (candidateIndex < candidates.length) audio.src = `/sounds/${candidates[candidateIndex]}.mp3`;
   });
   audioCache[key] = audio;
-  return audio;
+  return audio.cloneNode();
 }
 
-/* الحل: تشغيل مؤثر begin مرة واحدة فقط بعد 5 ثواني من فتح الرابط، وفقط في صفحة البداية */
+function enqueueSound(key, volume = .55) {
+  if (!state.soundEnabled) return;
+  state.audioQueue.push({ key, volume });
+  processAudioQueue();
+}
+
+function processAudioQueue() {
+  if (state.isPlayingAudio || state.audioQueue.length === 0) return;
+  state.isPlayingAudio = true;
+  const { key, volume } = state.audioQueue.shift();
+  const audio = getAudio(key);
+  try {
+    audio.volume = volume;
+    audio.onended = () => {
+      state.isPlayingAudio = false;
+      setTimeout(processAudioQueue, 150);
+    };
+    audio.onerror = () => {
+      state.isPlayingAudio = false;
+      processAudioQueue();
+    };
+    audio.play().catch(() => {
+      state.isPlayingAudio = false;
+      processAudioQueue();
+    });
+  } catch (e) {
+    state.isPlayingAudio = false;
+    processAudioQueue();
+  }
+}
+
+function clearAudioQueue() {
+  state.audioQueue = [];
+  state.isPlayingAudio = false;
+}
+
 function scheduleBeginSound() {
   setTimeout(() => {
     const setupScreen = $('setupScreen');
-    if (setupScreen && !setupScreen.classList.contains('hidden')) playSound('begin', .8);
+    if (setupScreen && !setupScreen.classList.contains('hidden')) enqueueSound('begin', .8);
   }, 5000);
 }
 
 function getSavedSets() { try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch { return []; } }
 function getHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; } }
-function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(state.questionHistory.slice(-180))); }
+function getAnalytics() { try { return JSON.parse(localStorage.getItem(ANALYTICS_KEY) || '{}'); } catch { return {}; } }
+
+function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(state.questionHistory.slice(-200))); }
+function saveAnalytics() { localStorage.setItem(ANALYTICS_KEY, JSON.stringify(state.questionAnalytics)); }
+
+function trackQuestion(question, wasCorrect) {
+  const key = question.question.slice(0, 50);
+  if (!state.questionAnalytics[key]) {
+    state.questionAnalytics[key] = { q: question.question, attempts: 0, correct: 0, category: question.category };
+  }
+  state.questionAnalytics[key].attempts++;
+  if (wasCorrect) state.questionAnalytics[key].correct++;
+  saveAnalytics();
+}
+
+/* Smart Deduplication - تجنب الأسئلة المتشابهة */
+function normalizeText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .replace(/[^\u0621-\u064Aa-z0-9]/g, '')
+    .trim();
+}
+
+function isSimilarQuestion(newQ, historyList) {
+  const normalized = normalizeText(newQ);
+  if (normalized.length < 10) return false;
+  return historyList.some(oldQ => {
+    const oldNormalized = normalizeText(oldQ);
+    if (oldNormalized === normalized) return true;
+    // تشابه 70%+
+    if (normalized.length > 20 && oldNormalized.length > 20) {
+      const shorter = normalized.length < oldNormalized.length ? normalized : oldNormalized;
+      const longer = normalized.length >= oldNormalized.length ? normalized : oldNormalized;
+      if (longer.includes(shorter.slice(0, 15))) return true;
+    }
+    return false;
+  });
+}
+
 function saveQuestionSet(questions, meta = {}) {
   const sets = getSavedSets();
   sets.unshift({ id: Date.now(), date: new Date().toLocaleString('ar-SA'), questions, category: meta.category || 'اختيارات متنوعة', difficulty: meta.difficulty || 'متوسط', count: questions.length, source: meta.source || 'local' });
   localStorage.setItem(SAVED_KEY, JSON.stringify(sets.slice(0, 20)));
   updateSavedCount();
 }
+
 function updateSavedCount() { const el = $('savedCount'); if (el) el.textContent = getSavedSets().length; }
-function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char])); }
-function shuffle(list) { const items = [...list]; for (let i = items.length - 1; i > 0; i -= 1) { const j = Math.floor(Math.random() * (i + 1)); [items[i], items[j]] = [items[j], items[i]]; } return items; }
 
-/* الحل: تشغيل بسيط وسليم مع تحميل كسول */
-function playSound(key, volume = .55) {
-  if (!state.soundEnabled) return;
-  const audio = getAudio(key);
-  try { audio.currentTime = 0; audio.volume = volume; audio.play().catch(() => {}); } catch (e) {}
+function escapeHtml(value) {
+  return String(value).replace(/[&<>'"]/g, (char) => ({
+    '&': '&', '<': '<', '>': '>', "'": ''', '"': '"'
+  }[char]));
 }
-function toggleSound() { state.soundEnabled = !state.soundEnabled; localStorage.setItem(SOUND_KEY, String(state.soundEnabled)); updateSoundButtons(); }
-function updateSoundButtons() { const glyph = state.soundEnabled ? '◉' : '○'; ['setupSoundBtn', 'soundToggle'].forEach((id) => { if ($(id)) { $(id).textContent = glyph; $(id).classList.toggle('sound-on', state.soundEnabled); } }); }
 
-function showScreen(id) { $$('.screen').forEach((screen) => screen.classList.toggle('hidden', screen.id !== id)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function shuffle(list) {
+  const items = [...list];
+  for (let i = items.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [items[i], items[j]] = [items[j], items[i]];
+  }
+  return items;
+}
+
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  localStorage.setItem(SOUND_KEY, String(state.soundEnabled));
+  updateSoundButtons();
+  if (state.soundEnabled) enqueueSound('tick', .3);
+}
+
+function updateSoundButtons() {
+  const glyph = state.soundEnabled ? '◉' : '○';
+  ['setupSoundBtn', 'soundToggle'].forEach((id) => {
+    if ($(id)) {
+      $(id).textContent = glyph;
+      $(id).classList.toggle('sound-on', state.soundEnabled);
+    }
+  });
+}
+
+function showScreen(id) {
+  $$('.screen').forEach((screen) => screen.classList.toggle('hidden', screen.id !== id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function showLoading(message) { $('loadingText').textContent = message; $('loadingOverlay').classList.remove('hidden'); }
 function hideLoading() { $('loadingOverlay').classList.add('hidden'); }
-function showToast(text, kicker = 'SHOW CONTROL') { $('captainToastKicker').textContent = kicker; $('captainToastText').textContent = text; $('captainToast').classList.remove('hidden'); clearTimeout(showToast.timeout); showToast.timeout = setTimeout(() => $('captainToast').classList.add('hidden'), 3100); }
-function formatClock() { const seconds = Math.floor((Date.now() - state.showStartedAt) / 1000); return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
-function startShowClock() { state.showStartedAt = Date.now(); clearInterval(state.showClockInterval); state.showClockInterval = setInterval(() => { if ($('showClock')) $('showClock').textContent = formatClock(); }, 1000); }
+
+function showToast(text, kicker = 'SHOW CONTROL') {
+  $('captainToastKicker').textContent = kicker;
+  $('captainToastText').textContent = text;
+  $('captainToast').classList.remove('hidden');
+  clearTimeout(showToast.timeout);
+  showToast.timeout = setTimeout(() => $('captainToast').classList.add('hidden'), 3100);
+}
+
+function formatClock() {
+  const seconds = Math.floor((Date.now() - state.showStartedAt) / 1000);
+  return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+function startShowClock() {
+  state.showStartedAt = Date.now();
+  clearInterval(state.showClockInterval);
+  state.showClockInterval = setInterval(() => {
+    if ($('showClock')) $('showClock').textContent = formatClock();
+  }, 1000);
+}
 
 function updateScores() {
-  $('girlsScoreValue').textContent = state.girlsScore; $('boysScoreValue').textContent = state.boysScore;
-  $('girlsProgress').style.width = `${Math.min(100, Math.max(0, state.girlsScore) * 20)}%`; $('boysProgress').style.width = `${Math.min(100, Math.max(0, state.boysScore) * 20)}%`;
-  $('girlsRoundsWon').textContent = `${state.girlsRounds} جولات`; $('boysRoundsWon').textContent = `${state.boysRounds} جولات`;
+  $('girlsScoreValue').textContent = state.girlsScore;
+  $('boysScoreValue').textContent = state.boysScore;
+  $('girlsProgress').style.width = `${Math.min(100, Math.max(0, state.girlsScore) * 20)}%`;
+  $('boysProgress').style.width = `${Math.min(100, Math.max(0, state.boysScore) * 20)}%`;
+  $('girlsRoundsWon').textContent = `${state.girlsRounds} جولات`;
+  $('boysRoundsWon').textContent = `${state.boysRounds} جولات`;
   $('roundResults').textContent = `${state.girlsRounds} - ${state.boysRounds}`;
   const roundNumber = state.mode === 'fullshow' ? (state.currentRoundIndex + 1) : (state.girlsRounds + state.boysRounds + 1);
   if ($('roundDisplay')) $('roundDisplay').textContent = `الجولة ${roundNumber}`;
   $('teamShieldGirls').classList.toggle('hidden', state.shieldTeam !== 'girls');
   $('teamShieldBoys').classList.toggle('hidden', state.shieldTeam !== 'boys');
 }
-function updateTimer() { $('timerDisplay').textContent = state.timerValue; $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0); }
-function stopTimer() { clearInterval(state.timerInterval); state.timerInterval = null; state.isTimerRunning = false; $('startTimerBtn').disabled = false; }
+
+function updateTimer() {
+  $('timerDisplay').textContent = state.timerValue;
+  $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = null;
+  state.isTimerRunning = false;
+  $('startTimerBtn').disabled = false;
+}
+
 function startTimer() {
   if (state.isTimerRunning || state.isRevealed) return;
-  state.isTimerRunning = true; $('startTimerBtn').disabled = true; state.timerValue = state.timerDuration; updateTimer(); playSound('tick', .25);
+  state.isTimerRunning = true;
+  $('startTimerBtn').disabled = true;
+  state.timerValue = state.timerDuration;
+  updateTimer();
+  enqueueSound('tick', .25);
   state.timerInterval = setInterval(() => {
-    state.timerValue -= 1; updateTimer();
-    if (state.timerValue > 0 && state.timerValue <= 3) playSound('tick', .24);
-    if (state.timerValue <= 0) { stopTimer(); playSound('wrong', .35); showToast('انتهى الوقت — اكشف الإجابة!', 'TIME UP'); }
+    state.timerValue -= 1;
+    updateTimer();
+    if (state.timerValue > 0 && state.timerValue <= 3) enqueueSound('tick', .24);
+    if (state.timerValue <= 0) {
+      stopTimer();
+      enqueueSound('wrong', .35);
+      showToast('انتهى الوقت — اكشف الإجابة!', 'TIME UP');
+    }
   }, 1000);
 }
+
 function renderQuestion() {
-  const question = state.questions[state.currentIndex]; if (!question) return;
-  stopTimer(); state.isRevealed = false; state.timerValue = state.timerDuration; updateTimer();
+  const question = state.questions[state.currentIndex];
+  if (!question) return;
+  stopTimer();
+  state.isRevealed = false;
+  state.timerValue = state.timerDuration;
+  updateTimer();
   updateScores();
   $('roundProgress').textContent = `${String(state.currentIndex + 1).padStart(2, '0')} / ${String(state.questions.length).padStart(2, '0')}`;
   $('questionCounter').textContent = `السؤال ${String(state.currentIndex + 1).padStart(2, '0')} / ${String(state.questions.length).padStart(2, '0')}`;
   $('questionNumber').textContent = String(state.currentIndex + 1).padStart(2, '0');
   $('categoryBadge').textContent = `${question.category || 'اختيارات متنوعة'}`;
   $('questionText').textContent = question.question;
-  $('answerText').textContent = '—'; $('explanationText').textContent = '—'; $('answerReveal').classList.add('hidden');
-  $('revealBtn').disabled = false; $('nextBtn').disabled = false; $('sourceBadge').textContent = question.source === 'ai' ? 'AI BANK READY' : 'LOCAL BANK READY';
+  $('answerText').textContent = '—';
+  $('explanationText').textContent = '—';
+  $('answerReveal').classList.add('hidden');
+  $('revealBtn').disabled = false;
+  $('nextBtn').disabled = false;
+  $('sourceBadge').textContent = question.source === 'ai' ? 'AI BANK READY' : 'LOCAL BANK READY';
   $('questionSource').textContent = question.source === 'ai' ? 'AUTO-SAVED / AI' : 'AUTO-SAVED';
-  const grid = $('optionsGrid'); grid.innerHTML = '';
+  const grid = $('optionsGrid');
+  grid.innerHTML = '';
   (question.options || []).slice(0, 4).forEach((option, index) => {
-    const button = document.createElement('button'); button.type = 'button'; button.className = 'option-btn'; button.dataset.letter = String.fromCharCode(65 + index); button.textContent = option; button.addEventListener('click', () => selectAnswer(index)); grid.appendChild(button);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'option-btn';
+    button.dataset.letter = String.fromCharCode(65 + index);
+    button.textContent = option;
+    button.addEventListener('click', () => selectAnswer(index));
+    grid.appendChild(button);
   });
   $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
   $('activeGiftBanner').classList.add('hidden');
 }
+
 function revealAnswer() {
   if (state.isRevealed) return;
-  const question = state.questions[state.currentIndex]; if (!question) return;
-  state.isRevealed = true; stopTimer();
-  $$('.option-btn').forEach((button, index) => { button.classList.remove('selected'); if (index === question.correctIndex) button.classList.add('correct'); });
+  const question = state.questions[state.currentIndex];
+  if (!question) return;
+  state.isRevealed = true;
+  stopTimer();
+  $$('.option-btn').forEach((button, index) => {
+    button.classList.remove('selected');
+    if (index === question.correctIndex) button.classList.add('correct');
+  });
   $('answerText').textContent = `${String.fromCharCode(65 + question.correctIndex)}. ${question.options[question.correctIndex]}`;
-  $('explanationText').textContent = question.explanation || 'معلومة إضافية للمقدم غير متاحة.'; $('answerReveal').classList.remove('hidden'); $('revealBtn').disabled = true;
-}
-function selectAnswer(index) {
-  if (state.isRevealed) return;
-  const question = state.questions[state.currentIndex]; const buttons = $$('.option-btn');
-  buttons.forEach((button, buttonIndex) => { button.classList.toggle('selected', buttonIndex === index); if (buttonIndex === index && buttonIndex !== question.correctIndex) button.classList.add('wrong'); });
-  playSound(index === question.correctIndex ? 'correct' : 'wrong', .5); revealAnswer();
+  $('explanationText').textContent = question.explanation || 'معلومة إضافية للمقدم غير متاحة.';
+  $('answerReveal').classList.remove('hidden');
+  $('revealBtn').disabled = true;
 }
 
-/* الحل: فصل المنطق - الهدايا المباشرة (بدون اختيار فريق) والهدايا التي تحتاج اختيار فريق */
+function selectAnswer(index) {
+  if (state.isRevealed) return;
+  const question = state.questions[state.currentIndex];
+  const buttons = $$('.option-btn');
+  const isCorrect = index === question.correctIndex;
+  buttons.forEach((button, buttonIndex) => {
+    button.classList.toggle('selected', buttonIndex === index);
+    if (buttonIndex === index && !isCorrect) button.classList.add('wrong');
+  });
+  enqueueSound(isCorrect ? 'correct' : 'wrong', .5);
+  trackQuestion(question, isCorrect);
+  revealAnswer();
+}
+
+/* Debounce للهدايا */
 function closeGiftBanner() {
   state.activeGift = null;
   $('activeGiftBanner').classList.add('hidden');
@@ -140,60 +317,73 @@ function closeGiftBanner() {
 }
 
 function selectGift(gift) {
-  state.activeGift = gift; $$('.gift-button').forEach((button) => button.classList.toggle('is-active', button.dataset.gift === gift));
+  // Debounce: منع الضغط المتكرر خلال 800ms
+  const now = Date.now();
+  if (now - state.lastGiftClick < 800) return;
+  state.lastGiftClick = now;
 
-  // هدايا الدمار الشامل ودرع الحماية فقط تحتاج اختيار فريق
+  state.activeGift = gift;
+  $$('.gift-button').forEach((button) => button.classList.toggle('is-active', button.dataset.gift === gift));
+
   if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart') {
     $('activeGiftText').textContent = gift === 'heart' ? 'اختر الفريق لتفعيل درع الحماية' : 'اختر الفريق لتفعيل الدمار الشامل';
     $('activeGiftBanner').classList.remove('hidden');
-    playSound('tick', .28);
+    enqueueSound('tick', .28);
     return;
   }
 
-  // الهدايا المباشرة (فريق ثابت مسبقاً، لا تحتاج اختيار)
-  if (gift === 'rose') { subtractPoint('boys', true); playSound('gift-rose', .6); }
-  else if (gift === 'tiktok') { subtractPoint('girls', true); playSound('gift-tiktok', .6); }
-  else if (gift === 'donut') { state.girlsRounds += 1; state.girlsScore = 0; state.boysScore = 0; playSound('gift-donut', .65); showToast('+1 جولة لفريق البنات', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'corgi') { state.girlsRounds += 10; state.girlsScore = 0; state.boysScore = 0; playSound('gift-corgi', .65); showToast('+10 جولات لفريق البنات', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'cat') { state.boysRounds += 1; state.girlsScore = 0; state.boysScore = 0; playSound('gift-cat', .65); showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'crown') { state.boysRounds += 10; state.girlsScore = 0; state.boysScore = 0; playSound('gift-crown', .65); showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
+  if (gift === 'rose') { subtractPoint('boys', true); enqueueSound('gift-rose', .6); }
+  else if (gift === 'tiktok') { subtractPoint('girls', true); enqueueSound('gift-tiktok', .6); }
+  else if (gift === 'donut') { state.girlsRounds += 1; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-donut', .65); showToast('+1 جولة لفريق البنات', 'GIFT LOCKED'); updateScores(); }
+  else if (gift === 'corgi') { state.girlsRounds += 10; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-corgi', .65); showToast('+10 جولات لفريق البنات', 'GIFT LOCKED'); updateScores(); }
+  else if (gift === 'cat') { state.boysRounds += 1; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-cat', .65); showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
+  else if (gift === 'crown') { state.boysRounds += 10; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-crown', .65); showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
 
-  setTimeout(() => { state.activeGift = null; $$('.gift-button').forEach((button) => button.classList.remove('is-active')); }, 450);
+  setTimeout(() => {
+    state.activeGift = null;
+    $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
+  }, 450);
 }
 
-/* الحل: دالة اختيار الفريق للهدايا التي تحتاج فريق (الدرع + الدمار الشامل) */
 function resolveGift(team) {
-  const gift = state.activeGift; if (!gift) return;
-
+  const gift = state.activeGift;
+  if (!gift) return;
   if (gift === 'heart') {
     state.shieldTeam = team;
     if (team === 'girls') state.girlsScore = Math.max(0, state.girlsScore);
     else state.boysScore = Math.max(0, state.boysScore);
-    playSound('gift-heart', .7); showToast(`درع الحماية لفريق ${team === 'girls' ? 'البنات' : 'الشباب'}`, 'PROTECTION ON');
-    closeGiftBanner(); updateScores(); return;
+    enqueueSound('gift-heart', .7);
+    showToast(`درع الحماية لفريق ${team === 'girls' ? 'البنات' : 'الشباب'}`, 'PROTECTION ON');
+    closeGiftBanner();
+    updateScores();
+    return;
   }
-
-  // الدمار الشامل: مجرة (50) وعجلة الحظ (100) — الفريق المختار يحدد الجولات والمؤثر الصوتي معاً
   let roundsToAdd = 0;
   if (gift === 'galaxy') roundsToAdd = 50;
   else if (gift === 'wheel') roundsToAdd = 100;
   const giftSound = team === 'girls' ? 'girls-galaxy' : 'boys-galaxy';
-
-  if (team === 'girls') state.girlsRounds += roundsToAdd; else state.boysRounds += roundsToAdd;
-
-  playSound(giftSound, .7);
+  if (team === 'girls') state.girlsRounds += roundsToAdd;
+  else state.boysRounds += roundsToAdd;
+  enqueueSound(giftSound, .7);
   showToast(`+${roundsToAdd} جولة لفريق ${team === 'girls' ? 'البنات' : 'الشباب'}`, 'GIFT LOCKED');
-  state.girlsScore = 0; state.boysScore = 0;
-  closeGiftBanner(); updateScores();
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  closeGiftBanner();
+  updateScores();
 }
 
 function subtractPoint(team, viaGift = false) {
-  if (state.shieldTeam === team) { playSound('gift-heart', .4); showToast(`فريق ${team === 'girls' ? 'البنات' : 'الشباب'} محمي بالدرع`, 'SHIELD ACTIVE'); return; }
+  if (state.shieldTeam === team) {
+    enqueueSound('gift-heart', .4);
+    showToast(`فريق ${team === 'girls' ? 'البنات' : 'الشباب'} محمي بالدرع`, 'SHIELD ACTIVE');
+    return;
+  }
   if (team === 'girls') state.girlsScore = Math.max(-5, state.girlsScore - 1);
   else state.boysScore = Math.max(-5, state.boysScore - 1);
   updateScores();
-  if (!viaGift) playSound('wrong', .25);
+  if (!viaGift) enqueueSound('wrong', .25);
 }
+
 function applyPoint(team, points = 1) {
   if (team === 'girls') {
     if (state.girlsScore < 0) state.girlsScore = Math.min(0, state.girlsScore + points);
@@ -202,53 +392,146 @@ function applyPoint(team, points = 1) {
     if (state.boysScore < 0) state.boysScore = Math.min(0, state.boysScore + points);
     else state.boysScore = Math.min(5, state.boysScore + points);
   }
-  updateScores(); playSound('correct', .28);
+  updateScores();
+  enqueueSound('correct', .28);
   if ((team === 'girls' && state.girlsScore >= 5) || (team === 'boys' && state.boysScore >= 5)) {
     showToast('اكتملت 5 نقاط! اضغط "الجولة التالية" لإعلان الفائز', 'ROUND READY');
   }
 }
+
 function finishRound() {
   stopTimer();
-  const currentRound = state.currentRoundIndex + 1; let winner = 'تعادل رائع بين الفريقين';
-  if (state.girlsScore >= 5) { state.girlsRounds += 1; winner = 'فوز فريق البنات'; playSound('girls-round', .7); setTimeout(() => playSound('boys-lose', .35), 12000); }
-  else if (state.boysScore >= 5) { state.boysRounds += 1; winner = 'فوز فريق الشباب'; playSound('boys-round', .7); setTimeout(() => playSound('girls-lose', .35), 12000); }
-  else if (state.girlsScore > state.boysScore) { state.girlsRounds += 1; winner = 'فوز فريق البنات'; playSound('girls-round', .7); setTimeout(() => playSound('boys-lose', .35), 12000); }
-  else if (state.boysScore > state.girlsScore) { state.boysRounds += 1; winner = 'فوز فريق الشباب'; playSound('boys-round', .7); setTimeout(() => playSound('girls-lose', .35), 12000); }
-  else playSound('girls-round', .35);
+  clearAudioQueue();
+  const currentRound = state.currentRoundIndex + 1;
+  let winner = 'تعادل رائع بين الفريقين';
 
-  updateScores(); $('roundEndNumber').textContent = `الجولة ${currentRound}`; $('roundEndWinner').textContent = winner; $('roundEndGirlsScore').textContent = state.girlsScore; $('roundEndBoysScore').textContent = state.boysScore; $('roundEndOverlay').classList.remove('hidden'); fireConfetti();
-  state.girlsScore = 0; state.boysScore = 0; state.shieldTeam = null; updateScores();
+  if (state.girlsScore >= 5 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
+    state.girlsRounds += 1;
+    winner = 'فوز فريق البنات';
+    enqueueSound('girls-round', .7);
+    setTimeout(() => enqueueSound('boys-lose', .35), 500);
+  } else if (state.boysScore >= 5 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
+    state.boysRounds += 1;
+    winner = 'فوز فريق الشباب';
+    enqueueSound('boys-round', .7);
+    setTimeout(() => enqueueSound('girls-lose', .35), 500);
+  } else {
+    enqueueSound('girls-round', .35);
+  }
+
+  updateScores();
+  $('roundEndNumber').textContent = `الجولة ${currentRound}`;
+  $('roundEndWinner').textContent = winner;
+  $('roundEndGirlsScore').textContent = state.girlsScore;
+  $('roundEndBoysScore').textContent = state.boysScore;
+  $('roundEndOverlay').classList.remove('hidden');
+  fireConfetti();
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  state.shieldTeam = null;
+  updateScores();
 }
-function continueAfterRound() { $('roundEndOverlay').classList.add('hidden'); if (state.mode === 'fullshow' && state.currentRoundIndex < state.fullShowRounds.length - 1) { state.currentRoundIndex += 1; state.questions = state.fullShowRounds[state.currentRoundIndex].questions; state.currentIndex = 0; renderQuestion(); return; } showResults(); }
-function nextQuestion() { if (!state.isRevealed) { showToast('اكشف الإجابة أولاً ثم انتقل', 'HOST TIP'); return; } if (state.currentIndex < state.questions.length - 1) { state.currentIndex += 1; renderQuestion(); startTimer(); } else finishRound(); }
+
+function continueAfterRound() {
+  $('roundEndOverlay').classList.add('hidden');
+  if (state.mode === 'fullshow' && state.currentRoundIndex < state.fullShowRounds.length - 1) {
+    state.currentRoundIndex += 1;
+    state.questions = state.fullShowRounds[state.currentRoundIndex].questions;
+    state.currentIndex = 0;
+    renderQuestion();
+    return;
+  }
+  showResults();
+}
+
+function nextQuestion() {
+  if (!state.isRevealed) { showToast('اكشف الإجابة أولاً ثم انتقل', 'HOST TIP'); return; }
+  if (state.currentIndex < state.questions.length - 1) {
+    state.currentIndex += 1;
+    renderQuestion();
+    startTimer();
+  } else {
+    finishRound();
+  }
+}
+
 function showResults() {
-  stopTimer(); showScreen('resultsScreen'); $('finalGirlsScore').textContent = state.girlsRounds; $('finalBoysScore').textContent = state.boysRounds;
+  stopTimer();
+  clearAudioQueue();
+  showScreen('resultsScreen');
+  $('finalGirlsScore').textContent = state.girlsRounds;
+  $('finalBoysScore').textContent = state.boysRounds;
   const winner = $('winnerText');
-  if (state.girlsRounds > state.boysRounds) { winner.textContent = 'فريق البنات فاز!'; winner.style.color = 'var(--pink-hot)'; playSound('girls-win', .8); }
-  else if (state.boysRounds > state.girlsRounds) { winner.textContent = 'فريق الشباب فاز!'; winner.style.color = 'var(--cyan)'; playSound('boys-win', .8); }
-  else { winner.textContent = 'تعادل أبطال الليلة'; winner.style.color = 'var(--gold-hot)'; playSound('end', .75); }
-  setTimeout(() => playSound('end', .35), 700); fireConfetti();
-}
-function fireConfetti() {
-  const canvas = $('confettiCanvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  const colors = ['#f45ca0', '#5de2ff', '#ffd36e', '#64ecad', '#917aff'];
-  const particles = Array.from({ length: 105 }, () => ({ x: Math.random() * canvas.width, y: -20 - Math.random() * 100, size: 3 + Math.random() * 5, speed: 2 + Math.random() * 3.5, drift: (Math.random() - .5) * 2.6, spin: Math.random() * 6.28, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1 }));
-  let frame = 0; const animate = () => { ctx.clearRect(0, 0, canvas.width, canvas.height); let active = false; particles.forEach((p) => { if (p.alpha <= 0) return; active = true; p.y += p.speed; p.x += p.drift; p.spin += .08; p.alpha -= .006; ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color; ctx.translate(p.x, p.y); ctx.rotate(p.spin); ctx.fillRect(-p.size / 2, -p.size / 2, p.size * 1.5, p.size); ctx.restore(); }); if (active && frame < 260) { frame += 1; requestAnimationFrame(animate); } else ctx.clearRect(0, 0, canvas.width, canvas.height); }; animate();
+  if (state.girlsRounds > state.boysRounds) {
+    winner.textContent = 'فريق البنات فاز!';
+    winner.style.color = 'var(--pink-hot)';
+    enqueueSound('girls-win', .8);
+    setTimeout(() => enqueueSound('end', .35), 800);
+  } else if (state.boysRounds > state.girlsRounds) {
+    winner.textContent = 'فريق الشباب فاز!';
+    winner.style.color = 'var(--cyan)';
+    enqueueSound('boys-win', .8);
+    setTimeout(() => enqueueSound('end', .35), 800);
+  } else {
+    winner.textContent = 'تعادل أبطال الليلة';
+    winner.style.color = 'var(--gold-hot)';
+    enqueueSound('end', .75);
+  }
+  setTimeout(() => fireConfetti(), 300);
 }
 
-/* الحل: تسجيل كباتن الفريقين وعرض اسم الكابتن وسط الشاشة لمدة 10 ثوانٍ */
+function fireConfetti() {
+  const canvas = $('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#f45ca0', '#5de2ff', '#ffd36e', '#64ecad', '#917aff'];
+  const particles = Array.from({ length: 105 }, () => ({
+    x: Math.random() * canvas.width, y: -20 - Math.random() * 100,
+    size: 3 + Math.random() * 5, speed: 2 + Math.random() * 3.5,
+    drift: (Math.random() - .5) * 2.6, spin: Math.random() * 6.28,
+    color: colors[Math.floor(Math.random() * colors.length)], alpha: 1
+  }));
+  let frame = 0;
+  const animate = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let active = false;
+    particles.forEach((p) => {
+      if (p.alpha <= 0) return;
+      active = true;
+      p.y += p.speed;
+      p.x += p.drift;
+      p.spin += .08;
+      p.alpha -= .006;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.spin);
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size * 1.5, p.size);
+      ctx.restore();
+    });
+    if (active && frame < 260) { frame += 1; requestAnimationFrame(animate); }
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+  animate();
+}
+
 function confirmCaptain(team, slot) {
   const input = document.querySelector(`.captain-input[data-team="${team}"][data-slot="${slot}"]`);
   if (!input) return;
   const name = input.value.trim();
   if (!name) { showToast('اكتب اسم الكابتن أولاً', 'HOST TIP'); return; }
-  input.value = name; input.classList.add('confirmed');
+  input.value = name;
+  input.classList.add('confirmed');
   state.captains[team][slot] = name;
   showCaptainReveal(name, team);
-  playSound(team === 'girls' ? 'girls-captin' : 'boys-captin', .8);
+  enqueueSound(team === 'girls' ? 'girls-captin' : 'boys-captin', .8);
 }
+
 function showCaptainReveal(name, team) {
-  const overlay = $('captainRevealOverlay'); if (!overlay) return;
+  const overlay = $('captainRevealOverlay');
+  if (!overlay) return;
   $('captainRevealName').textContent = name;
   overlay.classList.remove('hidden', 'team-girls', 'team-boys');
   overlay.classList.add(team === 'girls' ? 'team-girls' : 'team-boys');
@@ -256,70 +539,233 @@ function showCaptainReveal(name, team) {
   showCaptainReveal.timeout = setTimeout(() => overlay.classList.add('hidden'), 10000);
 }
 
-/* الحل: زر ابدأ الأسئلة يجلب من البنك مباشرة */
 async function generateSingleRound() {
-  const category = $('category').value || 'اختيارات متنوعة'; const difficulty = $('difficulty').value || 'متوسط'; const count = Math.max(3, Math.min(30, Number($('count').value) || 10));
+  const category = $('category').value || 'اختيارات متنوعة';
+  const difficulty = $('difficulty').value || 'متوسط';
+  const count = Math.max(3, Math.min(30, Number($('count').value) || 10));
   showLoading('نجهز الأسئلة من البنك...');
   try {
-    const response = await fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ category, difficulty, count, avoid: state.questionHistory.slice(-100) }) });
-    const data = await response.json(); const questions = Array.isArray(data.questions) ? data.questions : [];
-    if (questions.length > 0) {
-      state.questions = questions; state.fullShowRounds = []; state.mode = 'single'; state.currentIndex = 0; state.currentRoundIndex = 0;
-      state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
-      state.questionHistory = [...state.questionHistory, ...questions.map((question) => question.question)].slice(-180);
-      saveHistory(); saveQuestionSet(questions, { category, difficulty, source: questions[0]?.source });
-      updateScores(); showScreen('gameScreen'); startShowClock(); renderQuestion(); playSound('begin', .75);
-    } else { showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL'); }
-  } catch (e) { showToast('خطأ في جلب الأسئلة', 'ERROR'); }
+    const response = await fetch('/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ category, difficulty, count, avoid: state.questionHistory.slice(-150) })
+    });
+    const data = await response.json();
+    const questions = Array.isArray(data.questions) ? data.questions : [];
+    // Smart Deduplication: فلترة الأسئلة المتشابهة
+    const filtered = questions.filter(q => !isSimilarQuestion(q.question, state.questionHistory));
+    if (filtered.length > 0) {
+      state.questions = filtered;
+      state.fullShowRounds = [];
+      state.mode = 'single';
+      state.currentIndex = 0;
+      state.currentRoundIndex = 0;
+      state.girlsScore = 0;
+      state.boysScore = 0;
+      state.girlsRounds = 0;
+      state.boysRounds = 0;
+      state.questionHistory = [...state.questionHistory, ...filtered.map((q) => q.question)].slice(-200);
+      saveHistory();
+      saveQuestionSet(filtered, { category, difficulty, source: filtered[0]?.source });
+      updateScores();
+      showScreen('gameScreen');
+      startShowClock();
+      renderQuestion();
+      enqueueSound('begin', .75);
+    } else {
+      showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL');
+    }
+  } catch (e) {
+    showToast('خطأ في جلب الأسئلة', 'ERROR');
+  }
   hideLoading();
 }
 
 async function generateFullShow() {
-  const plan = Array.from({ length: 3 }, (_, index) => ({ title: `الجولة ${index + 1}`, category: index === 0 ? 'معلومات عامة' : index === 1 ? 'جغرافيا' : 'اختيارات متنوعة', difficulty: index === 0 ? 'سهل' : index === 1 ? 'متوسط' : 'صعب', count: 10 }));
-  state.fullShowRounds = []; showLoading('نرتب فصول اللايف...');
-  for (let index = 0; index < plan.length; index += 1) { $('loadingText').textContent = `نجهز ${plan[index].title} — ${index + 1} / ${plan.length}`; const questions = await fetchQuestions(plan[index]); state.fullShowRounds.push({ ...plan[index], questions }); state.questionHistory = [...state.questionHistory, ...questions.map((question) => question.question)].slice(-180); }
-  saveHistory(); saveQuestionSet(state.fullShowRounds.flatMap((round) => round.questions), { category: 'مسابقة', difficulty: 'متدرج' }); state.mode = 'fullshow'; state.currentRoundIndex = 0; state.questions = state.fullShowRounds[0].questions; state.currentIndex = 0; state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0; updateScores(); showScreen('gameScreen'); startShowClock(); renderQuestion(); playSound('begin', .75); hideLoading();
+  const plan = Array.from({ length: 3 }, (_, index) => ({
+    title: `الجولة ${index + 1}`,
+    category: index === 0 ? 'معلومات عامة' : index === 1 ? 'جغرافيا' : 'اختيارات متنوعة',
+    difficulty: index === 0 ? 'سهل' : index === 1 ? 'متوسط' : 'صعب',
+    count: 10
+  }));
+  state.fullShowRounds = [];
+  showLoading('نرتب فصول اللايف...');
+  for (let index = 0; index < plan.length; index += 1) {
+    $('loadingText').textContent = `نجهز ${plan[index].title} — ${index + 1} / ${plan.length}`;
+    const questions = await fetchQuestions(plan[index]);
+    state.fullShowRounds.push({ ...plan[index], questions });
+    state.questionHistory = [...state.questionHistory, ...questions.map((q) => q.question)].slice(-200);
+  }
+  saveHistory();
+  saveQuestionSet(state.fullShowRounds.flatMap((round) => round.questions), { category: 'مسابقة', difficulty: 'متدرج' });
+  state.mode = 'fullshow';
+  state.currentRoundIndex = 0;
+  state.questions = state.fullShowRounds[0].questions;
+  state.currentIndex = 0;
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  state.girlsRounds = 0;
+  state.boysRounds = 0;
+  updateScores();
+  showScreen('gameScreen');
+  startShowClock();
+  renderQuestion();
+  enqueueSound('begin', .75);
+  hideLoading();
 }
 
 async function fetchQuestions(params) {
   try {
-    const response = await fetch('/api/questions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...params, avoid: state.questionHistory.slice(-100) }) });
-    const data = await response.json(); const questions = Array.isArray(data.questions) ? data.questions : [];
-    return questions;
+    const response = await fetch('/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...params, avoid: state.questionHistory.slice(-150) })
+    });
+    const data = await response.json();
+    return Array.isArray(data.questions) ? data.questions : [];
   } catch { return []; }
 }
 
-/* الحل: ربط الأزرار بشكل صحيح */
 function initSetup() {
-  $$('.mode-tab').forEach((tab) => tab.addEventListener('click', () => { $$('.mode-tab').forEach((item) => item.classList.remove('is-active')); tab.classList.add('is-active'); state.mode = tab.dataset.mode; $('fullShowOptions').hidden = state.mode !== 'fullshow'; $('categoryField').hidden = state.mode === 'fullshow'; }));
-  $$('.stepper-btn').forEach((button) => button.addEventListener('click', () => { const input = $('count'); const current = Number(input.value) || 10; input.value = Math.max(3, Math.min(50, current + (button.dataset.action === 'plus' ? 1 : -1))); }));
-  $$('[data-duration]').forEach((button) => button.addEventListener('click', () => { $$('[data-duration]').forEach((item) => item.classList.remove('is-active')); button.classList.add('is-active'); state.fullShowDuration = Number(button.dataset.duration); }));
-  $$('[data-timer]').forEach((button) => button.addEventListener('click', () => { $$('[data-timer]').forEach((item) => item.classList.remove('is-active')); button.classList.add('is-active'); state.timerDuration = Number(button.dataset.timer); state.timerValue = state.timerDuration; }));
+  $$('.mode-tab').forEach((tab) => tab.addEventListener('click', () => {
+    $$('.mode-tab').forEach((item) => item.classList.remove('is-active'));
+    tab.classList.add('is-active');
+    state.mode = tab.dataset.mode;
+    $('fullShowOptions').hidden = state.mode !== 'fullshow';
+    $('categoryField').hidden = state.mode === 'fullshow';
+  }));
+  $$('.stepper-btn').forEach((button) => button.addEventListener('click', () => {
+    const input = $('count');
+    const current = Number(input.value) || 10;
+    input.value = Math.max(3, Math.min(50, current + (button.dataset.action === 'plus' ? 1 : -1)));
+  }));
+  $$('[data-duration]').forEach((button) => button.addEventListener('click', () => {
+    $$('[data-duration]').forEach((item) => item.classList.remove('is-active'));
+    button.classList.add('is-active');
+    state.fullShowDuration = Number(button.dataset.duration);
+  }));
+  $$('[data-timer]').forEach((button) => button.addEventListener('click', () => {
+    $$('[data-timer]').forEach((item) => item.classList.remove('is-active'));
+    button.classList.add('is-active');
+    state.timerDuration = Number(button.dataset.timer);
+    state.timerValue = state.timerDuration;
+  }));
   $('generateBtn').addEventListener('click', () => state.mode === 'fullshow' ? generateFullShow() : generateSingleRound());
   $('savedStartBtn').addEventListener('click', generateSingleRound);
   $('savedQuestionsBtn').addEventListener('click', openSaved);
   $('setupSoundBtn').addEventListener('click', toggleSound);
 }
+
+function openSaved() {
+  const sets = getSavedSets();
+  const list = $('savedList');
+  if (!list) return;
+  if (sets.length === 0) {
+    list.innerHTML = '<div class="saved-empty">لا توجد مجموعات محفوظة بعد</div>';
+  } else {
+    list.innerHTML = sets.map((set, index) => `
+      <div class="saved-item">
+        <div class="saved-item-title">${escapeHtml(set.category)} · ${set.count} سؤال</div>
+        <div class="saved-item-meta">${escapeHtml(set.date)} · ${escapeHtml(set.difficulty)}</div>
+        <div class="saved-item-actions">
+          <button class="saved-item-btn saved-item-use" data-index="${index}">استخدام</button>
+          <button class="saved-item-btn saved-item-delete" data-index="${index}">حذف</button>
+        </div>
+      </div>
+    `).join('');
+    list.querySelectorAll('.saved-item-use').forEach((btn) => btn.addEventListener('click', (e) => {
+      const idx = Number(e.target.dataset.index);
+      const set = sets[idx];
+      if (set && set.questions) {
+        state.questions = set.questions;
+        state.mode = 'single';
+        state.currentIndex = 0;
+        state.girlsScore = 0; state.boysScore = 0;
+        state.girlsRounds = 0; state.boysRounds = 0;
+        updateScores();
+        showScreen('gameScreen');
+        startShowClock();
+        renderQuestion();
+        enqueueSound('begin', .75);
+        $('savedModal').classList.add('hidden');
+      }
+    }));
+    list.querySelectorAll('.saved-item-delete').forEach((btn) => btn.addEventListener('click', (e) => {
+      const idx = Number(e.target.dataset.index);
+      sets.splice(idx, 1);
+      localStorage.setItem(SAVED_KEY, JSON.stringify(sets));
+      updateSavedCount();
+      openSaved();
+    }));
+  }
+  $('savedModal').classList.remove('hidden');
+}
+
 function initGame() {
-  $('soundToggle').addEventListener('click', toggleSound); $('startTimerBtn').addEventListener('click', startTimer); $('revealBtn').addEventListener('click', revealAnswer); $('nextBtn').addEventListener('click', nextQuestion);
-  $('girlsPlusBtn').addEventListener('click', () => applyPoint('girls')); $('girlsMinusBtn').addEventListener('click', () => subtractPoint('girls')); $('boysPlusBtn').addEventListener('click', () => applyPoint('boys')); $('boysMinusBtn').addEventListener('click', () => subtractPoint('boys'));
-  $('nextRoundBtn').addEventListener('click', finishRound); $('endGameBtn').addEventListener('click', showResults); $('newRoundBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); });
+  $('soundToggle').addEventListener('click', toggleSound);
+  $('startTimerBtn').addEventListener('click', startTimer);
+  $('revealBtn').addEventListener('click', revealAnswer);
+  $('nextBtn').addEventListener('click', nextQuestion);
+  $('girlsPlusBtn').addEventListener('click', () => applyPoint('girls'));
+  $('girlsMinusBtn').addEventListener('click', () => subtractPoint('girls'));
+  $('boysPlusBtn').addEventListener('click', () => applyPoint('boys'));
+  $('boysMinusBtn').addEventListener('click', () => subtractPoint('boys'));
+  $('nextRoundBtn').addEventListener('click', finishRound);
+  $('endGameBtn').addEventListener('click', showResults);
+  $('newRoundBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); });
   $$('.gift-button').forEach((button) => button.addEventListener('click', () => selectGift(button.dataset.gift)));
-  $('pickGirlsBtn').addEventListener('click', () => resolveGift('girls')); $('pickBoysBtn').addEventListener('click', () => resolveGift('boys')); $('cancelGiftBtn').addEventListener('click', () => { state.activeGift = null; $('activeGiftBanner').classList.add('hidden'); $$('.gift-button').forEach((button) => button.classList.remove('is-active')); });
+  $('pickGirlsBtn').addEventListener('click', () => resolveGift('girls'));
+  $('pickBoysBtn').addEventListener('click', () => resolveGift('boys'));
+  $('cancelGiftBtn').addEventListener('click', () => {
+    state.activeGift = null;
+    $('activeGiftBanner').classList.add('hidden');
+    $$('.gift-button').forEach((button) => button.classList.remove('is-active'));
+  });
   $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
   $$('.captain-done').forEach((button) => button.addEventListener('click', () => confirmCaptain(button.dataset.team, button.dataset.slot)));
-  $$('.sound-trigger').forEach((button) => button.addEventListener('click', () => playSound(button.dataset.sound, .7)));
+  $$('.sound-trigger').forEach((button) => button.addEventListener('click', () => enqueueSound(button.dataset.sound, .7)));
 }
-function initResults() { $('replayBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); }); }
-function initOverlays() { $('closeSavedBtn').addEventListener('click', () => $('savedModal').classList.add('hidden')); ['savedModal', 'roundEndOverlay'].forEach((id) => $(id).addEventListener('click', (event) => { if (event.target.id === id) $(id).classList.add('hidden'); })); }
-function init() {
-  state.questionHistory = getHistory(); state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true'; updateSoundButtons(); updateSavedCount(); initSetup(); initGame(); initResults(); initOverlays(); hideLoading(); updateTimer(); initFloatingSound(); scheduleBeginSound();
+
+function initResults() {
+  $('replayBtn').addEventListener('click', () => { stopTimer(); clearAudioQueue(); showScreen('setupScreen'); });
 }
-/* ربط زر القائمة الصوتية */
+
+function initOverlays() {
+  $('closeSavedBtn').addEventListener('click', () => $('savedModal').classList.add('hidden'));
+  ['savedModal', 'roundEndOverlay'].forEach((id) => $(id).addEventListener('click', (event) => {
+    if (event.target.id === id) $(id).classList.add('hidden');
+  }));
+}
+
 function initFloatingSound() {
-  const gameBtn = $('floatingSoundBtn'); const gameBoard = $('floatingSoundBoard');
-  if (gameBtn) { gameBtn.addEventListener('click', () => gameBoard.classList.toggle('hidden')); if ($('closeFloatingSound')) $('closeFloatingSound').addEventListener('click', () => gameBoard.classList.add('hidden')); }
-  const resultsBtn = $('floatingSoundBtnResults'); const resultsBoard = $('floatingSoundBoardResults');
-  if (resultsBtn) { resultsBtn.addEventListener('click', () => resultsBoard.classList.toggle('hidden')); if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => resultsBoard.classList.add('hidden')); }
+  const gameBtn = $('floatingSoundBtn');
+  const gameBoard = $('floatingSoundBoard');
+  if (gameBtn) {
+    gameBtn.addEventListener('click', () => gameBoard.classList.toggle('hidden'));
+    if ($('closeFloatingSound')) $('closeFloatingSound').addEventListener('click', () => gameBoard.classList.add('hidden'));
+  }
+  const resultsBtn = $('floatingSoundBtnResults');
+  const resultsBoard = $('floatingSoundBoardResults');
+  if (resultsBtn) {
+    resultsBtn.addEventListener('click', () => resultsBoard.classList.toggle('hidden'));
+    if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => resultsBoard.classList.add('hidden'));
+  }
 }
+
+function init() {
+  state.questionHistory = getHistory();
+  state.questionAnalytics = getAnalytics();
+  state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
+  updateSoundButtons();
+  updateSavedCount();
+  initSetup();
+  initGame();
+  initResults();
+  initOverlays();
+  hideLoading();
+  updateTimer();
+  initFloatingSound();
+  scheduleBeginSound();
+}
+
 document.addEventListener('DOMContentLoaded', init);

@@ -1,239 +1,624 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <meta name="theme-color" content="#080b1d" />
-    <title>عالم التحديات — Live Game Show</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <div class="app-shell">
-      <div class="ambient ambient-one"></div>
-      <div class="ambient ambient-two"></div>
-      <div class="grid-glow"></div>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>عالم التحديات — Live Game Show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+<div class="app-shell">
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="grid-glow"></div>
 
-      <!-- ===== SETUP SCREEN ===== -->
-      <main id="setupScreen" class="screen setup-screen">
-        <header class="topbar setup-topbar">
-          <div class="brand-lockup">
-            <img class="brand-mark" src="/images/logo.png" alt="شعار عالم التحديات" />
-            <div>
-              <p class="eyebrow">LIVE GAME SHOW</p>
-              <strong>عالم التحديات</strong>
-            </div>
-          </div>
-          <button id="setupSoundBtn" class="icon-button" type="button" aria-label="تشغيل الصوت">◉</button>
-        </header>
-
-        <section class="setup-hero">
-          <div class="hero-copy">
-            <div class="live-badge"><span class="live-dot"></span> جاهز للبث الآن</div>
-            <h1 class="hero-title-spaced">خلّي اللايف<br /><span>يشتعل</span></h1>
-            <p class="hero-desc">مواجهة نارية بين البنات والشباب على الهواء مباشرة! كل سؤال جولة تحدي، وكل هدية سلاح يقلب موازين المعركة — استعد لأقوى ليلة تفاعل يعيشها جمهورك لحظة بلحظة.</p>
-          </div>
-          <div class="hero-logo-wrap">
-            <div class="hero-ring"></div>
-            <img src="/images/logo.png" alt="عالم التحديات" class="hero-logo" />
-          </div>
-        </section>
-
-        <div class="host-name-display">
-          <span class="host-label">المضيف</span>
-          <strong>مروان حكيم</strong>
+  <!-- شاشة الإعداد -->
+  <section id="setupScreen" class="screen">
+    <div class="topbar setup-topbar">
+      <div class="brand-lockup">
+        <img src="/images/logo.png" alt="logo" class="brand-mark" />
+        <div>
+          <p class="eyebrow">LIVE GAME SHOW</p>
+          <strong>عالم التحديات</strong>
         </div>
-
-        <section class="weapons-section">
-          <h3>⚔️ أسلحة الفريقين</h3>
-          <div class="weapons-master-box">
-            <div class="weapons-column">
-              <div class="weapon-team-head"><img src="/images/girl-team.png" alt="فريق البنات" /><span>أسلحة</span></div>
-              <div class="weapon-row"><img src="/images/gift-rose.png"><span>-1 من الشباب</span></div>
-              <div class="weapon-row"><img src="/images/gift-heart.png"><span>درع الحماية</span></div>
-              <div class="weapon-row"><img src="/images/gift-donut.png"><span>1+ جولة</span></div>
-              <div class="weapon-row"><img src="/images/gift-corgi.png"><span>10+ جولات</span></div>
-            </div>
-            <div class="weapons-column">
-              <div class="weapon-team-head"><img src="/images/boy-team.png" alt="فريق الشباب" /><span>أسلحة</span></div>
-              <div class="weapon-row"><img src="/images/gift-tiktok.png"><span>-1 من البنات</span></div>
-              <div class="weapon-row"><img src="/images/gift-heart.png"><span>درع الحماية</span></div>
-              <div class="weapon-row"><img src="/images/gift-cat.png"><span>1+ جولة</span></div>
-              <div class="weapon-row"><img src="/images/gift-crown.png"><span>10+ جولات</span></div>
-            </div>
-            <div class="weapons-ultimate">
-              <h4>الدمار الشامل</h4>
-              <div class="weapon-row ultimate"><img src="/images/gift-galaxy.png"><span>+50 جولة</span></div>
-              <div class="weapon-row ultimate"><img src="/images/gift-wheel.png"><span>+100 جولة</span></div>
-            </div>
-          </div>
-        </section>
-
-        <section class="setup-card glass-card">
-          <div class="section-heading">
-            <div><span class="section-kicker">01 / QUICK SETUP</span><h2>جهّز المواجهة</h2></div>
-            <button id="savedQuestionsBtn" class="small-link" type="button">المحفوظات <span id="savedCount">0</span></button>
-          </div>
-
-          <div class="mode-switch" role="tablist" aria-label="طريقة اللعب">
-            <button class="mode-tab is-active" data-mode="single" type="button"><span>⚡</span><b>جولة سريعة</b><small>تبدأ فوراً</small></button>
-            <button class="mode-tab" data-mode="fullshow" type="button"><span>🏆</span><b>مسابقة</b><small>عدة جولات</small></button>
-          </div>
-
-          <div class="field-grid">
-            <label class="field" id="categoryField"><span>الفئة</span><select id="category"><option value="معلومات عامة">🧠 معلومات عامة</option><option value="جغرافيا">🌍 جغرافيا</option><option value="علوم">🔬 علوم</option><option value="تاريخ">📜 تاريخ</option><option value="أسئلة دينية">🕌 دين</option><option value="ألغاز">🧩 ألغاز</option><option value="رياضة">⚽ رياضة</option><option value="تكنولوجيا">⌘ تكنولوجيا</option><option value="اختيارات متنوعة">◈ خليط</option></select></label>
-            <label class="field"><span>المستوى</span><select id="difficulty"><option value="سهل">⭐ سهل</option><option value="متوسط" selected>⭐⭐ متوسط</option><option value="صعب">⭐⭐⭐ صعب</option></select></label>
-          </div>
-
-          <div class="count-row">
-            <div><span class="field-label">عدد الأسئلة</span><p class="field-hint">يتم الحفظ تلقائياً في بنك الأسئلة</p></div>
-            <div class="stepper"><button class="stepper-btn" data-action="minus" type="button">−</button><input id="count" type="number" min="3" max="50" value="10" /><button class="stepper-btn" data-action="plus" type="button">+</button></div>
-          </div>
-
-          <div class="option-row" id="fullShowOptions" hidden>
-            <div><span class="field-label">طول المسابقة</span><p class="field-hint">نقترح 3 جولات متصاعدة</p></div>
-            <div class="pill-group" data-group="duration"><button class="pill" data-duration="60" type="button">ساعة</button><button class="pill is-active" data-duration="120" type="button">ساعتين</button><button class="pill" data-duration="180" type="button">3 ساعات</button></div>
-          </div>
-
-          <div class="option-row">
-            <div><span class="field-label">وقت الإجابة</span><p class="field-hint">عداد واضح للمشاهدين</p></div>
-            <div class="pill-group" data-group="timer"><button class="pill" data-timer="20" type="button">20 ث</button><button class="pill is-active" data-timer="30" type="button">30 ث</button><button class="pill" data-timer="40" type="button">40 ث</button></div>
-          </div>
-
-          <div class="setup-actions">
-            <button id="generateBtn" class="primary-cta" type="button"><span class="cta-icon">🎥</span><span><b>افتح الاستوديو</b><small>توليد أسئلة AI والبدء</small></span><span class="cta-arrow">←</span></button>
-            <button id="savedStartBtn" class="primary-cta cta-secondary" type="button"><span class="cta-icon">📚</span><span><b>ابدأ الأسئلة</b><small>اسحب من بنك الأسئلة</small></span><span class="cta-arrow">←</span></button>
-            <p class="privacy-note"><span>◌</span> يتجنب الأسئلة المستخدمة ويحفظ الجولة تلقائياً</p>
-          </div>
-        </section>
-
-        <footer class="setup-footer"><span>DESIGNED FOR VERTICAL LIVE</span><span class="footer-line"></span><span>v6.0 SHOW CONTROL</span></footer>
-      </main>
-      <main id="gameScreen" class="screen game-screen hidden">
-        <header class="topbar live-topbar">
-          <div class="brand-lockup compact-brand"><img class="brand-mark" src="/images/logo.png" alt="شعار عالم التحديات" /><div><p class="eyebrow">ON AIR / 02</p><strong>عالم التحديات</strong></div></div>
-          <div class="live-status"><span class="live-dot"></span><b>LIVE</b><span id="showClock">00:00</span></div>
-          <button id="soundToggle" class="icon-button sound-on" type="button">◉</button>
-        </header>
-
-        <section class="show-stage">
-          <div class="stage-label"><span class="spark">✦</span><span>GIFT MOMENTS</span><span class="stage-label-line"></span><span>LIVE INTERACTION</span></div>
-          <div class="gift-stage">
-            <div class="gift-zone right-zone">
-              <button class="gift-button gift-corgi" data-gift="corgi" type="button"><span class="gift-emoji"><img src="/images/gift-corgi.png" alt="كورجي" /></span><span class="gift-label">كورجي</span><small>+10 جولات</small></button>
-              <button class="gift-button gift-donut" data-gift="donut" type="button"><span class="gift-emoji"><img src="/images/gift-donut.png" alt="دونتس" /></span><span class="gift-label">دونتس</span><small>+1 جولة</small></button>
-              <button class="gift-button gift-rose" data-gift="rose" type="button"><span class="gift-emoji"><img src="/images/gift-rose.png" alt="وردة" /></span><span class="gift-label">وردة</span><small>-1 شباب</small></button>
-            </div>
-            <div class="gift-center-column">
-              <button class="gift-button gift-heart central-gift" data-gift="heart" type="button"><span class="gift-emoji"><img src="/images/gift-heart.png" alt="قلب الحماية" /></span><span class="gift-label">قلب الحماية</span><small>SAFE PLAY</small></button>
-              <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-              <div class="gift-under-row">
-                <button class="gift-button gift-galaxy" data-gift="galaxy" type="button"><span class="gift-emoji"><img src="/images/gift-galaxy.png" alt="مجرة" /></span><span class="gift-label">مجرة</span><small>+50 جولة</small></button>
-                <button class="gift-button gift-wheel" data-gift="wheel" type="button"><span class="gift-emoji"><img src="/images/gift-wheel.png" alt="عجلة الحظ" /></span><span class="gift-label">عجلة الحظ</span><small>+100 جولة</small></button>
-              </div>
-            </div>
-            <div class="gift-zone left-zone">
-              <button class="gift-button gift-tiktok" data-gift="tiktok" type="button"><span class="gift-emoji"><img src="/images/gift-tiktok.png" alt="TikTok" /></span><span class="gift-label">TikTok</span><small>-1 بنات</small></button>
-              <button class="gift-button gift-cat" data-gift="cat" type="button"><span class="gift-emoji"><img src="/images/gift-cat.png" alt="Kitty" /></span><span class="gift-label">Kitty</span><small>+1 جولة</small></button>
-              <button class="gift-button gift-crown" data-gift="crown" type="button"><span class="gift-emoji"><img src="/images/gift-crown.png" alt="التاج" /></span><span class="gift-label">التاج</span><small>+10 جولات</small></button>
-            </div>
-          </div>
-          <div class="active-gift-banner hidden" id="activeGiftBanner"><span id="activeGiftText">اختر الفريق</span><div class="team-pick-buttons"><button id="pickGirlsBtn" class="pick-btn pick-girls" type="button">👧 البنات</button><button id="pickBoysBtn" class="pick-btn pick-boys" type="button">👦 الشباب</button></div><button id="cancelGiftBtn" class="cancel-pick" type="button">إلغاء</button></div>
-        </section>
-
-        <section class="score-strip">
-          <article class="team-score team-score-girls">
-            <div class="team-score-top"><span class="team-tag">TEAM PINK</span><span class="team-rounds" id="girlsRoundsWon">0 جولات</span></div>
-            <div class="team-score-main"><span class="team-title">البنات</span><strong id="girlsScoreValue">0</strong></div>
-            <div class="score-track"><i id="girlsProgress"></i></div>
-            <div class="captain-panel">
-              <span class="captain-vert-label">كابتن الفريق</span>
-              <div class="captain-slots">
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="0" maxlength="14" placeholder="كابتن 1" /><button class="captain-done" data-team="girls" data-slot="0" type="button">✓</button></div>
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="1" maxlength="14" placeholder="كابتن 2" /><button class="captain-done" data-team="girls" data-slot="1" type="button">✓</button></div>
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="2" maxlength="14" placeholder="كابتن 3" /><button class="captain-done" data-team="girls" data-slot="2" type="button">✓</button></div>
-              </div>
-            </div>
-            <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
-          </article>
-          <div class="round-puck"><span id="roundDisplay">الجولة 1</span><b>VS</b><div class="round-results" id="roundResults">0 - 0</div><small id="roundProgress">01 / 10</small></div>
-          <article class="team-score team-score-boys">
-            <div class="team-score-top"><span class="team-tag">TEAM CYAN</span><span class="team-rounds" id="boysRoundsWon">0 جولات</span></div>
-            <div class="team-score-main"><span class="team-title">الشباب</span><strong id="boysScoreValue">0</strong></div>
-            <div class="score-track"><i id="boysProgress"></i></div>
-            <div class="captain-panel">
-              <span class="captain-vert-label">كابتن الفريق</span>
-              <div class="captain-slots">
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="0" maxlength="14" placeholder="كابتن 1" /><button class="captain-done" data-team="boys" data-slot="0" type="button">✓</button></div>
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="1" maxlength="14" placeholder="كابتن 2" /><button class="captain-done" data-team="boys" data-slot="1" type="button">✓</button></div>
-                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="2" maxlength="14" placeholder="كابتن 3" /><button class="captain-done" data-team="boys" data-slot="2" type="button">✓</button></div>
-              </div>
-            </div>
-            <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
-          </article>
-        </section>
-
-        <section class="question-card glass-card question-large">
-          <div class="question-meta"><span class="category-pill" id="categoryBadge">🧠 معلومات عامة</span><span class="question-counter" id="questionCounter">السؤال 01 / 10</span></div>
-          <div class="question-main"><div class="question-number" id="questionNumber">01</div><h1 id="questionText">جاهز للسؤال الأول؟</h1></div>
-          <div class="options-grid" id="optionsGrid"></div>
-          <div class="answer-reveal hidden" id="answerReveal"><div><span class="answer-kicker">ANSWER LOCKED</span><strong id="answerText">—</strong></div><p id="explanationText">—</p></div>
-        </section>
-
-        <section class="control-deck">
-          <div class="timer-control"><div class="timer-ring" id="timerRing"><span id="timerDisplay">30</span><small>SEC</small></div><button id="startTimerBtn" class="deck-button timer-start" type="button">ابدأ العداد <span>▶</span></button></div>
-          <div class="deck-actions"><button id="revealBtn" class="deck-button reveal-button" type="button">كشف الإجابة <span>✓</span></button><button id="nextBtn" class="deck-button next-button" type="button">السؤال التالي <span>←</span></button></div>
-          <div class="score-actions"><button id="girlsPlusBtn" class="mini-control girls-control" type="button">+ بنات</button><button id="girlsMinusBtn" class="mini-control muted-control" type="button">− بنات</button><button id="boysPlusBtn" class="mini-control boys-control" type="button">+ شباب</button><button id="boysMinusBtn" class="mini-control muted-control" type="button">− شباب</button></div>
-          <div class="show-actions"><button id="nextRoundBtn" class="text-control danger-control" type="button">الجولة التالية <span>■</span></button><button id="endGameBtn" class="text-control danger-control" type="button">إنهاء اللايف <span>■</span></button><button id="newRoundBtn" class="text-control" type="button">إعادة الضبط <span>↻</span></button></div>
-        </section>
-
-        <footer class="game-footer"><span id="sourceBadge">LOCAL BANK READY</span><span>اسحب الهدية إلى اللحظة المناسبة</span><span id="questionSource">AUTO-SAVED</span></footer>
-        
-        <div class="floating-sound-controls">
-          <button id="floatingSoundBtn" class="soundboard-icon-btn" type="button" aria-label="فتح المؤثرات الصوتية">🎛️</button>
-          <div id="floatingSoundBoard" class="floating-soundboard-panel hidden">
-            <div class="soundboard-inner">
-              <div class="soundboard-header"><strong>🎛️ المؤثرات</strong><button id="closeFloatingSound" class="close-button" type="button">×</button></div>
-              <div class="soundboard-grid">
-                <button class="sound-trigger" data-sound="end" type="button">⏹️ End</button><button class="sound-trigger" data-sound="learn" type="button">🎓 Learn</button><button class="sound-trigger" data-sound="boys-mood" type="button">😎 Boys</button><button class="sound-trigger" data-sound="girls2captin" type="button">👧 Girls2</button><button class="sound-trigger" data-sound="captin2boys" type="button">👦 Boys2</button><button class="sound-trigger" data-sound="Longway" type="button">🛣️ Longway</button><button class="sound-trigger" data-sound="girls-replay-boys" type="button">👧 Replay</button><button class="sound-trigger" data-sound="boys-replay-girls" type="button">👦 Replay</button><button class="sound-trigger" data-sound="advice" type="button">💡 Advice</button><button class="sound-trigger" data-sound="teamwork" type="button">🤝 Team</button><button class="sound-trigger" data-sound="boom" type="button">💥 Boom</button><button class="sound-trigger" data-sound="days" type="button">📅 Days</button><button class="sound-trigger" data-sound="kont-feen" type="button">🤔 Kont</button><button class="sound-trigger" data-sound="laugh" type="button">😂 Laugh</button><button class="sound-trigger" data-sound="fight" type="button">⚔️ Fight</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      <main id="resultsScreen" class="screen results-screen hidden">
-        <header class="topbar"><div class="brand-lockup"><img class="brand-mark" src="/images/logo.png" alt="شعار عالم التحديات" /><div><p class="eyebrow">FINAL BROADCAST</p><strong>عالم التحديات</strong></div></div><div class="live-status"><span class="live-dot"></span><b>SHOW END</b></div></header>
-        <section class="results-hero"><div class="winner-orbit"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><img src="/images/logo.png" alt="كأس عالم التحديات" /></div><p class="section-kicker">THE FINAL SCORE</p><h1 id="winnerText">ليلة استثنائية</h1><p class="results-subtitle">انتهت الجولة، لكن لحظة الفوز تبقى على الهواء.</p></section>
-        <section class="final-scoreboard glass-card">
-          <div class="final-team final-girls"><img src="/images/girl-team.png" alt="فريق البنات" /><div><span>TEAM PINK</span><strong>البنات</strong></div><b id="finalGirlsScore">0</b></div>
-          <div class="final-vs">VS</div>
-          <div class="final-team final-boys"><img src="/images/boy-team.png" alt="فريق الشباب" /><div><span>TEAM CYAN</span><strong>الشباب</strong></div><b id="finalBoysScore">0</b></div>
-        </section>
-        <section class="results-controls"><button id="replayBtn" class="primary-cta" type="button"><span class="cta-icon">↻</span><span><b>جولة جديدة</b><small>العودة إلى الاستوديو</small></span><span class="cta-arrow">←</span></button></section>
-        
-        <div class="floating-sound-controls">
-          <button id="floatingSoundBtnResults" class="soundboard-icon-btn" type="button" aria-label="فتح المؤثرات الصوتية">🎛️</button>
-          <div id="floatingSoundBoardResults" class="floating-soundboard-panel hidden">
-            <div class="soundboard-inner">
-              <div class="soundboard-header"><strong>🎛️ المؤثرات</strong><button id="closeFloatingSoundResults" class="close-button" type="button">×</button></div>
-              <div class="soundboard-grid"><button class="sound-trigger" data-sound="end" type="button">⏹️ End</button><button class="sound-trigger" data-sound="learn" type="button">🎓 Learn</button><button class="sound-trigger" data-sound="boys-mood" type="button">😎 Boys</button><button class="sound-trigger" data-sound="girls2captin" type="button">👧 Girls2</button><button class="sound-trigger" data-sound="captin2boys" type="button">👦 Boys2</button><button class="sound-trigger" data-sound="Longway" type="button">🛣️ Longway</button><button class="sound-trigger" data-sound="girls-replay-boys" type="button">👧 Replay</button><button class="sound-trigger" data-sound="boys-replay-girls" type="button">👦 Replay</button><button class="sound-trigger" data-sound="advice" type="button">💡 Advice</button><button class="sound-trigger" data-sound="teamwork" type="button">🤝 Team</button><button class="sound-trigger" data-sound="boom" type="button">💥 Boom</button><button class="sound-trigger" data-sound="days" type="button">📅 Days</button><button class="sound-trigger" data-sound="kont-feen" type="button">🤔 Kont</button><button class="sound-trigger" data-sound="laugh" type="button">😂 Laugh</button><button class="sound-trigger" data-sound="fight" type="button">⚔️ Fight</button></div>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      <div id="captainToast" class="captain-toast hidden"><span class="toast-icon">✦</span><div><small id="captainToastKicker">CAPTAIN INTRO</small><strong id="captainToastText">كابتن لينا دخلت المواجهة</strong></div></div>
-      <div id="roundEndOverlay" class="overlay hidden"><div class="overlay-card glass-card"><span class="overlay-kicker">ROUND COMPLETE</span><div class="overlay-trophy">✦</div><h2 id="roundEndNumber">الجولة 1</h2><p id="roundEndWinner">مبروك للفريق الفائز</p><div class="overlay-score"><span><b id="roundEndGirlsScore">0</b><small>البنات</small></span><i>VS</i><span><b id="roundEndBoysScore">0</b><small>الشباب</small></span></div><button id="roundEndContinueBtn" class="primary-cta" type="button"><span class="cta-icon">→</span><span><b>استمرار العرض</b><small>نبدأ الجولة التالية</small></span><span class="cta-arrow">←</span></button></div></div>
-      <div id="savedModal" class="overlay hidden"><div class="overlay-card glass-card saved-card"><div class="modal-heading"><div><span class="section-kicker">QUESTION VAULT</span><h2>بنك الأسئلة</h2></div><button id="closeSavedBtn" class="close-button" type="button">×</button></div><div id="savedList" class="saved-list"></div></div></div>
-      <div id="loadingOverlay" class="overlay loading-overlay hidden"><div class="loading-card glass-card"><div class="loader-orbit"><span></span><span></span><span></span></div><span class="section-kicker">SHOW CONTROL</span><h2 id="loadingText">جاري التجهيز...</h2><p>نرتب الأسئلة ونجهز اللحظة الأولى</p></div></div>
-      <div id="captainRevealOverlay" class="captain-reveal hidden">
-        <span class="captain-reveal-kicker">ON AIR CAPTAIN</span>
-        <h2 id="captainRevealName">—</h2>
       </div>
-      <canvas id="confettiCanvas"></canvas>
+      <button id="setupSoundBtn" class="icon-button" aria-label="toggle sound" title="تفعيل الصوت">○</button>
     </div>
-    <script src="/app.js"></script>
-  </body>
+
+    <div class="setup-hero">
+      <div class="hero-copy">
+        <span class="live-badge"><span class="live-dot"></span> جاهز للبث الآن</span>
+        <h1>خلّي اللايف<br /><span>يشتعل 🔥</span></h1>
+        <p class="hero-desc">مواجهة نارية بين البنات والشباب على الهواء مباشرة! كل سؤال جولة تحدي، وكل هدية سلاح يقلب موازين المعركة.</p>
+      </div>
+      <div class="hero-logo-wrap">
+        <div class="hero-ring"></div>
+        <img src="/images/logo.png" alt="logo" class="hero-logo" />
+      </div>
+    </div>
+
+    <div class="host-name-display">
+      <span class="host-label">المضيف</span>
+      <strong>مروان حكيم</strong>
+    </div>
+
+    <div class="weapons-section">
+      <h3>⚔️ أسلحة الفريقين</h3>
+      <div class="weapons-master-box">
+        <div class="weapons-column">
+          <div class="weapon-team-head">
+            <img src="/images/girl-team.png" alt="girls" />
+            <span>أسلحة البنات</span>
+          </div>
+          <div class="weapon-row"><img src="/images/gift-rose.png" alt="" /><span>-1 من الشباب</span></div>
+          <div class="weapon-row"><img src="/images/gift-heart.png" alt="" /><span>درع الحماية</span></div>
+          <div class="weapon-row"><img src="/images/gift-donut.png" alt="" /><span>+1 جولة</span></div>
+          <div class="weapon-row"><img src="/images/gift-corgi.png" alt="" /><span>+10 جولات</span></div>
+        </div>
+        <div class="weapons-column">
+          <div class="weapon-team-head">
+            <img src="/images/boy-team.png" alt="boys" />
+            <span>أسلحة الشباب</span>
+          </div>
+          <div class="weapon-row"><img src="/images/gift-tiktok.png" alt="" /><span>-1 من البنات</span></div>
+          <div class="weapon-row"><img src="/images/gift-heart.png" alt="" /><span>درع الحماية</span></div>
+          <div class="weapon-row"><img src="/images/gift-cat.png" alt="" /><span>+1 جولة</span></div>
+          <div class="weapon-row"><img src="/images/gift-crown.png" alt="" /><span>+10 جولات</span></div>
+        </div>
+        <div class="weapons-ultimate">
+          <h4>💥 الدمار الشامل</h4>
+          <div class="weapon-row ultimate"><img src="/images/gift-galaxy.png" alt="" /><span>+50 جولة</span></div>
+          <div class="weapon-row ultimate"><img src="/images/gift-wheel.png" alt="" /><span>+100 جولة</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card setup-card">
+      <div class="section-heading">
+        <div>
+          <p class="section-kicker">01 / QUICK SETUP</p>
+          <h2>جهّز المواجهة</h2>
+        </div>
+        <button id="savedQuestionsBtn" class="small-link">
+          <span id="savedCount">0</span> المحفوظات
+        </button>
+      </div>
+
+      <div class="mode-switch">
+        <button type="button" class="mode-tab is-active" data-mode="single">
+          <span>⚡</span>
+          <b>جولة سريعة</b>
+          <small>تبدأ فوراً</small>
+        </button>
+        <button type="button" class="mode-tab" data-mode="fullshow">
+          <span>🏆</span>
+          <b>مسابقة</b>
+          <small>عدة جولات</small>
+        </button>
+      </div>
+
+      <div id="categoryField" class="field-grid">
+        <div class="field">
+          <span>الفئة 🧠</span>
+          <select id="category">
+            <option value="اختيارات متنوعة">◈ خليط</option>
+            <option value="معلومات عامة">معلومات عامة</option>
+            <option value="جغرافيا">🌍 جغرافيا</option>
+            <option value="علوم">🔬 علوم</option>
+            <option value="تاريخ">📜 تاريخ</option>
+            <option value="دين">🕌 دين</option>
+            <option value="لغز">🧩 ألغاز</option>
+            <option value="رياضة">⚽ رياضة</option>
+            <option value="تكنولوجيا">⌘ تكنولوجيا</option>
+          </select>
+        </div>
+        <div class="field">
+          <span>المستوى ◈</span>
+          <select id="difficulty">
+            <option value="متوسط">⭐⭐ متوسط</option>
+            <option value="سهل">⭐ سهل</option>
+            <option value="صعب">⭐⭐⭐ صعب</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="count-row">
+        <div>
+          <span class="field-label">عدد الأسئلة</span>
+          <p class="field-hint">يتم الحفظ تلقائياً في بنك الأسئلة</p>
+        </div>
+        <div class="stepper">
+          <button type="button" class="stepper-btn" data-action="minus">−</button>
+          <input id="count" type="text" value="10" inputmode="numeric" />
+          <button type="button" class="stepper-btn" data-action="plus">+</button>
+        </div>
+      </div>
+
+      <div id="fullShowOptions" class="hidden">
+        <div class="option-row">
+          <div>
+            <span class="field-label">طول المسابقة</span>
+            <p class="field-hint">نقترح 3 جولات متصاعدة</p>
+          </div>
+          <div class="pill-group">
+            <button type="button" class="pill is-active" data-duration="60">ساعة</button>
+            <button type="button" class="pill" data-duration="120">ساعتين</button>
+            <button type="button" class="pill" data-duration="180">3 ساعات</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="option-row">
+        <div>
+          <span class="field-label">وقت الإجابة</span>
+          <p class="field-hint">عداد واضح للمشاهدين</p>
+        </div>
+        <div class="pill-group">
+          <button type="button" class="pill" data-timer="20">20 ث</button>
+          <button type="button" class="pill is-active" data-timer="30">30 ث</button>
+          <button type="button" class="pill" data-timer="40">40 ث</button>
+        </div>
+      </div>
+
+      <div class="setup-actions">
+        <button id="generateBtn" type="button" class="primary-cta">
+          <span class="cta-icon">🎥</span>
+          <div>
+            <b>افتح الاستوديو</b>
+            <small>توليد أسئلة AI والبدء</small>
+          </div>
+          <span class="cta-arrow">←</span>
+        </button>
+        <button id="savedStartBtn" type="button" class="primary-cta cta-secondary">
+          <span class="cta-icon">📚</span>
+          <div>
+            <b>ابدأ الأسئلة</b>
+            <small>اسحب من بنك الأسئلة</small>
+          </div>
+          <span class="cta-arrow">←</span>
+        </button>
+      </div>
+
+      <p class="privacy-note">
+        <span>✓</span> يتجنب الأسئلة المستخدمة ويحفظ الجولة تلقائياً
+      </p>
+    </div>
+
+    <div class="setup-footer">
+      <span class="footer-line"></span>
+      DESIGNED FOR VERTICAL LIVE · v6.1 SHOW CONTROL
+      <span class="footer-line"></span>
+    </div>
+  </section>
+
+  <!-- شاشة اللعبة -->
+  <section id="gameScreen" class="screen game-screen hidden">
+    <div class="topbar live-topbar compact-brand">
+      <div class="brand-lockup">
+        <img src="/images/logo.png" alt="logo" class="brand-mark" />
+        <div>
+          <p class="eyebrow">ON AIR / 02</p>
+          <strong>عالم التحديات</strong>
+        </div>
+      </div>
+      <div class="live-status">
+        <b>LIVE</b>
+        <span id="showClock">00:00</span>
+      </div>
+      <button id="soundToggle" class="icon-button sound-on" aria-label="toggle sound">○</button>
+    </div>
+
+    <div class="show-stage">
+      <div class="stage-label">
+        <span class="spark">✦</span>
+        <span>GIFT MOMENTS</span>
+        <span class="stage-label-line"></span>
+        <span>LIVE INTERACTION</span>
+      </div>
+
+      <div class="gift-stage">
+        <div class="gift-zone right-zone">
+          <button type="button" class="gift-button gift-corgi" data-gift="corgi">
+            <span class="gift-emoji"><img src="/images/gift-corgi.png" alt="" /></span>
+            <span class="gift-label">كورجي</span>
+            <small>+10 جولات</small>
+          </button>
+          <button type="button" class="gift-button gift-donut" data-gift="donut">
+            <span class="gift-emoji"><img src="/images/gift-donut.png" alt="" /></span>
+            <span class="gift-label">دونتس</span>
+            <small>+1 جولة</small>
+          </button>
+        </div>
+
+        <div class="gift-center-column">
+          <div class="orbit orbit-one"></div>
+          <div class="orbit orbit-two"></div>
+          <button type="button" class="gift-button gift-rose central-gift" data-gift="rose">
+            <span class="gift-emoji"><img src="/images/gift-rose.png" alt="" /></span>
+            <span class="gift-label">وردة</span>
+            <small>-1 شباب</small>
+          </button>
+          <div class="gift-under-row">
+            <button type="button" class="gift-button gift-heart" data-gift="heart">
+              <span class="gift-emoji">🛡️</span>
+              <span class="gift-label">الحماية</span>
+              <small>SAFE PLAY</small>
+            </button>
+          </div>
+        </div>
+
+        <div class="gift-zone left-zone">
+          <button type="button" class="gift-button gift-galaxy" data-gift="galaxy">
+            <span class="gift-emoji"><img src="/images/gift-galaxy.png" alt="" /></span>
+            <span class="gift-label">مجرة</span>
+            <small>+50 جولة</small>
+          </button>
+          <button type="button" class="gift-button gift-wheel" data-gift="wheel">
+            <span class="gift-emoji"><img src="/images/gift-wheel.png" alt="" /></span>
+            <span class="gift-label">عجلة الحظ</span>
+            <small>+100 جولة</small>
+          </button>
+        </div>
+      </div>
+
+      <div class="gift-stage" style="min-height: 90px; margin-top: -6px;">
+        <div class="gift-zone right-zone">
+          <button type="button" class="gift-button gift-tiktok" data-gift="tiktok">
+            <span class="gift-emoji">♪</span>
+            <span class="gift-label">TikTok</span>
+            <small>-1 بنات</small>
+          </button>
+        </div>
+        <div class="gift-center-column" style="min-height: 90px;">
+          <div class="orbit orbit-one" style="width: 90px; height: 40px;"></div>
+        </div>
+        <div class="gift-zone left-zone">
+          <button type="button" class="gift-button gift-cat" data-gift="cat">
+            <span class="gift-emoji"><img src="/images/gift-cat.png" alt="" /></span>
+            <span class="gift-label">Kitty</span>
+            <small>+1 جولة</small>
+          </button>
+          <button type="button" class="gift-button gift-crown" data-gift="crown">
+            <span class="gift-emoji"><img src="/images/gift-crown.png" alt="" /></span>
+            <span class="gift-label">التاج</span>
+            <small>+10 جولات</small>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="activeGiftBanner" class="active-gift-banner hidden">
+      <span id="activeGiftText">اختر الفريق</span>
+      <div class="team-pick-buttons">
+        <button type="button" id="pickGirlsBtn" class="pick-btn pick-girls">👧 البنات</button>
+        <button type="button" id="pickBoysBtn" class="pick-btn pick-boys">👦 الشباب</button>
+        <button type="button" id="cancelGiftBtn" class="cancel-pick">إلغاء</button>
+      </div>
+    </div>
+
+    <div class="score-strip">
+      <div class="team-score team-score-girls">
+        <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
+        <div class="team-score-top">
+          <span class="team-tag">TEAM PINK</span>
+          <span id="girlsRoundsWon" class="team-rounds">0 جولات</span>
+        </div>
+        <div class="team-score-main">
+          <span class="team-title">البنات</span>
+          <strong id="girlsScoreValue">0</strong>
+        </div>
+        <div class="score-track"><i id="girlsProgress"></i></div>
+        <div class="captain-panel">
+          <span class="captain-vert-label">كابتن الفريق</span>
+          <div class="captain-slots">
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="girls" data-slot="0" placeholder="كابتن 1" maxlength="20" />
+              <button type="button" class="captain-done" data-team="girls" data-slot="0">✓</button>
+            </div>
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="girls" data-slot="1" placeholder="كابتن 2" maxlength="20" />
+              <button type="button" class="captain-done" data-team="girls" data-slot="1">✓</button>
+            </div>
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="girls" data-slot="2" placeholder="كابتن 3" maxlength="20" />
+              <button type="button" class="captain-done" data-team="girls" data-slot="2">✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="round-puck">
+        <span id="roundDisplay">الجولة 1</span>
+        <b id="roundResults">0 - 0</b>
+        <small>VS</small>
+      </div>
+
+      <div class="team-score team-score-boys">
+        <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
+        <div class="team-score-top">
+          <span class="team-tag">TEAM CYAN</span>
+          <span id="boysRoundsWon" class="team-rounds">0 جولات</span>
+        </div>
+        <div class="team-score-main">
+          <span class="team-title">الشباب</span>
+          <strong id="boysScoreValue">0</strong>
+        </div>
+        <div class="score-track"><i id="boysProgress"></i></div>
+        <div class="captain-panel">
+          <span class="captain-vert-label">كابتن الفريق</span>
+          <div class="captain-slots">
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="boys" data-slot="0" placeholder="كابتن 1" maxlength="20" />
+              <button type="button" class="captain-done" data-team="boys" data-slot="0">✓</button>
+            </div>
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="boys" data-slot="1" placeholder="كابتن 2" maxlength="20" />
+              <button type="button" class="captain-done" data-team="boys" data-slot="1">✓</button>
+            </div>
+            <div class="captain-slot">
+              <input type="text" class="captain-input" data-team="boys" data-slot="2" placeholder="كابتن 3" maxlength="20" />
+              <button type="button" class="captain-done" data-team="boys" data-slot="2">✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass-card question-card">
+      <div class="question-meta">
+        <span id="categoryBadge" class="category-pill">🧠 معلومات عامة</span>
+        <span id="questionCounter" class="question-counter">السؤال 01 / 10</span>
+      </div>
+
+      <div class="question-main">
+        <div id="questionNumber" class="question-number">01</div>
+        <h1 id="questionText">جاهز للسؤال الأول؟</h1>
+      </div>
+
+      <div id="optionsGrid" class="options-grid"></div>
+
+      <div id="answerReveal" class="answer-reveal hidden">
+        <div>
+          <span class="answer-kicker">ANSWER LOCKED</span>
+          <strong id="answerText">—</strong>
+        </div>
+        <p id="explanationText">—</p>
+      </div>
+
+      <div class="control-deck">
+        <div class="timer-control">
+          <div id="timerRing" class="timer-ring">
+            <div>
+              <span id="timerDisplay">30</span>
+              <small>SEC</small>
+            </div>
+          </div>
+          <button id="startTimerBtn" type="button" class="deck-button timer-start">
+            <span>▶</span> ابدأ العداد
+          </button>
+        </div>
+
+        <div class="deck-actions">
+          <button id="revealBtn" type="button" class="deck-button reveal-button">
+            <span>✓</span> كشف الإجابة
+          </button>
+          <button id="nextBtn" type="button" class="deck-button next-button">
+            <span>←</span> السؤال التالي
+          </button>
+        </div>
+
+        <div class="score-actions">
+          <button id="girlsPlusBtn" type="button" class="mini-control girls-control">+ بنات</button>
+          <button id="girlsMinusBtn" type="button" class="mini-control girls-control">− بنات</button>
+          <button id="boysPlusBtn" type="button" class="mini-control boys-control">+ شباب</button>
+          <button id="boysMinusBtn" type="button" class="mini-control boys-control">− شباب</button>
+        </div>
+
+        <div class="show-actions">
+          <button id="nextRoundBtn" type="button" class="text-control">■ الجولة التالية</button>
+          <button id="endGameBtn" type="button" class="text-control danger-control">■ إنهاء اللايف</button>
+          <button id="newRoundBtn" type="button" class="text-control">↻ إعادة الضبط</button>
+        </div>
+      </div>
+
+      <div class="question-meta" style="margin-top: 10px;">
+        <span id="sourceBadge" class="category-pill">LOCAL BANK READY</span>
+        <span id="questionSource" class="question-counter">AUTO-SAVED</span>
+      </div>
+    </div>
+
+    <div class="game-footer">
+      <span>🎛️</span>
+      <span class="footer-line"></span>
+      <span>SHOW CONTROL</span>
+      <span class="footer-line"></span>
+      <span id="roundProgress">01 / 10</span>
+    </div>
+
+    <div class="floating-sound-controls">
+      <button id="floatingSoundBtn" class="soundboard-icon-btn" title="المؤثرات الصوتية">🎛️</button>
+    </div>
+
+    <div id="floatingSoundBoard" class="floating-soundboard-panel hidden">
+      <div class="soundboard-inner">
+        <div class="soundboard-header">
+          <strong>🎛️ المؤثرات</strong>
+          <button id="closeFloatingSound" class="close-button">×</button>
+        </div>
+        <div class="soundboard-grid">
+          <button type="button" class="sound-trigger" data-sound="end">⏹️ End</button>
+          <button type="button" class="sound-trigger" data-sound="learn">🎓 Learn</button>
+          <button type="button" class="sound-trigger" data-sound="boys-mood">😎 Boys</button>
+          <button type="button" class="sound-trigger" data-sound="girls2captin">👧 Girls2</button>
+          <button type="button" class="sound-trigger" data-sound="captin2boys">👦 Boys2</button>
+          <button type="button" class="sound-trigger" data-sound="Longway">🛣️ Longway</button>
+          <button type="button" class="sound-trigger" data-sound="girls-replay-boys">👧 Replay</button>
+          <button type="button" class="sound-trigger" data-sound="boys-replay-girls">👦 Replay</button>
+          <button type="button" class="sound-trigger" data-sound="advice">💡 Advice</button>
+          <button type="button" class="sound-trigger" data-sound="teamwork">🤝 Team</button>
+          <button type="button" class="sound-trigger" data-sound="boom">💥 Boom</button>
+          <button type="button" class="sound-trigger" data-sound="days">📅 Days</button>
+          <button type="button" class="sound-trigger" data-sound="kont-feen">🤔 Kont</button>
+          <button type="button" class="sound-trigger" data-sound="fight">⚔️ Fight</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- شاشة النتائج -->
+  <section id="resultsScreen" class="screen results-screen hidden">
+    <div class="topbar compact-brand">
+      <div class="brand-lockup">
+        <img src="/images/logo.png" alt="logo" class="brand-mark" />
+        <div>
+          <p class="eyebrow">FINAL BROADCAST</p>
+          <strong>عالم التحديات</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-hero">
+      <div class="winner-orbit">
+        <img src="/images/logo.png" alt="trophy" />
+      </div>
+      <h1 id="winnerText">SHOW END</h1>
+      <p class="results-subtitle">THE FINAL SCORE</p>
+    </div>
+
+    <div class="glass-card final-scoreboard">
+      <div class="final-team final-girls">
+        <img src="/images/girl-team.png" alt="girls" />
+        <div>
+          <span>TEAM PINK</span>
+          <strong>البنات</strong>
+        </div>
+        <b id="finalGirlsScore">0</b>
+      </div>
+      <div class="final-vs">VS</div>
+      <div class="final-team final-boys">
+        <img src="/images/boy-team.png" alt="boys" />
+        <div>
+          <span>TEAM CYAN</span>
+          <strong>الشباب</strong>
+        </div>
+        <b id="finalBoysScore">0</b>
+      </div>
+    </div>
+
+    <div class="setup-actions" style="margin-top: 18px;">
+      <button id="replayBtn" type="button" class="primary-cta">
+        <span class="cta-icon">↻</span>
+        <div>
+          <b>جولة جديدة</b>
+          <small>العودة إلى الاستوديو</small>
+        </div>
+        <span class="cta-arrow">←</span>
+      </button>
+    </div>
+
+    <div class="floating-sound-controls">
+      <button id="floatingSoundBtnResults" class="soundboard-icon-btn" title="المؤثرات الصوتية">🎛️</button>
+    </div>
+
+    <div id="floatingSoundBoardResults" class="floating-soundboard-panel hidden">
+      <div class="soundboard-inner">
+        <div class="soundboard-header">
+          <strong>🎛️ المؤثرات</strong>
+          <button id="closeFloatingSoundResults" class="close-button">×</button>
+        </div>
+        <div class="soundboard-grid">
+          <button type="button" class="sound-trigger" data-sound="end">⏹️ End</button>
+          <button type="button" class="sound-trigger" data-sound="learn">🎓 Learn</button>
+          <button type="button" class="sound-trigger" data-sound="boys-mood">😎 Boys</button>
+          <button type="button" class="sound-trigger" data-sound="girls2captin">👧 Girls2</button>
+          <button type="button" class="sound-trigger" data-sound="captin2boys">👦 Boys2</button>
+          <button type="button" class="sound-trigger" data-sound="Longway">🛣️ Longway</button>
+          <button type="button" class="sound-trigger" data-sound="girls-replay-boys">👧 Replay</button>
+          <button type="button" class="sound-trigger" data-sound="boys-replay-girls">👦 Replay</button>
+          <button type="button" class="sound-trigger" data-sound="advice">💡 Advice</button>
+          <button type="button" class="sound-trigger" data-sound="teamwork">🤝 Team</button>
+          <button type="button" class="sound-trigger" data-sound="boom">💥 Boom</button>
+          <button type="button" class="sound-trigger" data-sound="days">📅 Days</button>
+          <button type="button" class="sound-trigger" data-sound="kont-feen">🤔 Kont</button>
+          <button type="button" class="sound-trigger" data-sound="fight">⚔️ Fight</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Overlay: نهاية الجولة -->
+  <div id="roundEndOverlay" class="overlay hidden">
+    <div class="glass-card overlay-card">
+      <span class="overlay-kicker">✦ CAPTAIN INTRO</span>
+      <div class="overlay-trophy">🏆</div>
+      <h2>ROUND COMPLETE</h2>
+      <p id="roundEndWinner">مبروك للفريق الفائز</p>
+      <div class="overlay-score">
+        <span>
+          <b id="roundEndGirlsScore">0</b>
+          <small>البنات</small>
+        </span>
+        <i>VS</i>
+        <span>
+          <b id="roundEndBoysScore">0</b>
+          <small>الشباب</small>
+        </span>
+      </div>
+      <p id="roundEndNumber" style="text-align:center; color: var(--muted); font-size: 11px;">الجولة 1</p>
+      <button id="roundEndContinueBtn" type="button" class="primary-cta" style="margin-top: 14px;">
+        <span class="cta-icon">→</span>
+        <div>
+          <b>استمرار العرض</b>
+          <small>نبدأ الجولة التالية</small>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Overlay: بنك الأسئلة المحفوظة -->
+  <div id="savedModal" class="overlay hidden">
+    <div class="glass-card overlay-card">
+      <div class="modal-heading">
+        <div>
+          <p class="overlay-kicker">QUESTION VAULT</p>
+          <h2>بنك الأسئلة</h2>
+        </div>
+        <button id="closeSavedBtn" class="close-button">×</button>
+      </div>
+      <div id="savedList" class="saved-list"></div>
+    </div>
+  </div>
+
+  <!-- Overlay: التحميل -->
+  <div id="loadingOverlay" class="overlay loading-overlay hidden">
+    <div class="glass-card overlay-card loading-card">
+      <div class="loader-orbit"><span></span></div>
+      <h2 id="loadingText">جاري التجهيز...</h2>
+      <p>نرتب الأسئلة ونجهز اللحظة الأولى</p>
+    </div>
+  </div>
+
+  <!-- Toast: إشعار الكابتن -->
+  <div id="captainToast" class="captain-toast hidden">
+    <span class="toast-icon">✦</span>
+    <div>
+      <small id="captainToastKicker">ON AIR CAPTAIN</small>
+      <strong id="captainToastText">—</strong>
+    </div>
+  </div>
+
+  <!-- Reveal: اسم الكابتن -->
+  <div id="captainRevealOverlay" class="captain-reveal hidden">
+    <span class="captain-reveal-kicker">✦ CAPTAIN INTRO</span>
+    <h2 id="captainRevealName">—</h2>
+  </div>
+
+  <canvas id="confettiCanvas"></canvas>
+</div>
+
+<script src="/app.js"></script>
+</body>
 </html>
