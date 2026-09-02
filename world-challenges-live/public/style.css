@@ -1,4 +1,4 @@
-/* Live Game Show — Ultimate Broadcast UI v6.1 */
+/* Live Game Show — Ultimate Broadcast UI v6.2 */
 :root {
   --ink: #080b1d; --ink-soft: #11162f; --panel: rgba(20, 25, 57, .76);
   --line: rgba(159, 171, 255, .17); --text: #f6f7ff; --muted: #9298bf;
@@ -103,8 +103,9 @@ img { max-width: 100%; }
 }
 .hero-ring::before { top: 13px; left: 34px; }
 .hero-ring::after { bottom: 20px; right: 22px; background: var(--cyan); box-shadow: 0 0 12px var(--cyan); }
+/* التعديل 1: تكبير اللوجو ليتناسب مع الدائرة المحيطة (166px → 140px) */
 .hero-logo {
-  position: relative; z-index: 1; width: 150px; height: 150px;
+  position: relative; z-index: 1; width: 140px; height: 140px;
   object-fit: contain; filter: drop-shadow(0 16px 30px rgba(0,0,0,.4));
   animation: logoFloat 4s ease-in-out infinite;
 }
@@ -304,7 +305,6 @@ img { max-width: 100%; }
   transform: translateY(-3px) scale(1.04);
 }
 .gift-button:active { transform: translateY(0) scale(.95); }
-/* النقطة 3: تكبير صور الهدايا بنسبة قليلة */
 .gift-emoji {
   display: grid; place-items: center; width: 32px; height: 32px;
   border-radius: 10px; background: rgba(255,255,255,.08);
@@ -736,7 +736,8 @@ img { max-width: 100%; }
   .app-shell { padding: 22px 24px 30px; }
   .setup-hero { min-height: 275px; }
   .hero-copy h1 { font-size: 74px; }
-  .hero-logo { width: 205px; height: 205px; }
+  /* التعديل 1: تكبير اللوجو للشاشات الكبيرة (223px ring → 190px logo) */
+  .hero-logo { width: 190px; height: 190px; }
   .hero-ring { width: 223px; height: 223px; }
   .hero-logo-wrap { min-height: 250px; }
   .setup-card { padding: 24px 24px 18px; }

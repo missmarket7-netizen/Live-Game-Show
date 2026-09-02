@@ -5,7 +5,8 @@ const state = {
   soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
   fullShowDuration: 120, shieldTeam: null,
   captains: { girls: ['', '', ''], boys: ['', '', ''] },
-  audioQueue: [], isPlayingAudio: false, lastGiftClick: 0, questionAnalytics: {}
+  audioQueue: [], isPlayingAudio: false, lastGiftClick: 0, questionAnalytics: {},
+  fullShowUsedQuestions: []
 };
 const SAVED_KEY = 'lgs_saved_sets_v7';
 const HISTORY_KEY = 'lgs_question_history_v7';
@@ -75,10 +76,14 @@ function getAudio(key) {
   return audio;
 }
 
-function enqueueSound(key, volume) {
+/* تعديل: دعم callback لتنفيذ تسلسل الأصوات */
+function enqueueSound(key, volume, callback) {
   if (typeof volume === 'undefined') volume = 0.55;
-  if (!state.soundEnabled) return;
-  state.audioQueue.push({ key: key, volume: volume });
+  if (!state.soundEnabled) {
+    if (callback) setTimeout(callback, 100);
+    return;
+  }
+  state.audioQueue.push({ key: key, volume: volume, callback: callback });
   processAudioQueue();
 }
 
@@ -91,18 +96,30 @@ function processAudioQueue() {
     audio.volume = item.volume;
     audio.onended = function() {
       state.isPlayingAudio = false;
+      if (item.callback) {
+        try { item.callback(); } catch (e) {}
+      }
       setTimeout(processAudioQueue, 150);
     };
     audio.onerror = function() {
       state.isPlayingAudio = false;
+      if (item.callback) {
+        try { item.callback(); } catch (e) {}
+      }
       processAudioQueue();
     };
     audio.play().catch(function() {
       state.isPlayingAudio = false;
+      if (item.callback) {
+        try { item.callback(); } catch (e) {}
+      }
       processAudioQueue();
     });
   } catch (e) {
     state.isPlayingAudio = false;
+    if (item.callback) {
+      try { item.callback(); } catch (err) {}
+    }
     processAudioQueue();
   }
 }
@@ -112,7 +129,6 @@ function clearAudioQueue() {
   state.isPlayingAudio = false;
 }
 
-/* النقطة 1: صوت begin يعمل فقط في شاشة الإعداد بعد تفعيل زر الصوت */
 function scheduleBeginSound() {
   setTimeout(function() {
     var setupScreen = $('setupScreen');
@@ -193,7 +209,6 @@ function shuffle(list) {
   return items;
 }
 
-/* النقطة 1: عند تفعيل الصوت، يعمل begin فقط في شاشة الإعداد */
 function toggleSound() {
   state.soundEnabled = !state.soundEnabled;
   localStorage.setItem(SOUND_KEY, String(state.soundEnabled));
@@ -281,7 +296,6 @@ function stopTimer() {
   $('startTimerBtn').disabled = false;
 }
 
-/* النقطة 2: صوت tick يعمل فقط عند بدء المؤقت (زر ابدأ العداد) */
 function startTimer() {
   if (state.isTimerRunning || state.isRevealed) return;
   state.isTimerRunning = true;
@@ -382,7 +396,6 @@ function closeGiftBanner() {
   for (var i = 0; i < giftButtons.length; i++) giftButtons[i].classList.remove('is-active');
 }
 
-/* النقاط 5-7: هدايا مباشرة وهدايا تحتاج اختيار فريق */
 function selectGift(gift) {
   var now = Date.now();
   if (now - state.lastGiftClick < 800) return;
@@ -393,8 +406,6 @@ function selectGift(gift) {
     if (giftButtons[i].dataset.gift === gift) giftButtons[i].classList.add('is-active');
     else giftButtons[i].classList.remove('is-active');
   }
-
-  /* الهدايا التي تحتاج اختيار فريق: دونت، كورجي، مجرة، عجلة، قلب الحماية */
   if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart' || gift === 'donut' || gift === 'corgi') {
     var text = '';
     if (gift === 'heart') text = 'اختر الفريق لتفعيل درع الحماية';
@@ -405,8 +416,6 @@ function selectGift(gift) {
     $('activeGiftBanner').classList.remove('hidden');
     return;
   }
-
-  /* الهدايا المباشرة: وردة، تيك توك، كيتي، تاج */
   if (gift === 'rose') {
     subtractPoint('boys', true);
     enqueueSound('gift-rose', 0.6);
@@ -428,7 +437,6 @@ function selectGift(gift) {
     showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED');
     updateScores();
   }
-
   setTimeout(function() {
     state.activeGift = null;
     var btns = $$('.gift-button');
@@ -436,12 +444,9 @@ function selectGift(gift) {
   }, 450);
 }
 
-/* النقاط 5-7: معالجة اختيار الفريق للهدايا التي تحتاج اختيار */
 function resolveGift(team) {
   var gift = state.activeGift;
   if (!gift) return;
-
-  /* قلب الحماية */
   if (gift === 'heart') {
     state.shieldTeam = team;
     enqueueSound('gift-heart', 0.7);
@@ -450,8 +455,6 @@ function resolveGift(team) {
     updateScores();
     return;
   }
-
-  /* النقطة 5: دونت - بنات: gift-donut | شباب: gift-cat */
   if (gift === 'donut') {
     if (team === 'girls') {
       state.girlsRounds += 1;
@@ -468,8 +471,6 @@ function resolveGift(team) {
     updateScores();
     return;
   }
-
-  /* النقطة 6: كورجي - بنات: gift-corgi | شباب: gift-crown */
   if (gift === 'corgi') {
     if (team === 'girls') {
       state.girlsRounds += 10;
@@ -486,12 +487,9 @@ function resolveGift(team) {
     updateScores();
     return;
   }
-
-  /* النقطة 7: مجرة وعجلة الحظ - بنات: girls-wheel | شباب: boys-wheel */
   var roundsToAdd = 0;
   if (gift === 'galaxy') roundsToAdd = 50;
   else if (gift === 'wheel') roundsToAdd = 100;
-
   if (team === 'girls') {
     state.girlsRounds += roundsToAdd;
     enqueueSound('girls-wheel', 0.7);
@@ -534,6 +532,7 @@ function applyPoint(team, points) {
   }
 }
 
+/* التعديل 5: تسلسل الأصوات boys-round ثم girls-lose باستخدام callback */
 function finishRound() {
   stopTimer();
   clearAudioQueue();
@@ -542,13 +541,15 @@ function finishRound() {
   if (state.girlsScore >= 5 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
     state.girlsRounds += 1;
     winner = 'فوز فريق البنات';
-    enqueueSound('girls-round', 0.7);
-    setTimeout(function() { enqueueSound('boys-lose', 0.35); }, 500);
+    enqueueSound('girls-round', 0.7, function() {
+      setTimeout(function() { enqueueSound('boys-lose', 0.35); }, 400);
+    });
   } else if (state.boysScore >= 5 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
     state.boysRounds += 1;
     winner = 'فوز فريق الشباب';
-    enqueueSound('boys-round', 0.7);
-    setTimeout(function() { enqueueSound('girls-lose', 0.35); }, 500);
+    enqueueSound('boys-round', 0.7, function() {
+      setTimeout(function() { enqueueSound('girls-lose', 0.35); }, 400);
+    });
   } else {
     enqueueSound('girls-round', 0.35);
   }
@@ -577,7 +578,6 @@ function continueAfterRound() {
   showResults();
 }
 
-/* النقطة 2: السؤال التالي يستدعي startTimer الذي يشغل tick */
 function nextQuestion() {
   if (!state.isRevealed) { showToast('اكشف الإجابة أولاً ثم انتقل', 'HOST TIP'); return; }
   if (state.currentIndex < state.questions.length - 1) {
@@ -692,6 +692,10 @@ function localGenerate(params) {
   var old = {};
   var hist = state.questionHistory.slice(-100);
   for (var i = 0; i < hist.length; i++) old[hist[i]] = true;
+  /* التعديل 6: إضافة fullShowUsedQuestions لتجنب التكرار في المسابقة */
+  for (var j = 0; j < state.fullShowUsedQuestions.length; j++) {
+    old[state.fullShowUsedQuestions[j]] = true;
+  }
   var fresh = shuffle(pool.filter(function(q) { return !old[q.question]; }));
   var combined = fresh.concat(shuffle(pool));
   return combined.slice(0, count).map(function(q) {
@@ -699,13 +703,14 @@ function localGenerate(params) {
   });
 }
 
-/* النقطة 8: جلب الأسئلة من البنك الكامل + الحفظ التلقائي */
 async function fetchQuestions(params) {
   try {
+    /* التعديل 6: دمج fullShowUsedQuestions مع avoid */
+    var combinedAvoid = (params.avoid || []).concat(state.fullShowUsedQuestions);
     var response = await fetch('/api/questions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({}, params, { avoid: state.questionHistory.slice(-100) }))
+      body: JSON.stringify(Object.assign({}, params, { avoid: combinedAvoid.slice(-150) }))
     });
     if (!response.ok) throw new Error('API unavailable');
     var data = await response.json();
@@ -724,6 +729,8 @@ async function generateSingleRound() {
   var difficulty = $('difficulty').value || 'متوسط';
   var count = Math.max(3, Math.min(30, Number($('count').value) || 10));
   $('count').value = count;
+  /* التعديل 6: إعادة تعيين fullShowUsedQuestions في الجولة السريعة */
+  state.fullShowUsedQuestions = [];
   showLoading('نجهز بنك الأسئلة...');
   try {
     var questions = await fetchQuestions({ category: category, difficulty: difficulty, count: count });
@@ -766,9 +773,11 @@ function generateFullShowPlan(duration) {
   return plan;
 }
 
+/* التعديل 6: منع تكرار الأسئلة بين جولات المسابقة */
 async function generateFullShow() {
   var plan = generateFullShowPlan(state.fullShowDuration);
   state.fullShowRounds = [];
+  state.fullShowUsedQuestions = [];
   showLoading('نرتب فصول اللايف...');
   try {
     for (var index = 0; index < plan.length; index++) {
@@ -776,7 +785,10 @@ async function generateFullShow() {
       var questions = await fetchQuestions(plan[index]);
       state.fullShowRounds.push(Object.assign({}, plan[index], { questions: questions }));
       var newQs = [];
-      for (var i = 0; i < questions.length; i++) newQs.push(questions[i].question);
+      for (var i = 0; i < questions.length; i++) {
+        newQs.push(questions[i].question);
+        state.fullShowUsedQuestions.push(questions[i].question);
+      }
       state.questionHistory = state.questionHistory.concat(newQs).slice(-200);
     }
     saveHistory();
@@ -799,7 +811,6 @@ async function generateFullShow() {
   }
 }
 
-/* النقطة 1: لا يوجد صوت begin هنا — يعمل فقط في شاشة الإعداد */
 function prepareGame() {
   updateScores();
   showScreen('gameScreen');
