@@ -19,6 +19,17 @@ const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions") 
   : path.join(__dirname, "questions");
 
+// هل يوجد تخزين دائم (Railway Volume) مربوط؟
+const PERSISTENT_STORAGE = Boolean(process.env.RAILWAY_VOLUME_MOUNT_PATH);
+if (!PERSISTENT_STORAGE) {
+  console.warn(
+    "⚠️ لا يوجد Volume دائم مرتبط (RAILWAY_VOLUME_MOUNT_PATH غير موجود). " +
+    "الأسئلة المولّدة تُحفظ داخل نظام ملفات الحاوية المؤقت وستُحذف مع كل عملية Deploy جديدة على Railway. " +
+    "لجعل الحفظ دائماً: من إعدادات الخدمة في Railway أضف Volume واربطه بمسار (مثلاً /data)، " +
+    "ثم عرّف متغير البيئة RAILWAY_VOLUME_MOUNT_PATH بنفس المسار."
+  );
+}
+
 function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
 function loadBankQuestions() {
@@ -191,7 +202,12 @@ app.post("/api/questions", async (req, res) => {
   }
 });
 
-app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: loadBankQuestions().length + loadGeneratedQuestions().length }));
+app.get("/api/health", (req, res) => res.json({
+  status: "ok",
+  bankCount: loadBankQuestions().length + loadGeneratedQuestions().length,
+  persistentStorage: PERSISTENT_STORAGE,
+  dataDir: DATA_DIR
+}));
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 
 const PORT = process.env.PORT || 3000;

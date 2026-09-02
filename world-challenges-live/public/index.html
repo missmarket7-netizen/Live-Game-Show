@@ -32,8 +32,8 @@
         <section class="setup-hero">
           <div class="hero-copy">
             <div class="live-badge"><span class="live-dot"></span> جاهز للبث الآن</div>
-            <h1>خلّي اللايف<br /><span>يشتعل</span></h1>
-            <p class="hero-desc">أقوى تحدي بين البنات والشباب على الهواء! معركة الذكاء والمعلومات التي تجعل جمهورك يعيش كل لحظة بحماس.</p>
+            <h1 class="hero-title-spaced">خلّي اللايف<br /><span>يشتعل</span></h1>
+            <p class="hero-desc">مواجهة نارية بين البنات والشباب على الهواء مباشرة! كل سؤال جولة تحدي، وكل هدية سلاح يقلب موازين المعركة — استعد لأقوى ليلة تفاعل يعيشها جمهورك لحظة بلحظة.</p>
           </div>
           <div class="hero-logo-wrap">
             <div class="hero-ring"></div>
@@ -79,7 +79,7 @@
 
           <div class="mode-switch" role="tablist" aria-label="طريقة اللعب">
             <button class="mode-tab is-active" data-mode="single" type="button"><span>⚡</span><b>جولة سريعة</b><small>تبدأ فوراً</small></button>
-            <button class="mode-tab" data-mode="fullshow" type="button"><span>🎬</span><b>مسابقة</b><small>عدة جولات</small></button>
+            <button class="mode-tab" data-mode="fullshow" type="button"><span>🏆</span><b>مسابقة</b><small>عدة جولات</small></button>
           </div>
 
           <div class="field-grid">
@@ -103,7 +103,7 @@
           </div>
 
           <div class="setup-actions">
-            <button id="generateBtn" class="primary-cta" type="button"><span class="cta-icon">🚀</span><span><b>افتح الاستوديو</b><small>توليد أسئلة AI والبدء</small></span><span class="cta-arrow">←</span></button>
+            <button id="generateBtn" class="primary-cta" type="button"><span class="cta-icon">🎥</span><span><b>افتح الاستوديو</b><small>توليد أسئلة AI والبدء</small></span><span class="cta-arrow">←</span></button>
             <button id="savedStartBtn" class="primary-cta cta-secondary" type="button"><span class="cta-icon">📚</span><span><b>ابدأ الأسئلة</b><small>اسحب من بنك الأسئلة</small></span><span class="cta-arrow">←</span></button>
             <p class="privacy-note"><span>◌</span> يتجنب الأسئلة المستخدمة ويحفظ الجولة تلقائياً</p>
           </div>
@@ -122,22 +122,22 @@
           <div class="stage-label"><span class="spark">✦</span><span>GIFT MOMENTS</span><span class="stage-label-line"></span><span>LIVE INTERACTION</span></div>
           <div class="gift-stage">
             <div class="gift-zone right-zone">
-              <button class="gift-button gift-corgi" data-gift="corgi" type="button"><span class="gift-emoji">🐶</span><span class="gift-label">كورجي</span><small>+10</small></button>
-              <button class="gift-button gift-donut" data-gift="donut" type="button"><span class="gift-emoji">🍩</span><span class="gift-label">دونتس</span><small>×1</small></button>
-              <button class="gift-button gift-rose" data-gift="rose" type="button"><span class="gift-emoji">🌹</span><span class="gift-label">وردة</span><small>-1</small></button>
+              <button class="gift-button gift-corgi" data-gift="corgi" type="button"><span class="gift-emoji"><img src="/images/gift-corgi.png" alt="كورجي" /></span><span class="gift-label">كورجي</span><small>+10 جولات</small></button>
+              <button class="gift-button gift-donut" data-gift="donut" type="button"><span class="gift-emoji"><img src="/images/gift-donut.png" alt="دونتس" /></span><span class="gift-label">دونتس</span><small>+1 جولة</small></button>
+              <button class="gift-button gift-rose" data-gift="rose" type="button"><span class="gift-emoji"><img src="/images/gift-rose.png" alt="وردة" /></span><span class="gift-label">وردة</span><small>-1 شباب</small></button>
             </div>
             <div class="gift-center-column">
-              <button class="gift-button gift-heart central-gift" data-gift="heart" type="button"><span class="gift-emoji">💗</span><span class="gift-label">قلب الحماية</span><small>SAFE PLAY</small></button>
+              <button class="gift-button gift-heart central-gift" data-gift="heart" type="button"><span class="gift-emoji"><img src="/images/gift-heart.png" alt="قلب الحماية" /></span><span class="gift-label">قلب الحماية</span><small>SAFE PLAY</small></button>
               <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
               <div class="gift-under-row">
-                <button class="gift-button gift-galaxy" data-gift="galaxy" type="button"><span class="gift-emoji">🌌</span><span class="gift-label">مجرة</span><small>+50</small></button>
-                <button class="gift-button gift-whale" data-gift="whale" type="button"><span class="gift-emoji">🐋</span><span class="gift-label">حوت</span><small>+100</small></button>
+                <button class="gift-button gift-galaxy" data-gift="galaxy" type="button"><span class="gift-emoji"><img src="/images/gift-galaxy.png" alt="مجرة" /></span><span class="gift-label">مجرة</span><small>+50 جولة</small></button>
+                <button class="gift-button gift-wheel" data-gift="wheel" type="button"><span class="gift-emoji"><img src="/images/gift-wheel.png" alt="عجلة الحظ" /></span><span class="gift-label">عجلة الحظ</span><small>+100 جولة</small></button>
               </div>
             </div>
             <div class="gift-zone left-zone">
-              <button class="gift-button gift-tiktok" data-gift="tiktok" type="button"><span class="gift-emoji">♪</span><span class="gift-label">TikTok</span><small>-1</small></button>
-              <button class="gift-button gift-cat" data-gift="cat" type="button"><span class="gift-emoji">🐱</span><span class="gift-label">Kitty</span><small>×1</small></button>
-              <button class="gift-button gift-crown" data-gift="crown" type="button"><span class="gift-emoji">👑</span><span class="gift-label">التاج</span><small>+10</small></button>
+              <button class="gift-button gift-tiktok" data-gift="tiktok" type="button"><span class="gift-emoji"><img src="/images/gift-tiktok.png" alt="TikTok" /></span><span class="gift-label">TikTok</span><small>-1 بنات</small></button>
+              <button class="gift-button gift-cat" data-gift="cat" type="button"><span class="gift-emoji"><img src="/images/gift-cat.png" alt="Kitty" /></span><span class="gift-label">Kitty</span><small>+1 جولة</small></button>
+              <button class="gift-button gift-crown" data-gift="crown" type="button"><span class="gift-emoji"><img src="/images/gift-crown.png" alt="التاج" /></span><span class="gift-label">التاج</span><small>+10 جولات</small></button>
             </div>
           </div>
           <div class="active-gift-banner hidden" id="activeGiftBanner"><span id="activeGiftText">اختر الفريق</span><div class="team-pick-buttons"><button id="pickGirlsBtn" class="pick-btn pick-girls" type="button">👧 البنات</button><button id="pickBoysBtn" class="pick-btn pick-boys" type="button">👦 الشباب</button></div><button id="cancelGiftBtn" class="cancel-pick" type="button">إلغاء</button></div>
@@ -148,6 +148,14 @@
             <div class="team-score-top"><span class="team-tag">TEAM PINK</span><span class="team-rounds" id="girlsRoundsWon">0 جولات</span></div>
             <div class="team-score-main"><span class="team-title">البنات</span><strong id="girlsScoreValue">0</strong></div>
             <div class="score-track"><i id="girlsProgress"></i></div>
+            <div class="captain-panel">
+              <span class="captain-vert-label">كابتن الفريق</span>
+              <div class="captain-slots">
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="0" maxlength="14" placeholder="كابتن 1" /><button class="captain-done" data-team="girls" data-slot="0" type="button">✓</button></div>
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="1" maxlength="14" placeholder="كابتن 2" /><button class="captain-done" data-team="girls" data-slot="1" type="button">✓</button></div>
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="girls" data-slot="2" maxlength="14" placeholder="كابتن 3" /><button class="captain-done" data-team="girls" data-slot="2" type="button">✓</button></div>
+              </div>
+            </div>
             <div id="teamShieldGirls" class="team-shield hidden">🛡️</div>
           </article>
           <div class="round-puck"><span id="roundDisplay">الجولة 1</span><b>VS</b><div class="round-results" id="roundResults">0 - 0</div><small id="roundProgress">01 / 10</small></div>
@@ -155,6 +163,14 @@
             <div class="team-score-top"><span class="team-tag">TEAM CYAN</span><span class="team-rounds" id="boysRoundsWon">0 جولات</span></div>
             <div class="team-score-main"><span class="team-title">الشباب</span><strong id="boysScoreValue">0</strong></div>
             <div class="score-track"><i id="boysProgress"></i></div>
+            <div class="captain-panel">
+              <span class="captain-vert-label">كابتن الفريق</span>
+              <div class="captain-slots">
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="0" maxlength="14" placeholder="كابتن 1" /><button class="captain-done" data-team="boys" data-slot="0" type="button">✓</button></div>
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="1" maxlength="14" placeholder="كابتن 2" /><button class="captain-done" data-team="boys" data-slot="1" type="button">✓</button></div>
+                <div class="captain-slot"><input type="text" class="captain-input" data-team="boys" data-slot="2" maxlength="14" placeholder="كابتن 3" /><button class="captain-done" data-team="boys" data-slot="2" type="button">✓</button></div>
+              </div>
+            </div>
             <div id="teamShieldBoys" class="team-shield hidden">🛡️</div>
           </article>
         </section>
@@ -212,6 +228,10 @@
       <div id="roundEndOverlay" class="overlay hidden"><div class="overlay-card glass-card"><span class="overlay-kicker">ROUND COMPLETE</span><div class="overlay-trophy">✦</div><h2 id="roundEndNumber">الجولة 1</h2><p id="roundEndWinner">مبروك للفريق الفائز</p><div class="overlay-score"><span><b id="roundEndGirlsScore">0</b><small>البنات</small></span><i>VS</i><span><b id="roundEndBoysScore">0</b><small>الشباب</small></span></div><button id="roundEndContinueBtn" class="primary-cta" type="button"><span class="cta-icon">→</span><span><b>استمرار العرض</b><small>نبدأ الجولة التالية</small></span><span class="cta-arrow">←</span></button></div></div>
       <div id="savedModal" class="overlay hidden"><div class="overlay-card glass-card saved-card"><div class="modal-heading"><div><span class="section-kicker">QUESTION VAULT</span><h2>بنك الأسئلة</h2></div><button id="closeSavedBtn" class="close-button" type="button">×</button></div><div id="savedList" class="saved-list"></div></div></div>
       <div id="loadingOverlay" class="overlay loading-overlay hidden"><div class="loading-card glass-card"><div class="loader-orbit"><span></span><span></span><span></span></div><span class="section-kicker">SHOW CONTROL</span><h2 id="loadingText">جاري التجهيز...</h2><p>نرتب الأسئلة ونجهز اللحظة الأولى</p></div></div>
+      <div id="captainRevealOverlay" class="captain-reveal hidden">
+        <span class="captain-reveal-kicker">ON AIR CAPTAIN</span>
+        <h2 id="captainRevealName">—</h2>
+      </div>
       <canvas id="confettiCanvas"></canvas>
     </div>
     <script src="/app.js"></script>
