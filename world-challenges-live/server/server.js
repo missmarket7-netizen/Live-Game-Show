@@ -6,7 +6,6 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
@@ -15,14 +14,13 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
 
-// (نقطة 10) دعم الحفظ الدائم عبر Volume إذا أُضيف لاحقاً، وإلا استخدم مجلد المشروع
+// تحديد مسار الحفظ (يدعم Volume إذا توفر لاحقاً)
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH 
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions") 
   : path.join(__dirname, "questions");
 
 function shuffleArray(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 
-// تعريف واحد فقط للدوال (يتم استدعاؤها مرة واحدة فقط)
 function loadBankQuestions() {
   let all = [];
   for (let i = 1; i <= 5; i++) {
