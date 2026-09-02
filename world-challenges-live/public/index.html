@@ -15,7 +15,7 @@
   <div class="ambient ambient-two"></div>
   <div class="grid-glow"></div>
 
-  <!-- شاشة الإعداد -->
+  <!-- ═══════════ شاشة الإعداد ═══════════ -->
   <section id="setupScreen" class="screen">
     <div class="topbar setup-topbar">
       <div class="brand-lockup">
@@ -194,7 +194,7 @@
     </div>
   </section>
 
-  <!-- شاشة اللعبة -->
+  <!-- ═══════════ شاشة اللعبة ═══════════ -->
   <section id="gameScreen" class="screen game-screen hidden">
     <div class="topbar live-topbar compact-brand">
       <div class="brand-lockup">
@@ -223,12 +223,10 @@
         <div class="gift-zone right-zone">
           <button type="button" class="gift-button gift-corgi" data-gift="corgi">
             <span class="gift-emoji"><img src="/images/gift-corgi.png" alt="" /></span>
-            <span class="gift-label">كورجي</span>
             <small>+10 جولات</small>
           </button>
           <button type="button" class="gift-button gift-donut" data-gift="donut">
             <span class="gift-emoji"><img src="/images/gift-donut.png" alt="" /></span>
-            <span class="gift-label">دونتس</span>
             <small>+1 جولة</small>
           </button>
         </div>
@@ -238,13 +236,11 @@
           <div class="orbit orbit-two"></div>
           <button type="button" class="gift-button gift-rose central-gift" data-gift="rose">
             <span class="gift-emoji"><img src="/images/gift-rose.png" alt="" /></span>
-            <span class="gift-label">وردة</span>
             <small>-1 شباب</small>
           </button>
           <div class="gift-under-row">
             <button type="button" class="gift-button gift-heart" data-gift="heart">
               <span class="gift-emoji">🛡️</span>
-              <span class="gift-label">الحماية</span>
               <small>SAFE PLAY</small>
             </button>
           </div>
@@ -253,12 +249,10 @@
         <div class="gift-zone left-zone">
           <button type="button" class="gift-button gift-galaxy" data-gift="galaxy">
             <span class="gift-emoji"><img src="/images/gift-galaxy.png" alt="" /></span>
-            <span class="gift-label">مجرة</span>
             <small>+50 جولة</small>
           </button>
           <button type="button" class="gift-button gift-wheel" data-gift="wheel">
             <span class="gift-emoji"><img src="/images/gift-wheel.png" alt="" /></span>
-            <span class="gift-label">عجلة الحظ</span>
             <small>+100 جولة</small>
           </button>
         </div>
@@ -268,7 +262,6 @@
         <div class="gift-zone right-zone">
           <button type="button" class="gift-button gift-tiktok" data-gift="tiktok">
             <span class="gift-emoji">♪</span>
-            <span class="gift-label">TikTok</span>
             <small>-1 بنات</small>
           </button>
         </div>
@@ -278,12 +271,10 @@
         <div class="gift-zone left-zone">
           <button type="button" class="gift-button gift-cat" data-gift="cat">
             <span class="gift-emoji"><img src="/images/gift-cat.png" alt="" /></span>
-            <span class="gift-label">Kitty</span>
             <small>+1 جولة</small>
           </button>
           <button type="button" class="gift-button gift-crown" data-gift="crown">
             <span class="gift-emoji"><img src="/images/gift-crown.png" alt="" /></span>
-            <span class="gift-label">التاج</span>
             <small>+10 جولات</small>
           </button>
         </div>
@@ -468,7 +459,7 @@
     </div>
   </section>
 
-  <!-- شاشة النتائج -->
+  <!-- ═══════════ شاشة النتائج ═══════════ -->
   <section id="resultsScreen" class="screen results-screen hidden">
     <div class="topbar compact-brand">
       <div class="brand-lockup">
@@ -486,6 +477,7 @@
       </div>
       <h1 id="winnerText">SHOW END</h1>
       <p class="results-subtitle">THE FINAL SCORE</p>
+      <p class="results-desc">ليلة استثنائية — انتهت الجولة، لكن لحظة الفوز تبقى على الهواء.</p>
     </div>
 
     <div class="glass-card final-scoreboard">
@@ -549,7 +541,7 @@
     </div>
   </section>
 
-  <!-- Overlay: نهاية الجولة -->
+  <!-- ═══════════ Overlays ═══════════ -->
   <div id="roundEndOverlay" class="overlay hidden">
     <div class="glass-card overlay-card">
       <span class="overlay-kicker">✦ CAPTAIN INTRO</span>
@@ -557,28 +549,18 @@
       <h2>ROUND COMPLETE</h2>
       <p id="roundEndWinner">مبروك للفريق الفائز</p>
       <div class="overlay-score">
-        <span>
-          <b id="roundEndGirlsScore">0</b>
-          <small>البنات</small>
-        </span>
+        <span><b id="roundEndGirlsScore">0</b><small>البنات</small></span>
         <i>VS</i>
-        <span>
-          <b id="roundEndBoysScore">0</b>
-          <small>الشباب</small>
-        </span>
+        <span><b id="roundEndBoysScore">0</b><small>الشباب</small></span>
       </div>
       <p id="roundEndNumber" style="text-align:center; color: var(--muted); font-size: 11px;">الجولة 1</p>
       <button id="roundEndContinueBtn" type="button" class="primary-cta" style="margin-top: 14px;">
         <span class="cta-icon">→</span>
-        <div>
-          <b>استمرار العرض</b>
-          <small>نبدأ الجولة التالية</small>
-        </div>
+        <div><b>استمرار العرض</b><small>نبدأ الجولة التالية</small></div>
       </button>
     </div>
   </div>
 
-  <!-- Overlay: بنك الأسئلة المحفوظة -->
   <div id="savedModal" class="overlay hidden">
     <div class="glass-card overlay-card">
       <div class="modal-heading">
@@ -592,7 +574,6 @@
     </div>
   </div>
 
-  <!-- Overlay: التحميل -->
   <div id="loadingOverlay" class="overlay loading-overlay hidden">
     <div class="glass-card overlay-card loading-card">
       <div class="loader-orbit"><span></span></div>
@@ -601,7 +582,6 @@
     </div>
   </div>
 
-  <!-- Toast: إشعار الكابتن -->
   <div id="captainToast" class="captain-toast hidden">
     <span class="toast-icon">✦</span>
     <div>
@@ -610,7 +590,6 @@
     </div>
   </div>
 
-  <!-- Reveal: اسم الكابتن -->
   <div id="captainRevealOverlay" class="captain-reveal hidden">
     <span class="captain-reveal-kicker">✦ CAPTAIN INTRO</span>
     <h2 id="captainRevealName">—</h2>
