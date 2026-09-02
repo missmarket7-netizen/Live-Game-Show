@@ -277,22 +277,21 @@ img { max-width: 100%; }
 .gift-stage {
   display: grid; grid-template-columns: 1fr 1.16fr 1fr;
   grid-template-areas: 'right center left';
-  align-items: center; gap: 8px; min-height: 168px; padding: 5px 2px 4px;
+  align-items: center; gap: 8px; min-height: 190px; padding: 5px 2px 4px;
 }
-.gift-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; }
+.gift-zone { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
 .right-zone { grid-area: right; }
 .left-zone { grid-area: left; }
 .gift-center-column {
   position: relative; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 5px;
-  min-height: 168px; grid-area: center;
+  align-items: center; justify-content: center; gap: 6px;
+  min-height: 190px; grid-area: center;
 }
-.central-gift { z-index: 1; transform: scale(1.15); }
-.gift-under-row { display: flex; justify-content: center; gap: 7px; width: 100%; margin-top: 8px; }
+.gift-under-row { display: flex; justify-content: center; gap: 8px; width: 100%; margin-top: 8px; }
 .gift-button {
   position: relative; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  width: 63px; height: 49px; padding: 3px;
+  width: 70px; height: 54px; padding: 4px;
   border: 1px solid rgba(255,255,255,.12); border-radius: 15px;
   background: linear-gradient(140deg, rgba(255,255,255,.1), rgba(255,255,255,.035));
   box-shadow: 0 8px 14px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.08);
@@ -305,24 +304,24 @@ img { max-width: 100%; }
   transform: translateY(-3px) scale(1.04);
 }
 .gift-button:active { transform: translateY(0) scale(.95); }
+/* النقطة 3: تكبير صور الهدايا بنسبة قليلة */
 .gift-emoji {
-  display: grid; place-items: center; width: 25px; height: 25px;
-  border-radius: 9px; background: rgba(255,255,255,.08);
-  font-size: 19px; line-height: 1; overflow: hidden;
+  display: grid; place-items: center; width: 32px; height: 32px;
+  border-radius: 10px; background: rgba(255,255,255,.08);
+  font-size: 21px; line-height: 1; overflow: hidden;
 }
-.gift-emoji img { width: 72%; height: 72%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
-/* إزالة أسماء الهدايا - فقط الوصف */
+.gift-emoji img { width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(0 2px 6px rgba(0,0,0,.4)); }
 .gift-label { display: none; }
-.gift-button small { display: block; margin-top: 2px; color: var(--muted); font-family: var(--display); font-size: 7px; letter-spacing: .04em; line-height: 1; text-align: center; }
+.gift-button small { display: block; margin-top: 3px; color: var(--muted); font-family: var(--display); font-size: 7px; letter-spacing: .04em; line-height: 1; text-align: center; }
 .gift-heart {
-  width: 82px; height: 74px;
+  width: 88px; height: 80px;
   border-color: rgba(244,92,160,.45);
   background: radial-gradient(circle at 50% 28%, rgba(244,92,160,.24), rgba(255,255,255,.04) 58%);
   box-shadow: 0 0 24px rgba(244,92,160,.2), 0 9px 18px rgba(0,0,0,.28);
 }
-.gift-heart .gift-emoji { width: 39px; height: 39px; background: rgba(244,92,160,.16); font-size: 30px; }
-.gift-galaxy, .gift-wheel { width: 68px; height: 52px; }
-.gift-galaxy .gift-emoji, .gift-wheel .gift-emoji { font-size: 22px; }
+.gift-heart .gift-emoji { width: 46px; height: 46px; background: rgba(244,92,160,.16); font-size: 34px; }
+.gift-galaxy, .gift-wheel { width: 74px; height: 58px; }
+.gift-galaxy .gift-emoji, .gift-wheel .gift-emoji { font-size: 26px; }
 .gift-galaxy { border-color: rgba(145,122,255,.3); }
 .gift-wheel { border-color: rgba(93,226,255,.26); }
 .gift-tiktok .gift-emoji {
@@ -475,7 +474,6 @@ img { max-width: 100%; }
   86% { opacity: 1; transform: scale(1); }
   100% { opacity: 0; transform: scale(1.04) translateY(-16px); }
 }
-/* تكبير مربع السؤال والإجابات */
 .question-card { position: relative; overflow: hidden; padding: 30px 24px 26px; border-radius: 24px; }
 .question-card::before {
   content: ''; position: absolute; top: 0; right: 18%;
@@ -743,11 +741,11 @@ img { max-width: 100%; }
   .hero-logo-wrap { min-height: 250px; }
   .setup-card { padding: 24px 24px 18px; }
   .question-card { padding: 36px 28px 30px; }
-  .gift-stage { min-height: 192px; }
-  .gift-center-column { min-height: 192px; }
-  .gift-button { width: 75px; height: 58px; }
-  .central-gift { transform: scale(1.18); width: 96px; height: 84px; }
-  .gift-heart .gift-emoji { width: 45px; height: 45px; font-size: 34px; }
+  .gift-stage { min-height: 210px; }
+  .gift-center-column { min-height: 210px; }
+  .gift-button { width: 78px; height: 60px; }
+  .gift-heart { width: 94px; height: 86px; }
+  .gift-heart .gift-emoji { width: 50px; height: 50px; font-size: 38px; }
   .gift-under-row { margin-top: 12px; }
   .question-main h1 { font-size: 28px; min-height: 130px; }
   .option-btn { min-height: 90px; font-size: 16px; padding: 18px 36px 16px 16px; }
@@ -766,10 +764,10 @@ img { max-width: 100%; }
   .team-tag { font-size: 6px; }
   .team-rounds { font-size: 7px; }
   .gift-stage { gap: 3px; }
-  .gift-button { width: 57px; }
-  .gift-heart { width: 75px; }
+  .gift-button { width: 60px; }
+  .gift-heart { width: 80px; }
   .gift-under-row { gap: 3px; }
-  .gift-galaxy, .gift-wheel { width: 61px; }
+  .gift-galaxy, .gift-wheel { width: 64px; }
   .question-card { padding-left: 14px; padding-right: 14px; }
   .question-main h1 { font-size: 22px; min-height: 90px; }
   .option-btn { padding-left: 8px; padding-right: 24px; font-size: 13px; min-height: 70px; }

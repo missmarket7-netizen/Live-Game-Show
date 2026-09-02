@@ -22,7 +22,8 @@ const soundFiles = {
   'girls-round': ['girls-round'], 'boys-round': ['boys-round'], 'girls-lose': ['girls-lose'], 'boys-lose': ['boys-lose'],
   'girls-win': ['girls-win'], 'boys-win': ['boys-win'], Longway: ['Longway'], 'girls-replay-boys': ['girls-replay-boys'],
   'boys-replay-girls': ['boys-replay-girls'], advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
-  'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong']
+  'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong'],
+  'girls-wheel': ['girls-wheel', 'girls-galaxy'], 'boys-wheel': ['boys-wheel', 'boys-galaxy']
 };
 const audioCache = {};
 const categoryEmoji = {
@@ -32,38 +33,38 @@ const categoryEmoji = {
 };
 const fallbackQuestions = [
   { category: 'معلومات عامة', difficulty: 'سهل', question: 'ما هي عاصمة المملكة العربية السعودية؟', options: ['جدة', 'الرياض', 'مكة', 'الدمام'], correctIndex: 1, explanation: 'الرياض هي العاصمة السياسية والإدارية للمملكة.' },
-  { category: 'معلومات عامة', difficulty: 'متوسط', question: 'كم عدد ألوان قوس قزح التقليدية؟', options: ['خمسة', 'ستة', 'سبعة', 'ثمانية'], correctIndex: 2, explanation: 'الألوان السبعة هي: الأحمر والبرتقالي والأصفر والأخضر والأزرق والنيلي والبنفسجي.' },
-  { category: 'جغرافيا', difficulty: 'سهل', question: 'ما أكبر قارة في العالم من حيث المساحة؟', options: ['أفريقيا', 'آسيا', 'أوروبا', 'أمريكا الشمالية'], correctIndex: 1, explanation: 'آسيا هي أكبر قارات العالم مساحةً وسكاناً.' },
-  { category: 'جغرافيا', difficulty: 'متوسط', question: 'ما النهر الذي يمر بمدينة بغداد؟', options: ['النيل', 'الفرات', 'دجلة', 'الأردن'], correctIndex: 2, explanation: 'تقع بغداد على ضفاف نهر دجلة في العراق.' },
+  { category: 'معلومات عامة', difficulty: 'متوسط', question: 'كم عدد ألوان قوس قزح التقليدية؟', options: ['خمسة', 'ستة', 'سبعة', 'ثمانية'], correctIndex: 2, explanation: 'قوس قزح يتكون من 7 ألوان.' },
+  { category: 'معلومات عامة', difficulty: 'صعب', question: 'ما اسم أصغر عظمة في جسم الإنسان؟', options: ['المطرقة', 'الركاب', 'الزند', 'الشظية'], correctIndex: 1, explanation: 'عظمة الركاب توجد في الأذن الوسطى.' },
+  { category: 'جغرافيا', difficulty: 'سهل', question: 'ما أكبر قارة في العالم من حيث المساحة؟', options: ['أفريقيا', 'آسيا', 'أوروبا', 'أمريكا الشمالية'], correctIndex: 1, explanation: 'آسيا هي أكبر قارات العالم.' },
+  { category: 'جغرافيا', difficulty: 'متوسط', question: 'ما النهر الذي يمر بمدينة بغداد؟', options: ['النيل', 'الفرات', 'دجلة', 'الأردن'], correctIndex: 2, explanation: 'تقع بغداد على ضفاف نهر دجلة.' },
+  { category: 'جغرافيا', difficulty: 'صعب', question: 'ما أعمق نقطة معروفة في المحيطات؟', options: ['خندق ماريانا', 'خندق بورتوريكو', 'خندق تونغا', 'خندق الفلبين'], correctIndex: 0, explanation: 'يقع خندق ماريانا في المحيط الهادئ.' },
   { category: 'علوم', difficulty: 'سهل', question: 'ما أقرب كوكب إلى الشمس؟', options: ['الأرض', 'الزهرة', 'عطارد', 'المريخ'], correctIndex: 2, explanation: 'عطارد هو أقرب كواكب المجموعة الشمسية إلى الشمس.' },
-  { category: 'علوم', difficulty: 'متوسط', question: 'ما الرمز الكيميائي للذهب؟', options: ['Ag', 'Au', 'Fe', 'Cu'], correctIndex: 1, explanation: 'Au مأخوذ من الاسم اللاتيني للذهب Aurum.' },
-  { category: 'تاريخ', difficulty: 'سهل', question: 'في أي عام تأسست المملكة العربية السعودية بصورتها الحديثة؟', options: ['1925', '1930', '1932', '1940'], correctIndex: 2, explanation: 'أعلن الملك عبدالعزيز توحيد المملكة عام 1932.' },
-  { category: 'تاريخ', difficulty: 'متوسط', question: 'من بنى مدينة البتراء التاريخية؟', options: ['الأنباط', 'الفراعنة', 'الرومان', 'الآشوريون'], correctIndex: 0, explanation: 'ازدهرت البتراء عاصمةً للأنباط في جنوب الأردن.' },
-  { category: 'دين', difficulty: 'سهل', question: 'كم عدد ركعات صلاة الفجر المفروضة؟', options: ['ركعة واحدة', 'ركعتان', 'ثلاث ركعات', 'أربع ركعات'], correctIndex: 1, explanation: 'صلاة الفجر المفروضة ركعتان.' },
-  { category: 'دين', difficulty: 'متوسط', question: 'في أي شهر نزل القرآن الكريم؟', options: ['شعبان', 'رمضان', 'شوال', 'رجب'], correctIndex: 1, explanation: 'نزل القرآن الكريم في شهر رمضان المبارك.' },
-  { category: 'لغز', difficulty: 'سهل', question: 'ما الشيء الذي كلما أخذت منه كبر؟', options: ['البحر', 'الحفرة', 'الكتاب', 'الظل'], correctIndex: 1, explanation: 'الحفرة تكبر كلما أخذت من ترابها.' },
-  { category: 'لغز', difficulty: 'متوسط', question: 'له أسنان ولا يعض، ما هو؟', options: ['المشط', 'المفتاح', 'المنشار', 'القفل'], correctIndex: 0, explanation: 'المشط له أسنان لكنه لا يعض.' },
-  { category: 'رياضة', difficulty: 'سهل', question: 'كم لاعباً من كل فريق يوجد داخل ملعب كرة القدم؟', options: ['9', '10', '11', '12'], correctIndex: 2, explanation: 'يتكون الفريق داخل الملعب من 11 لاعباً.' },
-  { category: 'رياضة', difficulty: 'متوسط', question: 'في أي دولة أقيمت أول بطولة لكأس العالم لكرة القدم؟', options: ['البرازيل', 'إيطاليا', 'الأوروغواي', 'فرنسا'], correctIndex: 2, explanation: 'أقيمت أول بطولة عام 1930 في الأوروغواي.' },
-  { category: 'تكنولوجيا', difficulty: 'سهل', question: 'ما الشركة التي أسسها بيل غيتس وبول ألين؟', options: ['Apple', 'Google', 'Microsoft', 'IBM'], correctIndex: 2, explanation: 'أسس بيل غيتس وبول ألين شركة Microsoft.' },
-  { category: 'تكنولوجيا', difficulty: 'متوسط', question: 'ماذا تعني الأحرف HTML؟', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Mode Language'], correctIndex: 0, explanation: 'هي لغة ترميز النص التشعبي المستخدمة لبناء صفحات الويب.' },
-  { category: 'اختيارات متنوعة', difficulty: 'سهل', question: 'ما الحيوان المعروف بلقب سفينة الصحراء؟', options: ['الحصان', 'الجمل', 'الفيل', 'الغزال'], correctIndex: 1, explanation: 'يستطيع الجمل تحمل العطش والسير لمسافات طويلة في الصحراء.' },
-  { category: 'اختيارات متنوعة', difficulty: 'متوسط', question: 'ما الآلة الموسيقية التي تحتوي عادةً على 88 مفتاحاً؟', options: ['الكمان', 'البيانو', 'العود', 'الناي'], correctIndex: 1, explanation: 'البيانو القياسي يحتوي غالباً على 88 مفتاحاً.' },
-  { category: 'معلومات عامة', difficulty: 'صعب', question: 'ما اسم أصغر عظمة في جسم الإنسان؟', options: ['المطرقة', 'الركاب', 'الزند', 'الشظية'], correctIndex: 1, explanation: 'عظمة الركاب توجد في الأذن الوسطى وتعد الأصغر في جسم الإنسان.' },
-  { category: 'جغرافيا', difficulty: 'صعب', question: 'ما أعمق نقطة معروفة في المحيطات؟', options: ['خندق ماريانا', 'خندق بورتوريكو', 'خندق تونغا', 'خندق الفلبين'], correctIndex: 0, explanation: 'يقع خندق ماريانا في المحيط الهادئ ويضم أعمق نقطة معروفة.' },
-  { category: 'علوم', difficulty: 'صعب', question: 'ما الغاز الأكثر وفرة في الغلاف الجوي للأرض؟', options: ['الأكسجين', 'الهيدروجين', 'النيتروجين', 'ثاني أكسيد الكربون'], correctIndex: 2, explanation: 'يشكل النيتروجين قرابة 78% من الغلاف الجوي.' },
-  { category: 'تاريخ', difficulty: 'صعب', question: 'ما الحضارة التي ابتكرت الكتابة المسمارية؟', options: ['المصرية', 'السومرية', 'الفينيقية', 'الإغريقية'], correctIndex: 1, explanation: 'طوّر السومريون الكتابة المسمارية في بلاد الرافدين.' },
-  { category: 'رياضة', difficulty: 'صعب', question: 'كم عدد الحلقات في شعار الألعاب الأولمبية؟', options: ['أربع', 'خمس', 'ست', 'سبع'], correctIndex: 1, explanation: 'يتكون الشعار الأولمبي من خمس حلقات متشابكة.' },
-  { category: 'تكنولوجيا', difficulty: 'صعب', question: 'أي بروتوكول يستخدم عادةً لتصفح الويب الآمن؟', options: ['FTP', 'HTTP', 'HTTPS', 'SMTP'], correctIndex: 2, explanation: 'HTTPS يضيف طبقة تشفير لحماية الاتصال بالويب.' },
-  { category: 'اختيارات متنوعة', difficulty: 'صعب', question: 'ما اسم الظاهرة التي يتغير فيها تردد الموجة بسبب حركة المصدر؟', options: ['تأثير دوبلر', 'الانعكاس الكلي', 'التوصيل', 'الحيود'], correctIndex: 0, explanation: 'تأثير دوبلر يفسر تغير التردد الظاهري مع الحركة النسبية.' }
+  { category: 'علوم', difficulty: 'متوسط', question: 'ما الرمز الكيميائي للذهب؟', options: ['Ag', 'Au', 'Fe', 'Cu'], correctIndex: 1, explanation: 'Au مأخوذ من الاسم اللاتيني للذهب.' },
+  { category: 'علوم', difficulty: 'صعب', question: 'ما الغاز الأكثر وفرة في الغلاف الجوي للأرض؟', options: ['الأكسجين', 'الهيدروجين', 'النيتروجين', 'ثاني أكسيد الكربون'], correctIndex: 2, explanation: 'يشكل النيتروجين قرابة 78%.' },
+  { category: 'تاريخ', difficulty: 'سهل', question: 'في أي عام تأسست المملكة العربية السعودية؟', options: ['1925', '1930', '1932', '1940'], correctIndex: 2, explanation: 'أعلن توحيد المملكة عام 1932.' },
+  { category: 'تاريخ', difficulty: 'متوسط', question: 'من بنى مدينة البتراء التاريخية؟', options: ['الأنباط', 'الفراعنة', 'الرومان', 'الآشوريون'], correctIndex: 0, explanation: 'ازدهرت البتراء عاصمةً للأنباط.' },
+  { category: 'تاريخ', difficulty: 'صعب', question: 'ما الحضارة التي ابتكرت الكتابة المسمارية؟', options: ['المصرية', 'السومرية', 'الفينيقية', 'الإغريقية'], correctIndex: 1, explanation: 'طوّر السومريون الكتابة المسمارية.' },
+  { category: 'أسئلة دينية', difficulty: 'سهل', question: 'كم عدد ركعات صلاة الفجر المفروضة؟', options: ['ركعة', 'ركعتان', 'ثلاث', 'أربع'], correctIndex: 1, explanation: 'صلاة الفجر ركعتان.' },
+  { category: 'أسئلة دينية', difficulty: 'متوسط', question: 'في أي شهر نزل القرآن الكريم؟', options: ['شعبان', 'رمضان', 'شوال', 'رجب'], correctIndex: 1, explanation: 'نزل القرآن في رمضان.' },
+  { category: 'ألغاز', difficulty: 'سهل', question: 'ما الشيء الذي كلما أخذت منه كبر؟', options: ['البحر', 'الحفرة', 'الكتاب', 'الظل'], correctIndex: 1, explanation: 'الحفرة تكبر كلما حفرت فيها.' },
+  { category: 'ألغاز', difficulty: 'متوسط', question: 'له أسنان ولا يعض، ما هو؟', options: ['المشط', 'المفتاح', 'المنشار', 'القفل'], correctIndex: 0, explanation: 'المشط له أسنان ولا يعض.' },
+  { category: 'رياضة', difficulty: 'سهل', question: 'كم لاعباً من كل فريق داخل ملعب كرة القدم؟', options: ['9', '10', '11', '12'], correctIndex: 2, explanation: 'الفريق يتكون من 11 لاعباً.' },
+  { category: 'رياضة', difficulty: 'متوسط', question: 'في أي دولة أقيمت أول بطولة لكأس العالم؟', options: ['البرازيل', 'إيطاليا', 'الأوروغواي', 'فرنسا'], correctIndex: 2, explanation: 'أقيمت أول بطولة عام 1930 في الأوروغواي.' },
+  { category: 'رياضة', difficulty: 'صعب', question: 'كم عدد الحلقات في شعار الألعاب الأولمبية؟', options: ['أربع', 'خمس', 'ست', 'سبع'], correctIndex: 1, explanation: 'الشعار الأولمبي من خمس حلقات.' },
+  { category: 'تكنولوجيا', difficulty: 'سهل', question: 'ما الشركة التي أسسها بيل غيتس وبول ألين؟', options: ['Apple', 'Google', 'Microsoft', 'IBM'], correctIndex: 2, explanation: 'أسس الثنائي شركة Microsoft.' },
+  { category: 'تكنولوجيا', difficulty: 'متوسط', question: 'ماذا تعني الأحرف HTML؟', options: ['Hyper Text Markup Language', 'High Tech Modern Language', 'Home Tool Markup Language', 'Hyperlink Text Mode Language'], correctIndex: 0, explanation: 'لغة ترميز النص التشعبي.' },
+  { category: 'تكنولوجيا', difficulty: 'صعب', question: 'أي بروتوكول يستخدم لتصفح الويب الآمن؟', options: ['FTP', 'HTTP', 'HTTPS', 'SMTP'], correctIndex: 2, explanation: 'HTTPS يضيف طبقة تشفير.' },
+  { category: 'اختيارات متنوعة', difficulty: 'سهل', question: 'ما الحيوان المعروف بلقب سفينة الصحراء؟', options: ['الحصان', 'الجمل', 'الفيل', 'الغزال'], correctIndex: 1, explanation: 'الجمل يتحمل العطش والسير الطويل.' },
+  { category: 'اختيارات متنوعة', difficulty: 'متوسط', question: 'ما الآلة الموسيقية التي تحتوي على 88 مفتاحاً؟', options: ['الكمان', 'البيانو', 'العود', 'الناي'], correctIndex: 1, explanation: 'البيانو القياسي يحتوي على 88 مفتاحاً.' },
+  { category: 'اختيارات متنوعة', difficulty: 'صعب', question: 'ما الظاهرة التي يتغير فيها تردد الموجة بسبب حركة المصدر؟', options: ['تأثير دوبلر', 'الانعكاس الكلي', 'التوصيل', 'الحيود'], correctIndex: 0, explanation: 'تأثير دوبلر يفسر تغير التردد.' }
 ];
 
 function getAudio(key) {
   if (audioCache[key]) return audioCache[key];
-  const candidates = soundFiles[key] || [key];
-  const audio = new Audio('/sounds/' + candidates[0] + '.mp3');
+  var candidates = soundFiles[key] || [key];
+  var audio = new Audio('/sounds/' + candidates[0] + '.mp3');
   audio.preload = 'none';
-  let candidateIndex = 0;
+  var candidateIndex = 0;
   audio.addEventListener('error', function() {
     candidateIndex += 1;
     if (candidateIndex < candidates.length) {
@@ -111,6 +112,7 @@ function clearAudioQueue() {
   state.isPlayingAudio = false;
 }
 
+/* النقطة 1: صوت begin يعمل فقط في شاشة الإعداد بعد تفعيل زر الصوت */
 function scheduleBeginSound() {
   setTimeout(function() {
     var setupScreen = $('setupScreen');
@@ -191,11 +193,17 @@ function shuffle(list) {
   return items;
 }
 
+/* النقطة 1: عند تفعيل الصوت، يعمل begin فقط في شاشة الإعداد */
 function toggleSound() {
   state.soundEnabled = !state.soundEnabled;
   localStorage.setItem(SOUND_KEY, String(state.soundEnabled));
   updateSoundButtons();
-  if (state.soundEnabled) enqueueSound('tick', 0.3);
+  if (state.soundEnabled) {
+    var setupScreen = $('setupScreen');
+    if (setupScreen && !setupScreen.classList.contains('hidden')) {
+      enqueueSound('begin', 0.8);
+    }
+  }
 }
 
 function updateSoundButtons() {
@@ -273,6 +281,7 @@ function stopTimer() {
   $('startTimerBtn').disabled = false;
 }
 
+/* النقطة 2: صوت tick يعمل فقط عند بدء المؤقت (زر ابدأ العداد) */
 function startTimer() {
   if (state.isTimerRunning || state.isRevealed) return;
   state.isTimerRunning = true;
@@ -283,7 +292,6 @@ function startTimer() {
   state.timerInterval = setInterval(function() {
     state.timerValue -= 1;
     updateTimer();
-    if (state.timerValue > 0 && state.timerValue <= 3) enqueueSound('tick', 0.24);
     if (state.timerValue <= 0) {
       stopTimer();
       enqueueSound('wrong', 0.35);
@@ -374,6 +382,7 @@ function closeGiftBanner() {
   for (var i = 0; i < giftButtons.length; i++) giftButtons[i].classList.remove('is-active');
 }
 
+/* النقاط 5-7: هدايا مباشرة وهدايا تحتاج اختيار فريق */
 function selectGift(gift) {
   var now = Date.now();
   if (now - state.lastGiftClick < 800) return;
@@ -384,18 +393,42 @@ function selectGift(gift) {
     if (giftButtons[i].dataset.gift === gift) giftButtons[i].classList.add('is-active');
     else giftButtons[i].classList.remove('is-active');
   }
-  if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart') {
-    $('activeGiftText').textContent = gift === 'heart' ? 'اختر الفريق لتفعيل درع الحماية' : 'اختر الفريق لتفعيل الدمار الشامل';
+
+  /* الهدايا التي تحتاج اختيار فريق: دونت، كورجي، مجرة، عجلة، قلب الحماية */
+  if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart' || gift === 'donut' || gift === 'corgi') {
+    var text = '';
+    if (gift === 'heart') text = 'اختر الفريق لتفعيل درع الحماية';
+    else if (gift === 'donut') text = 'اختر الفريق لتفعيل الدونتس (+1 جولة)';
+    else if (gift === 'corgi') text = 'اختر الفريق لتفعيل الكورجي (+10 جولات)';
+    else text = 'اختر الفريق لتفعيل الدمار الشامل';
+    $('activeGiftText').textContent = text;
     $('activeGiftBanner').classList.remove('hidden');
-    enqueueSound('tick', 0.28);
     return;
   }
-  if (gift === 'rose') { subtractPoint('boys', true); enqueueSound('gift-rose', 0.6); }
-  else if (gift === 'tiktok') { subtractPoint('girls', true); enqueueSound('gift-tiktok', 0.6); }
-  else if (gift === 'donut') { state.girlsRounds += 1; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-donut', 0.65); showToast('+1 جولة لفريق البنات', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'corgi') { state.girlsRounds += 10; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-corgi', 0.65); showToast('+10 جولات لفريق البنات', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'cat') { state.boysRounds += 1; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-cat', 0.65); showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
-  else if (gift === 'crown') { state.boysRounds += 10; state.girlsScore = 0; state.boysScore = 0; enqueueSound('gift-crown', 0.65); showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED'); updateScores(); }
+
+  /* الهدايا المباشرة: وردة، تيك توك، كيتي، تاج */
+  if (gift === 'rose') {
+    subtractPoint('boys', true);
+    enqueueSound('gift-rose', 0.6);
+  } else if (gift === 'tiktok') {
+    subtractPoint('girls', true);
+    enqueueSound('gift-tiktok', 0.6);
+  } else if (gift === 'cat') {
+    state.boysRounds += 1;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    enqueueSound('gift-cat', 0.65);
+    showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED');
+    updateScores();
+  } else if (gift === 'crown') {
+    state.boysRounds += 10;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    enqueueSound('gift-crown', 0.65);
+    showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED');
+    updateScores();
+  }
+
   setTimeout(function() {
     state.activeGift = null;
     var btns = $$('.gift-button');
@@ -403,9 +436,12 @@ function selectGift(gift) {
   }, 450);
 }
 
+/* النقاط 5-7: معالجة اختيار الفريق للهدايا التي تحتاج اختيار */
 function resolveGift(team) {
   var gift = state.activeGift;
   if (!gift) return;
+
+  /* قلب الحماية */
   if (gift === 'heart') {
     state.shieldTeam = team;
     enqueueSound('gift-heart', 0.7);
@@ -414,13 +450,55 @@ function resolveGift(team) {
     updateScores();
     return;
   }
+
+  /* النقطة 5: دونت - بنات: gift-donut | شباب: gift-cat */
+  if (gift === 'donut') {
+    if (team === 'girls') {
+      state.girlsRounds += 1;
+      enqueueSound('gift-donut', 0.65);
+      showToast('+1 جولة لفريق البنات', 'GIFT LOCKED');
+    } else {
+      state.boysRounds += 1;
+      enqueueSound('gift-cat', 0.65);
+      showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED');
+    }
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    closeGiftBanner();
+    updateScores();
+    return;
+  }
+
+  /* النقطة 6: كورجي - بنات: gift-corgi | شباب: gift-crown */
+  if (gift === 'corgi') {
+    if (team === 'girls') {
+      state.girlsRounds += 10;
+      enqueueSound('gift-corgi', 0.65);
+      showToast('+10 جولات لفريق البنات', 'GIFT LOCKED');
+    } else {
+      state.boysRounds += 10;
+      enqueueSound('gift-crown', 0.65);
+      showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED');
+    }
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    closeGiftBanner();
+    updateScores();
+    return;
+  }
+
+  /* النقطة 7: مجرة وعجلة الحظ - بنات: girls-wheel | شباب: boys-wheel */
   var roundsToAdd = 0;
   if (gift === 'galaxy') roundsToAdd = 50;
   else if (gift === 'wheel') roundsToAdd = 100;
-  var giftSound = team === 'girls' ? 'girls-galaxy' : 'boys-galaxy';
-  if (team === 'girls') state.girlsRounds += roundsToAdd;
-  else state.boysRounds += roundsToAdd;
-  enqueueSound(giftSound, 0.7);
+
+  if (team === 'girls') {
+    state.girlsRounds += roundsToAdd;
+    enqueueSound('girls-wheel', 0.7);
+  } else {
+    state.boysRounds += roundsToAdd;
+    enqueueSound('boys-wheel', 0.7);
+  }
   showToast('+' + roundsToAdd + ' جولة لفريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT LOCKED');
   state.girlsScore = 0;
   state.boysScore = 0;
@@ -499,6 +577,7 @@ function continueAfterRound() {
   showResults();
 }
 
+/* النقطة 2: السؤال التالي يستدعي startTimer الذي يشغل tick */
 function nextQuestion() {
   if (!state.isRevealed) { showToast('اكشف الإجابة أولاً ثم انتقل', 'HOST TIP'); return; }
   if (state.currentIndex < state.questions.length - 1) {
@@ -620,6 +699,7 @@ function localGenerate(params) {
   });
 }
 
+/* النقطة 8: جلب الأسئلة من البنك الكامل + الحفظ التلقائي */
 async function fetchQuestions(params) {
   try {
     var response = await fetch('/api/questions', {
@@ -719,12 +799,12 @@ async function generateFullShow() {
   }
 }
 
+/* النقطة 1: لا يوجد صوت begin هنا — يعمل فقط في شاشة الإعداد */
 function prepareGame() {
   updateScores();
   showScreen('gameScreen');
   startShowClock();
   renderQuestion();
-  enqueueSound('begin', 0.75);
 }
 
 function renderSavedList() {
