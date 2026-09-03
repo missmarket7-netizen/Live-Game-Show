@@ -20,21 +20,13 @@ const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
   : path.join(__dirname, "questions");
 
-/* ═══════════ Turso: قاعدة البيانات الدائمة ═══════════ */
+/* ═══════════ Turso: الحفظ الدائم ═══════════ */
 const TURSO_URL = process.env.TURSO_URL || process.env.TURSO_DATABASE_URL || "";
 const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || process.env.TURSO_TOKEN || "";
-const turso = (TURSO_URL && TURSO_TOKEN)
-  ? createClient({ url: TURSO_URL, authToken: TURSO_TOKEN })
-  : null;
-
-if (!turso) {
-  console.warn("⚠️ متغيرات Turso غير موجودة — سيتم العمل بالنظام المؤقت المحلي.");
-} else {
-  console.log("✅ Turso متصل — الحفظ دائم والمؤشر مشترك بين الجميع.");
-}
+const turso = (TURSO_URL && TURSO_TOKEN) ? createClient({ url: TURSO_URL, authToken: TURSO_TOKEN }) : null;
 
 async function initTurso() {
-  if (!turso) return;
+  if (!turso) { console.warn("⚠️ متغيرات Turso غير موجودة — العمل بالنظام المحلي المؤقت."); return; }
   try {
     await turso.batch([
       `CREATE TABLE IF NOT EXISTS game_state (
@@ -46,20 +38,14 @@ async function initTurso() {
       )`,
       `CREATE TABLE IF NOT EXISTS generated_questions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        category TEXT,
-        difficulty TEXT,
-        question TEXT UNIQUE,
-        options TEXT,
-        correctIndex INTEGER,
-        explanation TEXT,
-        source TEXT DEFAULT 'ai',
-        created_at TEXT
+        category TEXT, difficulty TEXT, question TEXT UNIQUE,
+        options TEXT, correctIndex INTEGER, explanation TEXT,
+        source TEXT DEFAULT 'ai', created_at TEXT
       )`,
       `INSERT OR IGNORE INTO game_state (id, cursor, cycle_id, shuffle_order) VALUES (1, 0, 1, '[]')`
     ], "write");
-  } catch (e) {
-    console.error("Turso init error:", e.message);
-  }
+    console.log("✅ Turso متصل — الحفظ دائم والمؤشر مشترك.");
+  } catch (e) { console.error("Turso init error:", e.message); }
 }
 
 async function getState() {
@@ -98,17 +84,14 @@ async function saveGeneratedToTurso(questions) {
     try {
       await turso.execute({
         sql: "INSERT OR IGNORE INTO generated_questions (category, difficulty, question, options, correctIndex, explanation, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-        args: [
-          q.category || "معلومات عامة", q.difficulty || "متوسط", String(q.question).trim(),
-          JSON.stringify(q.options), q.correctIndex, q.explanation || "", q.source || "ai",
-          new Date().toISOString()
-        ]
+        args: [q.category || "معلومات عامة", q.difficulty || "متوسط", String(q.question).trim(),
+          JSON.stringify(q.options), q.correctIndex, q.explanation || "", q.source || "ai", new Date().toISOString()]
       });
     } catch (e) {}
   }
 }
 
-/* ═══════════ أدوات مساعدة ═══════════ */
+/* ═══════════ أدوات ═══════════ */
 function normalizeText(text) {
   return String(text || "").toLowerCase()
     .replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
@@ -124,7 +107,7 @@ function shuffleArray(arr) {
   return a;
 }
 
-/* تنظيف مفاتيح وقيم أسئلة البنك (معالجة المسافات الزائدة في الملفات) */
+/* تنظيف المفاتيح والقيم من المسافات الزائدة (يعالج db1→db5) */
 function sanitizeQuestion(raw) {
   if (!raw || typeof raw !== "object") return null;
   const q = {};
@@ -132,16 +115,18 @@ function sanitizeQuestion(raw) {
     const key = String(k).trim();
     q[key] = typeof v === "string" ? String(v).trim() : v;
   }
-  if (!q.question || !Array.isArray(q.options) || q.options.length < 2) return null;
-  q.options = q.options.map(function (o) { return String(o).trim(); });
+  if (!q.question || typeof q.question !== "string" || !q.question.trim()) return null;
+  if (!Array.isArray(q.options) || q.options.length < 2) return null;
+  q.question = q.question.trim();
+  q.options = q.options.map((o) => String(o).trim()).slice(0, 4);
   q.correctIndex = Math.max(0, Math.min(q.options.length - 1, Number(q.correctIndex) || 0));
-  q.category = q.category || "معلومات عامة";
-  q.difficulty = q.difficulty || "متوسط";
-  q.explanation = q.explanation || "";
+  q.category = String(q.category || "معلومات عامة").trim();
+  q.difficulty = String(q.difficulty || "متوسط").trim();
+  q.explanation = String(q.explanation || "").trim();
   return q;
 }
 
-/* تحميل ملفات db*.json من كل المسارات المحتملة + تنظيفها */
+/* تحميل db*.json من كل المسارات المحتملة */
 function loadBankQuestions() {
   const dirs = [
     DATA_DIR,
@@ -154,8 +139,9 @@ function loadBankQuestions() {
   for (const dir of dirs) {
     let files = [];
     try {
-      files = fs.readdirSync(dir).filter(function (f) { return /^db\d+\.json$/.test(f); })
-        .sort(function (a, b) { return parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10); });
+      files = fs.readdirSync(dir)
+        .filter((f) => /^db\d+\.json$/.test(f))
+        .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
     } catch (e) { continue; }
     for (const f of files) {
       if (loaded.has(f)) continue;
@@ -163,7 +149,11 @@ function loadBankQuestions() {
         const data = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
         if (Array.isArray(data)) {
           const clean = data.map(sanitizeQuestion).filter(Boolean);
-          if (clean.length) { loaded.add(f); all = all.concat(clean); console.log("📚 " + f + " → " + clean.length + " سؤال"); }
+          if (clean.length) {
+            loaded.add(f);
+            all = all.concat(clean);
+            console.log("📚 " + f + " → " + clean.length + " سؤال");
+          }
         }
       } catch (e) { console.error("⚠️ تعذر قراءة " + f + ": " + e.message); }
     }
@@ -171,11 +161,13 @@ function loadBankQuestions() {
   return all;
 }
 
-
 function loadGeneratedFromFile() {
   try {
     const p = path.join(DATA_DIR, "generated_questions.json");
-    if (fs.existsSync(p)) return JSON.parse(fs.readFileSync(p, "utf8"));
+    if (fs.existsSync(p)) {
+      const data = JSON.parse(fs.readFileSync(p, "utf8"));
+      if (Array.isArray(data)) return data.map(sanitizeQuestion).filter(Boolean);
+    }
   } catch (e) {}
   return [];
 }
@@ -189,7 +181,7 @@ function saveGeneratedToFile(questions) {
   } catch (e) { console.error("خطأ في الحفظ المحلي:", e.message); }
 }
 
-/* البنك الكامل: ملفات db + Turso + ملف محلي (بدون تكرار) */
+/* البنك الكامل بدون تكرار */
 async function getAllQuestions() {
   const bank = loadBankQuestions();
   const fromTurso = await loadGeneratedFromTurso();
@@ -317,82 +309,85 @@ async function callWithFallback(prompt, count) {
     try {
       const parsed = extractAndParseJSON(await provider.call(prompt));
       let questions = Array.isArray(parsed) ? parsed : (parsed.questions || [parsed]);
-      const valid = questions.filter((q) => q && q.question && Array.isArray(q.options) && q.options.length === 4 && typeof q.correctIndex === "number");
-      if (valid.length) return { questions: valid, source: "ai" };
+      const valid = questions.map(sanitizeQuestion).filter((q) =>
+        q && q.question && Array.isArray(q.options) && q.options.length === 4 && typeof q.correctIndex === "number");
+      if (valid.length > 0) return { questions: valid, source: "ai" };
     } catch (err) { errors.push(err.message); }
   }
   throw new Error("فشل الجميع: " + errors.join(" | "));
 }
 
-/* ═══════════ الدورة الذكية: مؤشر + ترتيب مخلوط دائم ═══════════ */
+/* ═══════════ الدورة الذكية ═══════════ */
 app.post("/api/questions", async (req, res) => {
   try {
     const body = req.body || {};
     const n = Math.min(Math.max(Number(body.count) || 10, 1), 50);
-    const category = body.category || "اختيارات متنوعة";
-    const difficulty = body.difficulty || "متوسط";
+    const category = String(body.category || "اختيارات متنوعة").trim();
+    const difficulty = String(body.difficulty || "متوسط").trim();
     const avoidSet = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
 
     const allBank = await getAllQuestions();
     if (!allBank.length) throw new Error("البنك فارغ");
     const len = allBank.length;
 
-    /* قراءة الحالة من Turso */
     let st = { cursor: 0, cycle_id: 1, shuffle_order: [] };
     try { const s = await getState(); if (s) st = s; } catch (e) {}
 
     let order = st.shuffle_order;
-    const orderValid = Array.isArray(order) && order.length === len && order.every((i) => Number.isInteger(i) && i >= 0 && i < len);
+    const orderValid = Array.isArray(order) && order.length === len &&
+      order.every((i) => Number.isInteger(i) && i >= 0 && i < len);
     if (!orderValid) order = shuffleArray(allBank.map((_, i) => i));
 
-    let absPos = Math.min(st.cursor, len);
-    let cycleId = st.cycle_id;
+    let absPos = Math.min(Number(st.cursor) || 0, len);
+    let cycleId = Number(st.cycle_id) || 1;
+
     const selected = [];
     const picked = new Set();
-
-    const tryPick = (q, requireCategory, requireDifficulty) => {
+    const tryPick = (q, wantCat, wantDiff) => {
+      if (!q) return false;
       const nk = normalizeText(q.question);
       if (picked.has(nk) || avoidSet.has(nk)) return false;
-      if (requireCategory && category !== "اختيارات متنوعة" && String(q.category || "").trim() !== String(category).trim()) return false;
-      if (requireDifficulty && String(q.difficulty || "").trim() !== String(difficulty).trim()) return false;
-      selected.push(q); picked.add(nk);
+      if (wantCat && category !== "اختيارات متنوعة" && String(q.category || "").trim() !== category) return false;
+      if (wantDiff && String(q.difficulty || "").trim() !== difficulty) return false;
+      picked.add(nk);
+      selected.push(q);
       return true;
     };
 
     /* مرور 1: فئة + مستوى مطابقان */
     let scanned = 0;
     while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], true, true); absPos++; scanned++; }
-    /* مرور 2: فئة مطابقة فقط */
+    /* مرور 2: فئة مطابقة */
     scanned = 0;
     while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], true, false); absPos++; scanned++; }
-    /* مرور 3: أي سؤال غير مستخدم حديثاً */
+    /* مرور 3: أي سؤال غير مستخدم */
     scanned = 0;
     while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], false, false); absPos++; scanned++; }
 
-    /* اكتمال دورة كاملة → دورة جديدة بترتيب جديد */
+    let newCursor = absPos % len;
     if (absPos >= len) {
       cycleId += 1;
       order = shuffleArray(allBank.map((_, i) => i));
+      newCursor = 0;
     }
-    const newCursor = absPos % len;
 
-    /* النقص يُكمل بتوليد AI ويُحفظ دائماً */
+    /* النقص يُكمل بـ AI ويُحفظ دائماً */
     if (selected.length < n) {
       const missing = n - selected.length;
       try {
         const aiResult = await callWithFallback(buildSystemPrompt(missing, category, difficulty), missing);
         await saveGeneratedToTurso(aiResult.questions);
         saveGeneratedToFile(aiResult.questions);
-        selected.push(...aiResult.questions);
+        for (const q of aiResult.questions) selected.push(q);
       } catch (e) {
-        selected.push(...getFallbackQuestions(category, missing, difficulty));
+        for (const q of getFallbackQuestions(category, missing, difficulty)) selected.push(q);
       }
     }
 
-    /* حفظ المؤشر والترتيب */
     try { await setState(newCursor, cycleId, order); } catch (e) {}
 
-    const enriched = selected.slice(0, n).map((q, i) => ({ ...q, id: `q_${Date.now()}_${i}`, source: q.source || "bank" }));
+    const enriched = selected.slice(0, n).map((q, i) =>
+      Object.assign({}, q, { id: "q_" + Date.now() + "_" + i, source: q.source || "bank" }));
     return res.json({
       questions: enriched,
       meta: { source: "smart-cycle", cursor: newCursor, cycle: cycleId, bankSize: len, persistent: Boolean(turso) }
@@ -414,7 +409,7 @@ app.post("/api/reset-cycle", async (req, res) => {
   }
 });
 
-/* حالة الدورة (للمتابعة) */
+/* حالة الدورة للمتابعة */
 app.get("/api/cycle-status", async (req, res) => {
   try {
     const st = await getState();
@@ -445,6 +440,6 @@ app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html
 const PORT = process.env.PORT || 3000;
 initTurso().finally(() => {
   app.listen(PORT, () => {
-    console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${loadBankQuestions().length} سؤال أساسي | Turso: ${turso ? "متصل ✅" : "غير مربوط ⚠️"}`);
+    console.log(`عالم التحديات يعمل على ${PORT} | Turso: ${turso ? "متصل ✅" : "غير مربوط ⚠️"}`);
   });
 });
