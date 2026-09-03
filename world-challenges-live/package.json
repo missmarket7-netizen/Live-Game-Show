@@ -1,18 +1,19 @@
 {
-  "name": "world-challenges-live-show",
-  "version": "1.0.0",
-  "type": "module",
-  "description": "🌎 عالم التحديات — LIVE GAME SHOW with AI-powered questions",
+  "name": "world-challenges-live",
+  "version": "6.3.0",
   "private": true,
+  "type": "module",
+  "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js"
   },
   "dependencies": {
-    "express": "^5.1.0",
-    "dotenv": "^17.2.1"
+    "@libsql/client": "^0.18.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18"
   }
 }
