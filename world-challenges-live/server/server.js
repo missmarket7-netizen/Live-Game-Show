@@ -124,22 +124,53 @@ function shuffleArray(arr) {
   return a;
 }
 
-/* تحميل كل ملفات db*.json ديناميكياً (db1..db6 وأكثر) */
+/* تنظيف مفاتيح وقيم أسئلة البنك (معالجة المسافات الزائدة في الملفات) */
+function sanitizeQuestion(raw) {
+  if (!raw || typeof raw !== "object") return null;
+  const q = {};
+  for (const [k, v] of Object.entries(raw)) {
+    const key = String(k).trim();
+    q[key] = typeof v === "string" ? String(v).trim() : v;
+  }
+  if (!q.question || !Array.isArray(q.options) || q.options.length < 2) return null;
+  q.options = q.options.map(function (o) { return String(o).trim(); });
+  q.correctIndex = Math.max(0, Math.min(q.options.length - 1, Number(q.correctIndex) || 0));
+  q.category = q.category || "معلومات عامة";
+  q.difficulty = q.difficulty || "متوسط";
+  q.explanation = q.explanation || "";
+  return q;
+}
+
+/* تحميل ملفات db*.json من كل المسارات المحتملة + تنظيفها */
 function loadBankQuestions() {
+  const dirs = [
+    DATA_DIR,
+    path.join(__dirname, "questions"),
+    path.join(__dirname, "..", "questions"),
+    path.join(__dirname, "..")
+  ];
   let all = [];
-  try {
-    const files = fs.readdirSync(DATA_DIR)
-      .filter((f) => /^db\d+\.json$/.test(f))
-      .sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
+  const loaded = new Set();
+  for (const dir of dirs) {
+    let files = [];
+    try {
+      files = fs.readdirSync(dir).filter(function (f) { return /^db\d+\.json$/.test(f); })
+        .sort(function (a, b) { return parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10); });
+    } catch (e) { continue; }
     for (const f of files) {
+      if (loaded.has(f)) continue;
       try {
-        const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf8"));
-        if (Array.isArray(data)) all = all.concat(data);
-      } catch (e) {}
+        const data = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
+        if (Array.isArray(data)) {
+          const clean = data.map(sanitizeQuestion).filter(Boolean);
+          if (clean.length) { loaded.add(f); all = all.concat(clean); console.log("📚 " + f + " → " + clean.length + " سؤال"); }
+        }
+      } catch (e) { console.error("⚠️ تعذر قراءة " + f + ": " + e.message); }
     }
-  } catch (e) {}
+  }
   return all;
 }
+
 
 function loadGeneratedFromFile() {
   try {
