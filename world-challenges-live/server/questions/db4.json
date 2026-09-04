@@ -13,14 +13,6 @@
     "explanation": "الإجابة الصحيحة: إسماعيل."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم حيوان يبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "سينما مصرية",
     "difficulty": "سهل",
     "question": "من بطلة فيلم بين الأطلال؟",
@@ -97,14 +89,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: عمر المختار."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شهر من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "دين",
@@ -406,22 +390,6 @@
     "explanation": "الإجابة الصحيحة: ركوب الأمواج."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم حيوان من 3 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مدينة عربية من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "معلومات عامة",
     "difficulty": "سهل",
     "question": "كم ضلعًا للمربع؟",
@@ -511,14 +479,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: سانتياغو."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم حيوان بحري يبدأ بحرف د",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما عربية",
@@ -664,19 +624,6 @@
     "explanation": "الإجابة الصحيحة: تصويبة ميدانية من نقطتين."
   },
   {
-    "category": "لغز",
-    "difficulty": "متوسط",
-    "question": "ما الشيء الذي تستطيع كسره دون لمسه؟",
-    "options": [
-      "الساعة",
-      "الصمت",
-      "الرعد والبرق",
-      "الساعة"
-    ],
-    "correctIndex": 1,
-    "explanation": "الإجابة الصحيحة: الصمت."
-  },
-  {
     "category": "سينما عربية",
     "difficulty": "سهل",
     "question": "من قامت بدور هند بنت عتبة في الرسالة؟",
@@ -701,14 +648,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: أغسطس."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم بلد يبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما مصرية",
@@ -802,14 +741,6 @@
     "explanation": "الإجابة الصحيحة: 2011."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مسلسل عربي يبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "جغرافيا",
     "difficulty": "سهل",
     "question": "ما عاصمة نيجيريا؟",
@@ -821,14 +752,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: أبوجا."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم عاصمة من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "جغرافيا",
@@ -909,14 +832,6 @@
     "explanation": "الإجابة الصحيحة: الصوديوم."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مشروب ساخن من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "لغز",
     "difficulty": "متوسط",
     "question": "ما الشيء الذي يمشي ويقف وليس له أرجل؟",
@@ -954,19 +869,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: إبراهيم عليه السلام."
-  },
-  {
-    "category": "سينما عربية",
-    "difficulty": "سهل",
-    "question": "ما اسم الفيلم اللبناني الذي يتناول طفلًا يرفع دعوى على والديه؟",
-    "options": [
-      "إيليا سليمان",
-      "زياد دويري",
-      "كفرناحوم",
-      "زياد دويري"
-    ],
-    "correctIndex": 2,
-    "explanation": "الإجابة الصحيحة: كفرناحوم."
   },
   {
     "category": "رياضة",
@@ -1158,7 +1060,7 @@
       "فاتن حمامة",
       "نور الشريف",
       "يسرا",
-      "فاتن حمامة"
+      "عبلة كامل"
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: يسرا."
@@ -1398,14 +1300,6 @@
     "explanation": "الإجابة الصحيحة: عادل إمام."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم دولة تبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "علوم",
     "difficulty": "متوسط",
     "question": "ما العضو الذي يضخ الدم في جسم الإنسان؟",
@@ -1430,19 +1324,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: نيوتن."
-  },
-  {
-    "category": "لغز",
-    "difficulty": "سهل",
-    "question": "ما الشيء الذي يبدأ بحرف وينتهي بحرف وليس كلمة؟",
-    "options": [
-      "النار",
-      "مفتاح الكمبيوتر/لوحة المفاتيح",
-      "الحرف",
-      "الضوء"
-    ],
-    "correctIndex": 2,
-    "explanation": "الإجابة الصحيحة: الحرف."
   },
   {
     "category": "لغز",
@@ -1588,14 +1469,6 @@
     "explanation": "الإجابة الصحيحة: الذهب."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شيء موجود في المطبخ يبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "سينما مصرية",
     "difficulty": "سهل",
     "question": "من بطل فيلم السكرية؟",
@@ -1698,14 +1571,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: الثورة الفرنسية."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم بلد من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -1812,14 +1677,6 @@
     "explanation": "الإجابة الصحيحة: غار حراء."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم لون من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "جغرافيا",
     "difficulty": "متوسط",
     "question": "ما عاصمة السودان؟",
@@ -1857,21 +1714,5 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: الرماية بالقوس."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم نبات من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم نادي كرة قدم يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   }
 ]

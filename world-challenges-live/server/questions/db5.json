@@ -91,14 +91,6 @@
     "explanation": "الإجابة الصحيحة: الساعة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم ممثلة مصرية تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "ما المدينة الإيطالية المرتبطة ببداية النهضة بقوة؟",
@@ -177,14 +169,6 @@
     "explanation": "الإجابة الصحيحة: الحديد."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم جماد من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "دين",
     "difficulty": "سهل",
     "question": "ما أول شهر في السنة الهجرية؟",
@@ -209,14 +193,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: بيروت."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم عاصمة تبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -258,14 +234,6 @@
     "explanation": "الإجابة الصحيحة: الفرنسية."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم دولة تبدأ بحرف ك",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "جغرافيا",
     "difficulty": "سهل",
     "question": "ما عاصمة الأرجنتين؟",
@@ -305,14 +273,6 @@
     "explanation": "الإجابة الصحيحة: أحمد زكي."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم دولة أفريقية من 6 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "معلومات عامة",
     "difficulty": "سهل",
     "question": "ما الدولة التي تشتهر بتاج محل؟",
@@ -324,14 +284,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: الهند."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم يوم يبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "تاريخ",
@@ -358,14 +310,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: فاتن حمامة."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم حشرة من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -405,14 +349,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: الصين."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم نبات يبدأ بحرف ر",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "لغز",
@@ -491,14 +427,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: بودابست."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شيء في السيارة يبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما عربية",
@@ -631,14 +559,6 @@
     "explanation": "الإجابة الصحيحة: يحيى شاهين."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم محافظة مصرية تبدأ بحرف ق",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "معلومات عامة",
     "difficulty": "متوسط",
     "question": "ما أول شهر ميلادي؟",
@@ -754,14 +674,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: أحمد زكي."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شخصية كرتونية تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما مصرية",
@@ -1492,22 +1404,6 @@
     "explanation": "الإجابة الصحيحة: عبد الله بن عبد المطلب."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم فاكهة من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مهنة تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "ما الاسم القديم لمدينة إسطنبول؟",
@@ -1554,7 +1450,7 @@
       "المدينة المنورة",
       "أحد",
       "خديجة بنت خويلد",
-      "المدينة المنورة"
+      "أسماء بنت أبي بكر"
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: خديجة بنت خويلد."
@@ -1651,24 +1547,16 @@
     "explanation": "الإجابة الصحيحة: الماء."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مادة دراسية من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "أين تقع ماتشو بيتشو؟",
     "options": [
-      "مهاتما غاندي",
-      "القسطنطينية",
       "بيرو",
-      "القسطنطينية"
+      "جنوب أفريقيا",
+      "المكسيك",
+      "اليونان"
     ],
-    "correctIndex": 2,
+    "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: بيرو."
   },
   {
@@ -1852,14 +1740,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: القضية رقم 23."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم لاعب كرة قدم يبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "دين",

@@ -124,7 +124,7 @@
       "سعاد حسني",
       "لبلبة",
       "عمر الشريف",
-      "عمر الشريف"
+      "مريم فخر الدين"
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: سعاد حسني."
@@ -206,14 +206,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: البارومتر."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم دولة تبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "دين",
@@ -333,14 +325,6 @@
     "explanation": "الإجابة الصحيحة: المشط."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم فاكهة تبدأ بحرف ت",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "لغز",
     "difficulty": "سهل",
     "question": "ما الشيء الذي يملأ الغرفة ولا يشغل حيزًا؟",
@@ -404,14 +388,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: مهاتما غاندي."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم عاصمة تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -516,14 +492,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: عادل إمام."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم خضار من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "لغز",
@@ -721,14 +689,6 @@
     "explanation": "الإجابة الصحيحة: الثقة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم آلة موسيقية من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "دين",
     "difficulty": "سهل",
     "question": "كم عدد أركان الإيمان؟",
@@ -924,14 +884,6 @@
     "explanation": "الإجابة الصحيحة: عمر الشريف."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم بنت من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "رياضة",
     "difficulty": "سهل",
     "question": "ما الرياضة التي تشتهر ببطولة ويمبلدون؟",
@@ -956,14 +908,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: KV62."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم بنت يبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "رياضة",
@@ -1044,14 +988,6 @@
     "explanation": "الإجابة الصحيحة: المقدمة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم فيلم عربي من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "جغرافيا",
     "difficulty": "سهل",
     "question": "ما عاصمة إندونيسيا؟",
@@ -1115,14 +1051,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: 8."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مخرج مصري يبدأ بحرف ش",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "تاريخ",
@@ -1229,14 +1157,6 @@
     "explanation": "الإجابة الصحيحة: الطريق."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مادة دراسية تبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "ما اسم عاصمة مصر القديمة في الدولة القديمة؟",
@@ -1300,14 +1220,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: فردوس عبد الحميد."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مخرج عربي يبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "لغز",
@@ -1399,14 +1311,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: أحد."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم محافظة مصرية تبدأ بحرف د",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -1539,14 +1443,6 @@
     "explanation": "الإجابة الصحيحة: عبد المنعم مدبولي."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم آلة موسيقية تبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "علوم",
     "difficulty": "سهل",
     "question": "ما الكوكب الأبعد عن الشمس في النظام الشمسي؟",
@@ -1560,14 +1456,6 @@
     "explanation": "الإجابة الصحيحة: نبتون."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شيء موجود في المدرسة يبدأ بحرف ك",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "علوم",
     "difficulty": "سهل",
     "question": "ما اسم الصخور المنصهرة التي تخرج إلى سطح الأرض؟",
@@ -1579,14 +1467,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: اللابة."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم لاعب مصري يبدأ بحرف ح",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "تاريخ",

@@ -26,14 +26,6 @@
     "explanation": "الإجابة الصحيحة: صلاح الدين الأيوبي."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم رياضة من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "سينما عربية",
     "difficulty": "سهل",
     "question": "في أي عام صدر فيلم القضية رقم 23؟",
@@ -177,22 +169,6 @@
     "explanation": "الإجابة الصحيحة: السحاب."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم أكلة مصرية من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم محافظة مصرية من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "رياضة",
     "difficulty": "سهل",
     "question": "ما الرياضة التي تشتهر بفريق Dream Team الأمريكي؟",
@@ -258,29 +234,16 @@
     "explanation": "الإجابة الصحيحة: ليلة القدر."
   },
   {
-    "category": "لغز",
-    "difficulty": "متوسط",
-    "question": "ما الشيء الذي له أذن ولا يسمع؟",
-    "options": [
-      "القلم",
-      "الكوب",
-      "النار",
-      "النار"
-    ],
-    "correctIndex": 1,
-    "explanation": "الإجابة الصحيحة: الكوب."
-  },
-  {
     "category": "دين",
     "difficulty": "سهل",
     "question": "ما اتجاه القبلة في الصلاة؟",
     "options": [
-      "خمس صلوات",
-      "مكة المكرمة",
-      "نحو الكعبة",
-      "الكعبة"
+      "نحو الكعبة المشرفة",
+      "نحو المسجد الأقصى",
+      "نحو المشرق فقط",
+      "نحو الشمال فقط"
     ],
-    "correctIndex": 2,
+    "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: نحو الكعبة."
   },
   {
@@ -490,14 +453,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: هراري."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مطرب عربي يبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما مصرية",
@@ -734,14 +689,6 @@
     "explanation": "الإجابة الصحيحة: الهاتف."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم خضار يبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "رياضة",
     "difficulty": "سهل",
     "question": "ما اسم الحلبة الأشهر في سباقات 24 ساعة بفرنسا؟",
@@ -885,14 +832,6 @@
     "explanation": "الإجابة الصحيحة: بكين."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم أغنية من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "دين",
     "difficulty": "سهل",
     "question": "ما الكتاب الذي أُنزل على داود؟",
@@ -971,14 +910,6 @@
     "explanation": "الإجابة الصحيحة: الصينية المندرينية."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم طائر يبدأ بحرف ح",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "علوم",
     "difficulty": "سهل",
     "question": "ما الطبقة الغازية المحيطة بالأرض؟",
@@ -990,14 +921,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: الغلاف الجوي."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم وجبة إفطار مصرية",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما مصرية",
@@ -1050,30 +973,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: المقص."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم ممثل عربي يبدأ بحرف ن",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم ولد يبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم منتخب يبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "لغز",
@@ -1191,14 +1090,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: الكوثر."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم نهر يبدأ بحرف ن",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -1381,14 +1272,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: الشم."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مسلسل مصري من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -1651,14 +1534,6 @@
     "explanation": "الإجابة الصحيحة: الدوحة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم بحر يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "سينما عربية",
     "difficulty": "سهل",
     "question": "في أي عام صدر فيلم يد إلهية؟",
@@ -1852,14 +1727,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: اليونان."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مدينة تبدأ بحرف س",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما مصرية",

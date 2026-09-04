@@ -85,7 +85,7 @@
       "داود عبد السيد",
       "عادل إمام",
       "عمر الشريف",
-      "عمر الشريف"
+      "محمود عبد العزيز"
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: عادل إمام."
@@ -221,22 +221,6 @@
     "explanation": "الإجابة الصحيحة: بغداد."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم ولد يبدأ بحرف ك",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم رياضة تبدأ بحرف ت",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "من بنى أول هرم مدرج شهير؟",
@@ -352,14 +336,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: نواكشوط."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم دولة آسيوية من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -856,19 +832,6 @@
     "explanation": "الإجابة الصحيحة: لبلبة."
   },
   {
-    "category": "سينما مصرية",
-    "difficulty": "متوسط",
-    "question": "من بطلة فيلم رد قلبي؟",
-    "options": [
-      "يسرا",
-      "مريم فخر الدين",
-      "عادل إمام",
-      "عادل إمام"
-    ],
-    "correctIndex": 1,
-    "explanation": "الإجابة الصحيحة: مريم فخر الدين."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "سهل",
     "question": "ما الوثيقة الإنجليزية التي صدرت عام 1215 وحدّت من سلطة الملك؟",
@@ -958,14 +921,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: الغاز."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم أداة تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "سينما عربية",
@@ -1122,22 +1077,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: نور الشريف."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مدينة مصرية من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم حلوى مصرية",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "لغز",
@@ -1361,22 +1300,6 @@
     "explanation": "الإجابة الصحيحة: فيتامين د."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم فيلم مصري يبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم ممثلة عربية تبدأ بحرف ل",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "لغز",
     "difficulty": "متوسط",
     "question": "ما الشيء الذي إذا كسرته لا يصدر صوتًا؟",
@@ -1453,14 +1376,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: 11."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شهر يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -1580,14 +1495,6 @@
     "explanation": "الإجابة الصحيحة: المنامة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم شخصية كرتونية من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "معلومات عامة",
     "difficulty": "متوسط",
     "question": "كم ضلعًا للسداسي؟",
@@ -1666,22 +1573,6 @@
     "explanation": "الإجابة الصحيحة: خوفو."
   },
   {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم نادي مصري من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مطربة عربية تبدأ بحرف ن",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "رياضة",
     "difficulty": "سهل",
     "question": "كم نقطة للتصويبة من خارج قوس الثلاثيات؟",
@@ -1706,14 +1597,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: القشرة الأرضية."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم مدينة مصرية يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "جغرافيا",
@@ -1753,14 +1636,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: التوبة."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم طائر يبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -1852,14 +1727,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: لافلز."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "سهل",
-    "question": "اسم جماد يبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "رياضة",
