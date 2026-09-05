@@ -7,7 +7,6 @@ import { createClient } from "@libsql/client";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
-
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
@@ -15,11 +14,9 @@ app.use(express.static(path.join(__dirname, "../public")));
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-
 const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
   : path.join(__dirname, "questions");
-
 const TURSO_URL = process.env.TURSO_URL || process.env.TURSO_DATABASE_URL || "";
 const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || process.env.TURSO_TOKEN || "";
 const turso = (TURSO_URL && TURSO_TOKEN) ? createClient({ url: TURSO_URL, authToken: TURSO_TOKEN }) : null;
@@ -28,107 +25,79 @@ async function initTurso() {
   if (!turso) { console.warn("⚠️ Turso غير مربوط — نظام محلي مؤقت."); return; }
   try {
     await turso.batch([
-      `CREATE TABLE IF NOT EXISTS game_state (id INTEGER PRIMARY KEY CHECK (id = 1), cursor INTEGER NOT NULL DEFAULT 0, cycle_id INTEGER NOT NULL DEFAULT 1, shuffle_order TEXT NOT NULL DEFAULT '[]', updated_at TEXT)`,
-      `CREATE TABLE IF NOT EXISTS generated_questions (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, difficulty TEXT, question TEXT UNIQUE, options TEXT, correctIndex INTEGER, explanation TEXT, source TEXT DEFAULT 'ai', created_at TEXT)`,
-      `INSERT OR IGNORE INTO game_state (id, cursor, cycle_id, shuffle_order) VALUES (1, 0, 1, '[]')`
+      "CREATE TABLE IF NOT EXISTS game_state (id INTEGER PRIMARY KEY CHECK (id = 1), cursor INTEGER NOT NULL DEFAULT 0, cycle_id INTEGER NOT NULL DEFAULT 1, shuffle_order TEXT NOT NULL DEFAULT '[]', updated_at TEXT)",
+      "CREATE TABLE IF NOT EXISTS generated_questions (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, difficulty TEXT, question TEXT UNIQUE, options TEXT, correctIndex INTEGER, explanation TEXT, source TEXT DEFAULT 'ai', created_at TEXT)",
+      "INSERT OR IGNORE INTO game_state (id, cursor, cycle_id, shuffle_order) VALUES (1, 0, 1, '[]')"
     ], "write");
     console.log("✅ Turso متصل — الحفظ دائم.");
   } catch (e) { console.error("Turso init error:", e.message); }
 }
-
 async function getState() {
   if (!turso) return null;
   const r = await turso.execute("SELECT cursor, cycle_id, shuffle_order FROM game_state WHERE id = 1");
   if (!r.rows.length) return { cursor: 0, cycle_id: 1, shuffle_order: [] };
-  const row = r.rows[0];
-  let order = [];
+  const row = r.rows[0]; let order = [];
   try { order = JSON.parse(row.shuffle_order || "[]"); } catch (e) {}
   return { cursor: Number(row.cursor) || 0, cycle_id: Number(row.cycle_id) || 1, shuffle_order: order };
 }
-
 async function setState(cursor, cycleId, order) {
   if (!turso) return;
   await turso.execute({ sql: "UPDATE game_state SET cursor = ?, cycle_id = ?, shuffle_order = ?, updated_at = ? WHERE id = 1", args: [cursor, cycleId, JSON.stringify(order), new Date().toISOString()] });
 }
-
 async function loadGeneratedFromTurso() {
   if (!turso) return [];
   try {
     const r = await turso.execute("SELECT category, difficulty, question, options, correctIndex, explanation, source FROM generated_questions");
-    return r.rows.map((row) => ({ category: row.category, difficulty: row.difficulty, question: row.question, options: JSON.parse(row.options), correctIndex: Number(row.correctIndex), explanation: row.explanation, source: row.source || "ai" }));
+    return r.rows.map((row) => ({ category: row.category, difficulty: row.difficulty, question: row.question, options: JSON.parse(row.options), correctIndex: row.correctIndex, explanation: row.explanation, source: row.source || "ai" }));
   } catch (e) { return []; }
 }
-
 async function saveGeneratedToTurso(questions) {
   if (!turso) return;
   for (const q of questions) {
     try {
-      await turso.execute({ sql: "INSERT OR IGNORE INTO generated_questions (category, difficulty, question, options, correctIndex, explanation, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: [q.category || "معلومات عامة", q.difficulty || "متوسط", String(q.question).trim(), JSON.stringify(q.options), q.correctIndex, q.explanation || "", q.source || "ai", new Date().toISOString()] });
+      await turso.execute({ sql: "INSERT OR IGNORE INTO generated_questions (category, difficulty, question, options, correctIndex, explanation, source, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", args: [q.category || "معلومات عامة", q.difficulty || "متوسط", String(q.question).trim(), JSON.stringify(q.options || []), q.correctIndex, q.explanation || "", q.source || "ai", new Date().toISOString()] });
     } catch (e) {}
   }
 }
-
-function normalizeText(text) {
-  return String(text || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[^\u0621-\u064Aa-z0-9]/g, "").trim();
+function normalizeText(t) {
+  return String(t || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[^\u0621-\u064Aa-z0-9]/g, "").trim();
 }
-
-function shuffleArray(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-
-/* ═══ التنظيف: يعالج مفاتيح db1-db5 ذات المسافات الزائدة ═══ */
+function shuffleArray(a0) { const a = [...a0]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+/* تنظيف المفاتيح والقيم + السماح بأسئلة الإجابة الحرة (سرعة) */
 function sanitizeQuestion(raw) {
   if (!raw || typeof raw !== "object") return null;
   const q = {};
-  for (const [k, v] of Object.entries(raw)) {
-    const key = String(k).trim();
-    q[key] = typeof v === "string" ? String(v).trim() : v;
-  }
+  for (const [k, v] of Object.entries(raw)) { const key = String(k).trim(); q[key] = typeof v === "string" ? String(v).trim() : v; }
   if (!q.question || typeof q.question !== "string" || !q.question.trim()) return null;
-  if (!Array.isArray(q.options) || q.options.length < 2) return null;
-  q.question = q.question.trim();
+  if (!Array.isArray(q.options)) q.options = [];
+  if (q.options.length > 0 && q.options.length < 2) return null;
   q.options = q.options.map((o) => String(o).trim()).slice(0, 4);
-  q.correctIndex = Math.max(0, Math.min(q.options.length - 1, Number(q.correctIndex) || 0));
+  q.correctIndex = q.options.length ? Math.max(0, Math.min(q.options.length - 1, Number(q.correctIndex) || 0)) : null;
   q.category = String(q.category || "معلومات عامة").trim();
   q.difficulty = String(q.difficulty || "متوسط").trim();
   q.explanation = String(q.explanation || "").trim();
   return q;
 }
-
-/* ═══ تحميل كل ملفات db*.json من كل المسارات ═══ */
 function loadBankQuestions() {
   const dirs = [DATA_DIR, path.join(__dirname, "questions"), path.join(__dirname, "..", "questions"), path.join(__dirname, "..")];
-  let all = [];
-  const loaded = new Set();
+  let all = []; const loaded = new Set();
   for (const dir of dirs) {
     let files = [];
-    try {
-      files = fs.readdirSync(dir).filter((f) => /^db\d+\.json$/.test(f)).sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10));
-    } catch (e) { continue; }
+    try { files = fs.readdirSync(dir).filter((f) => /^db\d+\.json$/.test(f)).sort((a, b) => parseInt(a.match(/\d+/)[0], 10) - parseInt(b.match(/\d+/)[0], 10)); } catch (e) { continue; }
     for (const f of files) {
       if (loaded.has(f)) continue;
       try {
         const data = JSON.parse(fs.readFileSync(path.join(dir, f), "utf8"));
-        if (Array.isArray(data)) {
-          const clean = data.map(sanitizeQuestion).filter(Boolean);
-          if (clean.length) { loaded.add(f); all = all.concat(clean); console.log("📚 " + f + " → " + clean.length); }
-        }
+        if (Array.isArray(data)) { const clean = data.map(sanitizeQuestion).filter(Boolean); if (clean.length) { loaded.add(f); all = all.concat(clean); console.log("📚 " + f + " → " + clean.length); } }
       } catch (e) { console.error("⚠️ " + f + ": " + e.message); }
     }
   }
   return all;
 }
-
 function loadGeneratedFromFile() {
-  try {
-    const p = path.join(DATA_DIR, "generated_questions.json");
-    if (fs.existsSync(p)) { const d = JSON.parse(fs.readFileSync(p, "utf8")); if (Array.isArray(d)) return d.map(sanitizeQuestion).filter(Boolean); }
-  } catch (e) {}
+  try { const p = path.join(DATA_DIR, "generated_questions.json"); if (fs.existsSync(p)) { const d = JSON.parse(fs.readFileSync(p, "utf8")); if (Array.isArray(d)) return d.map(sanitizeQuestion).filter(Boolean); } } catch (e) {}
   return [];
 }
-
 function saveGeneratedToFile(questions) {
   try {
     if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -136,109 +105,69 @@ function saveGeneratedToFile(questions) {
     fs.writeFileSync(path.join(DATA_DIR, "generated_questions.json"), JSON.stringify(merged, null, 2), "utf8");
   } catch (e) { console.error("حفظ محلي:", e.message); }
 }
-
 async function getAllQuestions() {
-  const seen = new Set();
-  const all = [];
+  const seen = new Set(); const all = [];
   for (const q of loadBankQuestions().concat(await loadGeneratedFromTurso(), loadGeneratedFromFile())) {
     if (!q || !q.question) continue;
     const key = normalizeText(q.question);
     if (seen.has(key)) continue;
-    seen.add(key);
-    all.push(q);
+    seen.add(key); all.push(q);
   }
   return all;
 }
-
 function buildSystemPrompt(count, category, difficulty) {
   return `أنت مولد أسئلة لمسابقة عربية مباشرة اسمها "عالم التحديات". أخرج JSON فقط: مصفوفة من ${count} كائنات، كل كائن: category, difficulty, question, options (4), correctIndex (0-3), explanation. الفئة: ${category || "معلومات عامة"} — المستوى: ${difficulty || "متوسط"}. لا تكرر وتأكد من الصحة.`;
 }
-
 function extractAndParseJSON(rawText) {
   if (!rawText || typeof rawText !== "string") throw new Error("الرد فارغ");
   const cleaned = rawText.replace(/```json\s*/gi, "").replace(/```\s*/g, " ").trim();
-  const am = cleaned.match(/\[[\s\S]*\]/);
-  if (am) { try { return JSON.parse(am[0]); } catch (e) {} }
-  const om = cleaned.match(/\{[\s\S]*\}/);
-  if (om) { try { return JSON.parse(om[0]); } catch (e) {} }
+  const am = cleaned.match(/\[[\s\S]*\]/); if (am) { try { return JSON.parse(am[0]); } catch (e) {} }
+  const om = cleaned.match(/\{[\s\S]*\}/); if (om) { try { return JSON.parse(om[0]); } catch (e) {} }
   try { return JSON.parse(cleaned); } catch (e) {}
   throw new Error("تعذر تحليل JSON");
 }
-
 const PROVIDERS = [
   { name: "gemini", key: GEMINI_API_KEY, call: async (prompt) => {
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     try {
-      const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: controller.signal, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9, maxOutputTokens: 4000 } }) });
-      clearTimeout(timeout);
-      if (!res.ok) throw new Error("Gemini " + res.status);
-      const json = await res.json();
-      const text = json.candidates?.[0]?.content?.parts?.[0]?.text || "";
-      if (!text) throw new Error("Gemini بدون نص");
-      return text;
-    } catch (err) { clearTimeout(timeout); throw err; }
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`, { method: "POST", headers: { "Content-Type": "application/json" }, signal: c.signal, body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }], generationConfig: { temperature: 0.9, maxOutputTokens: 4000 } }) });
+      clearTimeout(t); if (!r.ok) throw new Error("Gemini " + r.status);
+      const j = await r.json(); const text = j.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      if (!text) throw new Error("بدون نص"); return text;
+    } catch (e) { clearTimeout(t); throw e; }
   } },
   { name: "openrouter", key: OPENROUTER_API_KEY, call: async (prompt) => {
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     try {
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json", Authorization: `Bearer ${OPENROUTER_API_KEY}`, "HTTP-Referer": "https://live-game-show.app", "X-Title": "Live Game Show" }, body: JSON.stringify({ model: process.env.OPENROUTER_MODEL || "minimax/minimax-m2.7:free", messages: [{ role: "user", content: prompt }], temperature: 0.9, max_tokens: 4000 }) });
-      clearTimeout(timeout);
-      if (!res.ok) throw new Error("OpenRouter " + res.status);
-      const json = await res.json();
-      const content = json.choices?.[0]?.message?.content || "";
-      if (!content) throw new Error("OpenRouter بدون نص");
-      return content;
-    } catch (err) { clearTimeout(timeout); throw err; }
+      const r = await fetch("https://openrouter.ai/api/v1/chat/completions", { method: "POST", signal: c.signal, headers: { "Content-Type": "application/json", Authorization: `Bearer ${OPENROUTER_API_KEY}`, "HTTP-Referer": "https://live-game-show.app", "X-Title": "Live Game Show" }, body: JSON.stringify({ model: process.env.OPENROUTER_MODEL || "minimax/minimax-m2.7:free", messages: [{ role: "user", content: prompt }], temperature: 0.9, max_tokens: 4000 }) });
+      clearTimeout(t); if (!r.ok) throw new Error("OpenRouter " + r.status);
+      const j = await r.json(); const x = j.choices?.[0]?.message?.content || "";
+      if (!x) throw new Error("بدون نص"); return x;
+    } catch (e) { clearTimeout(t); throw e; }
   } },
   { name: "groq", key: GROQ_API_KEY, call: async (prompt) => {
-    const controller = new AbortController(); const timeout = setTimeout(() => controller.abort(), 20000);
+    const c = new AbortController(); const t = setTimeout(() => c.abort(), 20000);
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", signal: controller.signal, headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` }, body: JSON.stringify({ model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }], temperature: 0.9, max_tokens: 4000 }) });
-      clearTimeout(timeout);
-      if (!res.ok) throw new Error("Groq " + res.status);
-      const json = await res.json();
-      const content = json.choices?.[0]?.message?.content || "";
-      if (!content) throw new Error("Groq بدون نص");
-      return content;
-    } catch (err) { clearTimeout(timeout); throw err; }
+      const r = await fetch("https://api.groq.com/openai/v1/chat/completions", { method: "POST", signal: c.signal, headers: { "Content-Type": "application/json", Authorization: `Bearer ${GROQ_API_KEY}` }, body: JSON.stringify({ model: process.env.GROQ_MODEL || "llama-3.3-70b-versatile", messages: [{ role: "user", content: prompt }], temperature: 0.9, max_tokens: 4000 }) });
+      clearTimeout(t); if (!r.ok) throw new Error("Groq " + r.status);
+      const j = await r.json(); const x = j.choices?.[0]?.message?.content || "";
+      if (!x) throw new Error("بدون نص"); return x;
+    } catch (e) { clearTimeout(t); throw e; }
   } }
 ];
-
-function getFallbackQuestions(category, count, difficulty) {
-  const allQuestions = [
-    { category: "معلومات عامة", difficulty: "سهل", question: "ما هي عاصمة السعودية؟", options: ["جدة", "الرياض", "مكة", "الدمام"], correctIndex: 1, explanation: "الرياض هي العاصمة الرسمية." },
-    { category: "دين", difficulty: "سهل", question: "كم عدد ركعات صلاة الفجر؟", options: ["2", "3", "4", "5"], correctIndex: 0, explanation: "صلاة الفجر ركعتان." },
-    { category: "جغرافيا", difficulty: "سهل", question: "ما هو أطول نهر في العالم؟", options: ["الفرات", "النيل", "دجلة", "الأمازون"], correctIndex: 1, explanation: "نهر النيل هو الأطول." },
-    { category: "علوم", difficulty: "سهل", question: "ما هو أكبر كوكب في المجموعة الشمسية؟", options: ["الأرض", "المشتري", "زحل", "المريخ"], correctIndex: 1, explanation: "المشتري أكبر الكواكب." },
-    { category: "تاريخ", difficulty: "متوسط", question: "من هو فاتح الأندلس؟", options: ["خالد بن الوليد", "طارق بن زياد", "صلاح الدين", "سعد بن أبي وقاص"], correctIndex: 1, explanation: "طارق بن زياد 711م." },
-    { category: "رياضة", difficulty: "سهل", question: "كم عدد لاعبي فريق كرة القدم؟", options: ["9", "10", "11", "12"], correctIndex: 2, explanation: "11 لاعباً." },
-    { category: "تكنولوجيا", difficulty: "سهل", question: "ما هي شركة آبل؟", options: ["شركة سيارات", "شركة تقنية", "شركة أغذية", "شركة ملابس"], correctIndex: 1, explanation: "شركة تقنية أمريكية." },
-    { category: "لغز", difficulty: "سهل", question: "له أسنان ولا يعض، ما هو؟", options: ["التمساح", "المشط", "المنشار", "الفأر"], correctIndex: 1, explanation: "المشط." }
-  ];
-  let filtered = allQuestions.filter((q) => q.difficulty === difficulty);
-  if (!filtered.length) filtered = allQuestions;
-  if (category && category !== "اختيارات متنوعة" && category !== "معلومات عامة") {
-    const cat = filtered.filter((q) => q.category === category);
-    if (cat.length) filtered = cat;
-  }
-  return shuffleArray(filtered).slice(0, Math.min(count, filtered.length));
-}
-
 async function callWithFallback(prompt, count) {
   const errors = [];
-  for (const provider of PROVIDERS) {
-    if (!provider.key) continue;
+  for (const p of PROVIDERS) {
+    if (!p.key) continue;
     try {
-      const parsed = extractAndParseJSON(await provider.call(prompt));
-      let questions = Array.isArray(parsed) ? parsed : (parsed.questions || [parsed]);
-      const valid = questions.map(sanitizeQuestion).filter((q) => q && q.question && Array.isArray(q.options) && q.options.length === 4 && typeof q.correctIndex === "number");
-      if (valid.length > 0) return { questions: valid, source: "ai" };
-    } catch (err) { errors.push(err.message); }
+      const parsed = extractAndParseJSON(await p.call(prompt));
+      const list = Array.isArray(parsed) ? parsed : (parsed.questions || [parsed]);
+      const valid = list.map(sanitizeQuestion).filter((q) => q && q.question && q.options.length === 4 && typeof q.correctIndex === "number");
+      if (valid.length) return { questions: valid, source: "ai" };
+    } catch (e) { errors.push(e.message); }
   }
   throw new Error("فشل الجميع: " + errors.join(" | "));
 }
-
-/* ═══ الدورة الذكية: مؤشر + خلط دائم في Turso ═══ */
 app.post("/api/questions", async (req, res) => {
   try {
     const body = req.body || {};
@@ -246,89 +175,55 @@ app.post("/api/questions", async (req, res) => {
     const category = String(body.category || "اختيارات متنوعة").trim();
     const difficulty = String(body.difficulty || "متوسط").trim();
     const avoidSet = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
-
     const allBank = await getAllQuestions();
     if (!allBank.length) throw new Error("البنك فارغ");
     const len = allBank.length;
-
     let st = { cursor: 0, cycle_id: 1, shuffle_order: [] };
     try { const s = await getState(); if (s) st = s; } catch (e) {}
-
     let order = st.shuffle_order;
-    const orderValid = Array.isArray(order) && order.length === len && order.every((i) => Number.isInteger(i) && i >= 0 && i < len);
-    if (!orderValid) order = shuffleArray(allBank.map((_, i) => i));
-
+    const okOrder = Array.isArray(order) && order.length === len && order.every((i) => Number.isInteger(i) && i >= 0 && i < len);
+    if (!okOrder) order = shuffleArray(allBank.map((_, i) => i));
     let absPos = Math.min(Number(st.cursor) || 0, len);
     let cycleId = Number(st.cycle_id) || 1;
-
-    const selected = [];
-    const picked = new Set();
-    const tryPick = (q, wantCat, wantDiff) => {
+    const selected = []; const picked = new Set();
+    const tryPick = (q, wantCat) => {
       if (!q) return false;
       const nk = normalizeText(q.question);
       if (picked.has(nk) || avoidSet.has(nk)) return false;
       if (wantCat && category !== "اختيارات متنوعة" && String(q.category || "").trim() !== category) return false;
-      if (wantDiff && String(q.difficulty || "").trim() !== difficulty) return false;
       picked.add(nk); selected.push(q); return true;
     };
-
     let scanned = 0;
-    while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], true, true); absPos++; scanned++; }
+    while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], true); absPos++; scanned++; }
     scanned = 0;
-    while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], true, false); absPos++; scanned++; }
-    scanned = 0;
-    while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], false, false); absPos++; scanned++; }
-
+    while (selected.length < n && scanned < len) { tryPick(allBank[order[absPos % len]], false); absPos++; scanned++; }
     let newCursor = absPos % len;
     if (absPos >= len) { cycleId += 1; order = shuffleArray(allBank.map((_, i) => i)); newCursor = 0; }
-
     if (selected.length < n) {
       const missing = n - selected.length;
       try {
-        const aiResult = await callWithFallback(buildSystemPrompt(missing, category, difficulty), missing);
-        await saveGeneratedToTurso(aiResult.questions);
-        saveGeneratedToFile(aiResult.questions);
-        for (const q of aiResult.questions) selected.push(q);
-      } catch (e) {
-        for (const q of getFallbackQuestions(category, missing, difficulty)) selected.push(q);
-      }
+        const ai = await callWithFallback(buildSystemPrompt(missing, category, difficulty), missing);
+        await saveGeneratedToTurso(ai.questions); saveGeneratedToFile(ai.questions);
+        selected.push(...ai.questions);
+      } catch (e) { /* fallback bank only */ }
     }
-
     try { await setState(newCursor, cycleId, order); } catch (e) {}
-
     const enriched = selected.slice(0, n).map((q, i) => Object.assign({}, q, { id: "q_" + Date.now() + "_" + i, source: q.source || "bank" }));
     return res.json({ questions: enriched, meta: { source: "smart-cycle", cursor: newCursor, cycle: cycleId, bankSize: len, persistent: Boolean(turso) } });
-  } catch (err) {
-    return res.status(500).json({ error: "فشل في جلب الأسئلة", details: err.message });
-  }
+  } catch (err) { return res.status(500).json({ error: "فشل في جلب الأسئلة", details: err.message }); }
 });
-
 app.post("/api/reset-cycle", async (req, res) => {
-  try {
-    const allBank = await getAllQuestions();
-    await setState(0, 1, shuffleArray(allBank.map((_, i) => i)));
-    res.json({ success: true, bankSize: allBank.length });
-  } catch (e) { res.status(500).json({ error: e.message }); }
+  try { const all = await getAllQuestions(); await setState(0, 1, shuffleArray(all.map((_, i) => i))); res.json({ success: true, bankSize: all.length }); }
+  catch (e) { res.status(500).json({ error: e.message }); }
 });
-
 app.get("/api/cycle-status", async (req, res) => {
-  try {
-    const st = await getState();
-    const bank = await getAllQuestions();
-    res.json({ persistent: Boolean(turso), cursor: st ? st.cursor : 0, cycle: st ? st.cycle_id : 1, bankSize: bank.length });
-  } catch (e) {
-    res.json({ persistent: Boolean(turso), cursor: 0, cycle: 1, bankSize: 0 });
-  }
+  try { const st = await getState(); const bank = await getAllQuestions(); res.json({ persistent: Boolean(turso), cursor: st ? st.cursor : 0, cycle: st ? st.cycle_id : 1, bankSize: bank.length }); }
+  catch (e) { res.json({ persistent: Boolean(turso), cursor: 0, cycle: 1, bankSize: 0 }); }
 });
-
 app.get("/api/health", async (req, res) => {
   const bank = await getAllQuestions().catch(() => []);
-  res.json({ status: "ok", bankCount: bank.length, turso: Boolean(turso), persistentStorage: Boolean(process.env.RAILWAY_VOLUME_MOUNT_PATH) });
+  res.json({ status: "ok", bankCount: bank.length, turso: Boolean(turso) });
 });
-
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
-
 const PORT = process.env.PORT || 3000;
-initTurso().finally(() => {
-  app.listen(PORT, () => console.log(`عالم التحديات على ${PORT} | Turso: ${turso ? "✅" : "⚠️"}`));
-});
+initTurso().finally(() => { app.listen(PORT, () => console.log(`عالم التحديات على ${PORT} | Turso: ${turso ? "✅" : "⚠️"}`)); });

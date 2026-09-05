@@ -782,3 +782,4 @@ img { max-width: 100%; }
     transition-duration: .01ms !important;
   }
 }
+.free-answer-pill { grid-column: 1 / -1; padding: 16px 12px; border: 1px dashed rgba(255,211,110,.45); border-radius: 14px; background: rgba(255,211,110,.07); color: var(--gold-hot); font-size: 13px; font-weight: 800; text-align: center; }
