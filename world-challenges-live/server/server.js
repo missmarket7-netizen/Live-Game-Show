@@ -47,11 +47,11 @@ function sanitizeQuestion(raw) {
 function loadBankQuestions() {
   let all = [];
   try {
-    const files = fs.readdirSync(DATA_DIR).filter((f) => /^db.*\.json$/i.test(f)).sort();
+    const files = fs.readdirSync(DATA_DIR).filter(f => /^db.*\.json$/i.test(f)).sort();
     for (const f of files) {
       try {
         const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf8"));
-        if (Array.isArray(data)) all = all.concat(data.map(sanitizeQuestion).filter(Boolean));
+        if (Array.isArray(data)) all = all.concat(data);
       } catch (e) {}
     }
   } catch (e) {}
