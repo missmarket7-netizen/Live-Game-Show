@@ -429,3 +429,34 @@ function init() {
   hideLoading(); updateTimer();
 }
 document.addEventListener('DOMContentLoaded', init);
+/* ===== OVERRIDE نهائي: إخفاء الاختيارات — بطاقة تفكير + إجابة واحدة عند الكشف ===== */
+function isFreeQuestion(q) { return !q || !Array.isArray(q.options) || q.options.length === 0; }
+function renderQuestion() {
+  const question = state.questions[state.currentIndex]; if (!question) return;
+  stopTimer(); state.isRevealed = false; state.timerValue = state.timerDuration; updateTimer(); updateScores();
+  $('roundProgress').textContent = String(state.currentIndex + 1).padStart(2, '0') + ' / ' + String(state.questions.length).padStart(2, '0');
+  $('questionCounter').textContent = 'السؤال ' + String(state.currentIndex + 1).padStart(2, '0') + ' / ' + String(state.questions.length).padStart(2, '0');
+  $('questionNumber').textContent = String(state.currentIndex + 1).padStart(2, '0');
+  $('categoryBadge').textContent = (question.category || 'اختيارات متنوعة');
+  $('questionText').textContent = question.question;
+  $('answerText').textContent = '—'; $('explanationText').textContent = '—'; $('answerReveal').classList.add('hidden');
+  $('revealBtn').disabled = false; $('nextBtn').disabled = false;
+  $('sourceBadge').textContent = question.source === 'ai' ? 'AI BANK READY' : 'LOCAL BANK READY';
+  $('questionSource').textContent = question.source === 'ai' ? 'AUTO-SAVED / AI' : 'AUTO-SAVED';
+  const grid = $('optionsGrid'); grid.innerHTML = '';
+  const pill = document.createElement('div');
+  pill.className = 'think-pill';
+  pill.textContent = isFreeQuestion(question) ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف' : '🤔 فكّروا جيداً… الإجابة الصحيحة تظهر عند «كشف الإجابة»';
+  grid.appendChild(pill);
+  $$('.gift-button').forEach((b) => b.classList.remove('is-active'));
+  $('activeGiftBanner').classList.add('hidden');
+}
+function revealAnswer() {
+  if (state.isRevealed) return;
+  const question = state.questions[state.currentIndex]; if (!question) return;
+  state.isRevealed = true; stopTimer();
+  if (isFreeQuestion(question)) { $('answerText').textContent = '🎤 إجابة حرة — الحكم للمضيف'; }
+  else { $('answerText').textContent = String.fromCharCode(65 + question.correctIndex) + '. ' + question.options[question.correctIndex]; }
+  $('explanationText').textContent = question.explanation || 'معلومة إضافية للمقدم.';
+  $('answerReveal').classList.remove('hidden'); $('revealBtn').disabled = true;
+}
