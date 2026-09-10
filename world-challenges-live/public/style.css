@@ -797,3 +797,19 @@ img { max-width: 100%; }
 @keyframes ripple { from { transform: scale(.4); opacity: .9; } to { transform: scale(3.2); opacity: 0; } }
 .act-pulse { animation: actPulse .9s ease; }
 @keyframes actPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+/* ═══ Host Activity Layer — scoped to question + controls ═══ */
+@keyframes qaFlash{0%{opacity:0}30%{opacity:.5}100%{opacity:0}}
+@keyframes cardEnter{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes revealIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes scorePulse{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes btnPress{0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes optPop{0%{transform:scale(1)}45%{transform:scale(1.05)}100%{transform:scale(1)}}
+@keyframes roundSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.qa-flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 40%,rgba(255,211,110,.5),transparent 60%);opacity:0;animation:qaFlash .45s ease-out}
+.question-card.enter{animation:cardEnter .28s var(--ease)}
+.answer-reveal.reveal-anim{animation:revealIn .3s var(--ease)}
+.team-score.pulse .team-score-main strong{display:inline-block;animation:scorePulse .5s var(--ease)}
+.deck-button.press,.mini-control.press,.text-control.press{animation:btnPress .14s ease}
+.option-btn.selected{animation:optPop .22s var(--ease)}
+.round-sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.round-sweep i{position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(93,226,255,.25),transparent);animation:roundSweep .6s ease}
