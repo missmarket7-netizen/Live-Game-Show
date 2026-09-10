@@ -1,24 +1,36 @@
 (function(){
-  const card = () => document.querySelector('.question-card');
-  const flash = () => { const c=card(); if(!c) return; const f=document.createElement('div'); f.className='qa-flash'; c.appendChild(f); setTimeout(()=>f.remove(),500); };
-  const enter = () => { const c=card(); if(!c) return; c.classList.remove('enter'); void c.offsetWidth; c.classList.add('enter'); };
-  const press = (b) => { if(!b) return; b.classList.remove('press'); void b.offsetWidth; b.classList.add('press'); setTimeout(()=>b.classList.remove('press'),160); };
-  const pulse = (team) => { const el=document.querySelector(team==='girls'?'.team-score-girls':'.team-score-boys'); if(!el) return; el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); setTimeout(()=>el.classList.remove('pulse'),520); };
-  const sweep = () => { const c=card(); if(!c) return; const s=document.createElement('div'); s.className='round-sweep'; s.innerHTML='<i></i>'; c.appendChild(s); setTimeout(()=>s.remove(),700); };
+  'use strict';
+  var q = function(s){ return document.querySelector(s); };
+  var card = function(){ return q('.question-card'); };
+  var replay = function(el, cls, ms){ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); setTimeout(function(){ el.classList.remove(cls); }, ms); };
 
-  document.addEventListener('click', (e) => {
-    const t = e.target.closest('button'); if(!t) return;
-    if (t.matches('.deck-button,.mini-control,.text-control,.option-btn')) press(t);
-    if (t.id === 'nextBtn') { flash(); setTimeout(enter, 60); }
-    if (t.id === 'revealBtn') { setTimeout(() => { const r=document.querySelector('.answer-reveal'); if(r) r.classList.add('reveal-anim'); }, 30); }
-    if (t.id === 'girlsPlusBtn' || t.id === 'girlsMinusBtn') pulse('girls');
-    if (t.id === 'boysPlusBtn' || t.id === 'boysMinusBtn') pulse('boys');
-    if (t.id === 'roundEndContinueBtn') { sweep(); setTimeout(enter, 80); }
+  /* 1+6) دخول السؤال + بدء العداد تلقائياً لكل سؤال (الأول والجولات التالية) */
+  var _render = window.renderQuestion;
+  window.renderQuestion = function(){ var r = _render.apply(this, arguments); replay(card(), 'enter', 420); if (window.startTimer) startTimer(); return r; };
+
+  /* 2) نبضة بدء العداد */
+  var _startTimer = window.startTimer;
+  window.startTimer = function(){ var was = (state && state.isTimerRunning); var r = _startTimer.apply(this, arguments); if (!was && state && state.isTimerRunning) replay(q('.timer-ring'), 'start-pulse', 600); return r; };
+
+  /* 4+نبضة الاختيار) تأخير الكشف 140ms لتظهر نبضة selected ثم الكشف بأنيميشن */
+  var _reveal = window.revealAnswer;
+  window.revealAnswer = function(){ var a = arguments, s = this; setTimeout(function(){ _reveal.apply(s, a); replay(q('.answer-reveal'), 'reveal-anim', 460); }, 140); };
+
+  /* 5) نبضة نقاط للفريق المتغيّر فقط */
+  var pulseTeam = function(team){ replay(q(team === 'girls' ? '.team-score-girls' : '.team-score-boys'), 'pulse', 560); };
+  var _apply = window.applyPoint;
+  window.applyPoint = function(team){ var r = _apply.apply(this, arguments); pulseTeam(team); return r; };
+  var _sub = window.subtractPoint;
+  window.subtractPoint = function(team){ var r = _sub.apply(this, arguments); pulseTeam(team); return r; };
+
+  /* 7) انتقال الجولة: sweep على بطاقة السؤال عند إنهاء الجولة */
+  var _finish = window.finishRound;
+  window.finishRound = function(){ replay(card(), 'round-sweep-host', 720); return _finish.apply(this, arguments); };
+
+  /* 3) لمس الأزرار — محصور داخل السؤال ولوحة التحكم فقط (لا هدايا/أعلى) */
+  document.addEventListener('click', function(e){
+    var t = e.target.closest('button'); if (!t) return;
+    if (!t.closest('.question-card, .control-deck')) return;
+    replay(t, 'press', 170);
   }, true);
-
-  /* دخول بطاقة السؤال تلقائياً مع كل سؤال جديد */
-  let lastQ = null;
-  const qn = document.getElementById('questionNumber');
-  if (qn) new MutationObserver(() => { if (qn.textContent !== lastQ) { lastQ = qn.textContent; enter(); } })
-    .observe(qn, { childList:true, characterData:true, subtree:true });
 })();

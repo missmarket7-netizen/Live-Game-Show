@@ -813,3 +813,19 @@ img { max-width: 100%; }
 .option-btn.selected{animation:optPop .22s var(--ease)}
 .round-sweep{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .round-sweep i{position:absolute;top:0;bottom:0;width:40%;background:linear-gradient(90deg,transparent,rgba(93,226,255,.25),transparent);animation:roundSweep .6s ease}
+/* ═══ Host Activity Layer v2 — transform/opacity only ═══ */
+@keyframes cardEnter{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@keyframes ringPulse{0%{transform:scale(1)}40%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes revealIn{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:none}}
+@keyframes scorePulse{0%{transform:scale(1)}40%{transform:scale(1.18)}100%{transform:scale(1)}}
+@keyframes btnPress{0%{transform:scale(1)}40%{transform:scale(.94)}100%{transform:scale(1)}}
+@keyframes optPop{0%{transform:scale(1)}45%{transform:scale(1.06)}100%{transform:scale(1)}}
+@keyframes roundSweep{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+.question-card{position:relative}
+.question-card.enter{animation:cardEnter .3s ease}
+.question-card.round-sweep-host::after{content:'';position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(90deg,transparent,rgba(93,226,255,.28),transparent);transform:translateX(-100%);animation:roundSweep .6s ease}
+.timer-ring.start-pulse{animation:ringPulse .5s ease}
+.answer-reveal.reveal-anim{animation:revealIn .3s ease}
+.team-score.pulse .team-score-main strong{display:inline-block;animation:scorePulse .5s ease}
+.option-btn.selected{animation:optPop .22s ease}
+button.press{animation:btnPress .14s ease}
