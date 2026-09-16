@@ -3,13 +3,11 @@ import express from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "../public")));
-
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
@@ -17,11 +15,10 @@ const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
   : path.join(__dirname, "questions");
 const GEN_FILE = path.join(DATA_DIR, "generated_questions.json");
-
+/* ✅ مطلب 1: استبعاد أسئلة السينما المصرية والعربية نهائياً من البنك والتوليد */
+const EXCLUDED_CATEGORIES = new Set(["سينما مصرية", "سينما عربية"]);
 function shuffleArray(a0) { const a = [...a0]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function normalizeText(t) { return String(t || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[^\u0621-\u064Aa-z0-9]/g, "").trim(); }
-
-/* تنظيف المفاتيح/القيم + السماح بالإجابة الحرة (سرعة) أو 4 خيارات */
 function sanitizeQuestion(raw) {
   if (!raw || typeof raw !== "object") return null;
   const q = {};
@@ -37,17 +34,15 @@ function sanitizeQuestion(raw) {
     if (!Number.isInteger(ci) || ci < 0 || ci > 3) return null;
     q.correctIndex = ci;
   }
-  q.category = q.category || "معلومات عامة";
-  q.difficulty = q.difficulty || "متوسط";
-  q.explanation = q.explanation || "";
+  q.category = String(q.category || "معلومات عامة").trim();
+  q.difficulty = String(q.difficulty || "متوسط").trim();
+  q.explanation = String(q.explanation || "").trim();
   return q;
 }
-
-/* تحميل ديناميكي: كل db*.json حالياً وأي ملف يُضاف لاحقاً */
 function loadBankQuestions() {
   let all = [];
   try {
-    const files = fs.readdirSync(DATA_DIR).filter(f => /^db.*\.json$/i.test(f)).sort();
+    const files = fs.readdirSync(DATA_DIR).filter((f) => /^db.*\.json$/i.test(f)).sort();
     for (const f of files) {
       try {
         const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf8"));
@@ -68,18 +63,21 @@ function saveGenerated(questions) {
     fs.writeFileSync(GEN_FILE, JSON.stringify(merged, null, 2), "utf8");
   } catch (e) { console.error("خطأ حفظ AI:", e.message); }
 }
-/* دمج البنك + AI مع إزالة التكرار بالنص المُطبّع */
+/* دمج البنك + AI مع: إزالة التكرار + استبعاد السينما */
 function getAllQuestions() {
   const seen = new Set(); const all = [];
   for (const q of loadBankQuestions().concat(loadGenerated())) {
+    if (!q) continue;
+    if (EXCLUDED_CATEGORIES.has(String(q.category || "").trim())) continue;
     const key = normalizeText(q.question);
     if (seen.has(key)) continue;
     seen.add(key); all.push(q);
   }
   return all;
 }
+/* ✅ مطلب 1+2: برومبت AI بدون سينما */
 function buildSystemPrompt(count, category, difficulty) {
-  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا، سينما). أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات نصية)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة فقط، خيارات واضحة، بدون تكرار، بدون Markdown.`;
+  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا). يُمنع تماماً أي سؤال عن السينما أو الأفلام أو الممثلين. أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات نصية)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة فقط، خيارات واضحة، بدون تكرار، بدون Markdown.`;
 }
 function extractJson(text) {
   const cleaned = String(text || "").replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
@@ -117,8 +115,8 @@ const PROVIDERS = [
     } catch (e) { clearTimeout(t); throw e; }
   } }
 ];
-function isValid(q) { return q && typeof q.question === "string" && q.question.trim() && Array.isArray(q.options) && (q.options.length === 4 || q.options.length === 0) && (q.options.length === 0 ? true : (Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex <= 3)); }
-async function askProviders(prompt, count, category, difficulty) {
+function isValid(q) { return q && typeof q.question === "string" && q.question.trim() && Array.isArray(q.options) && (q.options.length === 4 || q.options.length === 0) && (q.options.length === 0 ? true : (Number.isInteger(q.correctIndex) && q.correctIndex >= 0 && q.correctIndex <= 3)) && !EXCLUDED_CATEGORIES.has(String(q.category || "").trim()); }
+async function askProviders(prompt, count) {
   for (const p of PROVIDERS) {
     if (!p.key) continue;
     try {
@@ -130,19 +128,19 @@ async function askProviders(prompt, count, category, difficulty) {
   }
   return null;
 }
-/* توليد AI خليط + حفظ تلقائي في generated_questions.json */
+/* ✅ مطلب 2: توليد AI + حفظ تلقائي في generated_questions.json */
 app.post("/api/generate", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(30, Math.max(1, Number(body.count) || 10));
   const avoid = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
   const prompt = buildSystemPrompt(count, body.category, body.difficulty);
-  const result = await askProviders(prompt, count, body.category, body.difficulty);
+  const result = await askProviders(prompt, count);
   if (!result) return res.json({ questions: [], meta: { source: "none" } });
-  let questions = result.questions.filter((q) => !avoid.has(normalizeText(q.question)));
+  const questions = result.questions.filter((q) => !avoid.has(normalizeText(q.question)));
   saveGenerated(questions);
   res.json({ questions, meta: { source: "ai", provider: result.provider, count: questions.length } });
 });
-/* بنك كامل مخلوط (كل الفئات) + أي ملفات db جديدة */
+/* ✅ مطلب 3: بنك مخلوط باستمرار + بدون تكرار (dedupe + avoid) + بدون سينما */
 app.post("/api/questions", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(50, Math.max(1, Number(body.count) || 10));
@@ -156,7 +154,7 @@ app.post("/api/questions", async (req, res) => {
   const selected = shuffleArray(pool).slice(0, count);
   res.json({ questions: selected, meta: { source: "bank", count: selected.length, bankSize: getAllQuestions().length } });
 });
-app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length }));
+app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, excluded: [...EXCLUDED_CATEGORIES] }));
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${getAllQuestions().length} سؤال`));
+app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${getAllQuestions().length} سؤال (بدون سينما)`));

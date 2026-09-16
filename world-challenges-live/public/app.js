@@ -460,3 +460,88 @@ function revealAnswer() {
   $('explanationText').textContent = question.explanation || 'معلومة إضافية للمقدم.';
   $('answerReveal').classList.remove('hidden'); $('revealBtn').disabled = true;
 }
+/* ===== INTEGRATION LAYER (additive only) — ✅ مطلب 2: زر الاستوديو = AI أولاً ===== */
+async function fetchAIQuestions(params) {
+  try {
+    const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({}, params, { avoid: (params.avoid || state.questionHistory.slice(-150)) })) });
+    if (!r.ok) throw new Error('AI unavailable');
+    const d = await r.json();
+    const qs = Array.isArray(d.questions) ? d.questions : [];
+    if (!qs.length) throw new Error('AI empty');
+    return qs.map((q) => Object.assign({}, q, { source: 'ai' }));
+  } catch (e) { return []; }
+}
+async function aiSingleRound() {
+  const category = $('category').value || 'اختيارات متنوعة';
+  const difficulty = $('difficulty').value || 'متوسط';
+  const count = Math.max(3, Math.min(30, Number($('count').value) || 10)); $('count').value = count;
+  showLoading('نولّد أسئلة AI جديدة...');
+  try {
+    let qs = await fetchAIQuestions({ category: category, difficulty: difficulty, count: count });
+    if (!qs.length) qs = await fetchQuestions({ category: category, difficulty: difficulty, count: count });
+    if (qs.length > 0) {
+      state.questions = qs; state.fullShowRounds = []; state.mode = 'single';
+      state.currentIndex = 0; state.currentRoundIndex = 0; state.roundNumber = 1;
+      state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
+      state.shieldGirls = false; state.shieldBoys = false;
+      state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-200); saveHistory();
+      saveQuestionSet(qs, { category: category, difficulty: difficulty, source: qs[0] ? qs[0].source : 'local' });
+      prepareGame();
+      showToast(qs[0] && qs[0].source === 'ai' ? 'تم توليد أسئلة AI وحفظها تلقائياً' : 'تم السحب من البنك', 'STUDIO READY');
+    } else showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL');
+  } catch (e) { showToast('تعذر تجهيز الجولة', 'SHOW CONTROL'); }
+  hideLoading();
+}
+/* اعتراض زر «افتح الاستوديو» فقط — دون المساس بزر «ابدأ الأسئلة» */
+document.addEventListener('click', (e) => {
+  const t = e.target.closest('#generateBtn');
+  if (!t) return;
+  e.stopPropagation(); e.preventDefault();
+  if (state.mode === 'fullshow') aiFullShow(); else aiSingleRound();
+}, true);
+async function aiFullShow() {
+  const plan = [
+    { title: 'الجولة 1', category: 'معلومات عامة', difficulty: 'سهل', count: 10 },
+    { title: 'الجولة 2', category: 'جغرافيا', difficulty: 'متوسط', count: 10 },
+    { title: 'الجولة الذهبية', category: 'اختيارات متنوعة', difficulty: 'صعب', count: 10 }
+  ];
+  state.fullShowRounds = []; showLoading('نولّد فصول اللايف بالـ AI...');
+  try {
+    for (let i = 0; i < plan.length; i += 1) {
+      $('loadingText').textContent = 'نجهز ' + plan[i].title + ' — ' + (i + 1) + ' / ' + plan.length;
+      let qs = await fetchAIQuestions(plan[i]);
+      if (!qs.length) qs = await fetchQuestions(plan[i]);
+      state.fullShowRounds.push(Object.assign({}, plan[i], { questions: qs }));
+      state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-200);
+    }
+    saveHistory();
+    saveQuestionSet(state.fullShowRounds.flatMap((r) => r.questions), { category: 'لايف كامل', difficulty: 'متدرج', source: 'ai' });
+    state.mode = 'fullshow'; state.currentRoundIndex = 0; state.questions = state.fullShowRounds[0].questions;
+    state.currentIndex = 0; state.roundNumber = 1;
+    state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
+    state.shieldGirls = false; state.shieldBoys = false;
+    prepareGame();
+    showToast('تم توليد اللايف بالـ AI وحفظه', 'STUDIO READY');
+  } catch (e) { showToast('تعذر تجهيز اللايف', 'SHOW CONTROL'); }
+  hideLoading();
+}
+/* ===== THEME ENGINE (additive) — وضع عادي + مظلم دون لمس التصميم ===== */
+const THEME_KEY = 'lgs_theme_v1';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  const btn = $('themeToggleBtn');
+  if (btn) { btn.textContent = (t === 'light') ? '☀️' : '🌙'; btn.title = (t === 'light') ? 'التحويل للوضع المظلم' : 'التحويل للوضع العادي'; }
+}
+function currentTheme() { try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; } }
+function toggleTheme() { applyTheme(currentTheme() === 'light' ? 'dark' : 'light'); }
+function initTheme() {
+  if (!$('themeToggleBtn')) {
+    const b = document.createElement('button');
+    b.id = 'themeToggleBtn'; b.type = 'button'; b.className = 'theme-toggle-btn';
+    b.addEventListener('click', toggleTheme);
+    document.body.appendChild(b);
+  }
+  applyTheme(currentTheme());
+}
+document.addEventListener('DOMContentLoaded', initTheme);
