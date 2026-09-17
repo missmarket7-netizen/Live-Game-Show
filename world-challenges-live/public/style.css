@@ -861,3 +861,12 @@ button.press{animation:btnPress .14s ease}
 [data-theme="light"] .grid-glow{opacity:.2;}
 [data-theme="light"] .overlay{background:rgba(244,246,251,.75);}
 [data-theme="light"] .saved-item{background:rgba(255,255,255,.85);}
+/* ═══ ألوان أسماء كباتن الفريقين — تعمل فقط في الوضع العادي ═══ */
+[data-theme="light"] .team-score-girls .captain-slot input,
+[data-theme="light"] .team-score-girls .captain-slot input.confirmed { color: #b02268; }
+[data-theme="light"] .team-score-boys .captain-slot input,
+[data-theme="light"] .team-score-boys .captain-slot input.confirmed { color: #0b7fa8; }
+[data-theme="light"] .team-score-girls .captain-vert-label { color: #b02268; }
+[data-theme="light"] .team-score-boys .captain-vert-label { color: #0b7fa8; }
+[data-theme="light"] .captain-slot input::placeholder { color: rgba(18, 22, 58, .42); }
+[data-theme="light"] .captain-slot input.confirmed { background: rgba(18, 22, 58, .06); border-color: rgba(18, 22, 58, .22); }
