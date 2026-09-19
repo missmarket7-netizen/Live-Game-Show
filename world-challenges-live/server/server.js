@@ -15,7 +15,6 @@ const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
   ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
   : path.join(__dirname, "questions");
 const GEN_FILE = path.join(DATA_DIR, "generated_questions.json");
-/* ✅ مطلب 1: استبعاد أسئلة السينما المصرية والعربية نهائياً من البنك والتوليد */
 const EXCLUDED_CATEGORIES = new Set(["سينما مصرية", "سينما عربية"]);
 function shuffleArray(a0) { const a = [...a0]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function normalizeText(t) { return String(t || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[^\u0621-\u064Aa-z0-9]/g, "").trim(); }
@@ -63,7 +62,6 @@ function saveGenerated(questions) {
     fs.writeFileSync(GEN_FILE, JSON.stringify(merged, null, 2), "utf8");
   } catch (e) { console.error("خطأ حفظ AI:", e.message); }
 }
-/* دمج البنك + AI مع: إزالة التكرار + استبعاد السينما */
 function getAllQuestions() {
   const seen = new Set(); const all = [];
   for (const q of loadBankQuestions().concat(loadGenerated())) {
@@ -75,12 +73,21 @@ function getAllQuestions() {
   }
   return all;
 }
-/* ✅ مطلب 1+2: برومبت AI بدون سينما */
+/* ✅ الدورة الذكية: لا يُعاد أي سؤال حتى يُستهلك البنك كاملاً ثم تبدأ دورة جديدة */
+let servedSet = new Set();
+let cycleCount = 1;
+function pickCycle(pool, count) {
+  let fresh = pool.filter((q) => !servedSet.has(normalizeText(q.question)));
+  if (fresh.length < count) { servedSet = new Set(); cycleCount += 1; fresh = pool.slice(); }
+  const picked = shuffleArray(fresh).slice(0, count);
+  picked.forEach((q) => servedSet.add(normalizeText(q.question)));
+  return picked;
+}
 function buildSystemPrompt(count, category, difficulty) {
-  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا). يُمنع تماماً أي سؤال عن السينما أو الأفلام أو الممثلين. أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات نصية)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة فقط، خيارات واضحة، بدون تكرار، بدون Markdown.`;
+  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا). يُمنع تماماً أي سؤال عن السينما أو الأفلام أو الممثلين. المستوى المطلوب: ${difficulty || "متوسط"}. أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات نصية)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة فقط، خيارات واضحة، بدون تكرار، بدون Markdown.`;
 }
 function extractJson(text) {
-  const cleaned = String(text || "").replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
+  const cleaned = String(text || "").replace(/```(?:json)?/gi, "").replace(/```/g, " ").trim();
   const am = cleaned.match(/\[[\s\S]*\]/); if (am) { try { return JSON.parse(am[0]); } catch (e) {} }
   const om = cleaned.match(/\{[\s\S]*\}/); if (om) { try { return JSON.parse(om[0]); } catch (e) {} }
   try { return JSON.parse(cleaned); } catch (e) {}
@@ -128,7 +135,6 @@ async function askProviders(prompt, count) {
   }
   return null;
 }
-/* ✅ مطلب 2: توليد AI + حفظ تلقائي في generated_questions.json */
 app.post("/api/generate", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(30, Math.max(1, Number(body.count) || 10));
@@ -140,21 +146,26 @@ app.post("/api/generate", async (req, res) => {
   saveGenerated(questions);
   res.json({ questions, meta: { source: "ai", provider: result.provider, count: questions.length } });
 });
-/* ✅ مطلب 3: بنك مخلوط باستمرار + بدون تكرار (dedupe + avoid) + بدون سينما */
+/* ✅ فلتر فئة + فلتر صعوبة حقيقي + الدورة الذكية */
 app.post("/api/questions", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(50, Math.max(1, Number(body.count) || 10));
   const category = body.category || "اختيارات متنوعة";
+  const difficulty = String(body.difficulty || "").trim();
   const avoid = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
   let pool = getAllQuestions().filter((q) => !avoid.has(normalizeText(q.question)));
   if (category && category !== "اختيارات متنوعة") {
     const cat = pool.filter((q) => q.category === category);
     if (cat.length >= count) pool = cat;
   }
-  const selected = shuffleArray(pool).slice(0, count);
-  res.json({ questions: selected, meta: { source: "bank", count: selected.length, bankSize: getAllQuestions().length } });
+  if (difficulty) {
+    const dif = pool.filter((q) => q.difficulty === difficulty);
+    if (dif.length >= count) pool = dif;
+  }
+  const selected = pickCycle(pool, count);
+  res.json({ questions: selected, meta: { source: "bank-cycle", count: selected.length, bankSize: getAllQuestions().length, cycle: cycleCount } });
 });
-app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, excluded: [...EXCLUDED_CATEGORIES] }));
+app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, cycle: cycleCount, excluded: [...EXCLUDED_CATEGORIES] }));
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${getAllQuestions().length} سؤال (بدون سينما)`));
