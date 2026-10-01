@@ -3,6 +3,7 @@ import express from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { createClient } from "@libsql/client";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
@@ -11,11 +12,39 @@ app.use(express.static(path.join(__dirname, "../public")));
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
-const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH
-  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
-  : path.join(__dirname, "questions");
+const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions") : path.join(__dirname, "questions");
 const GEN_FILE = path.join(DATA_DIR, "generated_questions.json");
+const CYCLE_FILE = path.join(DATA_DIR, "cycle_state.json");
 const EXCLUDED_CATEGORIES = new Set(["سينما مصرية", "سينما عربية"]);
+const TURSO_URL = process.env.TURSO_URL || process.env.TURSO_DATABASE_URL || "";
+const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || process.env.TURSO_TOKEN || "";
+const turso = (TURSO_URL && TURSO_TOKEN) ? createClient({ url: TURSO_URL, authToken: TURSO_TOKEN }) : null;
+async function initTurso() {
+  if (!turso) { console.warn("⚠️ Turso غير مربوط — الدورة تُحفظ في ملف محلي (تُصفّر مع كل Deploy)."); return; }
+  try {
+    await turso.batch([
+      "CREATE TABLE IF NOT EXISTS game_state (id INTEGER PRIMARY KEY CHECK (id = 1), cursor INTEGER NOT NULL DEFAULT 0, cycle_id INTEGER NOT NULL DEFAULT 1, shuffle_order TEXT NOT NULL DEFAULT '[]', updated_at TEXT)",
+      "CREATE TABLE IF NOT EXISTS generated_questions (id INTEGER PRIMARY KEY AUTOINCREMENT, category TEXT, difficulty TEXT, question TEXT UNIQUE, options TEXT, correctIndex INTEGER, explanation TEXT, source TEXT DEFAULT 'ai', created_at TEXT)",
+      "INSERT OR IGNORE INTO game_state (id, cursor, cycle_id, shuffle_order) VALUES (1, 0, 1, '[]')"
+    ], "write");
+    console.log("✅ Turso متصل — الدورة الذكية دائمة عبر الأيام والـ Deploys.");
+  } catch (e) { console.error("Turso init error:", e.message); }
+}
+/* ═══ ذاكرة الدورة الذكية: ما قُدّم لا يُعاد حتى يكتمل البنك ═══ */
+async function getCycleState() {
+  if (turso) {
+    try {
+      const r = await turso.execute("SELECT cycle_id, shuffle_order FROM game_state WHERE id = 1");
+      if (r.rows.length) { let served = []; try { served = JSON.parse(r.rows[0].shuffle_order || "[]"); } catch (e) {} return { cycle: Number(r.rows[0].cycle_id) || 1, served: Array.isArray(served) ? served : [] }; }
+    } catch (e) {}
+  }
+  try { if (fs.existsSync(CYCLE_FILE)) { const d = JSON.parse(fs.readFileSync(CYCLE_FILE, "utf8")); return { cycle: Number(d.cycle) || 1, served: Array.isArray(d.served) ? d.served : [] }; } } catch (e) {}
+  return { cycle: 1, served: [] };
+}
+async function setCycleState(cycle, served) {
+  if (turso) { try { await turso.execute({ sql: "UPDATE game_state SET cycle_id = ?, shuffle_order = ?, updated_at = ? WHERE id = 1", args: [cycle, JSON.stringify(served), new Date().toISOString()] }); return; } catch (e) {} }
+  try { if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true }); fs.writeFileSync(CYCLE_FILE, JSON.stringify({ cycle, served }, null, 2), "utf8"); } catch (e) {}
+}
 function shuffleArray(a0) { const a = [...a0]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function normalizeText(t) { return String(t || "").toLowerCase().replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/[^\u0621-\u064Aa-z0-9]/g, "").trim(); }
 function sanitizeQuestion(raw) {
@@ -27,12 +56,7 @@ function sanitizeQuestion(raw) {
   if (!Array.isArray(q.options)) q.options = [];
   q.options = q.options.map((o) => String(o).trim()).filter(Boolean);
   if (q.options.length === 0) { q.correctIndex = null; }
-  else {
-    if (q.options.length !== 4) return null;
-    const ci = Number(q.correctIndex);
-    if (!Number.isInteger(ci) || ci < 0 || ci > 3) return null;
-    q.correctIndex = ci;
-  }
+  else { if (q.options.length !== 4) return null; const ci = Number(q.correctIndex); if (!Number.isInteger(ci) || ci < 0 || ci > 3) return null; q.correctIndex = ci; }
   q.category = String(q.category || "معلومات عامة").trim();
   q.difficulty = String(q.difficulty || "متوسط").trim();
   q.explanation = String(q.explanation || "").trim();
@@ -42,12 +66,7 @@ function loadBankQuestions() {
   let all = [];
   try {
     const files = fs.readdirSync(DATA_DIR).filter((f) => /^db.*\.json$/i.test(f)).sort();
-    for (const f of files) {
-      try {
-        const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf8"));
-        if (Array.isArray(data)) all = all.concat(data);
-      } catch (e) {}
-    }
+    for (const f of files) { try { const data = JSON.parse(fs.readFileSync(path.join(DATA_DIR, f), "utf8")); if (Array.isArray(data)) all = all.concat(data); } catch (e) {} }
   } catch (e) {}
   return all;
 }
@@ -66,25 +85,16 @@ function getAllQuestions() {
   const seen = new Set(); const all = [];
   for (const q of loadBankQuestions().concat(loadGenerated())) {
     if (!q) continue;
-    if (EXCLUDED_CATEGORIES.has(String(q.category || "").trim())) continue;
-    const key = normalizeText(q.question);
+    const s = sanitizeQuestion(q); if (!s) continue;
+    if (EXCLUDED_CATEGORIES.has(s.category)) continue;
+    const key = normalizeText(s.question);
     if (seen.has(key)) continue;
-    seen.add(key); all.push(q);
+    seen.add(key); all.push(s);
   }
   return all;
 }
-/* ✅ الدورة الذكية: لا يُعاد أي سؤال حتى يُستهلك البنك كاملاً ثم تبدأ دورة جديدة */
-let servedSet = new Set();
-let cycleCount = 1;
-function pickCycle(pool, count) {
-  let fresh = pool.filter((q) => !servedSet.has(normalizeText(q.question)));
-  if (fresh.length < count) { servedSet = new Set(); cycleCount += 1; fresh = pool.slice(); }
-  const picked = shuffleArray(fresh).slice(0, count);
-  picked.forEach((q) => servedSet.add(normalizeText(q.question)));
-  return picked;
-}
 function buildSystemPrompt(count, category, difficulty) {
-  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا). يُمنع تماماً أي سؤال عن السينما أو الأفلام أو الممثلين. المستوى المطلوب: ${difficulty || "متوسط"}. أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات نصية)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة فقط، خيارات واضحة، بدون تكرار، بدون Markdown.`;
+  return `أنت محرر أسئلة لمسابقة عربية مباشرة اسمها «عالم التحديات». أعد ${count} سؤالاً جديداً باللغة العربية، خليطاً متنوعاً بين الفئات (معلومات عامة، جغرافيا، علوم، تاريخ، دين، ألغاز، رياضة، تكنولوجيا). يُمنع تماماً أي سؤال عن السينما أو الأفلام أو الممثلين. المستوى: ${difficulty || "متوسط"}. أخرج JSON فقط: مصفوفة كائنات، كل كائن: category, difficulty, question, options (4 خيارات)، correctIndex (0-3)، explanation قصيرة. إجابة صحيحة واحدة، خيارات واضحة، بدون تكرار، بدون Markdown.`;
 }
 function extractJson(text) {
   const cleaned = String(text || "").replace(/```(?:json)?/gi, "").replace(/```/g, " ").trim();
@@ -135,37 +145,48 @@ async function askProviders(prompt, count) {
   }
   return null;
 }
+/* ✅ زر الاستوديو: توليد AI خليط + حفظ تلقائي + إدخالها في ذاكرة الدورة */
 app.post("/api/generate", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(30, Math.max(1, Number(body.count) || 10));
   const avoid = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
-  const prompt = buildSystemPrompt(count, body.category, body.difficulty);
-  const result = await askProviders(prompt, count);
+  const result = await askProviders(buildSystemPrompt(count, body.category, body.difficulty), count);
   if (!result) return res.json({ questions: [], meta: { source: "none" } });
   const questions = result.questions.filter((q) => !avoid.has(normalizeText(q.question)));
   saveGenerated(questions);
-  res.json({ questions, meta: { source: "ai", provider: result.provider, count: questions.length } });
+  const st = await getCycleState();
+  const served = new Set(st.served);
+  questions.forEach((q) => served.add(normalizeText(q.question)));
+  await setCycleState(st.cycle, [...served]);
+  res.json({ questions, meta: { source: "ai", provider: result.provider, count: questions.length, cycle: st.cycle } });
 });
-/* ✅ فلتر فئة + فلتر صعوبة حقيقي + الدورة الذكية */
+/* ✅ الدورة الذكية: ما قُدّم لا يُعاد حتى يستُهلك البنك كاملاً ثم دورة جديدة */
 app.post("/api/questions", async (req, res) => {
   const body = req.body || {};
   const count = Math.min(50, Math.max(1, Number(body.count) || 10));
   const category = body.category || "اختيارات متنوعة";
   const difficulty = String(body.difficulty || "").trim();
   const avoid = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText));
-  let pool = getAllQuestions().filter((q) => !avoid.has(normalizeText(q.question)));
-  if (category && category !== "اختيارات متنوعة") {
-    const cat = pool.filter((q) => q.category === category);
-    if (cat.length >= count) pool = cat;
-  }
-  if (difficulty) {
-    const dif = pool.filter((q) => q.difficulty === difficulty);
-    if (dif.length >= count) pool = dif;
-  }
-  const selected = pickCycle(pool, count);
-  res.json({ questions: selected, meta: { source: "bank-cycle", count: selected.length, bankSize: getAllQuestions().length, cycle: cycleCount } });
+  const bank = getAllQuestions();
+  let pool = bank.filter((q) => !avoid.has(normalizeText(q.question)));
+  if (category && category !== "اختيارات متنوعة") { const c = pool.filter((q) => q.category === category); if (c.length >= count) pool = c; }
+  if (difficulty) { const d = pool.filter((q) => q.difficulty === difficulty); if (d.length >= count) pool = d; }
+  const st = await getCycleState();
+  let servedSet = new Set(st.served);
+  let cycle = st.cycle;
+  let fresh = pool.filter((q) => !servedSet.has(normalizeText(q.question)));
+  if (fresh.length < count) { cycle += 1; servedSet = new Set(); fresh = pool.slice(); }
+  const selected = shuffleArray(fresh).slice(0, count);
+  selected.forEach((q) => servedSet.add(normalizeText(q.question)));
+  await setCycleState(cycle, [...servedSet]);
+  res.json({ questions: selected, meta: { source: "bank-cycle", count: selected.length, bankSize: bank.length, cycle, served: servedSet.size } });
 });
-app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, cycle: cycleCount, excluded: [...EXCLUDED_CATEGORIES] }));
+app.post("/api/reset-cycle", async (req, res) => { await setCycleState(1, []); res.json({ success: true }); });
+app.get("/api/cycle-status", async (req, res) => {
+  const st = await getCycleState();
+  res.json({ persistent: Boolean(turso), cycle: st.cycle, served: st.served.length, bankSize: getAllQuestions().length });
+});
+app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, excluded: [...EXCLUDED_CATEGORIES] }));
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`عالم التحديات يعمل على ${PORT} | البنك: ${getAllQuestions().length} سؤال (بدون سينما)`));
+initTurso().finally(() => app.listen(PORT, () => console.log(`عالم التحديات على ${PORT} | البنك: ${getAllQuestions().length} سؤال | الدورة الذكية: ${turso ? "دائمة (Turso)" : "ملف محلي"}`)));

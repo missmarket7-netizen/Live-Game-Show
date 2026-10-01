@@ -468,3 +468,88 @@ revealAnswer = function () {
   function mount() { if (document.getElementById("themeToggleBtn")) { applyTheme(cur()); return; } const b = document.createElement("button"); b.id = "themeToggleBtn"; b.type = "button"; b.className = "theme-toggle-btn"; b.addEventListener("click", function () { applyTheme(cur() === "light" ? "dark" : "light"); }); document.body.appendChild(b); applyTheme(cur()); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mount); else mount();
 })();
+/* ===== SMART STUDIO + MIX INTEGRATION (additive — لا يمس أي وظيفة) ===== */
+function saveHistory() { localStorage.setItem(HISTORY_KEY, JSON.stringify(state.questionHistory.slice(-400))); }
+async function fetchAIQuestions(params) {
+  try {
+    const r = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(Object.assign({}, params, { avoid: state.questionHistory.slice(-300) })) });
+    if (!r.ok) throw new Error('AI unavailable');
+    const d = await r.json();
+    const qs = Array.isArray(d.questions) ? d.questions : [];
+    if (!qs.length) throw new Error('AI empty');
+    return qs.map((q) => Object.assign({}, q, { source: 'ai' }));
+  } catch (e) { return []; }
+}
+const MIX_PLAN = [
+  { title: 'الجولة 1', category: 'اختيارات متنوعة', difficulty: 'سهل', count: 10 },
+  { title: 'الجولة 2', category: 'اختيارات متنوعة', difficulty: 'متوسط', count: 10 },
+  { title: 'الجولة الذهبية', category: 'اختيارات متنوعة', difficulty: 'صعب', count: 10 }
+];
+async function aiSingleRound() {
+  const category = $('category').value || 'اختيارات متنوعة';
+  const difficulty = $('difficulty').value || 'متوسط';
+  const count = Math.max(3, Math.min(30, Number($('count').value) || 10)); $('count').value = count;
+  showLoading('نولّد أسئلة AI جديدة خليط...');
+  try {
+    let qs = await fetchAIQuestions({ category: category, difficulty: difficulty, count: count });
+    if (!qs.length) qs = await fetchQuestions({ category: category, difficulty: difficulty, count: count, avoid: state.questionHistory.slice(-300) });
+    if (qs.length > 0) {
+      state.questions = qs; state.fullShowRounds = []; state.mode = 'single';
+      state.currentIndex = 0; state.currentRoundIndex = 0; state.roundNumber = 1;
+      state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
+      state.shieldGirls = false; state.shieldBoys = false;
+      state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-400); saveHistory();
+      saveQuestionSet(qs, { category: category, difficulty: difficulty, source: qs[0] ? qs[0].source : 'local' });
+      prepareGame();
+      showToast(qs[0] && qs[0].source === 'ai' ? 'أسئلة AI جديدة — حُفظت تلقائياً في البنك' : 'تم السحب من البنك', 'STUDIO READY');
+    } else showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL');
+  } catch (e) { showToast('تعذر تجهيز الجولة', 'SHOW CONTROL'); }
+  hideLoading();
+}
+async function aiFullShow() {
+  state.fullShowRounds = []; showLoading('نولّد فصول اللايف بالـ AI...');
+  try {
+    for (let i = 0; i < MIX_PLAN.length; i += 1) {
+      $('loadingText').textContent = 'نجهز ' + MIX_PLAN[i].title + ' — ' + (i + 1) + ' / ' + MIX_PLAN.length;
+      let qs = await fetchAIQuestions(MIX_PLAN[i]);
+      if (!qs.length) qs = await fetchQuestions(Object.assign({}, MIX_PLAN[i], { avoid: state.questionHistory.slice(-300) }));
+      state.fullShowRounds.push(Object.assign({}, MIX_PLAN[i], { questions: qs }));
+      state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-400);
+    }
+    saveHistory();
+    saveQuestionSet(state.fullShowRounds.flatMap((r) => r.questions), { category: 'لايف كامل', difficulty: 'متدرج', source: 'ai' });
+    state.mode = 'fullshow'; state.currentRoundIndex = 0; state.questions = state.fullShowRounds[0].questions;
+    state.currentIndex = 0; state.roundNumber = 1;
+    state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
+    state.shieldGirls = false; state.shieldBoys = false;
+    prepareGame();
+    showToast('لايف AI خليط جاهز — محفوظ تلقائياً', 'STUDIO READY');
+  } catch (e) { showToast('تعذر تجهيز اللايف', 'SHOW CONTROL'); }
+  hideLoading();
+}
+async function bankFullShowMixed() {
+  state.fullShowRounds = []; showLoading('نرتب فصول اللايف من البنك (خليط)...');
+  try {
+    for (let i = 0; i < MIX_PLAN.length; i += 1) {
+      $('loadingText').textContent = 'نجهز ' + MIX_PLAN[i].title + ' — ' + (i + 1) + ' / ' + MIX_PLAN.length;
+      const qs = await fetchQuestions(Object.assign({}, MIX_PLAN[i], { avoid: state.questionHistory.slice(-300) }));
+      state.fullShowRounds.push(Object.assign({}, MIX_PLAN[i], { questions: qs }));
+      state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-400);
+    }
+    saveHistory();
+    saveQuestionSet(state.fullShowRounds.flatMap((r) => r.questions), { category: 'لايف كامل', difficulty: 'متدرج' });
+    state.mode = 'fullshow'; state.currentRoundIndex = 0; state.questions = state.fullShowRounds[0].questions;
+    state.currentIndex = 0; state.roundNumber = 1;
+    state.girlsScore = 0; state.boysScore = 0; state.girlsRounds = 0; state.boysRounds = 0;
+    state.shieldGirls = false; state.shieldBoys = false;
+    prepareGame();
+  } catch (e) { showToast('تعذر تجهيز اللايف', 'SHOW CONTROL'); }
+  hideLoading();
+}
+/* اعتراض الزرين فقط — بدون لمس أي مستمعات قائمة */
+document.addEventListener('click', (e) => {
+  const g = e.target.closest('#generateBtn');
+  if (g) { e.stopPropagation(); e.preventDefault(); if (state.mode === 'fullshow') aiFullShow(); else aiSingleRound(); return; }
+  const s = e.target.closest('#savedStartBtn');
+  if (s) { e.stopPropagation(); e.preventDefault(); if (state.mode === 'fullshow') bankFullShowMixed(); else generateSingleRound(); return; }
+}, true);
