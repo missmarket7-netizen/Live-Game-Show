@@ -1,5 +1,20 @@
-import TikTokLiveConnector from "tiktok-live-connector";
-const { WebcastPushConnection } = TikTokLiveConnector.default || TikTokLiveConnector;
+/* ═══ طبقة استقبال TikTok LIVE — تحميل كسول آمن (بدون import ثابت) ═══ */
+let WebcastPushConnection = null;
+async function loadConnector() {
+  if (WebcastPushConnection) return WebcastPushConnection;
+  const mod = await import("tiktok-live-connector");
+  const candidates = [
+    mod && mod.WebcastPushConnection,
+    mod && mod.default && mod.default.WebcastPushConnection,
+    mod && mod.default && mod.default.default && mod.default.default.WebcastPushConnection,
+    mod && mod.default,
+    mod && mod.default && mod.default.default
+  ];
+  const found = candidates.find((c) => typeof c === "function");
+  if (!found) throw new Error("tiktok-live-connector: شكل التصدير غير معروف [" + Object.keys(mod || {}).join(", ") + "]");
+  WebcastPushConnection = found;
+  return WebcastPushConnection;
+}
 
 const LIVE_CONFIG = {
   username: process.env.TIKTOK_USERNAME || "",
@@ -24,14 +39,15 @@ function broadcast(type, payload) {
 function giftNameOf(d) { return String(d.giftName || (d.gift && d.gift.name) || "").trim().toLowerCase(); }
 function scheduleReconnect() {
   if (!LIVE_CONFIG.autoReconnect || reconnectTimer) return;
-  reconnectTimer = setTimeout(() => { reconnectTimer = null; startConnection(); }, LIVE_CONFIG.reconnectDelayMs);
+  reconnectTimer = setTimeout(() => { reconnectTimer = null; startConnection().catch(() => {}); }, LIVE_CONFIG.reconnectDelayMs);
 }
 function bump(map, key, n) { if (key) map.set(key, (map.get(key) || 0) + n); }
 
-function startConnection() {
+async function startConnection() {
   if (!LIVE_CONFIG.username) { console.warn("⚠️ TIKTOK_USERNAME غير مضبوط — طبقة الاستقبال معطلة"); return; }
   try {
-    connection = new WebcastPushConnection(LIVE_CONFIG.username, {
+    const Conn = await loadConnector();
+    connection = new Conn(LIVE_CONFIG.username, {
       sessionId: LIVE_CONFIG.sessionId || undefined,
       enableExtendedGiftInfo: true,
       processInitialData: true
@@ -54,8 +70,9 @@ function startConnection() {
     }
     connection.on("disconnected", () => { status.connected = false; broadcast("status", status); scheduleReconnect(); });
   } catch (e) {
-    status.connected = false; status.error = String((e && e.message) || e);
-    console.error("❌ فشل بناء الاتصال:", status.error);
+    status.connected = false;
+    status.error = String((e && e.message) || e);
+    console.error("❌ فشل تحميل/بناء موصل تيك توك:", status.error);
     scheduleReconnect();
   }
 }
@@ -64,12 +81,13 @@ export function attachLiveRoutes(app) {
   app.get("/live/events", (req, res) => {
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", "Connection": "keep-alive" });
     res.write("data: " + JSON.stringify({ type: "hello", payload: status }) + "\n\n");
-    clients.add(res); req.on("close", () => clients.delete(res));
+    clients.add(res);
+    req.on("close", () => clients.delete(res));
   });
   app.get("/live/status", (req, res) => res.json(status));
   app.get("/live/leaderboard", (req, res) => {
     const top = (m) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, count]) => ({ name, count }));
     res.json({ enabled: LIVE_CONFIG.enableStats, likes: top(stats.likes), shares: top(stats.shares), chats: top(stats.chats), gifts: top(stats.gifts) });
   });
-  startConnection();
+  startConnection().catch((e) => console.error("❌ startConnection:", e.message));
 }
