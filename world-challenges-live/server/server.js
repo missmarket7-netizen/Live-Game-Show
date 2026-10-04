@@ -3,6 +3,7 @@ import express from "express";
 import path from "node:path";
 import fs from "node:fs";
 import { fileURLToPath } from "node:url";
+import { attachLiveRoutes } from "./live-connector.js";
 import { createClient } from "@libsql/client";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -189,4 +190,5 @@ app.get("/api/cycle-status", async (req, res) => {
 app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, excluded: [...EXCLUDED_CATEGORIES] }));
 app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
 const PORT = process.env.PORT || 3000;
-initTurso().finally(() => app.listen(PORT, () => console.log(`عالم التحديات على ${PORT} | البنك: ${getAllQuestions().length} سؤال | الدورة الذكية: ${turso ? "دائمة (Turso)" : "ملف محلي"}`)));
+initTurso().finally(() => attachLiveRoutes(app);
+app.listen(PORT, () => console.log(`عالم التحديات على ${PORT} | البنك: ${getAllQuestions().length} سؤال | الدورة الذكية: ${turso ? "دائمة (Turso)" : "ملف محلي"}`)));

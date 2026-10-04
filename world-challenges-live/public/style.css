@@ -870,3 +870,7 @@ button.press{animation:btnPress .14s ease}
 [data-theme="light"] .team-score-boys .captain-vert-label { color: #0b7fa8; }
 [data-theme="light"] .captain-slot input::placeholder { color: rgba(18, 22, 58, .42); }
 [data-theme="light"] .captain-slot input.confirmed { background: rgba(18, 22, 58, .06); border-color: rgba(18, 22, 58, .22); }
+#liveStatsChip{position:fixed;top:8px;right:8px;z-index:1240;display:flex;flex-direction:column;gap:4px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(20,25,57,.7);backdrop-filter:blur(10px);font-size:10px;font-weight:800;color:var(--text);pointer-events:none;}
+#liveStatsChip .ls-row{display:flex;gap:6px;align-items:center;}
+#liveStatsChip .ls-ico{font-size:12px;}
+#liveStatsChip strong{color:var(--gold-hot);}
