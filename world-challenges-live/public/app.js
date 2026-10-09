@@ -553,3 +553,39 @@ document.addEventListener('click', (e) => {
   const s = e.target.closest('#savedStartBtn');
   if (s) { e.stopPropagation(); e.preventDefault(); if (state.mode === 'fullshow') bankFullShowMixed(); else generateSingleRound(); return; }
 }, true);
+/* ===== TikTok Live Layer (client) ===== */
+if (window.soundFiles && !soundFiles['community-love']) soundFiles['community-love'] = ['community-love', 'celebration'];
+function liveEsc(v){ return String(v).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function showFollowWelcome(name, avatar){
+  var card = document.getElementById('liveFollowCard'); if (card) card.remove();
+  card = document.createElement('div'); card.id = 'liveFollowCard'; card.className = 'live-follow-card';
+  card.innerHTML = '<div class="lfc-heart">💖</div>' + (avatar ? '<img class="lfc-avatar" src="' + liveEsc(avatar) + '" alt="">' : '') +
+    '<div class="lfc-text"><small>متابع جديد انضم للعائلة</small><strong>' + liveEsc(name) + '</strong><span>نورت يا ' + liveEsc(name) + ' 💖</span></div>';
+  document.body.appendChild(card);
+  if (window.playSound) playSound('girls-captin', 0.7);
+  setTimeout(function(){ card.classList.add('out'); }, 4200);
+  setTimeout(function(){ card.remove(); }, 4800);
+}
+function communityBurst(name){
+  if (window.fireConfetti) fireConfetti();
+  if (window.playSound) playSound('community-love', 0.8);
+  if (window.showToast) showToast('💞 ' + name + ' انضم لمجتمعك الخاص!', 'COMMUNITY');
+}
+function renderLiveStats(j){
+  var chip = document.getElementById('liveStatsChip');
+  if (!chip) { chip = document.createElement('div'); chip.id = 'liveStatsChip'; document.body.appendChild(chip); }
+  var L = j.likes && j.likes[0], S = j.shares && j.shares[0];
+  chip.innerHTML = '<div class="ls-row"><span class="ls-ico">👍</span><span>الأكثر إعجاباً:</span><strong>' + (L ? liveEsc(L.name) + ' (' + L.count + ')' : '—') + '</strong></div>' +
+                   '<div class="ls-row"><span class="ls-ico">📤</span><span>الأكثر مشاركة:</span><strong>' + (S ? liveEsc(S.name) + ' (' + S.count + ')' : '—') + '</strong></div>';
+}
+function startLeaderboard(){ setInterval(function(){ fetch('/live/leaderboard').then(function(r){ return r.json(); }).then(function(j){ if (j && j.enabled) renderLiveStats(j); }).catch(function(){}); }, 15000); }
+function connectLive(){
+  if (!window.EventSource) return;
+  var es = new EventSource('/live/events');
+  es.onmessage = function(ev){
+    var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+    if (m.type === 'follow') showFollowWelcome(m.payload.name, m.payload.avatar);
+    else if (m.type === 'community') communityBurst(m.payload.name);
+  };
+}
+document.addEventListener('DOMContentLoaded', function(){ connectLive(); startLeaderboard(); });
