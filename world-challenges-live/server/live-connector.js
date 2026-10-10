@@ -1,43 +1,46 @@
-/* ═══ طبقة استقبال TikTok LIVE — دعم حسابين متزامنين (SSE) ═══ */
+/* ═══ طبقة استقبال TikTok LIVE — حسابين + محمّل لا يعتمد على النسخة (SSE) ═══ */
+import { createRequire } from "node:module";
+const requireCJS = createRequire(import.meta.url);
+
 let WebcastPushConnection = null;
+/* بصمة هيكلية: أي فئة تملك connect + on على الـ prototype هي الموصل، مهما كان اسمها أو نسخة المكتبة */
+function isConnector(x) { return typeof x === "function" && x.prototype && typeof x.prototype.connect === "function" && typeof x.prototype.on === "function"; }
+function pickConn(mod) {
+  if (!mod) return null;
+  if (isConnector(mod.WebcastPushConnection)) return mod.WebcastPushConnection;
+  for (const k of Object.keys(mod)) { if (isConnector(mod[k])) return mod[k]; }
+  if (isConnector(mod.default)) return mod.default;
+  if (mod.default && typeof mod.default === "object") { for (const k of Object.keys(mod.default)) { if (isConnector(mod.default[k])) return mod.default[k]; } }
+  return null;
+}
 async function loadConnector() {
   if (WebcastPushConnection) return WebcastPushConnection;
-  const mod = await import("tiktok-live-connector");
-  const candidates = [
-    mod && mod.WebcastPushConnection,
-    mod && mod.default && mod.default.WebcastPushConnection,
-    mod && mod.default && mod.default.default && mod.default.default.WebcastPushConnection,
-    mod && mod.default,
-    mod && mod.default && mod.default.default
-  ];
-  const found = candidates.find((c) => typeof c === "function");
-  if (!found) throw new Error("tiktok-live-connector: شكل التصدير غير معروف");
+  let mod = null, lastErr = null;
+  try { mod = await import("tiktok-live-connector"); } catch (e) { lastErr = e; }
+  let found = pickConn(mod);
+  if (!found) { try { found = pickConn(requireCJS("tiktok-live-connector")); } catch (e) { lastErr = e; } }
+  if (!found) {
+    const desc = mod ? Object.keys(mod).map((k) => k + ":" + typeof mod[k]).join(", ") : "(لا يوجد module)";
+    throw new Error("tiktok-live-connector: شكل تصدير غير معروف | exports => " + desc + (lastErr ? " | err: " + lastErr.message : ""));
+  }
   WebcastPushConnection = found;
-  return WebcastPushConnection;
+  console.log("✅ تم تحميل موصل تيك توك (فئة):", found.name || "anonymous");
+  return found;
 }
 
-/* ✅ الحسابات من المتغيرات: حساب 1 + حساب 2 (اختياري) */
 const ACCOUNTS = [
   { username: String(process.env.TIKTOK_USERNAME || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID || "").trim() },
   { username: String(process.env.TIKTOK_USERNAME_2 || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID_2 || "").trim() }
 ].filter((a) => a.username);
 
-const LIVE_CONFIG = {
-  autoReconnect: true,
-  communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]),
-  enableStats: true
-};
-
+const LIVE_CONFIG = { autoReconnect: true, communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]), enableStats: true };
 const clients = new Set();
 const connections = new Map();
 const stats = { likes: new Map(), shares: new Map(), chats: new Map(), gifts: new Map() };
 let lastEventAt = null;
 
 function overallStatus() {
-  const accounts = ACCOUNTS.map((a) => {
-    const c = connections.get(a.username);
-    return c ? { username: a.username, connected: c.connected, error: c.error, lastEventAt: c.lastEventAt } : { username: a.username, connected: false, error: "لم يبدأ" };
-  });
+  const accounts = ACCOUNTS.map((a) => { const c = connections.get(a.username); return c ? { username: a.username, connected: c.connected, error: c.error, lastEventAt: c.lastEventAt } : { username: a.username, connected: false, error: "لم يبدأ" }; });
   return { connected: accounts.some((a) => a.connected), accounts: accounts, lastEventAt: lastEventAt, error: (accounts.find((a) => a.error) || {}).error || null };
 }
 function broadcast(type, payload) {
@@ -48,40 +51,29 @@ function broadcast(type, payload) {
 function giftNameOf(d) { return String(d.giftName || (d.gift && d.gift.name) || "").trim().toLowerCase(); }
 function bump(map, key, n) { if (key) map.set(key, (map.get(key) || 0) + n); }
 
-/* ✅ اتصال مستقل لكل حساب + إعادة اتصال بتدرّج (Backoff) */
 function startConnection(account) {
-  const st = { connected: false, error: null, lastEventAt: null, retries: 0, conn: null, stopped: false };
+  const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false };
   connections.set(account.username, st);
-
-  const schedule = () => {
-    if (!LIVE_CONFIG.autoReconnect || st.stopped) return;
-    st.retries += 1;
-    const delay = Math.min(60000, 6000 * st.retries);
-    setTimeout(connect, delay);
+  const schedule = () => { if (!LIVE_CONFIG.autoReconnect || st.stopped) return; st.fails += 1; setTimeout(connect, Math.min(60000, 6000 * st.fails)); };
+  const fail = (msg) => {
+    st.connected = false; st.error = msg; st.fails += 1;
+    if (st.fails % 5 === 1) console.error("❌ [" + account.username + "] محاولة " + st.fails + ":", msg);
+    broadcast("status", overallStatus()); schedule();
   };
-
   async function connect() {
     if (st.stopped) return;
     try {
       const Conn = await loadConnector();
-      const conn = new Conn(account.username, {
-        sessionId: account.sessionId || undefined,
-        enableExtendedGiftInfo: true,
-        processInitialData: true
-      });
-      st.conn = conn;
+      const conn = new Conn(account.username, { sessionId: account.sessionId || undefined, enableExtendedGiftInfo: true, processInitialData: true });
       conn.connect()
-        .then(() => { st.connected = true; st.error = null; st.retries = 0; st.lastEventAt = new Date().toISOString(); console.log("✅ TikTok LIVE متصل:", account.username); broadcast("status", overallStatus()); })
-        .catch((err) => { st.connected = false; st.error = String((err && err.message) || err); console.error("❌ خطأ اتصال", account.username, ":", st.error); broadcast("status", overallStatus()); schedule(); });
-
+        .then(() => { st.connected = true; st.error = null; st.fails = 0; st.lastEventAt = new Date().toISOString(); console.log("✅ TikTok LIVE متصل:", account.username); broadcast("status", overallStatus()); })
+        .catch((err) => fail(String((err && err.message) || err)));
       conn.on("follow", (d) => broadcast("follow", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "" }));
       conn.on("gift", (d) => {
         const name = giftNameOf(d); if (!name) return;
         const k = d.uniqueId || d.nickname;
         if (LIVE_CONFIG.enableStats) bump(stats.gifts, k, d.diamondCount || 0);
-        if (LIVE_CONFIG.communityGiftNames.has(name)) {
-          broadcast("community", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, count: d.repeatCount || 1 });
-        }
+        if (LIVE_CONFIG.communityGiftNames.has(name)) broadcast("community", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, count: d.repeatCount || 1 });
       });
       if (LIVE_CONFIG.enableStats) {
         conn.on("like", (d) => bump(stats.likes, d.uniqueId || d.nickname, d.likeCount || 1));
@@ -89,11 +81,7 @@ function startConnection(account) {
         conn.on("chat", (d) => bump(stats.chats, d.uniqueId || d.nickname, 1));
       }
       conn.on("disconnected", () => { st.connected = false; console.warn("⚠️ انقطع الاتصال:", account.username); broadcast("status", overallStatus()); schedule(); });
-    } catch (e) {
-      st.connected = false; st.error = String((e && e.message) || e);
-      console.error("❌ فشل بناء الاتصال لـ", account.username, ":", st.error);
-      schedule();
-    }
+    } catch (e) { fail(String((e && e.message) || e)); }
   }
   connect();
 }
@@ -110,7 +98,7 @@ export function attachLiveRoutes(app) {
     const top = (m) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 5).map(([name, count]) => ({ name, count }));
     res.json({ enabled: LIVE_CONFIG.enableStats, likes: top(stats.likes), shares: top(stats.shares), chats: top(stats.chats), gifts: top(stats.gifts) });
   });
-  if (!ACCOUNTS.length) { console.warn("⚠️ لا يوجد TIKTOK_USERNAME أو TIKTOK_USERNAME_2 — طبقة الاستقبال معطلة"); return; }
+  if (!ACCOUNTS.length) { console.warn("⚠️ لا يوجد TIKTOK_USERNAME / TIKTOK_USERNAME_2 — طبقة الاستقبال معطلة"); return; }
   ACCOUNTS.forEach(startConnection);
   console.log("🎥 طبقة الاستقبال: حسابات مفعّلة =", ACCOUNTS.map((a) => a.username).join(" , "));
 }
