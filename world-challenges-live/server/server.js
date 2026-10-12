@@ -171,13 +171,23 @@ app.post("/api/questions", async (req, res) => {
   const bank = getAllQuestions();
   let pool = bank.filter((q) => !avoid.has(normalizeText(q.question)));
   if (category && category !== "اختيارات متنوعة") { const c = pool.filter((q) => q.category === category); if (c.length >= count) pool = c; }
-  if (difficulty) { const d = pool.filter((q) => q.difficulty === difficulty); if (d.length >= count) pool = d; }
+  if (difficulty && difficulty !== "متدرج") { const d = pool.filter((q) => q.difficulty === difficulty); if (d.length >= count) pool = d; }
   const st = await getCycleState();
   let servedSet = new Set(st.served);
   let cycle = st.cycle;
   let fresh = pool.filter((q) => !servedSet.has(normalizeText(q.question)));
   if (fresh.length < count) { cycle += 1; servedSet = new Set(); fresh = pool.slice(); }
-  const selected = shuffleArray(fresh).slice(0, count);
+  let selected;
+  if (difficulty === "متدرج") {
+    selected = [];
+    for (const tier of ["سهل", "متوسط", "صعب"]) {
+      if (selected.length >= count) break;
+      selected.push(...shuffleArray(fresh.filter((q) => q.difficulty === tier)).slice(0, count - selected.length));
+    }
+    if (selected.length < count) selected.push(...shuffleArray(fresh.filter((q) => selected.indexOf(q) === -1)).slice(0, count - selected.length));
+  } else {
+    selected = shuffleArray(fresh).slice(0, count);
+  }
   selected.forEach((q) => servedSet.add(normalizeText(q.question)));
   await setCycleState(cycle, [...servedSet]);
   res.json({ questions: selected, meta: { source: "bank-cycle", count: selected.length, bankSize: bank.length, cycle, served: servedSet.size } });
