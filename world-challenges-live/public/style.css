@@ -415,3 +415,384 @@ img{max-width:100%}
 [data-theme="light"] .sponsor-strip .ss-text strong{color:var(--gold-hot)}
 [data-theme="light"] #liveStatsChip,[data-theme="light"] .live-follow-card{background:rgba(255,255,255,.94);color:var(--text);box-shadow:0 12px 32px rgba(26,22,66,.16)}
 [data-theme="light"] #liveStatsChip strong,[data-theme="light"] .live-follow-card .lfc-text strong{color:var(--gold-hot)}
+/* ═══ FINAL UI PATCH v1 ═══ */
+
+/* حذف/إخفاء قائمة الموسيقى ولوحات المؤثرات */
+.floating-sound-controls,
+.floating-soundboard-panel,
+.soundboard {
+  display: none !important;
+}
+
+/* حذف نص دخول المواجهة والكباتن ورفع الخانات */
+.captain-command .command-heading {
+  display: none !important;
+}
+
+.captain-command {
+  padding-top: 6px !important;
+  margin-top: 0 !important;
+}
+
+.captain-columns {
+  margin-top: 0 !important;
+}
+
+/* صور الهدايا داخل أزرار الهدايا */
+.gift-img {
+  display: block;
+  width: 34px;
+  height: 34px;
+  margin: 0 auto 3px;
+  object-fit: contain;
+  filter: drop-shadow(0 3px 9px rgba(0,0,0,.45));
+  pointer-events: none;
+}
+
+.central-gift .gift-img {
+  width: 50px;
+  height: 50px;
+}
+
+.gift-name {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--gold-hot);
+  font-size: 9px;
+  font-weight: 900;
+  line-height: 1.15;
+  text-align: center;
+}
+
+.gift-button small {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-family: var(--display);
+  font-size: 7px;
+  letter-spacing: .04em;
+  line-height: 1;
+  text-align: center;
+}
+
+/* تكبير مربع عدد الجولات/النتيجة */
+.score-strip {
+  grid-template-columns: 1fr 92px 1fr !important;
+  gap: 8px !important;
+}
+
+.round-puck {
+  min-width: 92px !important;
+  height: 92px !important;
+  border-radius: 24px !important;
+  padding: 7px 5px !important;
+}
+
+.round-puck span {
+  font-size: 9px !important;
+}
+
+.round-puck b {
+  font-size: 30px !important;
+}
+
+.round-puck small,
+.round-results {
+  font-size: 12px !important;
+  font-weight: 900 !important;
+}
+
+.team-rounds {
+  font-size: 11px !important;
+  font-weight: 900 !important;
+}
+
+/* قصاصات النقاط */
+.point-bit {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 1260;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255,255,255,.35);
+  transform: translate(-50%, -50%);
+}
+
+/* ظهور الكابتن: أشعة + قصاصات + صورة الفريق */
+.captain-reveal {
+  overflow: hidden;
+}
+
+.captain-reveal::before,
+.captain-reveal::after {
+  content: none !important;
+  display: none !important;
+}
+
+.cr-rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160vmax;
+  height: 160vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg, rgba(200,255,81,.13) 0deg 8deg, transparent 8deg 20deg);
+  border-radius: 50%;
+  animation: crRays 10s linear infinite;
+  mask-image: radial-gradient(circle, black 0%, transparent 54%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 54%);
+  pointer-events: none;
+}
+
+.cr-confetti,
+.wl-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cr-confetti i,
+.wl-confetti i {
+  position: absolute;
+  top: -8vh;
+  border-radius: 2px;
+  opacity: .92;
+  animation-name: patchConfettiFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.cr-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  max-width: 92vw;
+  padding: 24px 30px;
+  border: 1.5px solid rgba(200,255,81,.48);
+  border-radius: 26px;
+  background: rgba(5,6,13,.74);
+  backdrop-filter: blur(18px);
+  box-shadow:
+    0 0 65px rgba(200,255,81,.18),
+    0 24px 72px rgba(0,0,0,.58);
+  animation: crPop .58s cubic-bezier(.22,1,.36,1) both;
+  pointer-events: none;
+}
+
+.cr-team-img {
+  width: 112px;
+  height: 112px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 26px rgba(255,211,110,.36));
+  animation: logoFloat 3.2s ease-in-out infinite;
+}
+
+.cr-card h2 {
+  margin: 0;
+  max-width: 88vw;
+  overflow-wrap: break-word;
+  font-size: clamp(32px, 11vw, 64px);
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -.055em;
+  text-align: center;
+  color: transparent;
+  background: linear-gradient(105deg, var(--neon-pink), var(--gold-hot) 50%, var(--neon-cyan));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 34px rgba(200,255,81,.34));
+  animation: captainPop 10s cubic-bezier(.22,1,.36,1) both;
+}
+
+.captain-reveal.team-girls .cr-card h2 {
+  background: linear-gradient(105deg, var(--pink-hot), var(--pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 34px rgba(255,79,154,.48));
+}
+
+.captain-reveal.team-boys .cr-card h2 {
+  background: linear-gradient(105deg, var(--cyan), var(--cyan-deep));
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 34px rgba(53,230,247,.48));
+}
+
+/* أضواء الفائز في صفحة النهاية */
+.winner-lights {
+  position: fixed;
+  inset: 0;
+  z-index: 1265;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(5,6,13,.62), rgba(5,6,13,.22) 54%, transparent 78%);
+  animation: wlIn .35s ease both;
+}
+
+.winner-lights.out {
+  opacity: 0;
+  transform: scale(1.04);
+  transition: opacity .6s ease, transform .6s ease;
+}
+
+.wl-rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 170vmax;
+  height: 170vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg, rgba(255,211,110,.14) 0deg 7deg, transparent 7deg 19deg);
+  border-radius: 50%;
+  animation: crRays 12s linear infinite;
+  mask-image: radial-gradient(circle, black 0%, transparent 56%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 56%);
+}
+
+.wl-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 34px;
+  border: 1.5px solid rgba(255,211,110,.5);
+  border-radius: 28px;
+  background: rgba(5,6,13,.76);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 70px rgba(255,211,110,.2), 0 24px 72px rgba(0,0,0,.58);
+  animation: crPop .62s cubic-bezier(.22,1,.36,1) both;
+}
+
+.wl-card img {
+  width: 118px;
+  height: 118px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 28px rgba(255,211,110,.38));
+  animation: logoFloat 3.4s ease-in-out infinite;
+}
+
+.wl-card strong {
+  font-size: clamp(28px, 8vw, 48px);
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -.055em;
+  color: var(--gold-hot);
+  text-shadow: 0 0 28px rgba(255,211,110,.35);
+}
+
+.wl-card span {
+  color: var(--neon-lime);
+  font-family: var(--display);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .22em;
+}
+
+.winner-lights.girls .wl-card {
+  border-color: rgba(255,79,154,.55);
+  box-shadow: 0 0 70px rgba(255,79,154,.2), 0 24px 72px rgba(0,0,0,.58);
+}
+
+.winner-lights.girls .wl-card strong {
+  color: var(--pink-hot);
+  text-shadow: 0 0 28px rgba(255,79,154,.38);
+}
+
+.winner-lights.boys .wl-card {
+  border-color: rgba(53,230,247,.55);
+  box-shadow: 0 0 70px rgba(53,230,247,.2), 0 24px 72px rgba(0,0,0,.58);
+}
+
+.winner-lights.boys .wl-card strong {
+  color: var(--cyan);
+  text-shadow: 0 0 28px rgba(53,230,247,.38);
+}
+
+@keyframes crRays {
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes crPop {
+  0% { opacity: 0; transform: scale(.68) translateY(18px); }
+  58% { opacity: 1; transform: scale(1.05) translateY(0); }
+  100% { transform: scale(1); }
+}
+
+@keyframes wlIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes patchConfettiFall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(112vh) rotate(760deg);
+    opacity: .16;
+  }
+}
+
+/* استجابة الشاشات الصغيرة */
+@media (max-width: 390px) {
+  .score-strip {
+    grid-template-columns: 1fr 78px 1fr !important;
+    gap: 5px !important;
+  }
+
+  .round-puck {
+    min-width: 78px !important;
+    height: 78px !important;
+    border-radius: 20px !important;
+  }
+
+  .round-puck b {
+    font-size: 25px !important;
+  }
+
+  .gift-img {
+    width: 29px;
+    height: 29px;
+  }
+
+  .central-gift .gift-img {
+    width: 43px;
+    height: 43px;
+  }
+
+  .cr-team-img,
+  .wl-card img {
+    width: 92px;
+    height: 92px;
+  }
+}
+
+/* توافق الثيم الفاتح */
+[data-theme="light"] .gift-img {
+  filter: drop-shadow(0 2px 6px rgba(20,18,56,.18));
+}
+
+[data-theme="light"] .cr-card,
+[data-theme="light"] .wl-card {
+  background: rgba(255,255,255,.88);
+  border-color: rgba(92,138,0,.38);
+  box-shadow: 0 18px 48px rgba(26,22,66,.18);
+}
+
+[data-theme="light"] .cr-card h2,
+[data-theme="light"] .wl-card strong {
+  color: var(--gold-hot);
+}
