@@ -1111,16 +1111,11 @@ function connectLiveStream() {
 
 /* ═══ ضمان ظهور زر المؤثرات في كل الشاشات ═══ */
 function ensureSoundButtonVisible() {
-  const wrapperDiv = document.querySelector('.floating-sound-controls');
-  if (wrapperDiv) {
-    wrapperDiv.style.cssText = 'position:fixed!important;bottom:20px!important;right:20px!important;z-index:9999!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important';
-  }
-  const mainBtn = $('floatingSoundBtn');
-  if (!mainBtn) return;
-  mainBtn.style.cssText = 'display:grid!important;place-items:center!important;width:56px!important;height:56px!important;border-radius:50%!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,211,110,.5)!important;color:#ffd36e!important;font-size:24px!important;cursor:pointer!important;backdrop-filter:blur(10px)!important;box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 20px rgba(255,211,110,.2)!important;z-index:9999!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important';
-  mainBtn.classList.remove('hidden');
-  const panelBox = $('floatingSoundBoard');
-  if (panelBox) panelBox.style.zIndex = '10000';
+  // التموضع والظهور مضمونان من CSS؛ هنا نتأكد فقط أن الأزرار غير مخفية
+  ['floatingSoundBtn', 'floatingSoundBtnResults'].forEach((bid) => {
+    const b = $(bid);
+    if (b) b.classList.remove('hidden');
+  });
 }
 
 function watchScreensForSoundBtn() {
@@ -1194,9 +1189,9 @@ function patchGiftImages() {
 
 function cleanCaptainSection() {
   $$('.captain-command .command-heading').forEach((hdEl) => hdEl.remove());
-  const cmdPanel = $('.captain-command');
+  const cmdPanel = document.querySelector('.captain-command');
   if (cmdPanel) { cmdPanel.style.paddingTop = '6px'; cmdPanel.style.marginTop = '0'; }
-  const colWrap = $('.captain-columns');
+  const colWrap = document.querySelector('.captain-columns');
   if (colWrap) colWrap.style.marginTop = '0';
 }
 

@@ -1177,3 +1177,32 @@ img{max-width:100%}
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ═══ FIX v21: منع طبقة الحجب الشفافة (سبب تجمّد الواجهة) ═══ */
+/* الغلاف لا يلتقط النقر أبداً؛ الزر نفسه فقط يلتقطه */
+.floating-sound-controls {
+  width: max-content !important;
+  height: max-content !important;
+  pointer-events: none !important;
+  display: block !important;
+}
+.floating-sound-controls > * { pointer-events: auto !important; }
+/* زر/لوحة شاشة النتائج: أعلى اليسار */
+.floating-sound-controls.floating-sound-controls--results {
+  top: 20px !important;
+  left: 20px !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+.floating-soundboard-panel.floating-soundboard-panel--results {
+  top: 85px !important;
+  left: 20px !important;
+  right: auto !important;
+  bottom: auto !important;
+}
+/* اللوحة المخفية لا تظهر ولا تلتقط نقراً مهما كانت القواعد الأخرى */
+.floating-soundboard-panel.hidden {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
