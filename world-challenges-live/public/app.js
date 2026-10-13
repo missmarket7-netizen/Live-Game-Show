@@ -35,49 +35,219 @@ const categoryEmoji = {
   'سرعة': '⚡', 'اختيارات متنوعة': '◈'
 };
 
+/* __WEBAUDIO_V1__ — الصوت عبر Web Audio: تشغيل أكثر استقراراً داخل الصفحة */
+let audioCtx = null;
+const bufferPromises = {};
+const activeSources = {};
+
+function getCtx() {
+  if (audioCtx) return audioCtx;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try {
+    audioCtx = new AC({ latencyHint: 'interactive' });
+  } catch (e) {
+    audioCtx = null;
+  }
+  return audioCtx;
+}
+
+function unlockAudio() {
+  const ctx = getCtx();
+  if (ctx && ctx.state !== 'running') {
+    try {
+      ctx.resume();
+    } catch (e) {}
+  }
+}
+
+['pointerdown', 'touchstart', 'click', 'keydown'].forEach((evt) => {
+  document.addEventListener(evt, unlockAudio, { passive: true });
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) unlockAudio();
+});
+
+function decodeBuf(ctx, arrayBuffer) {
+  return new Promise((resolve, reject) => {
+    const result = ctx.decodeAudioData(arrayBuffer, resolve, reject);
+    if (result && typeof result.then === 'function') {
+      result.then(resolve, reject);
+    }
+  });
+}
+
+function loadBuffer(key) {
+  if (bufferPromises[key]) return bufferPromises[key];
+
+  const ctx = getCtx();
+  const candidates = soundFiles[key] || [key];
+
+  bufferPromises[key] = (async () => {
+    if (!ctx) return null;
+
+    for (let i = 0; i < candidates.length; i += 1) {
+      try {
+        const res = await fetch('/sounds/' + candidates[i] + '.mp3');
+        if (!res.ok) continue;
+        const arrayBuffer = await res.arrayBuffer();
+        return await decodeBuf(ctx, arrayBuffer);
+      } catch (e) {
+        // جرّب المرشح التالي
+      }
+    }
+
+    return null;
+  })();
+
+  return bufferPromises[key];
+}
+
+function preloadSounds(keys) {
+  const list = keys || Object.keys(soundFiles);
+  list.reduce((chain, key) => chain.then(() => loadBuffer(key)), Promise.resolve());
+}
+
+function startBuffer(key, buffer, volume, onEnd) {
+  const ctx = getCtx();
+  if (!ctx || !buffer) return false;
+
+  try {
+    const previous = activeSources[key];
+    if (previous) {
+      previous.onended = null;
+      try {
+        previous.stop();
+      } catch (e) {}
+    }
+
+    const sourceNode = ctx.createBufferSource();
+    const gainNode = ctx.createGain();
+
+    gainNode.gain.value = volume;
+    sourceNode.buffer = buffer;
+    sourceNode.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    sourceNode.onended = () => {
+      if (activeSources[key] === sourceNode) {
+        delete activeSources[key];
+      }
+      if (onEnd) onEnd();
+    };
+
+    activeSources[key] = sourceNode;
+    sourceNode.start(0);
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/* احتياطي فقط إذا فشل Web Audio */
 function getAudio(key) {
   if (audioCache[key]) return audioCache[key];
+
   const candidates = soundFiles[key] || [key];
   const audio = new Audio('/sounds/' + candidates[0] + '.mp3');
   audio.preload = 'none';
-  let i = 0;
+
+  let index = 0;
   audio.addEventListener('error', () => {
-    i += 1;
-    if (i < candidates.length) audio.src = '/sounds/' + candidates[i] + '.mp3';
+    index += 1;
+    if (index < candidates.length) {
+      audio.src = '/sounds/' + candidates[index] + '.mp3';
+    }
   });
+
   audioCache[key] = audio;
   return audio;
 }
 
+function htmlPlay(key, volume, onEnd) {
+  try {
+    const audio = getAudio(key);
+    audio.currentTime = 0;
+    audio.volume = volume;
+    audio.onended = onEnd || null;
+    audio.onerror = onEnd || null;
+    audio.play().catch(() => {
+      if (onEnd) onEnd();
+    });
+  } catch (e) {
+    if (onEnd) onEnd();
+  }
+}
+
 function playSound(key, volume) {
   if (!state.soundEnabled) return;
-  const a = getAudio(key);
-  try {
-    a.currentTime = 0;
-    a.volume = volume == null ? 0.55 : volume;
-    a.play().catch(() => {});
-  } catch (e) {}
+
+  const safeVolume = volume == null ? 0.55 : volume;
+  unlockAudio();
+
+  if (!getCtx()) {
+    htmlPlay(key, safeVolume);
+    return;
+  }
+
+  loadBuffer(key).then((buffer) => {
+    if (!state.soundEnabled) return;
+    if (!startBuffer(key, buffer, safeVolume)) {
+      htmlPlay(key, safeVolume);
+    }
+  });
 }
 
 function playSequential(keys, onDone) {
-  const step = (idx) => {
-    if (idx >= keys.length) {
+  const step = (index) => {
+    if (index >= keys.length) {
       if (onDone) onDone();
       return;
     }
+
     if (!state.soundEnabled) {
-      step(idx + 1);
+      step(index + 1);
       return;
     }
-    const a = getAudio(keys[idx]);
-    a.currentTime = 0;
-    a.volume = 0.75;
-    a.onended = () => step(idx + 1);
-    a.onerror = () => step(idx + 1);
-    a.play().catch(() => step(idx + 1));
+
+    const next = () => step(index + 1);
+    const key = keys[index];
+
+    unlockAudio();
+
+    if (!getCtx()) {
+      htmlPlay(key, 0.75, next);
+      return;
+    }
+
+    loadBuffer(key).then((buffer) => {
+      if (!startBuffer(key, buffer, 0.75, next)) {
+        htmlPlay(key, 0.75, next);
+      }
+    });
   };
+
   step(0);
 }
+
+/* تحميل مسبق للمؤثرات الأساسية بعد أول لمسة */
+document.addEventListener('pointerdown', function preloadOnce() {
+  document.removeEventListener('pointerdown', preloadOnce);
+  preloadSounds([
+    'tick',
+    'correct',
+    'wrong',
+    'begin',
+    'girls-round',
+    'boys-round',
+    'girls-lose',
+    'boys-lose',
+    'celebration',
+    'girls-captin',
+    'boys-captin'
+  ]);
+}, { passive: true });
 
 function applyTheme(t) {
   document.documentElement.setAttribute('data-theme', t);
