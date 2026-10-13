@@ -1,4 +1,4 @@
-/* ═══ عالم التحديات — Final Broadcast Build (no click visuals) ═══ */
+/* ═══ عالم التحديات — Final Integrated Build v14 ═══ */
 const state = {
   mode: 'single', questions: [], fullShowRounds: [], currentRoundIndex: 0, currentIndex: 0,
   girlsScore: 0, boysScore: 0, girlsRounds: 0, boysRounds: 0,
@@ -16,7 +16,7 @@ const $$ = (s) => Array.from(document.querySelectorAll(s));
 const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
   'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
-  'gift-crown': ['gift-crown'], begin: ['begin'], end: ['end', 'End'], learn: ['learn'], 'boys-mood': ['boys-mood'],
+  'gift-crown': ['gift-crown'], begin: ['begin'], end: ['end'], learn: ['learn'], 'boys-mood': ['boys-mood'],
   'girls-captin': ['girls-captin'], 'boys-captin': ['boys-captin'], 'girls-galaxy': ['girls-galaxy'],
   'boys-galaxy': ['boys-galaxy'], 'girls-wheel': ['girls-wheel', 'girls-galaxy'], 'boys-wheel': ['boys-wheel', 'boys-galaxy'],
   girls2captin: ['girls2captin', 'girls-captin'], captin2boys: ['captin2boys', 'boys-captin'],
@@ -96,7 +96,7 @@ function updateSoundButtons() {
   const g = state.soundEnabled ? '◉' : '○';
   ['setupSoundBtn', 'soundToggle'].forEach((id) => { if ($(id)) { $(id).textContent = g; $(id).classList.toggle('sound-on', state.soundEnabled); } });
 }
-function showScreen(id) { $$('.screen').forEach((s) => s.classList.toggle('hidden', s.id !== id)); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+function showScreen(id) { $$('.screen').forEach((s) => s.classList.toggle('hidden', s.id !== id)); window.scrollTo({ top: 0, behavior: 'smooth' }); ensureSoundButtonVisible(); }
 function showLoading(m) { $('loadingText').textContent = m; $('loadingOverlay').classList.remove('hidden'); }
 function hideLoading() { $('loadingOverlay').classList.add('hidden'); }
 function showToast(text, kicker) {
@@ -171,7 +171,7 @@ function renderQuestion() {
   const grid = $('optionsGrid'); grid.innerHTML = '';
   const pill = document.createElement('div');
   pill.className = 'think-pill';
-  pill.textContent = isFreeQuestion(q) ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف' : '🤔 فكّروا جيداً… الإجابة الصحيحة تظهر عند «كشف الإجابة»';
+  pill.textContent = isFreeQuestion(q) ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف' : '🤔 فكّروا جيدا… الإجابة الصحيحة تظهر عند «كشف الإجابة»';
   grid.appendChild(pill);
   const card = document.querySelector('.question-card');
   if (card) { card.classList.remove('enter'); void card.offsetWidth; card.classList.add('enter'); }
@@ -194,7 +194,7 @@ function selectGift(gift) {
   state.activeGift = gift;
   $$('.gift-button').forEach((b) => b.classList.toggle('is-active', b.dataset.gift === gift));
   if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart' || gift === 'donut' || gift === 'corgi') {
-    const t = { heart: 'اختر الفريق لتفعيل درع الحماية', donut: 'اختر الفريق (الجولة للبنات دائماً)', corgi: 'اختر الفريق (10 جولات للبنات دائماً)', galaxy: 'اختر الفريق (+50 جولة)', wheel: 'اختر الفريق (+100 جولة)' }[gift];
+    const t = { heart: 'اختر الفريق لتفعيل درع الحماية', donut: 'اختر الفريق (الجولة للبنات دائما)', corgi: 'اختر الفريق (10 جولات للبنات دائما)', galaxy: 'اختر الفريق (+50 جولة)', wheel: 'اختر الفريق (+100 جولة)' }[gift];
     $('activeGiftText').textContent = t; $('activeGiftBanner').classList.remove('hidden'); playSound('tick', 0.28); return;
   }
   if (gift === 'rose') { subtractPoint('boys', true); playSound('gift-rose', 0.6); }
@@ -231,13 +231,33 @@ function subtractPoint(team, viaGift) {
   if (team === 'girls') state.girlsScore = Math.max(-5, state.girlsScore - 1); else state.boysScore = Math.max(-5, state.boysScore - 1);
   updateScores(); if (!viaGift) playSound('wrong', 0.25);
 }
+/* ═══ قصاصات عند تسجيل نقطة (NEW) ═══ */
+function burstAt(team) {
+  const sel = team === 'girls' ? '.team-score-girls' : '.team-score-boys';
+  const card = document.querySelector(sel);
+  if (!card || !card.getBoundingClientRect) return;
+  const r = card.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const colors = team === 'girls' ? ['#ff4f9a','#ff83bd','#ffd36e','#fff'] : ['#35e6f7','#5de2ff','#ffd36e','#fff'];
+  for (let i = 0; i < 18; i++) {
+    const bit = document.createElement('i');
+    bit.className = 'point-bit-direct';
+    bit.style.left = cx + 'px'; bit.style.top = cy + 'px'; bit.style.background = colors[i % colors.length];
+    document.body.appendChild(bit);
+    const ang = Math.random()*Math.PI*2, dist = 55+Math.random()*95, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-35, rot=Math.random()*720-360;
+    if (bit.animate) {
+      bit.animate([
+        {transform:'translate(-50%,-50%) scale(1)',opacity:1},
+        {transform:'translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px)) scale(.22) rotate('+rot+'deg)',opacity:0}
+      ],{duration:720+Math.random()*320,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=(function(b){return function(){b.remove();};})(bit);
+    } else setTimeout(function(b){return function(){b.remove();};}(bit),900);
+  }
+}
 function applyPoint(team, points) {
-  burstAt(team);
-
   if (!points) points = 1;
   if (team === 'girls') state.girlsScore = state.girlsScore < 0 ? Math.min(0, state.girlsScore + points) : Math.min(5, state.girlsScore + points);
   else state.boysScore = state.boysScore < 0 ? Math.min(0, state.boysScore + points) : Math.min(5, state.boysScore + points);
   updateScores(); playSound('correct', 0.28);
+  burstAt(team); /* ← NEW: قصاصات مع كل نقطة */
   if (state.girlsScore >= 5 || state.boysScore >= 5) showToast('اكتملت 5 نقاط! اضغط «الجولة التالية»', 'ROUND READY');
 }
 function finishRound() {
@@ -264,7 +284,7 @@ function continueAfterRound() {
   loadMoreQuestions();
 }
 function nextQuestion() {
-  if (!state.isRevealed) { showToast('اكشف الإجابة أولاً ثم انتقل', 'HOST TIP'); return; }
+  if (!state.isRevealed) { showToast('اكشف الإجابة أولا ثم انتقل', 'HOST TIP'); return; }
   if (state.currentIndex < state.questions.length - 1) { state.currentIndex += 1; renderQuestion(); startTimer(); }
   else loadMoreQuestions();
 }
@@ -283,19 +303,18 @@ async function loadMoreQuestions() {
   } catch (e) { showToast('تعذر التحميل — اضغط «الجولة التالية»', 'SHOW CONTROL'); }
   hideLoading(); state.isLoadingMore = false;
 }
+/* ═══ صفحة النتائج — بدون صوت end + أضواء الفائز ═══ */
 function showResults() {
   stopTimer(); showScreen('resultsScreen');
   $('finalGirlsScore').textContent = state.girlsRounds; $('finalBoysScore').textContent = state.boysRounds;
-  const w = $('winnerText'); let winSound = null;
-  if (state.girlsRounds > state.boysRounds) { w.textContent = 'فريق البنات فاز!'; w.style.color = 'var(--pink-hot)'; winSound = 'girls-win'; }
-  else if (state.boysRounds > state.girlsRounds) { w.textContent = 'فريق الشباب فاز!'; w.style.color = 'var(--cyan)'; winSound = 'boys-win'; }
-  else { w.textContent = 'تعادل أبطال الليلة'; w.style.color = 'var(--gold-hot)'; }
-  const celebrate = () => { if (winSound) playSound(winSound, 0.85); fireConfetti(); };
-  if (!state.soundEnabled) { celebrate(); return; }
-  const endAudio = getAudio('end');
-  endAudio.currentTime = 0; endAudio.volume = 0.75;
-  endAudio.onended = celebrate; endAudio.onerror = celebrate;
-  endAudio.play().catch(celebrate);
+  const w = $('winnerText'); let winSound = null; let team = null;
+  if (state.girlsRounds > state.boysRounds) { w.textContent = 'فريق البنات فاز!'; w.style.color = 'var(--pink-hot)'; winSound = 'girls-win'; team = 'girls'; }
+  else if (state.boysRounds > state.girlsRounds) { w.textContent = 'فريق الشباب فاز!'; w.style.color = 'var(--cyan)'; winSound = 'boys-win'; team = 'boys'; }
+  else { w.textContent = 'تعادل أبطال الليلة'; w.style.color = 'var(--gold-hot)'; team = 'draw'; }
+  showWinnerLights(team); /* ← NEW: أشواء وقصاصات للفائز */
+  // ⛔ NO playSound('end') here — disabled per request
+  if (winSound && state.soundEnabled) playSound(winSound, 0.85);
+  fireConfetti();
 }
 function fireConfetti() {
   const c = $('confettiCanvas'); const ctx = c.getContext('2d'); c.width = window.innerWidth; c.height = window.innerHeight;
@@ -305,18 +324,50 @@ function fireConfetti() {
   const animate = () => { ctx.clearRect(0, 0, c.width, c.height); let active = false; ps.forEach((p) => { if (p.alpha <= 0) return; active = true; p.y += p.speed; p.x += p.drift; p.spin += 0.08; p.alpha -= 0.006; ctx.save(); ctx.globalAlpha = p.alpha; ctx.fillStyle = p.color; ctx.translate(p.x, p.y); ctx.rotate(p.spin); ctx.fillRect(-p.size / 2, -p.size / 2, p.size * 1.5, p.size); ctx.restore(); }); if (active && f < 260) { f += 1; requestAnimationFrame(animate); } else ctx.clearRect(0, 0, c.width, c.height); };
   animate();
 }
+/* ═══ صورة الفائز: girls.jpg / boys.jpg ═══ */
+function showWinnerLights(team) {
+  let overlay = document.getElementById('winnerLightsOverlay');
+  if (!overlay) { overlay = document.createElement('div'); overlay.id = 'winnerLightsOverlay'; document.body.appendChild(overlay); }
+  const isGirls = team === 'girls', isBoys = team === 'boys';
+  const teamImage = isGirls ? '/images/girls.jpg' : isBoys ? '/images/boys.jpg' : '/images/logo.png';
+  const title = isGirls ? 'فريق البنات' : isBoys ? 'فريق الشباب' : 'تعادل أبطال الليلة';
+  const colors = isGirls ? ['#ff4f9a','#ff83bd','#ffd36e','#ffffff'] : isBoys ? ['#35e6f7','#5de2ff','#ffd36e','#ffffff'] : ['#ffd36e','#fff0a4','#ff83bd','#5de2ff'];
+  overlay.className = 'winner-lights ' + (isGirls ? 'girls' : isBoys ? 'boys' : 'draw');
+  overlay.innerHTML = '<div class="wl-rays"></div><div class="wl-confetti">' + bits(38, colors) + '</div><div class="wl-card"><img src="' + teamImage + '" alt=""><strong>' + escapeHtml(title) + '</strong><span>WINNER NIGHT</span></div>';
+  clearTimeout(showWinnerLights.timeout);
+  showWinnerLights.timeout = setTimeout(() => { overlay.classList.add('out'); setTimeout(() => { if (overlay && overlay.parentNode) overlay.remove(); }, 700); }, 5200);
+}
+function bits(count, colors) {
+  let output = '';
+  for (let i = 0; i < count; i += 1) {
+    const left = Math.random() * 100, delay = Math.random() * 1.8, duration = 2.2 + Math.random() * 1.8, size = 6 + Math.random() * 8, color = colors[i % colors.length];
+    output += '<i style="left:' + left + '%;width:' + size + 'px;height:' + (size * 1.45) + 'px;background:' + color + ';animation-delay:' + delay + 's;animation-duration:' + duration + 's"></i>';
+  }
+  return output;
+}
+/* ═══ تأكيد الكابتن + الكشف بالأشعة والقصاصات والصورة ═══ */
 function confirmCaptain(team, slot) {
   const inp = document.querySelector('.captain-input[data-team="' + team + '"][data-slot="' + slot + '"]');
   if (!inp) return;
-  const name = inp.value.trim(); if (!name) { showToast('اكتب اسم الكابتن أولاً', 'HOST TIP'); return; }
+  const name = inp.value.trim(); if (!name) { showToast('اكتب اسم الكابتن أولا', 'HOST TIP'); return; }
   inp.value = name; inp.classList.add('confirmed'); state.captains[team][slot] = name;
   showCaptainReveal(name, team); playSound(team === 'girls' ? 'girls-captin' : 'boys-captin', 0.8);
 }
 function showCaptainReveal(name, team) {
   const o = $('captainRevealOverlay'); if (!o) return;
-  $('captainRevealName').textContent = name;
+  const isGirls = team === 'girls';
+  const teamImage = isGirls ? '/images/girls.jpg' : '/images/boys.jpg';
+  const colors = isGirls ? ['#ff4f9a','#ff83bd','#ffd36e','#ffffff'] : ['#35e6f7','#5de2ff','#ffd36e','#ffffff'];
   o.classList.remove('hidden', 'team-girls', 'team-boys');
-  o.classList.add(team === 'girls' ? 'team-girls' : 'team-boys');
+  o.classList.add(isGirls ? 'team-girls' : 'team-boys');
+  o.innerHTML =
+    '<div class="cr-rays"></div>' +
+    '<div class="cr-confetti">' + bits(30, colors) + '</div>' +
+    '<div class="cr-card">' +
+      '<img class="cr-team-img" src="' + teamImage + '" alt="">' +
+      '<span class="captain-reveal-kicker">ON AIR CAPTAIN</span>' +
+      '<h2>' + escapeHtml(name) + '</h2>' +
+    '</div>';
   clearTimeout(showCaptainReveal.timeout); showCaptainReveal.timeout = setTimeout(() => o.classList.add('hidden'), 10000);
 }
 /* ═══ حركة محيطية فقط — بدون أي نقرات أو نبضات محاكاة ═══ */
@@ -371,8 +422,8 @@ async function aiSingleRound() {
       state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-400); saveHistory();
       saveQuestionSet(qs, { category: category, difficulty: difficulty, source: qs[0] ? qs[0].source : 'local' });
       prepareGame();
-      showToast(qs[0] && qs[0].source === 'ai' ? 'أسئلة AI جديدة — حُفظت تلقائياً' : 'تم السحب من البنك', 'STUDIO READY');
-    } else showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL');
+      showToast(qs[0] && qs[0].source === 'ai' ? 'أسئلة AI جديدة — حُفظت تلقائيا' : 'تم السحب من البنك', 'STUDIO READY');
+    } else showToast('لا توجد أسئلة متاحة حاليا', 'SHOW CONTROL');
   } catch (e) { showToast('تعذر تجهيز الجولة', 'SHOW CONTROL'); }
   hideLoading();
 }
@@ -390,7 +441,7 @@ async function aiFullShow() {
     saveQuestionSet(state.fullShowRounds.flatMap((r) => r.questions), { category: 'لايف كامل', difficulty: 'متدرج', source: 'ai' });
     state.mode = 'fullshow'; state.questions = state.fullShowRounds[0].questions; resetMatch();
     prepareGame();
-    showToast('لايف AI خليط جاهز — محفوظ تلقائياً', 'STUDIO READY');
+    showToast('لايف AI خليط جاهز — محفوظ تلقائيا', 'STUDIO READY');
   } catch (e) { showToast('تعذر تجهيز اللايف', 'SHOW CONTROL'); }
   hideLoading();
 }
@@ -422,11 +473,10 @@ async function bankSingleRound() {
       state.questionHistory = state.questionHistory.concat(qs.map((q) => q.question)).slice(-400); saveHistory();
       saveQuestionSet(qs, { category: category, difficulty: difficulty, source: qs[0] ? qs[0].source : 'local' });
       prepareGame();
-    } else showToast('لا توجد أسئلة متاحة حالياً', 'SHOW CONTROL');
+    } else showToast('لا توجد أسئلة متاحة حاليا', 'SHOW CONTROL');
   } catch (e) { showToast('تعذر تجهيز الجولة', 'SHOW CONTROL'); }
   hideLoading();
 }
-/* اعتراض زرّي الاستوديو والبنك فقط */
 document.addEventListener('click', (e) => {
   const g = e.target.closest('#generateBtn');
   if (g) { e.stopPropagation(); e.preventDefault(); if (state.mode === 'fullshow') aiFullShow(); else aiSingleRound(); return; }
@@ -448,7 +498,7 @@ function useSavedSet(id) {
   $('savedModal').classList.add('hidden'); prepareGame();
 }
 function deleteSavedSet(id) { localStorage.setItem(SAVED_KEY, JSON.stringify(getSavedSets().filter((s) => s.id !== id))); renderSavedList(); }
-/* ═══ طبقة تيك توك: ترحيب المتابعين + هدية المجتمع + لوحة الأكثر تفاعلاً ═══ */
+/* ═══ طبقة تيك توك: ترحيب المتابعين + هدية المجتمع + لوحة الأكثر تفاعلا ═══ */
 function liveEsc(v) { return String(v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function showFollowWelcome(name, avatar, uniqueId) {
   const old = document.getElementById('liveFollowCard'); if (old) old.remove();
@@ -469,7 +519,7 @@ function renderLiveStats(j) {
   let chip = document.getElementById('liveStatsChip');
   if (!chip) { chip = document.createElement('div'); chip.id = 'liveStatsChip'; document.body.appendChild(chip); }
   const L = j.likes && j.likes[0], S = j.shares && j.shares[0];
-  chip.innerHTML = '<div class="ls-row"><span class="ls-ico">👍</span><span>الأكثر إعجاباً:</span><strong>' + (L ? liveEsc(L.name) + ' (' + L.count + ')' : '—') + '</strong></div>' +
+  chip.innerHTML = '<div class="ls-row"><span class="ls-ico">👍</span><span>الأكثر إعجابا:</span><strong>' + (L ? liveEsc(L.name) + ' (' + L.count + ')' : '—') + '</strong></div>' +
     '<div class="ls-row"><span class="ls-ico">📤</span><span>الأكثر مشاركة:</span><strong>' + (S ? liveEsc(S.name) + ' (' + S.count + ')' : '—') + '</strong></div>';
 }
 function startLeaderboard() {
@@ -484,7 +534,63 @@ function connectLive() {
     else if (m.type === 'community') communityBurst(m.payload.name, m.payload.avatar, m.payload.uniqueId, m.payload.gift, m.payload.count);
   };
 }
-/* ═══ الربط ═══ */
+/* ═══ ضمان ظهور زر المؤثرات في كل الشاشات بما فيها النتائج ═══ */
+function ensureSoundButtonVisible() {
+  const btn = $('floatingSoundBtn');
+  if (!btn) return;
+  btn.style.display = 'grid'; btn.style.visibility = 'visible'; btn.style.opacity = '1'; btn.style.pointerEvents = 'auto';
+  btn.classList.remove('hidden');
+}
+/* ═══ إصلاح مؤقتات البداية: 20/30/40 ═══ */
+function fixTimerPills() {
+  const row = Array.from(document.querySelectorAll('.option-row')).find(r => /وقت الإجابة/.test(r.textContent));
+  if (!row) return;
+  const group = row.querySelector('.pill-group');
+  if (!group) return;
+  group.innerHTML = '';
+  ['20','30','40'].forEach(val => {
+    const b = document.createElement('button');
+    b.type='button'; b.className='pill'+(val==='30'?' is-active':''); b.dataset.timer=val; b.textContent=val+' ث';
+    group.appendChild(b);
+  });
+}
+/* ═══ تنظيف أزرار الهدايا: صور حقيقية + fallback emoji لـ cat/crown ═══ */
+function patchGiftImages() {
+  const configs = {
+    rose:{img:'/images/gift-rose.png',small:'−1 شباب'},
+    donut:{img:'/images/gift-donut.png',small:'+1 جولة'},
+    corgi:{img:'/images/gift-corgi.png',small:'+10 جولات'},
+    heart:{img:'/images/gift-heart.png',label:'درع الحماية',small:'حماية الفريق'},
+    galaxy:{img:'/images/gift-galaxy.png',small:'+50 جولة'},
+    wheel:{img:'/images/gift-whale.png',fallback:'/images/gift-wheel.png',small:'+100 جولة'},
+    tiktok:{img:'/images/gift-tiktok.png',small:'−1 بنات'},
+    cat:{img:'/images/gift-cat.png',fallbackEmoji:'🐱',small:'+1 جولة'},
+    crown:{img:'/images/gift-crown.png',fallbackEmoji:'👑',small:'+10 جولات'}
+  };
+  $$('.gift-button').forEach(btn => {
+    const cfg = configs[btn.dataset.gift]; if (!cfg) return;
+    btn.innerHTML = '';
+    const img = document.createElement('img'); img.className='gift-img'; img.alt=btn.dataset.gift||'هدية'; img.src=cfg.img;
+    if (cfg.fallback) img.addEventListener('error',()=>{img.src=cfg.fallback;},{once:true});
+    if (cfg.fallbackEmoji) img.addEventListener('error',()=>{
+      const span=document.createElement('span'); span.className='gift-art'; span.textContent=cfg.fallbackEmoji; span.style.fontSize='20px'; span.style.lineHeight='1';
+      img.replaceWith(span);
+    },{once:true});
+    btn.appendChild(img);
+    if (cfg.label){const l=document.createElement('span');l.className='gift-name';l.textContent=cfg.label;btn.appendChild(l);}
+    if (cfg.small){const s=document.createElement('small');s.textContent=cfg.small;btn.appendChild(s);}
+  });
+}
+/* ═══ حذف نص دخول المواجهة والكباتن ورفع الخانات للأعلى ═══ */
+function cleanCaptainSection() {
+  $$('.captain-command .command-heading').forEach(el => el.remove());
+  const cc = $('.captain-command'); if (cc) { cc.style.paddingTop='6px'; cc.style.marginTop='0'; }
+  const cols = $('.captain-columns'); if (cols) cols.style.marginTop='0';
+}
+/* ═══ حذف قائمة الموسيقى ولوحات المؤثرات من HTML ═══ */
+function removeMusicMenus() {
+  $$('.floating-sound-controls, .floating-soundboard-panel, .soundboard').forEach(el => el.remove());
+}
 function initSetup() {
   $$('.mode-tab').forEach((t) => t.addEventListener('click', () => { $$('.mode-tab').forEach((x) => x.classList.remove('is-active')); t.classList.add('is-active'); state.mode = t.dataset.mode; $('fullShowOptions').hidden = state.mode !== 'fullshow'; $('categoryField').hidden = state.mode === 'fullshow'; }));
   $$('.stepper-btn').forEach((b) => b.addEventListener('click', () => { const i = $('count'); const c = Number(i.value) || 10; i.value = Math.max(3, Math.min(30, c + (b.dataset.action === 'plus' ? 1 : -1))); }));
@@ -524,36 +630,14 @@ function initFloatingSound() {
   const rb = $('floatingSoundBtnResults'); const rp = $('floatingSoundBoardResults');
   if (rb) { rb.addEventListener('click', () => rp.classList.toggle('hidden')); if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => rp.classList.add('hidden')); }
 }
-
-/* ═══ Point Confetti Burst ═══ */
-function burstAt(team) {
-  var sel = team === 'girls' ? '.team-score-girls' : '.team-score-boys';
-  var card = document.querySelector(sel);
-  if (!card || !card.getBoundingClientRect) return;
-  var r = card.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  var colors = team === 'girls' ? ['#ff4f9a','#ff83bd','#ffd36e','#fff'] : ['#35e6f7','#5de2ff','#ffd36e','#fff'];
-  for (var i = 0; i < 18; i++) {
-    var bit = document.createElement('i');
-    bit.className = 'point-bit-direct';
-    bit.style.left = cx + 'px'; bit.style.top = cy + 'px'; bit.style.background = colors[i % colors.length];
-    document.body.appendChild(bit);
-    var ang = Math.random()*Math.PI*2, dist = 55+Math.random()*95, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-35, rot=Math.random()*720-360;
-    if (bit.animate) {
-      bit.animate([
-        {transform:'translate(-50%,-50%) scale(1)',opacity:1},
-        {transform:'translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(.22) rotate('+rot+'deg)',opacity:0}
-      ],{duration:720+Math.random()*320,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=(function(b){return function(){b.remove();};})(bit);
-    } else setTimeout(function(b){return function(){b.remove();};}(bit),900);
-  }
-}
-
 function init() {
   state.questionHistory = getHistory();
   state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
   updateSoundButtons(); updateSavedCount();
   injectSponsor(); expandCaptainSlots(); initTheme(); initActivity();
+  fixTimerPills(); patchGiftImages(); cleanCaptainSection(); removeMusicMenus();
   initSetup(); initGame(); initResults(); initOverlays(); initFloatingSound();
   connectLive(); startLeaderboard();
-  hideLoading(); updateTimer();
+  hideLoading(); updateTimer(); ensureSoundButtonVisible();
 }
 document.addEventListener('DOMContentLoaded', init);
