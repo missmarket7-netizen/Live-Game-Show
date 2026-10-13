@@ -9,7 +9,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 app.use((req, res, next) => { if (req.body === undefined) req.body = {}; next(); });
 app.use(express.json({ limit: "2mb" }));
-app.use(express.static(path.join(__dirname, "../public")));
+const publicDir = path.join(__dirname, "../public");
+const staticRoot = fs.existsSync(publicDir) ? publicDir : __dirname;
+app.use(express.static(staticRoot));
+app.use(express.static(__dirname));
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY || "";
 const GROQ_API_KEY = process.env.GROQ_API_KEY || "";
@@ -186,7 +189,7 @@ app.post("/api/questions", async (req, res) => {
     }
     if (selected.length < count) selected.push(...shuffleArray(fresh.filter((q) => selected.indexOf(q) === -1)).slice(0, count - selected.length));
   } else {
-    selected = shuffleArray(fresh).slice(0, count);
+    selected = fresh.slice(0, count); /* تسلسل البنك بالترتيب — بدون عشوائية داخل الدورة */
   }
   selected.forEach((q) => servedSet.add(normalizeText(q.question)));
   await setCycleState(cycle, [...servedSet]);
@@ -198,7 +201,11 @@ app.get("/api/cycle-status", async (req, res) => {
   res.json({ persistent: Boolean(turso), cycle: st.cycle, served: st.served.length, bankSize: getAllQuestions().length });
 });
 app.get("/api/health", (req, res) => res.json({ status: "ok", bankCount: getAllQuestions().length, excluded: [...EXCLUDED_CATEGORIES] }));
-app.use((req, res) => res.sendFile(path.join(__dirname, "../public", "index.html")));
+app.use((req, res) => {
+  const candidates = [path.join(staticRoot, "index.html"), path.join(__dirname, "index.html")];
+  const file = candidates.find((p) => fs.existsSync(p)) || candidates[1];
+  res.sendFile(file);
+});
 const PORT = process.env.PORT || 3000;
 initTurso().finally(() => {
   attachLiveRoutes(app);

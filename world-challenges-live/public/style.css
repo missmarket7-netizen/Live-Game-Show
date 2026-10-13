@@ -417,12 +417,7 @@ img{max-width:100%}
 [data-theme="light"] #liveStatsChip strong,[data-theme="light"] .live-follow-card .lfc-text strong{color:var(--gold-hot)}
 /* ═══ FINAL UI PATCH v1 ═══ */
 
-/* حذف/إخفاء قائمة الموسيقى ولوحات المؤثرات */
-.floating-sound-controls,
-.floating-soundboard-panel,
-.soundboard {
-  display: none !important;
-}
+/* زر المؤثرات الصوتية — ظاهر دائماً (لا تُخفَ) */
 
 /* حذف نص دخول المواجهة والكباتن ورفع الخانات */
 .captain-command .command-heading {
@@ -1057,4 +1052,42 @@ img{max-width:100%}
     animation-duration: .01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* ═══ FORCE: زر المؤثرات ظاهر في كل الشاشات ═══ */
+.floating-sound-controls {
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  z-index: 9999 !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+#floatingSoundBtn,
+.soundboard-icon-btn {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 9999 !important;
+  width: 56px !important;
+  height: 56px !important;
+}
+.floating-soundboard-panel:not(.hidden) {
+  display: block !important;
+  z-index: 10000 !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+.point-bit-direct {
+  position: fixed !important;
+  width: 10px !important;
+  height: 10px !important;
+  border-radius: 2px !important;
+  z-index: 12600 !important;
+  pointer-events: none !important;
+  box-shadow: 0 0 12px rgba(255,255,255,.45) !important;
+  transform: translate(-50%, -50%) !important;
 }
