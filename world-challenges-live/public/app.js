@@ -1,104 +1,1305 @@
-/* ═══ عالم التحديات — Final Integrated Build v15 (X2 + Confetti + SoundBtn) ═══ */
+/* ═══ عالم التحديات — Clean Production Build v18 ═══ */
 const state = {
-  mode:'single', questions:[], fullShowRounds:[], currentRoundIndex:0, currentIndex:0,
-  girlsScore:0, boysScore:0, girlsRounds:0, boysRounds:0,
-  timerDuration:30, timerValue:30, timerInterval:null, isTimerRunning:false, isRevealed:false,
-  soundEnabled:false, activeGift:null, questionHistory:[], showStartedAt:0, showClockInterval:null,
-  fullShowDuration:120, shieldGirls:false, shieldBoys:false, roundNumber:1, isLoadingMore:false,
-  x2Active:false, captains:{girls:['','','','',''],boys:['','','','','']}
+  mode: 'single', questions: [], fullShowRounds: [], currentRoundIndex: 0, currentIndex: 0,
+  girlsScore: 0, boysScore: 0, girlsRounds: 0, boysRounds: 0,
+  timerDuration: 30, timerValue: 30, timerInterval: null, isTimerRunning: false, isRevealed: false,
+  soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
+  fullShowDuration: 120, shieldGirls: false, shieldBoys: false, roundNumber: 1, isLoadingMore: false,
+  x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }
 };
-const SAVED_KEY='lgs_saved_sets_v7', HISTORY_KEY='lgs_question_history_v7', SOUND_KEY='lgs_sound_v7', THEME_KEY='lgs_theme_v1';
-const $=(id)=>document.getElementById(id), $$=(s)=>Array.from(document.querySelectorAll(s));
-const soundFiles={'gift-rose':['gift-rose'],'gift-donut':['gift-dount','gift-donut'],'gift-corgi':['gift-corgi'],'gift-heart':['gift-heart'],'gift-tiktok':['gift-tiktok'],'gift-cat':['gift-cat'],'gift-crown':['gift-crown'],begin:['begin'],end:['end'],learn:['learn'],'boys-mood':['boys-mood'],'girls-captin':['girls-captin'],'boys-captin':['boys-captin'],'girls-galaxy':['girls-galaxy'],'boys-galaxy':['boys-galaxy'],'girls-wheel':['girls-wheel','girls-galaxy'],'boys-wheel':['boys-wheel','boys-galaxy'],girls2captin:['girls2captin','girls-captin'],captin2boys:['captin2boys','boys-captin'],'girls-round':['girls-round'],'boys-round':['boys-round'],'girls-lose':['girls-lose'],'boys-lose':['boys-lose'],'girls-win':['girls-win'],'boys-win':['boys-win'],Longway:['longway','Longway'],'girls-replay-boys':['girls-replay-boys'],'boys-replay-girls':['boys-replay-girls'],advice:['advice'],teamwork:['teamwork'],boom:['boom'],days:['days'],'kont-feen':['kont-feen'],fight:['fight'],tick:['tick'],correct:['correct'],wrong:['wrong'],laugh:['laugh'],celebration:['celebration'],cheer:['cheer'],'community-love':['community-love','celebration']};
-const audioCache={}, categoryEmoji={'معلومات عامة':'🧠','جغرافيا':'🌍','علوم':'🔬','تاريخ':'📜','دين':'🕌','أسئلة دينية':'🕌','ألغاز':'🧩','لغز':'🧩','رياضة':'⚽','تكنولوجيا':'⌘','سرعة':'⚡','اختيارات متنوعة':'◈'};
-function getAudio(key){if(audioCache[key])return audioCache[key];const c=soundFiles[key]||[key];const a=new Audio('/sounds/'+c[0]+'.mp3');a.preload='none';let i=0;a.addEventListener('error',()=>{i+=1;if(i<c.length)a.src='/sounds/'+c[i]+'.mp3';});audioCache[key]=a;return a;}
-function playSound(key,volume){if(!state.soundEnabled)return;const a=getAudio(key);try{a.currentTime=0;a.volume=volume==null?0.55:volume;a.play().catch(()=>{});}catch(e){}}
-function playSequential(keys,onDone){const step=(i)=>{if(i>=keys.length){if(onDone)onDone();return;}if(!state.soundEnabled){step(i+1);return;}const a=getAudio(keys[i]);a.currentTime=0;a.volume=0.75;a.onended=()=>step(i+1);a.onerror=()=>step(i+1);a.play().catch(()=>step(i+1));};step(0);}
-function applyTheme(t){document.documentElement.setAttribute('data-theme',t);try{localStorage.setItem(THEME_KEY,t);}catch(e){}const b=$('themeToggleBtn');if(b)b.textContent=(t==='light')?'🌙':'☀️';}
-function currentTheme(){try{return localStorage.getItem(THEME_KEY)||'dark';}catch(e){return'dark';}}
-function toggleTheme(){applyTheme(currentTheme()==='light'?'dark':'light');}
-function initTheme(){if(!$('themeToggleBtn')){const b=document.createElement('button');b.id='themeToggleBtn';b.type='button';b.className='theme-toggle-btn';b.addEventListener('click',toggleTheme);document.body.appendChild(b);}applyTheme(currentTheme());}
-function getSavedSets(){try{return JSON.parse(localStorage.getItem(SAVED_KEY)||'[]');}catch(e){return[];}}
-function getHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]');}catch(e){return[];}}
-function saveHistory(){localStorage.setItem(HISTORY_KEY,JSON.stringify(state.questionHistory.slice(-400)));}
-function saveQuestionSet(q,m){m=m||{};const s=getSavedSets();s.unshift({id:Date.now(),date:new Date().toLocaleString('ar-SA'),questions:q,category:m.category||'اختيارات متنوعة',difficulty:m.difficulty||'متوسط',count:q.length,source:m.source||'local'});localStorage.setItem(SAVED_KEY,JSON.stringify(s.slice(0,20)));updateSavedCount();}
-function updateSavedCount(){const el=$('savedCount');if(el)el.textContent=getSavedSets().length;}
-function escapeHtml(v){return String(v).replace(/[&<>'"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));}
-function shuffle(l){const a=l.slice();for(let i=a.length-1;i>0;i-=1){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
-function toggleSound(){state.soundEnabled=!state.soundEnabled;localStorage.setItem(SOUND_KEY,String(state.soundEnabled));updateSoundButtons();if(state.soundEnabled){const s=$('setupScreen');if(s&&!s.classList.contains('hidden'))playSound('begin',0.35);}}
-function updateSoundButtons(){const g=state.soundEnabled?'◉':'○';['setupSoundBtn','soundToggle'].forEach((id)=>{if($(id)){$(id).textContent=g;$(id).classList.toggle('sound-on',state.soundEnabled);}});}
-function showScreen(id){$$('.screen').forEach((s)=>s.classList.toggle('hidden',s.id!==id));window.scrollTo({top:0,behavior:'smooth'});ensureSoundButtonVisible();}
-function showLoading(m){$('loadingText').textContent=m;$('loadingOverlay').classList.remove('hidden');}
-function hideLoading(){$('loadingOverlay').classList.add('hidden');}
-function showToast(text,kicker){if(!kicker)kicker='SHOW CONTROL';$('captainToastKicker').textContent=kicker;$('captainToastText').textContent=text;$('captainToast').classList.remove('hidden');clearTimeout(showToast.timeout);showToast.timeout=setTimeout(()=>$('captainToast').classList.add('hidden'),3100);}
-function formatClock(){const s=Math.floor((Date.now()-state.showStartedAt)/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
-function startShowClock(){state.showStartedAt=Date.now();clearInterval(state.showClockInterval);state.showClockInterval=setInterval(()=>{if($('showClock'))$('showClock').textContent=formatClock();},1000);}
-function updateScores(){$('girlsScoreValue').textContent=state.girlsScore;$('boysScoreValue').textContent=state.boysScore;$('girlsProgress').style.width=Math.min(100,Math.max(0,state.girlsScore)*20)+'%';$('boysProgress').style.width=Math.min(100,Math.max(0,state.boysScore)*20)+'%';$('girlsRoundsWon').textContent=state.girlsRounds+' جولات';$('boysRoundsWon').textContent=state.boysRounds+' جولات';$('roundResults').textContent=state.girlsRounds+' - '+state.boysRounds;if($('roundDisplay'))$('roundDisplay').textContent='الجولة '+state.roundNumber;$('teamShieldGirls').classList.toggle('hidden',!state.shieldGirls);$('teamShieldBoys').classList.toggle('hidden',!state.shieldBoys);}
-function updateTimer(){$('timerDisplay').textContent=state.timerValue;$('timerRing').classList.toggle('urgent',state.timerValue<=3&&state.timerValue>0);}
-function stopTimer(){clearInterval(state.timerInterval);state.timerInterval=null;state.isTimerRunning=false;$('startTimerBtn').disabled=false;}
-function startTimer(){if(state.isTimerRunning||state.isRevealed)return;state.isTimerRunning=true;$('startTimerBtn').disabled=true;state.timerValue=state.timerDuration;updateTimer();playSound('tick',0.25);state.timerInterval=setInterval(()=>{state.timerValue-=1;updateTimer();if(state.timerValue>0&&state.timerValue<=3)playSound('tick',0.24);if(state.timerValue<=0){stopTimer();playSound('wrong',0.35);showToast('انتهى الوقت — اكشف الإجابة!','TIME UP');}},1000);}
-function injectSponsor(){const html='<div class="sponsor-strip"><img src="/images/qaddaha.png" alt="قدها؟"><div class="ss-text"><small>الراعي الرسمي</small><strong>قدها؟</strong></div></div>';[['setupScreen','.setup-topbar'],['gameScreen','.live-topbar'],['resultsScreen','.results-hero']].forEach((p)=>{const screen=document.getElementById(p[0]);if(!screen)return;if(screen.querySelector('.sponsor-strip'))return;const anchor=screen.querySelector(p[1]);if(!anchor)return;anchor.insertAdjacentHTML('afterend',html);});}
-function expandCaptainSlots(){$$('.captain-slots').forEach((host)=>{const firstInput=host.querySelector('.captain-input');if(!firstInput)return;const team=firstInput.getAttribute('data-team');while(host.children.length<5){const slot=host.children[0].cloneNode(true);const idx=host.children.length;const inp=slot.querySelector('.captain-input');inp.value='';inp.classList.remove('confirmed');inp.setAttribute('data-slot',String(idx));slot.querySelector('.captain-done').addEventListener('click',()=>confirmCaptain(team,String(idx)));host.appendChild(slot);}});}
-function isFreeQuestion(q){return!q||!Array.isArray(q.options)||q.options.length===0;}
-function renderQuestion(){const q=state.questions[state.currentIndex];if(!q)return;stopTimer();state.isRevealed=false;state.timerValue=state.timerDuration;updateTimer();updateScores();$('roundProgress').textContent=String(state.currentIndex+1).padStart(2,'0')+' / '+String(state.questions.length).padStart(2,'0');$('questionCounter').textContent='السؤال '+String(state.currentIndex+1).padStart(2,'0')+' / '+String(state.questions.length).padStart(2,'0');$('questionNumber').textContent=String(state.currentIndex+1).padStart(2,'0');$('categoryBadge').textContent=(categoryEmoji[q.category]||'◈')+' '+(q.category||'اختيارات متنوعة');$('questionText').textContent=q.question;$('answerText').textContent='—';$('explanationText').textContent='—';$('answerReveal').classList.add('hidden');$('revealBtn').disabled=false;$('nextBtn').disabled=false;$('sourceBadge').textContent=q.source==='ai'?'AI BANK READY':'LOCAL BANK READY';$('questionSource').textContent=q.source==='ai'?'AUTO-SAVED / AI':'AUTO-SAVED';const grid=$('optionsGrid');grid.innerHTML='';const pill=document.createElement('div');pill.className='think-pill';pill.textContent=isFreeQuestion(q)?'⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف':'🤔 فكّروا جيدا… الإجابة الصحيحة تظهر عند «كشف الإجابة»';grid.appendChild(pill);const card=document.querySelector('.question-card');if(card){card.classList.remove('enter');void card.offsetWidth;card.classList.add('enter');}$$('.gift-button').forEach((b)=>b.classList.remove('is-active'));$('activeGiftBanner').classList.add('hidden');}
-function revealAnswer(){if(state.isRevealed)return;const q=state.questions[state.currentIndex];if(!q)return;state.isRevealed=true;stopTimer();if(isFreeQuestion(q)){$('answerText').textContent='🎤 إجابة حرة — الحكم للمضيف';}else{$('answerText').textContent=String.fromCharCode(65+q.correctIndex)+'. '+q.options[q.correctIndex];}$('explanationText').textContent=q.explanation||'معلومة إضافية للمقدم.';$('answerReveal').classList.remove('hidden');$('answerReveal').classList.add('reveal-anim');$('revealBtn').disabled=true;}
-function closeGiftBanner(){state.activeGift=null;$('activeGiftBanner').classList.add('hidden');$$('.gift-button').forEach((b)=>b.classList.remove('is-active'));}
-function selectGift(gift){state.activeGift=gift;$$('.gift-button').forEach((b)=>b.classList.toggle('is-active',b.dataset.gift===gift));if(gift==='galaxy'||gift==='wheel'||gift==='heart'||gift==='donut'||gift==='corgi'){const t={heart:'اختر الفريق لتفعيل درع الحماية',donut:'اختر الفريق (الجولة للبنات دائما)',corgi:'اختر الفريق (10 جولات للبنات دائما)',galaxy:'اختر الفريق (+50 جولة)',wheel:'اختر الفريق (+100 جولة)'}[gift];$('activeGiftText').textContent=t;$('activeGiftBanner').classList.remove('hidden');playSound('tick',0.28);return;}if(gift==='rose'){subtractPoint('boys',true);playSound('gift-rose',0.6);}else if(gift==='tiktok'){subtractPoint('girls',true);playSound('gift-tiktok',0.6);}else if(gift==='cat'){state.boysRounds+=1;state.girlsScore=0;state.boysScore=0;playSound('gift-cat',0.65);showToast('+1 جولة لفريق الشباب','GIFT LOCKED');updateScores();}else if(gift==='crown'){state.boysRounds+=10;state.girlsScore=0;state.boysScore=0;playSound('gift-crown',0.65);showToast('+10 جولات لفريق الشباب','GIFT LOCKED');updateScores();}setTimeout(()=>{state.activeGift=null;$$('.gift-button').forEach((b)=>b.classList.remove('is-active'));},450);}
-function resolveGift(team){const gift=state.activeGift;if(!gift)return;if(gift==='heart'){if(team==='girls')state.shieldGirls=true;else state.shieldBoys=true;playSound('gift-heart',0.7);showToast('درع الحماية لفريق '+(team==='girls'?'البنات':'الشباب'),'PROTECTION ON');closeGiftBanner();updateScores();return;}if(gift==='donut'){state.girlsRounds+=1;state.girlsScore=0;state.boysScore=0;playSound(team==='girls'?'gift-donut':'gift-cat',0.65);showToast('+1 جولة لفريق البنات','GIFT LOCKED');closeGiftBanner();updateScores();return;}if(gift==='corgi'){state.girlsRounds+=10;state.girlsScore=0;state.boysScore=0;playSound(team==='girls'?'gift-corgi':'gift-crown',0.65);showToast('+10 جولات لفريق البنات','GIFT LOCKED');closeGiftBanner();updateScores();return;}const add=gift==='galaxy'?50:100;if(team==='girls'){state.girlsRounds+=add;playSound('girls-wheel',0.7);}else{state.boysRounds+=add;playSound('boys-wheel',0.7);}showToast('+'+add+' جولة لفريق '+(team==='girls'?'البنات':'الشباب'),'GIFT LOCKED');state.girlsScore=0;state.boysScore=0;closeGiftBanner();updateScores();}
-function subtractPoint(team,viaGift){if((team==='girls'&&state.shieldGirls)||(team==='boys'&&state.shieldBoys)){playSound('gift-heart',0.4);showToast('فريق '+(team==='girls'?'البنات':'الشباب')+' محمي بالدرع','SHIELD ACTIVE');return;}if(team==='girls')state.girlsScore=Math.max(-5,state.girlsScore-1);else state.boysScore=Math.max(-5,state.boysScore-1);updateScores();if(!viaGift)playSound('wrong',0.25);}
-/* ═══ قصاصات الورق عند إضافة نقطة (NEW - DIRECT) ═══ */
-function burstAt(team){const sel=team==='girls'?'.team-score-girls':'.team-score-boys';const card=document.querySelector(sel);if(!card||!card.getBoundingClientRect)return;const r=card.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;const colors=team==='girls'?['#ff4f9a','#ff83bd','#ffd36e','#fff']:['#35e6f7','#5de2ff','#ffd36e','#fff'];for(let i=0;i<18;i++){const bit=document.createElement('i');bit.className='point-bit-direct';bit.style.left=cx+'px';bit.style.top=cy+'px';bit.style.background=colors[i%colors.length];document.body.appendChild(bit);const ang=Math.random()*Math.PI*2,dist=55+Math.random()*95,dx=Math.cos(ang)*dist,dy=Math.sin(ang)*dist-35,rot=Math.random()*720-360;if(bit.animate){bit.animate([{transform:'translate(-50%,-50%) scale(1)',opacity:1},{transform:'translate(calc(-50% + '+dx+'px), calc(-50% + '+dy+'px)) scale(.22) rotate('+rot+'deg)',opacity:0}],{duration:720+Math.random()*320,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=(function(b){return function(){b.remove();};})(bit);}else setTimeout(function(b){return function(){b.remove();};}(bit),900);}}
+const SAVED_KEY = 'lgs_saved_sets_v7';
+const HISTORY_KEY = 'lgs_question_history_v7';
+const SOUND_KEY = 'lgs_sound_v7';
+const THEME_KEY = 'lgs_theme_v1';
+const $ = (id) => document.getElementById(id);
+const $$ = (s) => Array.from(document.querySelectorAll(s));
+const soundFiles = {
+  'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
+  'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
+  'gift-crown': ['gift-crown'], begin: ['begin'], end: ['end'], learn: ['learn'], 'boys-mood': ['boys-mood'],
+  'girls-captin': ['girls-captin'], 'boys-captin': ['boys-captin'], 'girls-galaxy': ['girls-galaxy'],
+  'boys-galaxy': ['boys-galaxy'], 'girls-wheel': ['girls-wheel', 'girls-galaxy'], 'boys-wheel': ['boys-wheel', 'boys-galaxy'],
+  girls2captin: ['girls2captin', 'girls-captin'], captin2boys: ['captin2boys', 'boys-captin'],
+  'girls-round': ['girls-round'], 'boys-round': ['boys-round'], 'girls-lose': ['girls-lose'], 'boys-lose': ['boys-lose'],
+  'girls-win': ['girls-win'], 'boys-win': ['boys-win'], Longway: ['longway', 'Longway'],
+  'girls-replay-boys': ['girls-replay-boys'], 'boys-replay-girls': ['boys-replay-girls'],
+  advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
+  'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong'],
+  laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration']
+};
+const audioCache = {};
+const categoryEmoji = {
+  'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'دين': '🕌',
+  'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'لغز': '🧩', 'رياضة': '⚽', 'تكنولوجيا': '⌘',
+  'سرعة': '⚡', 'اختيارات متنوعة': '◈'
+};
 
-function fireScoreConfetti(team){const c=$('confettiCanvas');if(!c)return;const ctx=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;const isG=team==='girls';const ox=isG?c.width*0.22:c.width*0.78,oy=c.height*0.32;const colors=isG?['#ff2d7a','#ff7eb3','#ffc93c','#fff']:['#2ee6ff','#3b52ff','#ffc93c','#fff'];const ps=Array.from({length:56},()=>{const ang=(Math.random()*Math.PI)-Math.PI/2,sp=2.8+Math.random()*5.5;return{x:ox+(Math.random()-0.5)*50,y:oy,vx:Math.cos(ang)*sp*(isG?-0.35:0.35)+(Math.random()-0.5)*3.2,vy:-Math.abs(Math.sin(ang)*sp)-1.2,size:3+Math.random()*5,spin:Math.random()*6.28,color:colors[Math.floor(Math.random()*colors.length)],alpha:1,g:0.13+Math.random()*0.09};});let f=0;const tick=()=>{ctx.clearRect(0,0,c.width,c.height);let live=false;ps.forEach(p=>{if(p.alpha<=0)return;live=true;p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.spin+=0.12;p.alpha-=0.013;ctx.save();ctx.globalAlpha=Math.max(0,p.alpha);ctx.fillStyle=p.color;ctx.translate(p.x,p.y);ctx.rotate(p.spin);ctx.fillRect(-p.size/2,-p.size/2,p.size*1.5,p.size);ctx.restore();});if(live&&f<100){f++;requestAnimationFrame(tick);}else ctx.clearRect(0,0,c.width,c.height);};tick();}
+function getAudio(key) {
+  if (audioCache[key]) return audioCache[key];
+  const candidates = soundFiles[key] || [key];
+  const audio = new Audio('/sounds/' + candidates[0] + '.mp3');
+  audio.preload = 'none';
+  let i = 0;
+  audio.addEventListener('error', () => {
+    i += 1;
+    if (i < candidates.length) audio.src = '/sounds/' + candidates[i] + '.mp3';
+  });
+  audioCache[key] = audio;
+  return audio;
+}
 
-function applyPoint(team,points){if(!points)points=1;if(team==='girls')state.girlsScore=state.girlsScore<0?Math.min(0,state.girlsScore+points):Math.min(5,state.girlsScore+points);else state.boysScore=state.boysScore<0?Math.min(0,state.boysScore+points):Math.min(5,state.boysScore+points);updateScores();playSound('correct',0.28);try{burstAt(team);}catch(e){}try{fireScoreConfetti(team);}catch(e){}const scoreEl=document.querySelector(team==='girls'?'.team-score-girls':'.team-score-boys');if(scoreEl){scoreEl.classList.remove('pulse');void scoreEl.offsetWidth;scoreEl.classList.add('pulse');setTimeout(function(){scoreEl.classList.remove('pulse');},900);}if(state.girlsScore>=5||state.boysScore>=5)showToast('اكتملت 5 نقاط! اضغط «الجولة التالية»','ROUND READY');}
-function finishRound(){stopTimer();const card=document.querySelector('.question-card');if(card){card.classList.remove('round-sweep-host');void card.offsetWidth;card.classList.add('round-sweep-host');}let winner='تعادل رائع بين الفريقين';const multiplier=state.x2Active?2:1;if(state.girlsScore>=5||(state.girlsScore>state.boysScore&&state.girlsScore>0)){state.girlsRounds+=multiplier;winner='فوز فريق البنات'+(multiplier>1?' (×2!)':'');playSequential(['girls-round','boys-lose']);}else if(state.boysScore>=5||(state.boysScore>state.girlsScore&&state.boysScore>0)){state.boysRounds+=multiplier;winner='فوز فريق الشباب'+(multiplier>1?' (×2!)':'');playSequential(['boys-round','girls-lose']);}else playSound('girls-round',0.35);state.x2Active=false;updateScores();$('roundEndNumber').textContent='الجولة '+state.roundNumber;$('roundEndWinner').textContent=winner;$('roundEndGirlsScore').textContent=state.girlsScore;$('roundEndBoysScore').textContent=state.boysScore;$('roundEndOverlay').classList.remove('hidden');fireConfetti();state.shieldGirls=false;state.shieldBoys=false;state.girlsScore=0;state.boysScore=0;updateScores();}
-function continueAfterRound(){$('roundEndOverlay').classList.add('hidden');state.roundNumber+=1;if(state.mode==='fullshow'&&state.currentRoundIndex<state.fullShowRounds.length-1){state.currentRoundIndex+=1;state.questions=state.fullShowRounds[state.currentRoundIndex].questions;state.currentIndex=0;updateScores();renderQuestion();showToast('نبدأ الجولة '+state.roundNumber,'NEXT ROUND');return;}loadMoreQuestions();}
-function nextQuestion(){if(!state.isRevealed){showToast('اكشف الإجابة أولا ثم انتقل','HOST TIP');return;}if(state.currentIndex<state.questions.length-1){state.currentIndex+=1;renderQuestion();startTimer();}else loadMoreQuestions();}
-async function loadMoreQuestions(){if(state.isLoadingMore)return;state.isLoadingMore=true;showLoading('نحمّل أسئلة جديدة — الجولة مستمرة...');try{const avoid=state.questionHistory.concat(state.questions.map((q)=>q.question)).slice(-150);const qs=await fetchQuestions({category:'اختيارات متنوعة',difficulty:'متوسط',count:10,avoid:avoid});if(qs.length>0){state.questions=state.questions.concat(qs);state.questionHistory=state.questionHistory.concat(qs.map((q)=>q.question)).slice(-400);saveHistory();state.currentIndex+=1;renderQuestion();startTimer();showToast('تمت إضافة '+qs.length+' أسئلة — الجولة مستمرة','BANK LOADED');}else showToast('لا أسئلة إضافية — اضغط «الجولة التالية»','SHOW CONTROL');}catch(e){showToast('تعذر التحميل — اضغط «الجولة التالية»','SHOW CONTROL');}hideLoading();state.isLoadingMore=false;}
-function showResults(){stopTimer();showScreen('resultsScreen');$('finalGirlsScore').textContent=state.girlsRounds;$('finalBoysScore').textContent=state.boysRounds;const w=$('winnerText');let winSound=null,team=null;if(state.girlsRounds>state.boysRounds){w.textContent='فريق البنات فاز!';w.style.color='var(--pink-hot)';winSound='girls-win';team='girls';}else if(state.boysRounds>state.girlsRounds){w.textContent='فريق الشباب فاز!';w.style.color='var(--cyan)';winSound='boys-win';team='boys';}else{w.textContent='تعادل أبطال الليلة';w.style.color='var(--gold-hot)';team='draw';}showWinnerLights(team);if(winSound&&state.soundEnabled)playSound(winSound,0.85);fireConfetti();}
-function fireConfetti(){const c=$('confettiCanvas');const ctx=c.getContext('2d');c.width=window.innerWidth;c.height=window.innerHeight;const colors=['#f45ca0','#5de2ff','#ffd36e','#64ecad','#917aff'];const ps=Array.from({length:105},()=>({x:Math.random()*c.width,y:-20-Math.random()*100,size:3+Math.random()*5,speed:2+Math.random()*3.5,drift:(Math.random()-0.5)*2.6,spin:Math.random()*6.28,color:colors[Math.floor(Math.random()*colors.length)],alpha:1}));let f=0;const animate=()=>{ctx.clearRect(0,0,c.width,c.height);let active=false;ps.forEach((p)=>{if(p.alpha<=0)return;active=true;p.y+=p.speed;p.x+=p.drift;p.spin+=0.08;p.alpha-=0.006;ctx.save();ctx.globalAlpha=p.alpha;ctx.fillStyle=p.color;ctx.translate(p.x,p.y);ctx.rotate(p.spin);ctx.fillRect(-p.size/2,-p.size/2,p.size*1.5,p.size);ctx.restore();});if(active&&f<260){f+=1;requestAnimationFrame(animate);}else ctx.clearRect(0,0,c.width,c.height);};animate();}
-function bits(count,colors){let out='';for(let i=0;i<count;i++){const left=Math.random()*100,delay=Math.random()*1.8,dur=2.2+Math.random()*1.8,sz=6+Math.random()*8;out+='<i style="left:'+left+'%;width:'+sz+'px;height:'+(sz*1.45)+'px;background:'+colors[i%colors.length]+';animation-delay:'+delay+'s;animation-duration:'+dur+'s"></i>';}return out;}
-function showWinnerLights(team){let overlay=document.getElementById('winnerLightsOverlay');if(!overlay){overlay=document.createElement('div');overlay.id='winnerLightsOverlay';document.body.appendChild(overlay);}const isGirls=team==='girls',isBoys=team==='boys';const teamImage=isGirls?'/images/girls.jpg':isBoys?'/images/boys.jpg':'/images/logo.png';const title=isGirls?'فريق البنات':isBoys?'فريق الشباب':'تعادل أبطال الليلة';const colors=isGirls?['#ff4f9a','#ff83bd','#ffd36e','#ffffff']:isBoys?['#35e6f7','#5de2ff','#ffd36e','#ffffff']:['#ffd36e','#fff0a4','#ff83bd','#5de2ff'];overlay.className='winner-lights '+(isGirls?'girls':isBoys?'boys':'draw');overlay.innerHTML='<div class="wl-rays"></div><div class="wl-confetti">'+bits(38,colors)+'</div><div class="wl-card"><img src="'+teamImage+'" alt=""><strong>'+escapeHtml(title)+'</strong><span>WINNER NIGHT</span></div>';clearTimeout(showWinnerLights.timeout);showWinnerLights.timeout=setTimeout(()=>{overlay.classList.add('out');setTimeout(()=>{if(overlay&&overlay.parentNode)overlay.remove();},700);},5200);}
-function confirmCaptain(team,slot){const inp=document.querySelector('.captain-input[data-team="'+team+'"][data-slot="'+slot+'"]');if(!inp)return;const name=inp.value.trim();if(!name){showToast('اكتب اسم الكابتن أولا','HOST TIP');return;}inp.value=name;inp.classList.add('confirmed');state.captains[team][slot]=name;showCaptainReveal(name,team);playSound(team==='girls'?'girls-captin':'boys-captin',0.8);}
-function showCaptainReveal(name,team){const o=$('captainRevealOverlay');if(!o)return;const isGirls=team==='girls';const teamImage=isGirls?'/images/girls.jpg':'/images/boys.jpg';const colors=isGirls?['#ff4f9a','#ff83bd','#ffd36e','#ffffff']:['#35e6f7','#5de2ff','#ffd36e','#ffffff'];o.classList.remove('hidden','team-girls','team-boys');o.classList.add(isGirls?'team-girls':'team-boys');o.innerHTML='<div class="cr-rays"></div><div class="cr-confetti">'+bits(30,colors)+'</div><div class="cr-card"><img class="cr-team-img" src="'+teamImage+'" alt=""><span class="captain-reveal-kicker">ON AIR CAPTAIN</span><h2>'+escapeHtml(name)+'</h2></div>';clearTimeout(showCaptainReveal.timeout);showCaptainReveal.timeout=setTimeout(()=>o.classList.add('hidden'),10000);}
-/* ═══ زر X2 + نافذة الانتباه (NEW - DIRECT) ═══ */
-function activateX2(){state.x2Active=true;playSound('celebration',0.85);setTimeout(()=>playSound('tick',0.6),300);showX2AttentionOverlay();}
-function showX2AttentionOverlay(){let overlay=document.getElementById('x2AttentionOverlay');if(!overlay){overlay=document.createElement('div');overlay.id='x2AttentionOverlay';document.body.appendChild(overlay);}const colors=['#ffd36e','#fff0a4','#ff83bd','#5de2ff','#ffffff'];overlay.className='x2-overlay active';overlay.innerHTML='<div class="x2-rays"></div><div class="x2-confetti">'+bits(40,colors)+'</div><div class="x2-card"><div class="x2-badge">×2</div><h2>جولة X2</h2><p>جولة لمضاعفة النقاط تؤجل استخدام الدعم</p><button id="x2CloseBtn" type="button">إغلاق</button></div>';const closeBtn=document.getElementById('x2CloseBtn');if(closeBtn)closeBtn.addEventListener('click',hideX2Overlay);overlay.addEventListener('click',(e)=>{if(e.target===overlay)hideX2Overlay();});clearTimeout(showX2AttentionOverlay.timeout);showX2AttentionOverlay.timeout=setTimeout(hideX2Overlay,6000);}
-function hideX2Overlay(){const overlay=document.getElementById('x2AttentionOverlay');if(!overlay)return;overlay.classList.add('out');setTimeout(()=>{if(overlay&&overlay.parentNode)overlay.remove();},700);}
-function createX2Button(){if(document.getElementById('x2RoundBtn'))return;const deck=document.querySelector('.show-actions')||document.querySelector('.control-deck');if(!deck)return;const btn=document.createElement('button');btn.id='x2RoundBtn';btn.type='button';btn.className='text-control x2-special-btn';btn.innerHTML='<span>✦</span> جولة X2';btn.addEventListener('click',activateX2);deck.insertBefore(btn,deck.firstChild);}
-function initActivity(){if($('liveActivity'))return;const layer=document.createElement('div');layer.id='liveActivity';layer.innerHTML='<div class="act-marquee"><span id="actMarqueeText"></span></div><div class="act-eq"><i></i><i></i><i></i><i></i><i></i></div>';document.body.appendChild(layer);const msgs=['🔥 اللايف مشتعل','🎁 اسحب هدية الآن','👧 البنات ضد الشباب 👦','🛡️ درع الحماية جاهز','🏆 من سيفوز الليلة؟','⭐ فعّل الصوت للتفاعل الكامل'];$('actMarqueeText').textContent=(msgs.join('  •  ')+'  •  ').repeat(3);}
-async function fetchQuestions(params){try{const r=await fetch('/api/questions',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},params,{avoid:(params.avoid||state.questionHistory.slice(-150))}))});if(!r.ok)throw new Error('API unavailable');const d=await r.json();const qs=Array.isArray(d.questions)?d.questions:[];if(!qs.length)throw new Error('Empty');return qs.map((q)=>Object.assign({},q,{source:q.source||'bank'}));}catch(e){return[];}}
-async function fetchAIQuestions(params){try{const r=await fetch('/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.assign({},params,{avoid:state.questionHistory.slice(-300)}))});if(!r.ok)throw new Error('AI unavailable');const d=await r.json();const qs=Array.isArray(d.questions)?d.questions:[];if(!qs.length)throw new Error('AI empty');return qs.map((q)=>Object.assign({},q,{source:'ai'}));}catch(e){return[];}}
-const MIX_PLAN=[{title:'الجولة 1',category:'اختيارات متنوعة',difficulty:'سهل',count:10},{title:'الجولة 2',category:'اختيارات متنوعة',difficulty:'متوسط',count:10},{title:'الجولة الذهبية',category:'اختيارات متنوعة',difficulty:'صعب',count:10}];
-function resetMatch(){state.currentIndex=0;state.currentRoundIndex=0;state.roundNumber=1;state.girlsScore=0;state.boysScore=0;state.girlsRounds=0;state.boysRounds=0;state.shieldGirls=false;state.shieldBoys=false;state.x2Active=false;}
-async function aiSingleRound(){const category=$('category').value||'اختيارات متنوعة';const difficulty=$('difficulty').value||'متوسط';const count=Math.max(3,Math.min(30,Number($('count').value)||10));$('count').value=count;showLoading('نولّد أسئلة AI جديدة خليط...');try{let qs=await fetchAIQuestions({category:category,difficulty:difficulty,count:count});if(!qs.length)qs=await fetchQuestions({category:category,difficulty:difficulty,count:count});if(qs.length>0){state.questions=qs;state.fullShowRounds=[];state.mode='single';resetMatch();state.questionHistory=state.questionHistory.concat(qs.map((q)=>q.question)).slice(-400);saveHistory();saveQuestionSet(qs,{category:category,difficulty:difficulty,source:qs[0]?qs[0].source:'local'});prepareGame();showToast(qs[0]&&qs[0].source==='ai'?'أسئلة AI جديدة — حُفظت تلقائيا':'تم السحب من البنك','STUDIO READY');}else showToast('لا توجد أسئلة متاحة حاليا','SHOW CONTROL');}catch(e){showToast('تعذر تجهيز الجولة','SHOW CONTROL');}hideLoading();}
-async function aiFullShow(){state.fullShowRounds=[];showLoading('نولّد فصول اللايف بالـ AI...');try{for(let i=0;i<MIX_PLAN.length;i+=1){$('loadingText').textContent='نجهز '+MIX_PLAN[i].title+' — '+(i+1)+' / '+MIX_PLAN.length;let qs=await fetchAIQuestions(MIX_PLAN[i]);if(!qs.length)qs=await fetchQuestions(MIX_PLAN[i]);state.fullShowRounds.push(Object.assign({},MIX_PLAN[i],{questions:qs}));state.questionHistory=state.questionHistory.concat(qs.map((q)=>q.question)).slice(-400);}saveHistory();saveQuestionSet(state.fullShowRounds.flatMap((r)=>r.questions),{category:'لايف كامل',difficulty:'متدرج',source:'ai'});state.mode='fullshow';state.questions=state.fullShowRounds[0].questions;resetMatch();prepareGame();showToast('لايف AI خليط جاهز — محفوظ تلقائيا','STUDIO READY');}catch(e){showToast('تعذر تجهيز اللايف','SHOW CONTROL');}hideLoading();}
-async function bankFullShowMixed(){state.fullShowRounds=[];showLoading('نرتب فصول اللايف من البنك (خليط)...');try{for(let i=0;i<MIX_PLAN.length;i+=1){$('loadingText').textContent='نجهز '+MIX_PLAN[i].title+' — '+(i+1)+' / '+MIX_PLAN.length;const qs=await fetchQuestions(MIX_PLAN[i]);state.fullShowRounds.push(Object.assign({},MIX_PLAN[i],{questions:qs}));state.questionHistory=state.questionHistory.concat(qs.map((q)=>q.question)).slice(-400);}saveHistory();saveQuestionSet(state.fullShowRounds.flatMap((r)=>r.questions),{category:'لايف كامل',difficulty:'متدرج'});state.mode='fullshow';state.questions=state.fullShowRounds[0].questions;resetMatch();prepareGame();}catch(e){showToast('تعذر تجهيز اللايف','SHOW CONTROL');}hideLoading();}
-async function bankSingleRound(){const category=$('category').value||'اختيارات متنوعة';const difficulty=$('difficulty').value||'متوسط';const count=Math.max(3,Math.min(30,Number($('count').value)||10));$('count').value=count;showLoading('نجهز الأسئلة من البنك...');try{const qs=await fetchQuestions({category:category,difficulty:difficulty,count:count});if(qs.length>0){state.questions=qs;state.fullShowRounds=[];state.mode='single';resetMatch();state.questionHistory=state.questionHistory.concat(qs.map((q)=>q.question)).slice(-400);saveHistory();saveQuestionSet(qs,{category:category,difficulty:difficulty,source:qs[0]?qs[0].source:'local'});prepareGame();}else showToast('لا توجد أسئلة متاحة حاليا','SHOW CONTROL');}catch(e){showToast('تعذر تجهيز الجولة','SHOW CONTROL');}hideLoading();}
-document.addEventListener('click',(e)=>{const g=e.target.closest('#generateBtn');if(g){e.stopPropagation();e.preventDefault();if(state.mode==='fullshow')aiFullShow();else aiSingleRound();return;}const s=e.target.closest('#savedStartBtn');if(s){e.stopPropagation();e.preventDefault();if(state.mode==='fullshow')bankFullShowMixed();else bankSingleRound();return;}},true);
-function prepareGame(){updateScores();showScreen('gameScreen');startShowClock();renderQuestion();createX2Button();playSound('begin',0.75);}
-function renderSavedList(){const saved=getSavedSets();const list=$('savedList');updateSavedCount();if(!saved.length){list.innerHTML='<div class="saved-empty">لا توجد جولات محفوظة بعد.</div>';return;}list.innerHTML=saved.map((e)=>'<article class="saved-item"><div class="saved-item-title">'+escapeHtml(e.category)+' — '+escapeHtml(e.difficulty)+' <span>('+e.count+')</span></div><div class="saved-item-meta">'+escapeHtml(e.date)+' · '+(e.source==='ai'?'AI GENERATED':'LOCAL BANK')+'</div><div class="saved-item-actions"><button class="saved-item-btn saved-item-use" data-use="'+e.id+'" type="button">استخدام</button><button class="saved-item-btn saved-item-delete" data-delete="'+e.id+'" type="button">حذف</button></div></article>').join('');$$('[data-use]').forEach((b)=>b.addEventListener('click',()=>useSavedSet(Number(b.dataset.use))));$$('[data-delete]').forEach((b)=>b.addEventListener('click',()=>deleteSavedSet(Number(b.dataset.delete))));}
-function openSaved(){renderSavedList();$('savedModal').classList.remove('hidden');}
-function useSavedSet(id){const e=getSavedSets().find((s)=>s.id===id);if(!e)return;state.questions=e.questions;state.fullShowRounds=[];state.mode='single';resetMatch();$('savedModal').classList.add('hidden');prepareGame();}
-function deleteSavedSet(id){localStorage.setItem(SAVED_KEY,JSON.stringify(getSavedSets().filter((s)=>s.id!==id)));renderSavedList();}
-function liveEsc(v){return String(v).replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function showFollowWelcome(name,avatar,uniqueId){const old=document.getElementById('liveFollowCard');if(old)old.remove();const card=document.createElement('div');card.id='liveFollowCard';card.className='live-follow-card';card.innerHTML='<div class="lfc-heart">💖</div>'+(avatar?'<img class="lfc-avatar" src="'+liveEsc(avatar)+'" alt="">':'')+'<div class="lfc-text"><small>متابع جديد انضم للعائلة</small><strong>'+liveEsc(name)+'</strong>'+(uniqueId?'<span>@'+liveEsc(uniqueId)+'</span>':'')+'<span>نورت يا '+liveEsc(name)+' 💖</span></div>';document.body.appendChild(card);playSound('girls-captin',0.7);setTimeout(()=>card.classList.add('out'),4200);setTimeout(()=>card.remove(),4800);}
-function communityBurst(name,avatar,uniqueId,gift,count){fireConfetti();playSound('community-love',0.8);showToast('💞 '+name+' انضم لمجتمعك الخاص!'+(gift?' (🎁 '+gift+(count>1?' ×'+count:'')+')':''),'COMMUNITY');}
-function renderLiveStats(j){let chip=document.getElementById('liveStatsChip');if(!chip){chip=document.createElement('div');chip.id='liveStatsChip';document.body.appendChild(chip);}const L=j.likes&&j.likes[0],S=j.shares&&j.shares[0];chip.innerHTML='<div class="ls-row"><span class="ls-ico">👍</span><span>الأكثر إعجابا:</span><strong>'+(L?liveEsc(L.name)+' ('+L.count+')':'—')+'</strong></div><div class="ls-row"><span class="ls-ico">📤</span><span>الأكثر مشاركة:</span><strong>'+(S?liveEsc(S.name)+' ('+S.count+')':'—')+'</strong></div>';}
-function startLeaderboard(){setInterval(()=>{fetch('/live/leaderboard').then((r)=>r.json()).then((j)=>{if(j&&j.enabled)renderLiveStats(j);}).catch(()=>{});},15000);}
-function connectLive(){if(!window.EventSource)return;const es=new EventSource('/live/events');es.onmessage=(ev)=>{let m;try{m=JSON.parse(ev.data);}catch(e){return;}if(m.type==='follow')showFollowWelcome(m.payload.name,m.payload.avatar,m.payload.uniqueId);else if(m.type==='community')communityBurst(m.payload.name,m.payload.avatar,m.payload.uniqueId,m.payload.gift,m.payload.count);};}
-/* ═══ ضمان ظهور زر المؤثرات في كل الشاشات (NEW - DIRECT) ═══ */
-function ensureSoundButtonVisible(){const wrap=document.querySelector('.floating-sound-controls');if(wrap){wrap.style.cssText='position:fixed!important;bottom:20px!important;right:20px!important;z-index:9999!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important';}const btn=$('floatingSoundBtn');if(!btn)return;btn.style.cssText='display:grid!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;z-index:9999!important;width:56px!important;height:56px!important';btn.classList.remove('hidden');const panel=$('floatingSoundBoard');if(panel)panel.style.zIndex='10000';}
-function watchScreensForSoundBtn(){['setupScreen','gameScreen','resultsScreen'].forEach(function(id){const el=document.getElementById(id);if(!el||!window.MutationObserver)return;new MutationObserver(ensureSoundButtonVisible).observe(el,{attributes:true,attributeFilter:['class']});});ensureSoundButtonVisible();}
-function fixTimerPills(){const row=Array.from(document.querySelectorAll('.option-row')).find(r=>/وقت الإجابة/.test(r.textContent));if(!row)return;const group=row.querySelector('.pill-group');if(!group)return;group.innerHTML='';['20','30','40'].forEach(val=>{const b=document.createElement('button');b.type='button';b.className='pill'+(val==='30'?' is-active':'');b.dataset.timer=val;b.textContent=val+' ث';group.appendChild(b);});}
-function patchGiftImages(){const configs={rose:{img:'/images/gift-rose.png',small:'−1 شباب'},donut:{img:'/images/gift-donut.png',small:'+1 جولة'},corgi:{img:'/images/gift-corgi.png',small:'+10 جولات'},heart:{img:'/images/gift-heart.png',label:'درع الحماية',small:'حماية الفريق'},galaxy:{img:'/images/gift-galaxy.png',small:'+50 جولة'},wheel:{img:'/images/gift-whale.png',fallback:'/images/gift-wheel.png',small:'+100 جولة'},tiktok:{img:'/images/gift-tiktok.png',small:'−1 بنات'},cat:{img:'/images/gift-cat.png',fallbackEmoji:'🐱',small:'+1 جولة'},crown:{img:'/images/gift-crown.png',fallbackEmoji:'👑',small:'+10 جولات'}};$$('.gift-button').forEach(btn=>{const cfg=configs[btn.dataset.gift];if(!cfg)return;btn.innerHTML='';const img=document.createElement('img');img.className='gift-img';img.alt=btn.dataset.gift||'هدية';img.src=cfg.img;if(cfg.fallback)img.addEventListener('error',()=>{img.src=cfg.fallback;},{once:true});if(cfg.fallbackEmoji)img.addEventListener('error',()=>{const span=document.createElement('span');span.className='gift-art';span.textContent=cfg.fallbackEmoji;span.style.fontSize='20px';span.style.lineHeight='1';img.replaceWith(span);},{once:true});btn.appendChild(img);if(cfg.label){const l=document.createElement('span');l.className='gift-name';l.textContent=cfg.label;btn.appendChild(l);}if(cfg.small){const s=document.createElement('small');s.textContent=cfg.small;btn.appendChild(s);}});}
-function cleanCaptainSection(){$$('.captain-command .command-heading').forEach(el=>el.remove());const cc=$('.captain-command');if(cc){cc.style.paddingTop='6px';cc.style.marginTop='0';}const cols=$('.captain-columns');if(cols)cols.style.marginTop='0';}
-function removeMusicMenus(){$$('.floating-sound-controls, .floating-soundboard-panel, .soundboard').forEach(el=>el.remove());}
-function initSetup(){$$('.mode-tab').forEach((t)=>t.addEventListener('click',()=>{$$('.mode-tab').forEach((x)=>x.classList.remove('is-active'));t.classList.add('is-active');state.mode=t.dataset.mode;$('fullShowOptions').hidden=state.mode!=='fullshow';$('categoryField').hidden=state.mode==='fullshow';}));$$('.stepper-btn').forEach((b)=>b.addEventListener('click',()=>{const i=$('count');const c=Number(i.value)||10;i.value=Math.max(3,Math.min(30,c+(b.dataset.action==='plus'?1:-1)));}));$$('[data-duration]').forEach((b)=>b.addEventListener('click',()=>{$$('[data-duration]').forEach((x)=>x.classList.remove('is-active'));b.classList.add('is-active');state.fullShowDuration=Number(b.dataset.duration);}));$$('[data-timer]').forEach((b)=>b.addEventListener('click',()=>{$$('[data-timer]').forEach((x)=>x.classList.remove('is-active'));b.classList.add('is-active');state.timerDuration=Number(b.dataset.timer);state.timerValue=state.timerDuration;}));$('savedQuestionsBtn').addEventListener('click',openSaved);$('setupSoundBtn').addEventListener('click',toggleSound);}
-function initGame(){$('soundToggle').addEventListener('click',toggleSound);$('startTimerBtn').addEventListener('click',startTimer);$('revealBtn').addEventListener('click',revealAnswer);$('nextBtn').addEventListener('click',nextQuestion);$('girlsPlusBtn').addEventListener('click',()=>applyPoint('girls'));$('girlsMinusBtn').addEventListener('click',()=>subtractPoint('girls'));$('boysPlusBtn').addEventListener('click',()=>applyPoint('boys'));$('boysMinusBtn').addEventListener('click',()=>subtractPoint('boys'));$('nextRoundBtn').addEventListener('click',finishRound);$('endGameBtn').addEventListener('click',showResults);$('newRoundBtn').addEventListener('click',()=>{stopTimer();showScreen('setupScreen');});$$('.gift-button').forEach((b)=>b.addEventListener('click',()=>selectGift(b.dataset.gift)));$('pickGirlsBtn').addEventListener('click',()=>resolveGift('girls'));$('pickBoysBtn').addEventListener('click',()=>resolveGift('boys'));$('cancelGiftBtn').addEventListener('click',closeGiftBanner);$('roundEndContinueBtn').addEventListener('click',continueAfterRound);$$('.captain-done').forEach((b)=>b.addEventListener('click',()=>confirmCaptain(b.dataset.team,b.dataset.slot)));$$('.sound-trigger').forEach((b)=>b.addEventListener('click',()=>playSound(b.dataset.sound,0.7)));}
-function initResults(){$('replayBtn').addEventListener('click',()=>{stopTimer();showScreen('setupScreen');});}
-function initOverlays(){$('closeSavedBtn').addEventListener('click',()=>$('savedModal').classList.add('hidden'));['savedModal','roundEndOverlay'].forEach((id)=>$(id).addEventListener('click',(e)=>{if(e.target.id===id)$(id).classList.add('hidden');}));}
-function initFloatingSound(){const gb=$('floatingSoundBtn');const gp=$('floatingSoundBoard');if(gb){gb.addEventListener('click',()=>gp.classList.toggle('hidden'));if($('closeFloatingSound'))$('closeFloatingSound').addEventListener('click',()=>gp.classList.add('hidden'));}const rb=$('floatingSoundBtnResults');const rp=$('floatingSoundBoardResults');if(rb){rb.addEventListener('click',()=>rp.classList.toggle('hidden'));if($('closeFloatingSoundResults'))$('closeFloatingSoundResults').addEventListener('click',()=>rp.classList.add('hidden'));}}
-function init(){state.questionHistory=getHistory();state.soundEnabled=localStorage.getItem(SOUND_KEY)==='true';updateSoundButtons();updateSavedCount();injectSponsor();expandCaptainSlots();initTheme();initActivity();fixTimerPills();patchGiftImages();cleanCaptainSection();// [KEEP-SOUND-BTN] removeMusicMenus() disabledwatchScreensForSoundBtn();initSetup();initGame();initResults();initOverlays();initFloatingSound();connectLive();startLeaderboard();hideLoading();updateTimer();ensureSoundButtonVisible();}
-document.addEventListener('DOMContentLoaded',init);
+function playSound(key, volume) {
+  if (!state.soundEnabled) return;
+  const a = getAudio(key);
+  try {
+    a.currentTime = 0;
+    a.volume = volume == null ? 0.55 : volume;
+    a.play().catch(() => {});
+  } catch (e) {}
+}
+
+function playSequential(keys, onDone) {
+  const step = (idx) => {
+    if (idx >= keys.length) {
+      if (onDone) onDone();
+      return;
+    }
+    if (!state.soundEnabled) {
+      step(idx + 1);
+      return;
+    }
+    const a = getAudio(keys[idx]);
+    a.currentTime = 0;
+    a.volume = 0.75;
+    a.onended = () => step(idx + 1);
+    a.onerror = () => step(idx + 1);
+    a.play().catch(() => step(idx + 1));
+  };
+  step(0);
+}
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  try { localStorage.setItem(THEME_KEY, t); } catch (e) {}
+  const b = $('themeToggleBtn');
+  if (b) b.textContent = (t === 'light') ? '🌙' : '☀️';
+}
+
+function currentTheme() {
+  try { return localStorage.getItem(THEME_KEY) || 'dark'; } catch (e) { return 'dark'; }
+}
+
+function toggleTheme() {
+  applyTheme(currentTheme() === 'light' ? 'dark' : 'light');
+}
+
+function initTheme() {
+  if (!$('themeToggleBtn')) {
+    const b = document.createElement('button');
+    b.id = 'themeToggleBtn';
+    b.type = 'button';
+    b.className = 'theme-toggle-btn';
+    b.addEventListener('click', toggleTheme);
+    document.body.appendChild(b);
+  }
+  applyTheme(currentTheme());
+}
+
+function getSavedSets() {
+  try { return JSON.parse(localStorage.getItem(SAVED_KEY) || '[]'); } catch (e) { return []; }
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch (e) { return []; }
+}
+
+function saveHistory() {
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(state.questionHistory.slice(-400)));
+}
+
+function saveQuestionSet(questions, meta) {
+  meta = meta || {};
+  const sets = getSavedSets();
+  sets.unshift({
+    id: Date.now(),
+    date: new Date().toLocaleString('ar-SA'),
+    questions: questions,
+    category: meta.category || 'اختيارات متنوعة',
+    difficulty: meta.difficulty || 'متوسط',
+    count: questions.length,
+    source: meta.source || 'local'
+  });
+  localStorage.setItem(SAVED_KEY, JSON.stringify(sets.slice(0, 20)));
+  updateSavedCount();
+}
+
+function updateSavedCount() {
+  const el = $('savedCount');
+  if (el) el.textContent = getSavedSets().length;
+}
+
+function escapeHtml(v) {
+  return String(v).replace(/[&<>'"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[c]));
+}
+
+function shuffle(list) {
+  const arr = list.slice();
+  for (let i = arr.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const tmp = arr[i];
+    arr[i] = arr[j];
+    arr[j] = tmp;
+  }
+  return arr;
+}
+
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  localStorage.setItem(SOUND_KEY, String(state.soundEnabled));
+  updateSoundButtons();
+  if (state.soundEnabled) {
+    const s = $('setupScreen');
+    if (s && !s.classList.contains('hidden')) playSound('begin', 0.35);
+  }
+}
+
+function updateSoundButtons() {
+  const glyph = state.soundEnabled ? '◉' : '○';
+  ['setupSoundBtn', 'soundToggle'].forEach((id) => {
+    if ($(id)) {
+      $(id).textContent = glyph;
+      $(id).classList.toggle('sound-on', state.soundEnabled);
+    }
+  });
+}
+
+function showScreen(id) {
+  $$('.screen').forEach((s) => s.classList.toggle('hidden', s.id !== id));
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  ensureSoundButtonVisible();
+}
+
+function showLoading(msg) {
+  $('loadingText').textContent = msg;
+  $('loadingOverlay').classList.remove('hidden');
+}
+
+function hideLoading() {
+  $('loadingOverlay').classList.add('hidden');
+}
+
+function showToast(text, kicker) {
+  if (!kicker) kicker = 'SHOW CONTROL';
+  $('captainToastKicker').textContent = kicker;
+  $('captainToastText').textContent = text;
+  $('captainToast').classList.remove('hidden');
+  clearTimeout(showToast.timeout);
+  showToast.timeout = setTimeout(() => $('captainToast').classList.add('hidden'), 3100);
+}
+
+function formatClock() {
+  const sec = Math.floor((Date.now() - state.showStartedAt) / 1000);
+  return String(Math.floor(sec / 60)).padStart(2, '0') + ':' + String(sec % 60).padStart(2, '0');
+}
+
+function startShowClock() {
+  state.showStartedAt = Date.now();
+  clearInterval(state.showClockInterval);
+  state.showClockInterval = setInterval(() => {
+    if ($('showClock')) $('showClock').textContent = formatClock();
+  }, 1000);
+}
+
+function updateScores() {
+  $('girlsScoreValue').textContent = state.girlsScore;
+  $('boysScoreValue').textContent = state.boysScore;
+  $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * 20) + '%';
+  $('boysProgress').style.width = Math.min(100, Math.max(0, state.boysScore) * 20) + '%';
+  $('girlsRoundsWon').textContent = state.girlsRounds + ' جولات';
+  $('boysRoundsWon').textContent = state.boysRounds + ' جولات';
+  $('roundResults').textContent = state.girlsRounds + ' - ' + state.boysRounds;
+  if ($('roundDisplay')) $('roundDisplay').textContent = 'الجولة ' + state.roundNumber;
+  $('teamShieldGirls').classList.toggle('hidden', !state.shieldGirls);
+  $('teamShieldBoys').classList.toggle('hidden', !state.shieldBoys);
+}
+
+function updateTimer() {
+  $('timerDisplay').textContent = state.timerValue;
+  $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0);
+}
+
+function stopTimer() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = null;
+  state.isTimerRunning = false;
+  $('startTimerBtn').disabled = false;
+}
+
+function startTimer() {
+  if (state.isTimerRunning || state.isRevealed) return;
+  state.isTimerRunning = true;
+  $('startTimerBtn').disabled = true;
+  state.timerValue = state.timerDuration;
+  updateTimer();
+  playSound('tick', 0.25);
+  state.timerInterval = setInterval(() => {
+    state.timerValue -= 1;
+    updateTimer();
+    if (state.timerValue > 0 && state.timerValue <= 3) playSound('tick', 0.24);
+    if (state.timerValue <= 0) {
+      stopTimer();
+      playSound('wrong', 0.35);
+      showToast('انتهى الوقت — اكشف الإجابة!', 'TIME UP');
+    }
+  }, 1000);
+}
+/* ═══ شريط الراعي الرسمي ═══ */
+function injectSponsor() {
+  const html = '<div class="sponsor-strip"><img src="/images/qaddaha.png" alt="قدها؟"><div class="ss-text"><small>الراعي الرسمي</small><strong>قدها؟</strong></div></div>';
+  [['setupScreen', '.setup-topbar'], ['gameScreen', '.live-topbar'], ['resultsScreen', '.results-hero']].forEach((pair) => {
+    const screen = document.getElementById(pair[0]);
+    if (!screen) return;
+    if (screen.querySelector('.sponsor-strip')) return;
+    const anchor = screen.querySelector(pair[1]);
+    if (!anchor) return;
+    anchor.insertAdjacentHTML('afterend', html);
+  });
+}
+
+function expandCaptainSlots() {
+  $$('.captain-slots').forEach((host) => {
+    const firstInput = host.querySelector('.captain-input');
+    if (!firstInput) return;
+    const team = firstInput.getAttribute('data-team');
+    while (host.children.length < 5) {
+      const slot = host.children[0].cloneNode(true);
+      const idx = host.children.length;
+      const inp = slot.querySelector('.captain-input');
+      inp.value = '';
+      inp.classList.remove('confirmed');
+      inp.setAttribute('data-slot', String(idx));
+      slot.querySelector('.captain-done').addEventListener('click', () => confirmCaptain(team, String(idx)));
+      host.appendChild(slot);
+    }
+  });
+}
+
+function isFreeQuestion(q) {
+  return !q || !Array.isArray(q.options) || q.options.length === 0;
+}
+
+/* ═══ عرض السؤال والإجابة المخفية ═══ */
+function renderQuestion() {
+  const q = state.questions[state.currentIndex];
+  if (!q) return;
+  stopTimer();
+  state.isRevealed = false;
+  state.timerValue = state.timerDuration;
+  updateTimer();
+  updateScores();
+  $('roundProgress').textContent = String(state.currentIndex + 1).padStart(2, '0') + ' / ' + String(state.questions.length).padStart(2, '0');
+  $('questionCounter').textContent = 'السؤال ' + String(state.currentIndex + 1).padStart(2, '0') + ' / ' + String(state.questions.length).padStart(2, '0');
+  $('questionNumber').textContent = String(state.currentIndex + 1).padStart(2, '0');
+  $('categoryBadge').textContent = (categoryEmoji[q.category] || '◈') + ' ' + (q.category || 'اختيارات متنوعة');
+  $('questionText').textContent = q.question;
+  $('answerText').textContent = '—';
+  $('explanationText').textContent = '—';
+  $('answerReveal').classList.add('hidden');
+  $('revealBtn').disabled = false;
+  $('nextBtn').disabled = false;
+  $('sourceBadge').textContent = q.source === 'ai' ? 'AI BANK READY' : 'LOCAL BANK READY';
+  $('questionSource').textContent = q.source === 'ai' ? 'AUTO-SAVED / AI' : 'AUTO-SAVED';
+  const grid = $('optionsGrid');
+  grid.innerHTML = '';
+  const pill = document.createElement('div');
+  pill.className = 'think-pill';
+  pill.textContent = isFreeQuestion(q)
+    ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف'
+    : '🤔 فكّروا جيدا… الإجابة الصحيحة تظهر عند «كشف الإجابة»';
+  grid.appendChild(pill);
+  const card = document.querySelector('.question-card');
+  if (card) {
+    card.classList.remove('enter');
+    void card.offsetWidth;
+    card.classList.add('enter');
+  }
+  $$('.gift-button').forEach((b) => b.classList.remove('is-active'));
+  $('activeGiftBanner').classList.add('hidden');
+}
+
+function revealAnswer() {
+  if (state.isRevealed) return;
+  const q = state.questions[state.currentIndex];
+  if (!q) return;
+  state.isRevealed = true;
+  stopTimer();
+  if (isFreeQuestion(q)) {
+    $('answerText').textContent = '🎤 إجابة حرة — الحكم للمضيف';
+  } else {
+    $('answerText').textContent = String.fromCharCode(65 + q.correctIndex) + '. ' + q.options[q.correctIndex];
+  }
+  $('explanationText').textContent = q.explanation || 'معلومة إضافية للمقدم.';
+  $('answerReveal').classList.remove('hidden');
+  $('answerReveal').classList.add('reveal-anim');
+  $('revealBtn').disabled = true;
+}
+
+/* ═══ نظام الهدايا والدروع ═══ */
+function closeGiftBanner() {
+  state.activeGift = null;
+  $('activeGiftBanner').classList.add('hidden');
+  $$('.gift-button').forEach((b) => b.classList.remove('is-active'));
+}
+
+function selectGift(gift) {
+  state.activeGift = gift;
+  $$('.gift-button').forEach((b) => b.classList.toggle('is-active', b.dataset.gift === gift));
+  if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart' || gift === 'donut' || gift === 'corgi') {
+    const tipMap = {
+      heart: 'اختر الفريق لتفعيل درع الحماية',
+      donut: 'اختر الفريق (الجولة للبنات دائما)',
+      corgi: 'اختر الفريق (10 جولات للبنات دائما)',
+      galaxy: 'اختر الفريق (+50 جولة)',
+      wheel: 'اختر الفريق (+100 جولة)'
+    };
+    $('activeGiftText').textContent = tipMap[gift];
+    $('activeGiftBanner').classList.remove('hidden');
+    playSound('tick', 0.28);
+    return;
+  }
+  if (gift === 'rose') {
+    subtractPoint('boys', true);
+    playSound('gift-rose', 0.6);
+  } else if (gift === 'tiktok') {
+    subtractPoint('girls', true);
+    playSound('gift-tiktok', 0.6);
+  } else if (gift === 'cat') {
+    state.boysRounds += 1;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    playSound('gift-cat', 0.65);
+    showToast('+1 جولة لفريق الشباب', 'GIFT LOCKED');
+    updateScores();
+  } else if (gift === 'crown') {
+    state.boysRounds += 10;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    playSound('gift-crown', 0.65);
+    showToast('+10 جولات لفريق الشباب', 'GIFT LOCKED');
+    updateScores();
+  }
+  setTimeout(() => {
+    state.activeGift = null;
+    $$('.gift-button').forEach((b) => b.classList.remove('is-active'));
+  }, 450);
+}
+
+function resolveGift(team) {
+  const gift = state.activeGift;
+  if (!gift) return;
+  if (gift === 'heart') {
+    if (team === 'girls') state.shieldGirls = true;
+    else state.shieldBoys = true;
+    playSound('gift-heart', 0.7);
+    showToast('درع الحماية لفريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'PROTECTION ON');
+    closeGiftBanner();
+    updateScores();
+    return;
+  }
+  if (gift === 'donut') {
+    state.girlsRounds += 1;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    playSound(team === 'girls' ? 'gift-donut' : 'gift-cat', 0.65);
+    showToast('+1 جولة لفريق البنات', 'GIFT LOCKED');
+    closeGiftBanner();
+    updateScores();
+    return;
+  }
+  if (gift === 'corgi') {
+    state.girlsRounds += 10;
+    state.girlsScore = 0;
+    state.boysScore = 0;
+    playSound(team === 'girls' ? 'gift-corgi' : 'gift-crown', 0.65);
+    showToast('+10 جولات لفريق البنات', 'GIFT LOCKED');
+    closeGiftBanner();
+    updateScores();
+    return;
+  }
+  const addAmount = gift === 'galaxy' ? 50 : 100;
+  if (team === 'girls') {
+    state.girlsRounds += addAmount;
+    playSound('girls-wheel', 0.7);
+  } else {
+    state.boysRounds += addAmount;
+    playSound('boys-wheel', 0.7);
+  }
+  showToast('+' + addAmount + ' جولة لفريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT LOCKED');
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  closeGiftBanner();
+  updateScores();
+}
+
+function subtractPoint(team, viaGift) {
+  if ((team === 'girls' && state.shieldGirls) || (team === 'boys' && state.shieldBoys)) {
+    playSound('gift-heart', 0.4);
+    showToast('فريق ' + (team === 'girls' ? 'البنات' : 'الشباب') + ' محمي بالدرع', 'SHIELD ACTIVE');
+    return;
+  }
+  if (team === 'girls') state.girlsScore = Math.max(-5, state.girlsScore - 1);
+  else state.boysScore = Math.max(-5, state.boysScore - 1);
+  updateScores();
+  if (!viaGift) playSound('wrong', 0.25);
+}
+
+/* ═══ قصاصات النقاط الموجهة (بنات=يمين، شباب=يسار) ═══ */
+function burstAt(team) {
+  const sel = team === 'girls' ? '.team-score-girls' : '.team-score-boys';
+  const card = document.querySelector(sel);
+  if (!card || !card.getBoundingClientRect) return;
+  const rect = card.getBoundingClientRect();
+  const startX = team === 'girls' ? window.innerWidth - 40 : 40;
+  const startY = rect.top + rect.height / 2;
+  const colors = team === 'girls'
+    ? ['#ff4f9a', '#ff83bd', '#ffd36e', '#ffffff']
+    : ['#35e6f7', '#5de2ff', '#ffd36e', '#ffffff'];
+  for (let i = 0; i < 22; i++) {
+    const bit = document.createElement('i');
+    bit.className = 'point-bit-direct';
+    bit.style.left = startX + 'px';
+    bit.style.top = startY + 'px';
+    bit.style.background = colors[i % colors.length];
+    document.body.appendChild(bit);
+    const targetX = team === 'girls'
+      ? -(window.innerWidth * 0.35 + Math.random() * 180)
+      : (window.innerWidth * 0.35 + Math.random() * 180);
+    const dy = (Math.random() - 0.5) * 220 - 60;
+    const rot = Math.random() * 720 - 360;
+    if (bit.animate) {
+      bit.animate([
+        { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: 'translate(calc(-50% + ' + targetX + 'px), calc(-50% + ' + dy + 'px)) scale(.2) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: 900 + Math.random() * 400, easing: 'cubic-bezier(.15,.85,.3,1)' })
+        .onfinish = (function (b) { return function () { b.remove(); }; })(bit);
+    } else {
+      setTimeout((function (b) { return function () { b.remove(); }; })(bit), 1100);
+    }
+  }
+}
+
+function applyPoint(team, points) {
+  if (!points) points = 1;
+  if (team === 'girls') {
+    state.girlsScore = state.girlsScore < 0
+      ? Math.min(0, state.girlsScore + points)
+      : Math.min(5, state.girlsScore + points);
+  } else {
+    state.boysScore = state.boysScore < 0
+      ? Math.min(0, state.boysScore + points)
+      : Math.min(5, state.boysScore + points);
+  }
+  updateScores();
+  playSound('correct', 0.28);
+  burstAt(team);
+  if (state.girlsScore >= 5 || state.boysScore >= 5) {
+    showToast('اكتملت 5 نقاط! اضغط «الجولة التالية»', 'ROUND READY');
+  }
+}
+
+/* ═══ إنهاء الجولة مع دعم X2 ═══ */
+function finishRound() {
+  stopTimer();
+  const card = document.querySelector('.question-card');
+  if (card) {
+    card.classList.remove('round-sweep-host');
+    void card.offsetWidth;
+    card.classList.add('round-sweep-host');
+  }
+  let winnerMsg = 'تعادل رائع بين الفريقين';
+  const multiplier = state.x2Active ? 2 : 1;
+  if (state.girlsScore >= 5 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
+    state.girlsRounds += multiplier;
+    winnerMsg = 'فوز فريق البنات' + (multiplier > 1 ? ' (×2!)' : '');
+    playSequential(['girls-round', 'boys-lose']);
+  } else if (state.boysScore >= 5 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
+    state.boysRounds += multiplier;
+    winnerMsg = 'فوز فريق الشباب' + (multiplier > 1 ? ' (×2!)' : '');
+    playSequential(['boys-round', 'girls-lose']);
+  } else {
+    playSound('girls-round', 0.35);
+  }
+  state.x2Active = false;
+  updateScores();
+  $('roundEndNumber').textContent = 'الجولة ' + state.roundNumber;
+  $('roundEndWinner').textContent = winnerMsg;
+  $('roundEndGirlsScore').textContent = state.girlsScore;
+  $('roundEndBoysScore').textContent = state.boysScore;
+  $('roundEndOverlay').classList.remove('hidden');
+  fireConfetti();
+  state.shieldGirls = false;
+  state.shieldBoys = false;
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  updateScores();
+}
+
+function continueAfterRound() {
+  $('roundEndOverlay').classList.add('hidden');
+  state.roundNumber += 1;
+  if (state.mode === 'fullshow' && state.currentRoundIndex < state.fullShowRounds.length - 1) {
+    state.currentRoundIndex += 1;
+    state.questions = state.fullShowRounds[state.currentRoundIndex].questions;
+    state.currentIndex = 0;
+    updateScores();
+    renderQuestion();
+    showToast('نبدأ الجولة ' + state.roundNumber, 'NEXT ROUND');
+    return;
+  }
+  loadMoreQuestions();
+}
+
+function nextQuestion() {
+  if (!state.isRevealed) {
+    showToast('اكشف الإجابة أولا ثم انتقل', 'HOST TIP');
+    return;
+  }
+  if (state.currentIndex < state.questions.length - 1) {
+    state.currentIndex += 1;
+    renderQuestion();
+    startTimer();
+  } else {
+    loadMoreQuestions();
+  }
+}
+
+async function loadMoreQuestions() {
+  if (state.isLoadingMore) return;
+  state.isLoadingMore = true;
+  showLoading('نحمّل أسئلة جديدة — الجولة مستمرة...');
+  try {
+    const avoidList = state.questionHistory.concat(state.questions.map((qq) => qq.question)).slice(-150);
+    const qs = await fetchQuestions({ category: 'اختيارات متنوعة', difficulty: 'متوسط', count: 10, avoid: avoidList });
+    if (qs.length > 0) {
+      state.questions = state.questions.concat(qs);
+      state.questionHistory = state.questionHistory.concat(qs.map((qq) => qq.question)).slice(-400);
+      saveHistory();
+      state.currentIndex += 1;
+      renderQuestion();
+      startTimer();
+      showToast('تمت إضافة ' + qs.length + ' أسئلة — الجولة مستمرة', 'BANK LOADED');
+    } else {
+      showToast('لا أسئلة إضافية — اضغط «الجولة التالية»', 'SHOW CONTROL');
+    }
+  } catch (err) {
+    showToast('تعذر التحميل — اضغط «الجولة التالية»', 'SHOW CONTROL');
+  }
+  hideLoading();
+  state.isLoadingMore = false;
+}
+/* ═══ صفحة النتائج والفائزين ═══ */
+function showResults() {
+  stopTimer();
+  showScreen('resultsScreen');
+  $('finalGirlsScore').textContent = state.girlsRounds;
+  $('finalBoysScore').textContent = state.boysRounds;
+  const w = $('winnerText');
+  let winSound = null;
+  let team = null;
+  if (state.girlsRounds > state.boysRounds) {
+    w.textContent = 'فريق البنات فاز!';
+    w.style.color = 'var(--pink-hot)';
+    winSound = 'girls-win';
+    team = 'girls';
+  } else if (state.boysRounds > state.girlsRounds) {
+    w.textContent = 'فريق الشباب فاز!';
+    w.style.color = 'var(--cyan)';
+    winSound = 'boys-win';
+    team = 'boys';
+  } else {
+    w.textContent = 'تعادل أبطال الليلة';
+    w.style.color = 'var(--gold-hot)';
+    team = 'draw';
+  }
+  showWinnerLights(team);
+  // ⛔ NO playSound('end') here — disabled per host request
+  if (winSound && state.soundEnabled) playSound(winSound, 0.85);
+  fireConfetti();
+}
+
+function fireConfetti() {
+  const canvas = $('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const palette = ['#f45ca0', '#5de2ff', '#ffd36e', '#64ecad', '#917aff'];
+  const particles = Array.from({ length: 105 }, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 100,
+    size: 3 + Math.random() * 5,
+    speed: 2 + Math.random() * 3.5,
+    drift: (Math.random() - 0.5) * 2.6,
+    spin: Math.random() * 6.28,
+    color: palette[Math.floor(Math.random() * palette.length)],
+    alpha: 1
+  }));
+  let frameCount = 0;
+  const animateLoop = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let anyActive = false;
+    particles.forEach((p) => {
+      if (p.alpha <= 0) return;
+      anyActive = true;
+      p.y += p.speed;
+      p.x += p.drift;
+      p.spin += 0.08;
+      p.alpha -= 0.006;
+      ctx.save();
+      ctx.globalAlpha = p.alpha;
+      ctx.fillStyle = p.color;
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.spin);
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size * 1.5, p.size);
+      ctx.restore();
+    });
+    if (anyActive && frameCount < 260) {
+      frameCount += 1;
+      requestAnimationFrame(animateLoop);
+    } else {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+  animateLoop();
+}
+
+function bits(count, colorsArr) {
+  let outputStr = '';
+  for (let k = 0; k < count; k++) {
+    const leftPos = Math.random() * 100;
+    const delayVal = Math.random() * 1.8;
+    const durVal = 2.2 + Math.random() * 1.8;
+    const szVal = 6 + Math.random() * 8;
+    outputStr += '<i style="left:' + leftPos + '%;width:' + szVal + 'px;height:' + (szVal * 1.45) + 'px;background:' + colorsArr[k % colorsArr.length] + ';animation-delay:' + delayVal + 's;animation-duration:' + durVal + 's"></i>';
+  }
+  return outputStr;
+}
+
+function showWinnerLights(teamType) {
+  let overlayEl = document.getElementById('winnerLightsOverlay');
+  if (!overlayEl) {
+    overlayEl = document.createElement('div');
+    overlayEl.id = 'winnerLightsOverlay';
+    document.body.appendChild(overlayEl);
+  }
+  const isGirlsTeam = teamType === 'girls';
+  const isBoysTeam = teamType === 'boys';
+  const imgPath = isGirlsTeam ? '/images/girls.jpg' : isBoysTeam ? '/images/boys.jpg' : '/images/logo.png';
+  const titleTxt = isGirlsTeam ? 'فريق البنات' : isBoysTeam ? 'فريق الشباب' : 'تعادل أبطال الليلة';
+  const clrArr = isGirlsTeam
+    ? ['#ff4f9a', '#ff83bd', '#ffd36e', '#ffffff']
+    : isBoysTeam
+      ? ['#35e6f7', '#5de2ff', '#ffd36e', '#ffffff']
+      : ['#ffd36e', '#fff0a4', '#ff83bd', '#5de2ff'];
+  overlayEl.className = 'winner-lights ' + (isGirlsTeam ? 'girls' : isBoysTeam ? 'boys' : 'draw');
+  overlayEl.innerHTML = '<div class="wl-rays"></div><div class="wl-confetti">' + bits(38, clrArr) + '</div><div class="wl-card"><img src="' + imgPath + '" alt=""><strong>' + escapeHtml(titleTxt) + '</strong><span>WINNER NIGHT</span></div>';
+  clearTimeout(showWinnerLights.tmout);
+  showWinnerLights.tmout = setTimeout(() => {
+    overlayEl.classList.add('out');
+    setTimeout(() => {
+      if (overlayEl && overlayEl.parentNode) overlayEl.remove();
+    }, 700);
+  }, 5200);
+}
+
+/* ═══ الكباتن وكشفهم بالأشعة ═══ */
+function confirmCaptain(teamKey, slotIdx) {
+  const inputEl = document.querySelector('.captain-input[data-team="' + teamKey + '"][data-slot="' + slotIdx + '"]');
+  if (!inputEl) return;
+  const captainName = inputEl.value.trim();
+  if (!captainName) {
+    showToast('اكتب اسم الكابتن أولا', 'HOST TIP');
+    return;
+  }
+  inputEl.value = captainName;
+  inputEl.classList.add('confirmed');
+  state.captains[teamKey][slotIdx] = captainName;
+  showCaptainReveal(captainName, teamKey);
+  playSound(teamKey === 'girls' ? 'girls-captin' : 'boys-captin', 0.8);
+}
+
+function showCaptainReveal(nameStr, teamKey) {
+  const overlayBox = $('captainRevealOverlay');
+  if (!overlayBox) return;
+  const girlSide = teamKey === 'girls';
+  const picUrl = girlSide ? '/images/girls.jpg' : '/images/boys.jpg';
+  const huePalette = girlSide
+    ? ['#ff4f9a', '#ff83bd', '#ffd36e', '#ffffff']
+    : ['#35e6f7', '#5de2ff', '#ffd36e', '#ffffff'];
+  overlayBox.classList.remove('hidden', 'team-girls', 'team-boys');
+  overlayBox.classList.add(girlSide ? 'team-girls' : 'team-boys');
+  overlayBox.innerHTML =
+    '<div class="cr-rays"></div>' +
+    '<div class="cr-confetti">' + bits(30, huePalette) + '</div>' +
+    '<div class="cr-card">' +
+      '<img class="cr-team-img" src="' + picUrl + '" alt="">' +
+      '<span class="captain-reveal-kicker">ON AIR CAPTAIN</span>' +
+      '<h2>' + escapeHtml(nameStr) + '</h2>' +
+    '</div>';
+  clearTimeout(showCaptainReveal.tmout);
+  showCaptainReveal.tmout = setTimeout(() => overlayBox.classList.add('hidden'), 10000);
+}
+
+/* ═══ زر X2 ونافذة الانتباه ═══ */
+function activateX2() {
+  state.x2Active = true;
+  playSound('celebration', 0.85);
+  setTimeout(() => playSound('tick', 0.6), 300);
+  showX2AttentionOverlay();
+}
+
+function showX2AttentionOverlay() {
+  let x2Overlay = document.getElementById('x2AttentionOverlay');
+  if (!x2Overlay) {
+    x2Overlay = document.createElement('div');
+    x2Overlay.id = 'x2AttentionOverlay';
+    document.body.appendChild(x2Overlay);
+  }
+  const goldHues = ['#ffd36e', '#fff0a4', '#ff83bd', '#5de2ff', '#ffffff'];
+  x2Overlay.className = 'x2-overlay active';
+  x2Overlay.innerHTML =
+    '<div class="x2-rays"></div>' +
+    '<div class="x2-confetti">' + bits(40, goldHues) + '</div>' +
+    '<div class="x2-card">' +
+      '<div class="x2-badge">×2</div>' +
+      '<h2>جولة X2</h2>' +
+      '<p>جولة لمضاعفة النقاط تؤجل استخدام الدعم</p>' +
+      '<button id="x2CloseBtn" type="button">إغلاق</button>' +
+    '</div>';
+  const dismissBtn = document.getElementById('x2CloseBtn');
+  if (dismissBtn) dismissBtn.addEventListener('click', hideX2Overlay);
+  x2Overlay.addEventListener('click', (evtObj) => {
+    if (evtObj.target === x2Overlay) hideX2Overlay();
+  });
+  clearTimeout(showX2AttentionOverlay.tmout);
+  showX2AttentionOverlay.tmout = setTimeout(hideX2Overlay, 6000);
+}
+
+function hideX2Overlay() {
+  const refEl = document.getElementById('x2AttentionOverlay');
+  if (!refEl) return;
+  refEl.classList.add('out');
+  setTimeout(() => {
+    if (refEl && refEl.parentNode) refEl.remove();
+  }, 700);
+}
+
+function createX2Button() {
+  if (document.getElementById('x2RoundBtn')) return;
+  const deckArea = document.querySelector('.show-actions') || document.querySelector('.control-deck');
+  if (!deckArea) return;
+  const actionBtn = document.createElement('button');
+  actionBtn.id = 'x2RoundBtn';
+  actionBtn.type = 'button';
+  actionBtn.className = 'text-control x2-special-btn';
+  actionBtn.innerHTML = '<span>✦</span> جولة X2';
+  actionBtn.addEventListener('click', activateX2);
+  deckArea.insertBefore(actionBtn, deckArea.firstChild);
+}
+
+/* ═══ حركة محيطية فقط ═══ */
+function initActivity() {
+  if ($('liveActivity')) return;
+  const ambientLayer = document.createElement('div');
+  ambientLayer.id = 'liveActivity';
+  ambientLayer.innerHTML = '<div class="act-marquee"><span id="actMarqueeText"></span></div><div class="act-eq"><i></i><i></i><i></i><i></i><i></i></div>';
+  document.body.appendChild(ambientLayer);
+  const tickerMessages = ['🔥 اللايف مشتعل', '🎁 اسحب هدية الآن', '👧 البنات ضد الشباب 👦', '🛡️ درع الحماية جاهز', '🏆 من سيفوز الليلة؟', '⭐ فعّل الصوت للتفاعل الكامل'];
+  $('actMarqueeText').textContent = (tickerMessages.join(' • ') + ' • ').repeat(3);
+}
+
+/* ═══ جلب الأسئلة من السيرفر ═══ */
+async function fetchQuestions(apiParams) {
+  try {
+    const respObj = await fetch('/api/questions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, apiParams, { avoid: (apiParams.avoid || state.questionHistory.slice(-150)) }))
+    });
+    if (!respObj.ok) throw new Error('API unavailable');
+    const jsonBody = await respObj.json();
+    const rawQs = Array.isArray(jsonBody.questions) ? jsonBody.questions : [];
+    if (!rawQs.length) throw new Error('Empty');
+    return rawQs.map((item) => Object.assign({}, item, { source: item.source || 'bank' }));
+  } catch (fetchErr) {
+    return [];
+  }
+}
+
+async function fetchAIQuestions(aiParams) {
+  try {
+    const aiResp = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, aiParams, { avoid: state.questionHistory.slice(-300) }))
+    });
+    if (!aiResp.ok) throw new Error('AI unavailable');
+    const aiJson = await aiResp.json();
+    const aiQs = Array.isArray(aiJson.questions) ? aiJson.questions : [];
+    if (!aiQs.length) throw new Error('AI empty');
+    return aiQs.map((entry) => Object.assign({}, entry, { source: 'ai' }));
+  } catch (aiErr) {
+    return [];
+  }
+}
+
+const MIX_PLAN = [
+  { title: 'الجولة 1', category: 'اختيارات متنوعة', difficulty: 'سهل', count: 10 },
+  { title: 'الجولة 2', category: 'اختيارات متنوعة', difficulty: 'متوسط', count: 10 },
+  { title: 'الجولة الذهبية', category: 'اختيارات متنوعة', difficulty: 'صعب', count: 10 }
+];
+
+function resetMatch() {
+  state.currentIndex = 0;
+  state.currentRoundIndex = 0;
+  state.roundNumber = 1;
+  state.girlsScore = 0;
+  state.boysScore = 0;
+  state.girlsRounds = 0;
+  state.boysRounds = 0;
+  state.shieldGirls = false;
+  state.shieldBoys = false;
+  state.x2Active = false;
+}
+async function aiSingleRound() {
+  const chosenCat = $('category').value || 'اختيارات متنوعة';
+  const chosenDiff = $('difficulty').value || 'متوسط';
+  const chosenCnt = Math.max(3, Math.min(30, Number($('count').value) || 10));
+  $('count').value = chosenCnt;
+  showLoading('نولّد أسئلة AI جديدة خليط...');
+  try {
+    let generatedQs = await fetchAIQuestions({ category: chosenCat, difficulty: chosenDiff, count: chosenCnt });
+    if (!generatedQs.length) generatedQs = await fetchQuestions({ category: chosenCat, difficulty: chosenDiff, count: chosenCnt });
+    if (generatedQs.length > 0) {
+      state.questions = generatedQs;
+      state.fullShowRounds = [];
+      state.mode = 'single';
+      resetMatch();
+      state.questionHistory = state.questionHistory.concat(generatedQs.map((gq) => gq.question)).slice(-400);
+      saveHistory();
+      saveQuestionSet(generatedQs, { category: chosenCat, difficulty: chosenDiff, source: generatedQs[0] ? generatedQs[0].source : 'local' });
+      prepareGame();
+      showToast(generatedQs[0] && generatedQs[0].source === 'ai' ? 'أسئلة AI جديدة — حُفظت تلقائيا' : 'تم السحب من البنك', 'STUDIO READY');
+    } else {
+      showToast('لا توجد أسئلة متاحة حاليا', 'SHOW CONTROL');
+    }
+  } catch (genErr) {
+    showToast('تعذر تجهيز الجولة', 'SHOW CONTROL');
+  }
+  hideLoading();
+}
+
+async function aiFullShow() {
+  state.fullShowRounds = [];
+  showLoading('نولّد فصول اللايف بالـ AI...');
+  try {
+    for (let mi = 0; mi < MIX_PLAN.length; mi += 1) {
+      $('loadingText').textContent = 'نجهز ' + MIX_PLAN[mi].title + ' — ' + (mi + 1) + ' / ' + MIX_PLAN.length;
+      let batchQs = await fetchAIQuestions(MIX_PLAN[mi]);
+      if (!batchQs.length) batchQs = await fetchQuestions(MIX_PLAN[mi]);
+      state.fullShowRounds.push(Object.assign({}, MIX_PLAN[mi], { questions: batchQs }));
+      state.questionHistory = state.questionHistory.concat(batchQs.map((bq) => bq.question)).slice(-400);
+    }
+    saveHistory();
+    saveQuestionSet(state.fullShowRounds.flatMap((rd) => rd.questions), { category: 'لايف كامل', difficulty: 'متدرج', source: 'ai' });
+    state.mode = 'fullshow';
+    state.questions = state.fullShowRounds[0].questions;
+    resetMatch();
+    prepareGame();
+    showToast('لايف AI خليط جاهز — محفوظ تلقائيا', 'STUDIO READY');
+  } catch (fullErr) {
+    showToast('تعذر تجهيز اللايف', 'SHOW CONTROL');
+  }
+  hideLoading();
+}
+
+async function bankFullShowMixed() {
+  state.fullShowRounds = [];
+  showLoading('نرتب فصول اللايف من البنك (خليط)...');
+  try {
+    for (let bi = 0; bi < MIX_PLAN.length; bi += 1) {
+      $('loadingText').textContent = 'نجهز ' + MIX_PLAN[bi].title + ' — ' + (bi + 1) + ' / ' + MIX_PLAN.length;
+      const bankBatch = await fetchQuestions(MIX_PLAN[bi]);
+      state.fullShowRounds.push(Object.assign({}, MIX_PLAN[bi], { questions: bankBatch }));
+      state.questionHistory = state.questionHistory.concat(bankBatch.map((bb) => bb.question)).slice(-400);
+    }
+    saveHistory();
+    saveQuestionSet(state.fullShowRounds.flatMap((br) => br.questions), { category: 'لايف كامل', difficulty: 'متدرج' });
+    state.mode = 'fullshow';
+    state.questions = state.fullShowRounds[0].questions;
+    resetMatch();
+    prepareGame();
+  } catch (bankFullErr) {
+    showToast('تعذر تجهيز اللايف', 'SHOW CONTROL');
+  }
+  hideLoading();
+}
+
+async function bankSingleRound() {
+  const bankCat = $('category').value || 'اختيارات متنوعة';
+  const bankDiff = $('difficulty').value || 'متوسط';
+  const bankCnt = Math.max(3, Math.min(30, Number($('count').value) || 10));
+  $('count').value = bankCnt;
+  showLoading('نجهز الأسئلة من البنك...');
+  try {
+    const pulledQs = await fetchQuestions({ category: bankCat, difficulty: bankDiff, count: bankCnt });
+    if (pulledQs.length > 0) {
+      state.questions = pulledQs;
+      state.fullShowRounds = [];
+      state.mode = 'single';
+      resetMatch();
+      state.questionHistory = state.questionHistory.concat(pulledQs.map((pq) => pq.question)).slice(-400);
+      saveHistory();
+      saveQuestionSet(pulledQs, { category: bankCat, difficulty: bankDiff, source: pulledQs[0] ? pulledQs[0].source : 'local' });
+      prepareGame();
+    } else {
+      showToast('لا توجد أسئلة متاحة حاليا', 'SHOW CONTROL');
+    }
+  } catch (pullErr) {
+    showToast('تعذر تجهيز الجولة', 'SHOW CONTROL');
+  }
+  hideLoading();
+}
+
+document.addEventListener('click', (clickEvt) => {
+  const genTarget = clickEvt.target.closest('#generateBtn');
+  if (genTarget) {
+    clickEvt.stopPropagation();
+    clickEvt.preventDefault();
+    if (state.mode === 'fullshow') aiFullShow();
+    else aiSingleRound();
+    return;
+  }
+  const savedTarget = clickEvt.target.closest('#savedStartBtn');
+  if (savedTarget) {
+    clickEvt.stopPropagation();
+    clickEvt.preventDefault();
+    if (state.mode === 'fullshow') bankFullShowMixed();
+    else bankSingleRound();
+    return;
+  }
+}, true);
+
+function prepareGame() {
+  updateScores();
+  showScreen('gameScreen');
+  startShowClock();
+  renderQuestion();
+  createX2Button();
+  playSound('begin', 0.75);
+}
+
+function renderSavedList() {
+  const storedSets = getSavedSets();
+  const listBox = $('savedList');
+  updateSavedCount();
+  if (!storedSets.length) {
+    listBox.innerHTML = '<div class="saved-empty">لا توجد جولات محفوظة بعد.</div>';
+    return;
+  }
+  listBox.innerHTML = storedSets.map((setItem) =>
+    '<article class="saved-item">' +
+      '<div class="saved-item-title">' + escapeHtml(setItem.category) + ' — ' + escapeHtml(setItem.difficulty) + ' <span>(' + setItem.count + ')</span></div>' +
+      '<div class="saved-item-meta">' + escapeHtml(setItem.date) + ' · ' + (setItem.source === 'ai' ? 'AI GENERATED' : 'LOCAL BANK') + '</div>' +
+      '<div class="saved-item-actions">' +
+        '<button class="saved-item-btn saved-item-use" data-use="' + setItem.id + '" type="button">استخدام</button>' +
+        '<button class="saved-item-btn saved-item-delete" data-delete="' + setItem.id + '" type="button">حذف</button>' +
+      '</div>' +
+    '</article>'
+  ).join('');
+  $$('[data-use]').forEach((useBtn) => useBtn.addEventListener('click', () => useSavedSet(Number(useBtn.dataset.use))));
+  $$('[data-delete]').forEach((delBtn) => delBtn.addEventListener('click', () => deleteSavedSet(Number(delBtn.dataset.delete))));
+}
+
+function openSaved() {
+  renderSavedList();
+  $('savedModal').classList.remove('hidden');
+}
+
+function useSavedSet(targetId) {
+  const matchedSet = getSavedSets().find((ss) => ss.id === targetId);
+  if (!matchedSet) return;
+  state.questions = matchedSet.questions;
+  state.fullShowRounds = [];
+  state.mode = 'single';
+  resetMatch();
+  $('savedModal').classList.add('hidden');
+  prepareGame();
+}
+
+function deleteSavedSet(removeId) {
+  const remaining = getSavedSets().filter((rs) => rs.id !== removeId);
+  localStorage.setItem(SAVED_KEY, JSON.stringify(remaining));
+  renderSavedList();
+}
+
+/* ═══ طبقة تيك توك ═══ */
+function liveEsc(rawVal) {
+  return String(rawVal).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function showFollowWelcome(followName, followAvatar, followUid) {
+  const prevCard = document.getElementById('liveFollowCard');
+  if (prevCard) prevCard.remove();
+  const welcomeCard = document.createElement('div');
+  welcomeCard.id = 'liveFollowCard';
+  welcomeCard.className = 'live-follow-card';
+  welcomeCard.innerHTML =
+    '<div class="lfc-heart">💖</div>' +
+    (followAvatar ? '<img class="lfc-avatar" src="' + liveEsc(followAvatar) + '" alt="">' : '') +
+    '<div class="lfc-text">' +
+      '<small>متابع جديد انضم للعائلة</small>' +
+      '<strong>' + liveEsc(followName) + '</strong>' +
+      (followUid ? '<span>@' + liveEsc(followUid) + '</span>' : '') +
+      '<span>نورت يا ' + liveEsc(followName) + ' 💖</span>' +
+    '</div>';
+  document.body.appendChild(welcomeCard);
+  playSound('girls-captin', 0.7);
+  setTimeout(() => welcomeCard.classList.add('out'), 4200);
+  setTimeout(() => welcomeCard.remove(), 4800);
+}
+
+function communityBurst(commName, commAvatar, commUid, commGift, commCount) {
+  fireConfetti();
+  playSound('community-love', 0.8);
+  showToast('💞 ' + commName + ' انضم لمجتمعك الخاص!' + (commGift ? ' (🎁 ' + commGift + (commCount > 1 ? ' ×' + commCount : '') + ')' : ''), 'COMMUNITY');
+}
+
+function renderLiveStats(statsJson) {
+  let statsChip = document.getElementById('liveStatsChip');
+  if (!statsChip) {
+    statsChip = document.createElement('div');
+    statsChip.id = 'liveStatsChip';
+    document.body.appendChild(statsChip);
+  }
+  const topLike = statsJson.likes && statsJson.likes[0];
+  const topShare = statsJson.shares && statsJson.shares[0];
+  statsChip.innerHTML =
+    '<div class="ls-row"><span class="ls-ico">👍</span><span>الأكثر إعجابا:</span><strong>' + (topLike ? liveEsc(topLike.name) + ' (' + topLike.count + ')' : '—') + '</strong></div>' +
+    '<div class="ls-row"><span class="ls-ico">📤</span><span>الأكثر مشاركة:</span><strong>' + (topShare ? liveEsc(topShare.name) + ' (' + topShare.count + ')' : '—') + '</strong></div>';
+}
+
+function startLeaderboardPoll() {
+  setInterval(() => {
+    fetch('/live/leaderboard')
+      .then((lbRes) => lbRes.json())
+      .then((lbData) => { if (lbData && lbData.enabled) renderLiveStats(lbData); })
+      .catch(() => {});
+  }, 15000);
+}
+
+function connectLiveStream() {
+  if (!window.EventSource) return;
+  const eventStream = new EventSource('/live/events');
+  eventStream.onmessage = (msgEvent) => {
+    let parsedMsg;
+    try { parsedMsg = JSON.parse(msgEvent.data); } catch (parseErr) { return; }
+    if (parsedMsg.type === 'follow') showFollowWelcome(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId);
+    else if (parsedMsg.type === 'community') communityBurst(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId, parsedMsg.payload.gift, parsedMsg.payload.count);
+  };
+}
+
+/* ═══ ضمان ظهور زر المؤثرات في كل الشاشات ═══ */
+function ensureSoundButtonVisible() {
+  const wrapperDiv = document.querySelector('.floating-sound-controls');
+  if (wrapperDiv) {
+    wrapperDiv.style.cssText = 'position:fixed!important;bottom:20px!important;right:20px!important;z-index:9999!important;display:block!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important';
+  }
+  const mainBtn = $('floatingSoundBtn');
+  if (!mainBtn) return;
+  mainBtn.style.cssText = 'display:grid!important;place-items:center!important;width:56px!important;height:56px!important;border-radius:50%!important;background:rgba(255,255,255,.1)!important;border:1px solid rgba(255,211,110,.5)!important;color:#ffd36e!important;font-size:24px!important;cursor:pointer!important;backdrop-filter:blur(10px)!important;box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 20px rgba(255,211,110,.2)!important;z-index:9999!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important';
+  mainBtn.classList.remove('hidden');
+  const panelBox = $('floatingSoundBoard');
+  if (panelBox) panelBox.style.zIndex = '10000';
+}
+
+function watchScreensForSoundBtn() {
+  ['setupScreen', 'gameScreen', 'resultsScreen'].forEach((scrId) => {
+    const scrElement = document.getElementById(scrId);
+    if (!scrElement || !window.MutationObserver) return;
+    new MutationObserver(ensureSoundButtonVisible).observe(scrElement, { attributes: true, attributeFilter: ['class'] });
+  });
+  ensureSoundButtonVisible();
+}
+
+function fixTimerPills() {
+  const timerRow = Array.from(document.querySelectorAll('.option-row')).find((tr) => /وقت الإجابة/.test(tr.textContent));
+  if (!timerRow) return;
+  const pillGroup = timerRow.querySelector('.pill-group');
+  if (!pillGroup) return;
+  pillGroup.innerHTML = '';
+  ['20', '30', '40'].forEach((tv) => {
+    const tb = document.createElement('button');
+    tb.type = 'button';
+    tb.className = 'pill' + (tv === '30' ? ' is-active' : '');
+    tb.dataset.timer = tv;
+    tb.textContent = tv + ' ث';
+    pillGroup.appendChild(tb);
+  });
+}
+
+function patchGiftImages() {
+  const giftConfigs = {
+    rose: { img: '/images/gift-rose.png', small: '−1 شباب' },
+    donut: { img: '/images/gift-donut.png', small: '+1 جولة' },
+    corgi: { img: '/images/gift-corgi.png', small: '+10 جولات' },
+    heart: { img: '/images/gift-heart.png', label: 'درع الحماية', small: 'حماية الفريق' },
+    galaxy: { img: '/images/gift-galaxy.png', small: '+50 جولة' },
+    wheel: { img: '/images/gift-whale.png', fallback: '/images/gift-wheel.png', small: '+100 جولة' },
+    tiktok: { img: '/images/gift-tiktok.png', small: '−1 بنات' },
+    cat: { img: '/images/gift-cat.png', fallbackEmoji: '🐱', small: '+1 جولة' },
+    crown: { img: '/images/gift-crown.png', fallbackEmoji: '👑', small: '+10 جولات' }
+  };
+  $$('.gift-button').forEach((gbtn) => {
+    const cfgEntry = giftConfigs[gbtn.dataset.gift];
+    if (!cfgEntry) return;
+    gbtn.innerHTML = '';
+    const imgNode = document.createElement('img');
+    imgNode.className = 'gift-img';
+    imgNode.alt = gbtn.dataset.gift || 'هدية';
+    imgNode.src = cfgEntry.img;
+    if (cfgEntry.fallback) imgNode.addEventListener('error', () => { imgNode.src = cfgEntry.fallback; }, { once: true });
+    if (cfgEntry.fallbackEmoji) imgNode.addEventListener('error', () => {
+      const emojiSpan = document.createElement('span');
+      emojiSpan.className = 'gift-art';
+      emojiSpan.textContent = cfgEntry.fallbackEmoji;
+      emojiSpan.style.fontSize = '20px';
+      emojiSpan.style.lineHeight = '1';
+      imgNode.replaceWith(emojiSpan);
+    }, { once: true });
+    gbtn.appendChild(imgNode);
+    if (cfgEntry.label) {
+      const lblNode = document.createElement('span');
+      lblNode.className = 'gift-name';
+      lblNode.textContent = cfgEntry.label;
+      gbtn.appendChild(lblNode);
+    }
+    if (cfgEntry.small) {
+      const smNode = document.createElement('small');
+      smNode.textContent = cfgEntry.small;
+      gbtn.appendChild(smNode);
+    }
+  });
+}
+
+function cleanCaptainSection() {
+  $$('.captain-command .command-heading').forEach((hdEl) => hdEl.remove());
+  const cmdPanel = $('.captain-command');
+  if (cmdPanel) { cmdPanel.style.paddingTop = '6px'; cmdPanel.style.marginTop = '0'; }
+  const colWrap = $('.captain-columns');
+  if (colWrap) colWrap.style.marginTop = '0';
+}
+
+function removeMusicMenus() { /* تم تعطيله للحفاظ على زر المؤثرات */ }
+
+/* ═══ الربط والتشغيل الرئيسي ═══ */
+function initSetup() {
+  $$('.mode-tab').forEach((tabEl) => tabEl.addEventListener('click', () => {
+    $$('.mode-tab').forEach((otherTab) => otherTab.classList.remove('is-active'));
+    tabEl.classList.add('is-active');
+    state.mode = tabEl.dataset.mode;
+    $('fullShowOptions').hidden = state.mode !== 'fullshow';
+    $('categoryField').hidden = state.mode === 'fullshow';
+  }));
+  $$('.stepper-btn').forEach((sb) => sb.addEventListener('click', () => {
+    const cntInput = $('count');
+    const curVal = Number(cntInput.value) || 10;
+    cntInput.value = Math.max(3, Math.min(30, curVal + (sb.dataset.action === 'plus' ? 1 : -1)));
+  }));
+  $$('[data-duration]').forEach((dp) => dp.addEventListener('click', () => {
+    $$('[data-duration]').forEach((odp) => odp.classList.remove('is-active'));
+    dp.classList.add('is-active');
+    state.fullShowDuration = Number(dp.dataset.duration);
+  }));
+  $$('[data-timer]').forEach((tp) => tp.addEventListener('click', () => {
+    $$('[data-timer]').forEach((otp) => otp.classList.remove('is-active'));
+    tp.classList.add('is-active');
+    state.timerDuration = Number(tp.dataset.timer);
+    state.timerValue = state.timerDuration;
+  }));
+  $('savedQuestionsBtn').addEventListener('click', openSaved);
+  $('setupSoundBtn').addEventListener('click', toggleSound);
+}
+
+function initGame() {
+  $('soundToggle').addEventListener('click', toggleSound);
+  $('startTimerBtn').addEventListener('click', startTimer);
+  $('revealBtn').addEventListener('click', revealAnswer);
+  $('nextBtn').addEventListener('click', nextQuestion);
+  $('girlsPlusBtn').addEventListener('click', () => applyPoint('girls'));
+  $('girlsMinusBtn').addEventListener('click', () => subtractPoint('girls'));
+  $('boysPlusBtn').addEventListener('click', () => applyPoint('boys'));
+  $('boysMinusBtn').addEventListener('click', () => subtractPoint('boys'));
+  $('nextRoundBtn').addEventListener('click', finishRound);
+  $('endGameBtn').addEventListener('click', showResults);
+  $('newRoundBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); });
+  $$('.gift-button').forEach((gb) => gb.addEventListener('click', () => selectGift(gb.dataset.gift)));
+  $('pickGirlsBtn').addEventListener('click', () => resolveGift('girls'));
+  $('pickBoysBtn').addEventListener('click', () => resolveGift('boys'));
+  $('cancelGiftBtn').addEventListener('click', closeGiftBanner);
+  $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
+  $$('.captain-done').forEach(cd => cd.addEventListener('click', () => confirmCaptain(cd.dataset.team, cd.dataset.slot)));
+  $$('.sound-trigger').forEach(st => st.addEventListener('click', () => playSound(st.dataset.sound, 0.7)));
+}
+
+function initResults() {
+  $('replayBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); });
+}
+
+function initOverlays() {
+  $('closeSavedBtn').addEventListener('click', () => $('savedModal').classList.add('hidden'));
+  ['savedModal', 'roundEndOverlay'].forEach((ovId) => $(ovId).addEventListener('click', (ovEvt) => {
+    if (ovEvt.target.id === ovId) $(ovId).classList.add('hidden');
+  }));
+}
+
+function initFloatingSound() {
+  const floatBtnMain = $('floatingSoundBtn');
+  const floatPanelMain = $('floatingSoundBoard');
+  if (floatBtnMain) {
+    floatBtnMain.addEventListener('click', () => floatPanelMain.classList.toggle('hidden'));
+    if ($('closeFloatingSound')) $('closeFloatingSound').addEventListener('click', () => floatPanelMain.classList.add('hidden'));
+  }
+  const floatBtnRes = $('floatingSoundBtnResults');
+  const floatPanelRes = $('floatingSoundBoardResults');
+  if (floatBtnRes) {
+    floatBtnRes.addEventListener('click', () => floatPanelRes.classList.toggle('hidden'));
+    if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => floatPanelRes.classList.add('hidden'));
+  }
+}
+
+function init() {
+  state.questionHistory = getHistory();
+  state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
+  updateSoundButtons();
+  updateSavedCount();
+  injectSponsor();
+  expandCaptainSlots();
+  initTheme();
+  initActivity();
+  fixTimerPills();
+  patchGiftImages();
+  cleanCaptainSection();
+  watchScreensForSoundBtn();
+  initSetup();
+  initGame();
+  initResults();
+  initOverlays();
+  initFloatingSound();
+  connectLiveStream();
+  startLeaderboardPoll();
+  hideLoading();
+  updateTimer();
+  ensureSoundButtonVisible();
+}
+
+document.addEventListener('DOMContentLoaded', init);
