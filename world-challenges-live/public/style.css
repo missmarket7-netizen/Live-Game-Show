@@ -874,3 +874,187 @@ img{max-width:100%}
   position: fixed; width: 8px; height: 8px; border-radius: 2px; z-index: 1260;
   pointer-events: none; box-shadow: 0 0 10px rgba(255,255,255,.35); transform: translate(-50%, -50%);
 }
+/* ═══ X2 PATCH v1 ═══ */
+
+/* ضمان ظهور زر المؤثرات في كل الشاشات */
+.floating-sound-controls,
+#floatingSoundBtn,
+.soundboard-icon-btn {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 1200 !important;
+}
+
+/* قصاصات النقاط المباشرة */
+.point-bit-direct {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 1260;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255, 255, 255, .35);
+  transform: translate(-50%, -50%);
+}
+
+/* زر جولة X2 مميز */
+.x2-special-btn {
+  border-color: rgba(255, 211, 110, .55) !important;
+  background: linear-gradient(135deg, rgba(255, 211, 110, .22), rgba(255, 131, 189, .12)) !important;
+  color: var(--gold-hot) !important;
+  font-weight: 900 !important;
+  animation: x2Pulse 2.2s ease-in-out infinite;
+}
+.x2-special-btn:hover {
+  filter: saturate(1.2);
+  box-shadow: 0 0 24px rgba(255, 211, 110, .3);
+}
+@keyframes x2Pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+}
+
+/* نافذة انتباه جولة X2 */
+.x2-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1270;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 50%, rgba(5, 6, 13, .65), rgba(5, 6, 13, .25) 55%, transparent 78%);
+  animation: x2FadeIn .35s ease both;
+}
+.x2-overlay.out {
+  animation: x2FadeOut .6s ease both;
+}
+.x2-rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 170vmax;
+  height: 170vmax;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(from 0deg, rgba(255, 211, 110, .14) 0deg 7deg, transparent 7deg 19deg);
+  border-radius: 50%;
+  animation: x2RaysSpin 12s linear infinite;
+  mask-image: radial-gradient(circle, black 0%, transparent 56%);
+  -webkit-mask-image: radial-gradient(circle, black 0%, transparent 56%);
+  pointer-events: none;
+}
+.x2-confetti {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.x2-confetti i {
+  position: absolute;
+  top: -8vh;
+  border-radius: 2px;
+  opacity: .92;
+  animation-name: x2ConfettiFall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.x2-card {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 92vw;
+  padding: 28px 36px;
+  border: 1.5px solid rgba(255, 211, 110, .55);
+  border-radius: 28px;
+  background: rgba(8, 10, 28, .94);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 0 70px rgba(255, 211, 110, .22), 0 24px 72px rgba(0, 0, 0, .58);
+  animation: x2Pop .55s cubic-bezier(.22, 1, .36, 1) both;
+  text-align: center;
+}
+.x2-badge {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #ffd36e, #ff83bd);
+  color: #05060d;
+  font-family: var(--display);
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  box-shadow: 0 0 30px rgba(255, 211, 110, .45);
+  animation: x2BadgeSpin 3s ease-in-out infinite alternate;
+}
+.x2-card h2 {
+  margin: 0;
+  font-size: clamp(30px, 9vw, 52px);
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -.055em;
+  color: transparent;
+  background: linear-gradient(105deg, #ffd36e, #ff83bd 50%, #5de2ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  filter: drop-shadow(0 0 34px rgba(255, 211, 110, .35));
+}
+.x2-card p {
+  margin: 0;
+  color: #aeb4d8;
+  font-size: 13px;
+  line-height: 1.6;
+  max-width: 320px;
+}
+.x2-card button {
+  margin-top: 8px;
+  min-height: 40px;
+  padding: 8px 20px;
+  border: 1px solid rgba(255, 211, 110, .4);
+  border-radius: 12px;
+  background: rgba(255, 211, 110, .12);
+  color: var(--gold-hot);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+.x2-card button:hover {
+  background: rgba(255, 211, 110, .22);
+  border-color: var(--gold);
+  transform: scale(1.04);
+}
+
+@keyframes x2FadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes x2FadeOut { to { opacity: 0; transform: scale(1.04); } }
+@keyframes x2RaysSpin { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes x2Pop {
+  0% { opacity: 0; transform: scale(.68) translateY(18px); }
+  58% { opacity: 1; transform: scale(1.05) translateY(0); }
+  100% { transform: scale(1); }
+}
+@keyframes x2BadgeSpin {
+  0% { transform: rotate(-8deg) scale(1); }
+  100% { transform: rotate(8deg) scale(1.06); }
+}
+@keyframes x2ConfettiFall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 0; }
+  8% { opacity: 1; }
+  100% { transform: translateY(112vh) rotate(760deg); opacity: .16; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .point-bit-direct,
+  .x2-rays,
+  .x2-confetti i,
+  .x2-badge,
+  .x2-special-btn {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
