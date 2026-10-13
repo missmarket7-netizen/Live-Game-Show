@@ -454,37 +454,40 @@ function subtractPoint(team, viaGift) {
   if (!viaGift) playSound('wrong', 0.25);
 }
 
-/* ═══ قصاصات النقاط الموجهة (بنات=يمين، شباب=يسار) ═══ */
+/* ═══ قصاصات النقاط الموجهة (بنات = الجانب الأيمن، شباب = الجانب الأيسر) ═══ */
 function burstAt(team) {
-  const sel = team === 'girls' ? '.team-score-girls' : '.team-score-boys';
-  const card = document.querySelector(sel);
-  if (!card || !card.getBoundingClientRect) return;
-  const rect = card.getBoundingClientRect();
-  const startX = team === 'girls' ? window.innerWidth - 40 : 40;
-  const startY = rect.top + rect.height / 2;
-  const colors = team === 'girls'
+  const isGirls = team === 'girls';
+  const W = window.innerWidth;
+  const H = window.innerHeight;
+  const colors = isGirls
     ? ['#ff4f9a', '#ff83bd', '#ffd36e', '#ffffff']
     : ['#35e6f7', '#5de2ff', '#ffd36e', '#ffffff'];
-  for (let i = 0; i < 22; i++) {
+  const dir = isGirls ? -1 : 1; // البنات يتحركن للداخل من اليمين، الشباب من اليسار
+  for (let i = 0; i < 40; i++) {
     const bit = document.createElement('i');
     bit.className = 'point-bit-direct';
+    // يبدأ داخل شريط ضيق عند حافة الجانب الخاص بالفريق
+    const edgeOffset = 12 + Math.random() * 70;
+    const startX = isGirls ? W - edgeOffset : edgeOffset;
+    const startY = H * (0.12 + Math.random() * 0.7);
     bit.style.left = startX + 'px';
     bit.style.top = startY + 'px';
     bit.style.background = colors[i % colors.length];
     document.body.appendChild(bit);
-    const targetX = team === 'girls'
-      ? -(window.innerWidth * 0.35 + Math.random() * 180)
-      : (window.innerWidth * 0.35 + Math.random() * 180);
-    const dy = (Math.random() - 0.5) * 220 - 60;
+    // حركة أفقية قصيرة للداخل فيبقى القصاص في جانبه، وسقوط للأسفل
+    const driftX = dir * (30 + Math.random() * 130);
+    const driftY = 60 + Math.random() * 220;
     const rot = Math.random() * 720 - 360;
+    const dur = 1100 + Math.random() * 600;
+    const done = (function (b) { return function () { b.remove(); }; })(bit);
     if (bit.animate) {
       bit.animate([
         { transform: 'translate(-50%,-50%) scale(1) rotate(0deg)', opacity: 1 },
-        { transform: 'translate(calc(-50% + ' + targetX + 'px), calc(-50% + ' + dy + 'px)) scale(.2) rotate(' + rot + 'deg)', opacity: 0 }
-      ], { duration: 900 + Math.random() * 400, easing: 'cubic-bezier(.15,.85,.3,1)' })
-        .onfinish = (function (b) { return function () { b.remove(); }; })(bit);
+        { transform: 'translate(calc(-50% + ' + (driftX * 0.5) + 'px), calc(-50% - ' + (30 + Math.random() * 50) + 'px)) scale(1.1) rotate(' + (rot * 0.5) + 'deg)', opacity: 1, offset: 0.3 },
+        { transform: 'translate(calc(-50% + ' + driftX + 'px), calc(-50% + ' + driftY + 'px)) scale(.3) rotate(' + rot + 'deg)', opacity: 0 }
+      ], { duration: dur, easing: 'cubic-bezier(.2,.7,.3,1)' }).onfinish = done;
     } else {
-      setTimeout((function (b) { return function () { b.remove(); }; })(bit), 1100);
+      setTimeout(done, 1300);
     }
   }
 }
