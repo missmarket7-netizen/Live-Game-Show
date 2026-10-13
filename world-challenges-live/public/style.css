@@ -869,3 +869,8 @@ img{max-width:100%}
     animation-iteration-count: 1 !important;
   }
 }
+/* ═══ Direct Point Confetti Styles ═══ */
+.point-bit-direct {
+  position: fixed; width: 8px; height: 8px; border-radius: 2px; z-index: 1260;
+  pointer-events: none; box-shadow: 0 0 10px rgba(255,255,255,.35); transform: translate(-50%, -50%);
+}

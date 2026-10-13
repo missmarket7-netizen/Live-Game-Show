@@ -232,6 +232,8 @@ function subtractPoint(team, viaGift) {
   updateScores(); if (!viaGift) playSound('wrong', 0.25);
 }
 function applyPoint(team, points) {
+  burstAt(team);
+
   if (!points) points = 1;
   if (team === 'girls') state.girlsScore = state.girlsScore < 0 ? Math.min(0, state.girlsScore + points) : Math.min(5, state.girlsScore + points);
   else state.boysScore = state.boysScore < 0 ? Math.min(0, state.boysScore + points) : Math.min(5, state.boysScore + points);
@@ -522,6 +524,29 @@ function initFloatingSound() {
   const rb = $('floatingSoundBtnResults'); const rp = $('floatingSoundBoardResults');
   if (rb) { rb.addEventListener('click', () => rp.classList.toggle('hidden')); if ($('closeFloatingSoundResults')) $('closeFloatingSoundResults').addEventListener('click', () => rp.classList.add('hidden')); }
 }
+
+/* ═══ Point Confetti Burst ═══ */
+function burstAt(team) {
+  var sel = team === 'girls' ? '.team-score-girls' : '.team-score-boys';
+  var card = document.querySelector(sel);
+  if (!card || !card.getBoundingClientRect) return;
+  var r = card.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  var colors = team === 'girls' ? ['#ff4f9a','#ff83bd','#ffd36e','#fff'] : ['#35e6f7','#5de2ff','#ffd36e','#fff'];
+  for (var i = 0; i < 18; i++) {
+    var bit = document.createElement('i');
+    bit.className = 'point-bit-direct';
+    bit.style.left = cx + 'px'; bit.style.top = cy + 'px'; bit.style.background = colors[i % colors.length];
+    document.body.appendChild(bit);
+    var ang = Math.random()*Math.PI*2, dist = 55+Math.random()*95, dx=Math.cos(ang)*dist, dy=Math.sin(ang)*dist-35, rot=Math.random()*720-360;
+    if (bit.animate) {
+      bit.animate([
+        {transform:'translate(-50%,-50%) scale(1)',opacity:1},
+        {transform:'translate(calc(-50%+'+dx+'px),calc(-50%+'+dy+'px)) scale(.22) rotate('+rot+'deg)',opacity:0}
+      ],{duration:720+Math.random()*320,easing:'cubic-bezier(.2,.7,.3,1)'}).onfinish=(function(b){return function(){b.remove();};})(bit);
+    } else setTimeout(function(b){return function(){b.remove();};}(bit),900);
+  }
+}
+
 function init() {
   state.questionHistory = getHistory();
   state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
