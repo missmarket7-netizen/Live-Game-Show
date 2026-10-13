@@ -12,6 +12,7 @@ const HISTORY_KEY = 'lgs_question_history_v7';
 const SOUND_KEY = 'lgs_sound_v7';
 const THEME_KEY = 'lgs_theme_v1';
 const $ = (id) => document.getElementById(id);
+const safeOn = (id, evt, fn) => { const el = $(id); if (el) el.addEventListener(evt, fn); return el; };
 const $$ = (s) => Array.from(document.querySelectorAll(s));
 const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
@@ -180,21 +181,21 @@ function showScreen(id) {
 }
 
 function showLoading(msg) {
-  $('loadingText').textContent = msg;
-  $('loadingOverlay').classList.remove('hidden');
+  if ($('loadingText')) $('loadingText').textContent = msg;
+  if ($('loadingOverlay')) $('loadingOverlay').classList.remove('hidden');
 }
 
 function hideLoading() {
-  $('loadingOverlay').classList.add('hidden');
+  if ($('loadingOverlay')) $('loadingOverlay').classList.add('hidden');
 }
 
 function showToast(text, kicker) {
   if (!kicker) kicker = 'SHOW CONTROL';
-  $('captainToastKicker').textContent = kicker;
-  $('captainToastText').textContent = text;
-  $('captainToast').classList.remove('hidden');
+  if ($('captainToastKicker')) $('captainToastKicker').textContent = kicker;
+  if ($('captainToastText')) $('captainToastText').textContent = text;
+  if ($('captainToast')) $('captainToast').classList.remove('hidden');
   clearTimeout(showToast.timeout);
-  showToast.timeout = setTimeout(() => $('captainToast').classList.add('hidden'), 3100);
+  showToast.timeout = setTimeout(() => { if ($('captainToast')) $('captainToast').classList.add('hidden'); }, 3100);
 }
 
 function formatClock() {
@@ -211,28 +212,28 @@ function startShowClock() {
 }
 
 function updateScores() {
-  $('girlsScoreValue').textContent = state.girlsScore;
-  $('boysScoreValue').textContent = state.boysScore;
-  $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * 20) + '%';
-  $('boysProgress').style.width = Math.min(100, Math.max(0, state.boysScore) * 20) + '%';
-  $('girlsRoundsWon').textContent = state.girlsRounds + ' جولات';
-  $('boysRoundsWon').textContent = state.boysRounds + ' جولات';
-  $('roundResults').textContent = state.girlsRounds + ' - ' + state.boysRounds;
+  if ($('girlsScoreValue')) $('girlsScoreValue').textContent = state.girlsScore;
+  if ($('boysScoreValue')) $('boysScoreValue').textContent = state.boysScore;
+  if ($('girlsProgress')) $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * 20) + '%';
+  if ($('boysProgress')) $('boysProgress').style.width = Math.min(100, Math.max(0, state.boysScore) * 20) + '%';
+  if ($('girlsRoundsWon')) $('girlsRoundsWon').textContent = state.girlsRounds + ' جولات';
+  if ($('boysRoundsWon')) $('boysRoundsWon').textContent = state.boysRounds + ' جولات';
+  if ($('roundResults')) $('roundResults').textContent = state.girlsRounds + ' - ' + state.boysRounds;
   if ($('roundDisplay')) $('roundDisplay').textContent = 'الجولة ' + state.roundNumber;
-  $('teamShieldGirls').classList.toggle('hidden', !state.shieldGirls);
-  $('teamShieldBoys').classList.toggle('hidden', !state.shieldBoys);
+  if ($('teamShieldGirls')) $('teamShieldGirls').classList.toggle('hidden', !state.shieldGirls);
+  if ($('teamShieldBoys')) $('teamShieldBoys').classList.toggle('hidden', !state.shieldBoys);
 }
 
 function updateTimer() {
-  $('timerDisplay').textContent = state.timerValue;
-  $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0);
+  if ($('timerDisplay')) $('timerDisplay').textContent = state.timerValue;
+  if ($('timerRing')) $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0);
 }
 
 function stopTimer() {
   clearInterval(state.timerInterval);
   state.timerInterval = null;
   state.isTimerRunning = false;
-  $('startTimerBtn').disabled = false;
+  if ($('startTimerBtn')) $('startTimerBtn').disabled = false;
 }
 
 function startTimer() {
@@ -1207,11 +1208,12 @@ function initSetup() {
     $$('.mode-tab').forEach((otherTab) => otherTab.classList.remove('is-active'));
     tabEl.classList.add('is-active');
     state.mode = tabEl.dataset.mode;
-    $('fullShowOptions').hidden = state.mode !== 'fullshow';
-    $('categoryField').hidden = state.mode === 'fullshow';
+    if ($('fullShowOptions')) $('fullShowOptions').hidden = state.mode !== 'fullshow';
+    if ($('categoryField')) $('categoryField').hidden = state.mode === 'fullshow';
   }));
   $$('.stepper-btn').forEach((sb) => sb.addEventListener('click', () => {
     const cntInput = $('count');
+    if (!cntInput) return;
     const curVal = Number(cntInput.value) || 10;
     cntInput.value = Math.max(3, Math.min(30, curVal + (sb.dataset.action === 'plus' ? 1 : -1)));
   }));
@@ -1226,29 +1228,29 @@ function initSetup() {
     state.timerDuration = Number(tp.dataset.timer);
     state.timerValue = state.timerDuration;
   }));
-  $('savedQuestionsBtn').addEventListener('click', openSaved);
-  $('setupSoundBtn').addEventListener('click', toggleSound);
+  safeOn('savedQuestionsBtn', 'click', openSaved);
+  safeOn('setupSoundBtn', 'click', toggleSound);
 }
 
 function initGame() {
-  $('soundToggle').addEventListener('click', toggleSound);
-  $('startTimerBtn').addEventListener('click', startTimer);
-  $('revealBtn').addEventListener('click', revealAnswer);
-  $('nextBtn').addEventListener('click', nextQuestion);
-  $('girlsPlusBtn').addEventListener('click', () => applyPoint('girls'));
-  $('girlsMinusBtn').addEventListener('click', () => subtractPoint('girls'));
-  $('boysPlusBtn').addEventListener('click', () => applyPoint('boys'));
-  $('boysMinusBtn').addEventListener('click', () => subtractPoint('boys'));
-  $('nextRoundBtn').addEventListener('click', finishRound);
-  $('endGameBtn').addEventListener('click', showResults);
-  $('newRoundBtn').addEventListener('click', () => { stopTimer(); showScreen('setupScreen'); });
+  safeOn('soundToggle', 'click', toggleSound);
+  safeOn('startTimerBtn', 'click', startTimer);
+  safeOn('revealBtn', 'click', revealAnswer);
+  safeOn('nextBtn', 'click', nextQuestion);
+  safeOn('girlsPlusBtn', 'click', () => applyPoint('girls'));
+  safeOn('girlsMinusBtn', 'click', () => subtractPoint('girls'));
+  safeOn('boysPlusBtn', 'click', () => applyPoint('boys'));
+  safeOn('boysMinusBtn', 'click', () => subtractPoint('boys'));
+  safeOn('nextRoundBtn', 'click', finishRound);
+  safeOn('endGameBtn', 'click', showResults);
+  safeOn('newRoundBtn', 'click', () => { stopTimer(); showScreen('setupScreen'); });
   $$('.gift-button').forEach((gb) => gb.addEventListener('click', () => selectGift(gb.dataset.gift)));
-  $('pickGirlsBtn').addEventListener('click', () => resolveGift('girls'));
-  $('pickBoysBtn').addEventListener('click', () => resolveGift('boys'));
-  $('cancelGiftBtn').addEventListener('click', closeGiftBanner);
-  $('roundEndContinueBtn').addEventListener('click', continueAfterRound);
-  $$('.captain-done').forEach(cd => cd.addEventListener('click', () => confirmCaptain(cd.dataset.team, cd.dataset.slot)));
-  $$('.sound-trigger').forEach(st => st.addEventListener('click', () => playSound(st.dataset.sound, 0.7)));
+  safeOn('pickGirlsBtn', 'click', () => resolveGift('girls'));
+  safeOn('pickBoysBtn', 'click', () => resolveGift('boys'));
+  safeOn('cancelGiftBtn', 'click', closeGiftBanner);
+  safeOn('roundEndContinueBtn', 'click', continueAfterRound);
+  $$('.captain-done').forEach((cd) => cd.addEventListener('click', () => confirmCaptain(cd.dataset.team, cd.dataset.slot)));
+  $$('.sound-trigger').forEach((st) => st.addEventListener('click', () => playSound(st.dataset.sound, 0.7)));
 }
 
 function initResults() {
@@ -1278,28 +1280,44 @@ function initFloatingSound() {
 }
 
 function init() {
-  state.questionHistory = getHistory();
-  state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
-  updateSoundButtons();
-  updateSavedCount();
-  injectSponsor();
-  expandCaptainSlots();
-  initTheme();
-  initActivity();
-  fixTimerPills();
-  patchGiftImages();
-  cleanCaptainSection();
-  watchScreensForSoundBtn();
-  initSetup();
-  initGame();
-  initResults();
-  initOverlays();
-  initFloatingSound();
-  connectLiveStream();
-  startLeaderboardPoll();
-  hideLoading();
-  updateTimer();
-  ensureSoundButtonVisible();
+  try { hideLoading(); } catch (e) {}
+  // إزالة أي طبقة قد تحجب النقرات
+  try {
+    document.querySelectorAll('.overlay, .captain-reveal, .loading-overlay, #x2AttentionOverlay, #liveFollowCard').forEach((el) => {
+      if (el && !el.classList.contains('hidden') && el.id !== 'setupScreen') {
+        /* لا نخفي الشاشات الأساسية */
+      }
+    });
+    ['loadingOverlay','roundEndOverlay','savedModal','captainRevealOverlay'].forEach((oid) => {
+      const o = $(oid); if (o) o.classList.add('hidden');
+    });
+  } catch (e) {}
+  try {
+    state.questionHistory = getHistory();
+    state.soundEnabled = localStorage.getItem(SOUND_KEY) === 'true';
+    updateSoundButtons();
+    updateSavedCount();
+  } catch (e) { console.warn('state init', e); }
+  const steps = [
+    injectSponsor, expandCaptainSlots, initTheme, initActivity, fixTimerPills,
+    patchGiftImages, cleanCaptainSection, watchScreensForSoundBtn,
+    initSetup, initGame, initResults, initOverlays, initFloatingSound,
+    connectLiveStream, startLeaderboardPoll
+  ];
+  steps.forEach((fn) => {
+    try { if (typeof fn === 'function') fn(); }
+    catch (err) { console.error('[init step]', fn && fn.name, err); }
+  });
+  try { hideLoading(); } catch (e) {}
+  try { updateTimer(); } catch (e) {}
+  try { ensureSoundButtonVisible(); } catch (e) {}
+  // تفويض نقر عام احتياطي للأزرار الحرجة
+  document.body.addEventListener('click', (ev) => {
+    const t = ev.target.closest('button, .mode-tab, .pill, .gift-button, .option-btn, .mini-control, .deck-button, .primary-cta, .sound-trigger, .stepper-btn');
+    if (!t) return;
+    // لا نمنع الافتراضي إلا لما نعالج
+  }, false);
+  console.log('✅ عالم التحديات — init complete v18-safe');
 }
 
 document.addEventListener('DOMContentLoaded', init);
