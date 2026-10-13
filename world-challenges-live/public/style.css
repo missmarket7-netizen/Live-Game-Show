@@ -796,3 +796,76 @@ img{max-width:100%}
 [data-theme="light"] .wl-card strong {
   color: var(--gold-hot);
 }
+/* ═══ FX PATCH v1 ═══ */
+
+/* قصاصات النقاط */
+.fx-point-bit {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  z-index: 1260;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255,255,255,.35);
+  transform: translate(-50%, -50%);
+}
+
+/* صورة الكابتن خلف اسم الكشف */
+.fx-captain-img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(70vw, 420px);
+  max-height: 60vh;
+  object-fit: contain;
+  opacity: .28;
+  filter: drop-shadow(0 0 40px rgba(255,211,110,.4));
+  pointer-events: none;
+  animation: logoFloat 4s ease-in-out infinite;
+  z-index: 0;
+}
+
+.captain-reveal h2,
+.captain-reveal-kicker {
+  position: relative;
+  z-index: 2;
+}
+
+/* بديل emoji للهدايا */
+.gift-art {
+  display: grid;
+  place-items: center;
+  width: 27px;
+  height: 27px;
+  margin: 0 auto 2px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.08);
+  font-size: 16px;
+}
+
+.central-gift .gift-art {
+  width: 44px;
+  height: 44px;
+  font-size: 27px;
+  border-radius: 50%;
+}
+
+/* ضمان ظهور زر المؤثرات فوق كل الطبقات حتى في شاشة النتائج */
+.floating-sound-controls,
+#floatingSoundBtn,
+.soundboard-icon-btn {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  z-index: 1200 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-point-bit,
+  .fx-captain-img {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
