@@ -1489,3 +1489,127 @@ function init() {
 }
 
 document.addEventListener('DOMContentLoaded', init);
+
+/* ═══ FLAG_REVEAL_ONLY_V1 ═══ */
+(function () {
+  function getFlags(text) {
+    return String(text || '').match(/[\u{1F1E6}-\u{1F1FF}][\u{1F1E6}-\u{1F1FF}]/gu) || [];
+  }
+
+  function isFlagOnlyQuestion(text) {
+    const compact = String(text || '').trim().replace(/\s+/g, '');
+    const flags = getFlags(text);
+    return flags.length > 0 && flags.join('') === compact;
+  }
+
+  function isCountryFlagQuestion(q) {
+    if (!q) return false;
+    if (String(q.category || '').trim() === 'خمن الدولة') return true;
+    return isFlagOnlyQuestion(q.question);
+  }
+
+  function getCountryAnswer(q) {
+    if (!q) return '';
+
+    if (Array.isArray(q.options) && q.options.length) {
+      const idx = Number.isInteger(q.correctIndex) ? q.correctIndex : 0;
+      return String(q.options[idx] || q.options[0] || '').trim();
+    }
+
+    if (q.answer) return String(q.answer).trim();
+    if (q.correctAnswer) return String(q.correctAnswer).trim();
+
+    return '';
+  }
+
+  function applyFlagQuestionStyle() {
+    const el = document.getElementById('questionText');
+    if (!el) return;
+
+    const flags = getFlags(el.textContent);
+    const isFlag = isFlagOnlyQuestion(el.textContent);
+
+    el.classList.toggle('flag-emoji-question', isFlag);
+    el.dataset.flagCount = String(flags.length);
+
+    const grid = document.getElementById('optionsGrid');
+    if (grid && isFlag) {
+      grid.innerHTML = '';
+
+      const pill = document.createElement('div');
+      pill.className = 'think-pill';
+      pill.textContent = '🏳️ خمن الدولة من العلم — الإجابة تظهر عند كشف الإجابة';
+      grid.appendChild(pill);
+    }
+  }
+
+  const originalRenderQuestion = window.renderQuestion;
+
+  if (typeof originalRenderQuestion === 'function') {
+    window.renderQuestion = function () {
+      const result = originalRenderQuestion.apply(this, arguments);
+
+      try {
+        const q = window.state && window.state.questions && window.state.questions[window.state.currentIndex];
+        if (isCountryFlagQuestion(q)) {
+          applyFlagQuestionStyle();
+        }
+      } catch (e) {}
+
+      return result;
+    };
+  }
+
+  const originalRevealAnswer = window.revealAnswer;
+
+  if (typeof originalRevealAnswer === 'function') {
+    window.revealAnswer = function () {
+      const q = window.state && window.state.questions && window.state.questions[window.state.currentIndex];
+
+      if (!isCountryFlagQuestion(q)) {
+        return originalRevealAnswer.apply(this, arguments);
+      }
+
+      if (window.state.isRevealed) return;
+
+      window.state.isRevealed = true;
+
+      if (typeof window.stopTimer === 'function') {
+        window.stopTimer();
+      }
+
+      const country = getCountryAnswer(q);
+      const answerText = document.getElementById('answerText');
+      const explanationText = document.getElementById('explanationText');
+      const answerReveal = document.getElementById('answerReveal');
+      const revealBtn = document.getElementById('revealBtn');
+
+      if (answerText) {
+        answerText.textContent = country || '—';
+      }
+
+      if (explanationText) {
+        explanationText.textContent = q.explanation || ('هذا علم ' + (country || 'الدولة') + '.');
+      }
+
+      if (answerReveal) {
+        answerReveal.classList.remove('hidden');
+        answerReveal.classList.add('reveal-anim');
+      }
+
+      if (revealBtn) {
+        revealBtn.disabled = true;
+      }
+
+      try {
+        if (typeof window.playSound === 'function') {
+          window.playSound('correct', 0.35);
+        }
+      } catch (e) {}
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(applyFlagQuestionStyle, 0);
+  });
+})();

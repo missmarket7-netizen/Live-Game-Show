@@ -1345,3 +1345,51 @@ body:has(#liveStatsChip) .floating-sound-controls {
     font-size: 8px !important;
   }
 }
+/* ═══ FLAG_REVEAL_ONLY_V1 ═══ */
+/* علم الدولة يظهر كبيرًا داخل مساحة السؤال بدون اختيارات */
+
+#questionText.flag-emoji-question,
+.question-text.flag-emoji-question,
+.question-main #questionText.flag-emoji-question {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: clamp(130px, 36vw, 230px) !important;
+  height: auto !important;
+  margin: 0 auto !important;
+  padding: 8px 0 !important;
+  font-size: clamp(92px, 29vw, 180px) !important;
+  line-height: 1 !important;
+  letter-spacing: 0 !important;
+  text-align: center !important;
+  text-shadow: 0 16px 38px rgba(0, 0, 0, 0.34) !important;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.22)) !important;
+  overflow: visible !important;
+  word-break: keep-all !important;
+}
+
+#questionText.flag-emoji-question[data-flag-count="2"],
+.question-text.flag-emoji-question[data-flag-count="2"] {
+  font-size: clamp(64px, 21vw, 132px) !important;
+  min-height: clamp(96px, 28vw, 170px) !important;
+}
+
+@media (min-width: 700px) {
+  #questionText.flag-emoji-question,
+  .question-text.flag-emoji-question {
+    font-size: clamp(140px, 20vw, 230px) !important;
+    min-height: 250px !important;
+  }
+
+  #questionText.flag-emoji-question[data-flag-count="2"],
+  .question-text.flag-emoji-question[data-flag-count="2"] {
+    font-size: clamp(96px, 14vw, 168px) !important;
+    min-height: 180px !important;
+  }
+}
+
+[data-theme="light"] #questionText.flag-emoji-question,
+[data-theme="light"] .question-text.flag-emoji-question {
+  text-shadow: 0 12px 28px rgba(26, 22, 66, 0.14) !important;
+  filter: drop-shadow(0 8px 18px rgba(26, 22, 66, 0.10)) !important;
+}
