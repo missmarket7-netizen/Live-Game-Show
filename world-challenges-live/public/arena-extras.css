@@ -695,3 +695,43 @@
 [data-theme="light"] .ax-goal-count {
   color: #8a6d1f;
 }
+/* ═══ AX_GIFT_FILL_FIX_V1 ═══ */
+/* إصلاح تعبئة عمود هدف الهدايا — يتجاوز height:0% !important القديم */
+
+.ax-gift-side .ax-goal-track {
+  position: relative !important;
+  display: block !important;
+  overflow: hidden !important;
+}
+
+.ax-gift-side .ax-goal-track i,
+.ax-gift-side .ax-goal-fill {
+  position: absolute !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100% !important;
+  height: var(--ax-fill-height, 0%) !important;
+  display: block !important;
+  transition: height 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  will-change: height !important;
+}
+
+.ax-gift-side-girls .ax-goal-track i,
+.ax-gift-side-girls .ax-goal-fill {
+  background: linear-gradient(180deg, #ff4f9a, #ffd36e) !important;
+  box-shadow: 0 0 14px rgba(255, 79, 154, 0.35) !important;
+}
+
+.ax-gift-side-boys .ax-goal-track i,
+.ax-gift-side-boys .ax-goal-fill {
+  background: linear-gradient(180deg, #35e6f7, #ffd36e) !important;
+  box-shadow: 0 0 14px rgba(53, 230, 247, 0.35) !important;
+}
+
+.ax-gift-side .ax-goal-track.ax-goal-full i,
+.ax-gift-side .ax-goal-track.ax-goal-full .ax-goal-fill {
+  box-shadow:
+    0 0 18px rgba(255, 211, 110, 0.55),
+    0 0 34px rgba(255, 79, 154, 0.28) !important;
+}

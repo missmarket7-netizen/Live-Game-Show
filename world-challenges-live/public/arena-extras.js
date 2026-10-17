@@ -271,20 +271,36 @@
   /* ═══ 2) هدف الهدايا الجماعي — يمين البنات ويسار الشباب ═══ */
 
   function updateGiftUI() {
-    var girlsValue = AX.giftGoal.girls || 0;
-    var boysValue = AX.giftGoal.boys || 0;
+  var girlsValue = AX.giftGoal.girls || 0;
+  var boysValue = AX.giftGoal.boys || 0;
+  var max = CONFIG.giftGoalMax || 20;
 
-    var girlsFill = $('axGoalGirlsFill');
-    var girlsCount = $('axGoalGirlsNum');
-    var boysFill = $('axGoalBoysFill');
-    var boysCount = $('axGoalBoysNum');
+  function setFill(fillEl, value) {
+    if (!fillEl) return;
 
-    if (girlsFill) girlsFill.style.height = ((girlsValue / CONFIG.giftGoalMax) * 100) + '%';
-    if (girlsCount) girlsCount.textContent = String(girlsValue);
+    var numericValue = Number(value) || 0;
+    var pct = Math.max(0, Math.min(100, (numericValue / max) * 100));
 
-    if (boysFill) boysFill.style.height = ((boysValue / CONFIG.giftGoalMax) * 100) + '%';
-    if (boysCount) boysCount.textContent = String(boysValue);
+    fillEl.style.setProperty('--ax-fill-height', pct + '%');
+    fillEl.style.height = pct + '%';
+
+    var track = fillEl.parentElement;
+    if (track) {
+      track.classList.toggle('ax-goal-full', pct >= 100);
+    }
   }
+
+  setFill($('axGoalGirlsFill'), girlsValue);
+  setFill($('axGoalBoysFill'), boysValue);
+
+  var girlsCount = $('axGoalGirlsNum');
+  var boysCount = $('axGoalBoysNum');
+
+  if (girlsCount) girlsCount.textContent = String(girlsValue);
+  if (boysCount) boysCount.textContent = String(boysValue);
+}
+
+
 
   function setGiftSidesVisible() {
     var gameScreen = $('gameScreen');
