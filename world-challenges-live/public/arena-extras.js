@@ -673,62 +673,75 @@
     }
   }
 
-  function openWheel() {
-    if (AX.wheelBusy || $('axWheelOverlay')) return;
+  /* __AX_WHEEL_CINEMATIC_V1__ */
+function openWheel() {
+  if (AX.wheelBusy || $('axWheelOverlay')) return;
 
-    AX.wheelBusy = true;
+  AX.wheelBusy = true;
 
-    var result = WHEEL_RESULTS[Math.floor(Math.random() * WHEEL_RESULTS.length)];
-    var segment = 360 / WHEEL_RESULTS.length;
-    var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad'];
+  var result = WHEEL_RESULTS[Math.floor(Math.random() * WHEEL_RESULTS.length)];
+  var segment = 360 / WHEEL_RESULTS.length;
+  var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad'];
 
-    var stops = WHEEL_RESULTS.map(function (item, index) {
-      var start = index * segment;
-      var end = (index + 1) * segment;
-      return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
-    }).join(', ');
+  var wheelLabels = {
+    x3: '×3 دعم',
+    swap: 'تبديل',
+    yellow: 'كارت',
+    x2: '×2',
+    snatch: 'اخطف'
+  };
 
-    var labels = WHEEL_RESULTS.map(function (item) {
-      var angle = item.index * segment + segment / 2;
-      return (
-        '<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
-        esc(item.short || item.title) +
-        '</span>'
-      );
-    }).join('');
+  var stops = WHEEL_RESULTS.map(function (item, index) {
+    var start = index * segment;
+    var end = (index + 1) * segment;
+    return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
+  }).join(', ');
 
-    var html =
-      '<div class="ax-wheel-stage">' +
-        '<div class="ax-wheel-rays"></div>' +
-        '<div class="ax-wheel-pointer">▼</div>' +
-        '<div class="ax-wheel" id="axWheel" style="background: conic-gradient(from 0deg, ' + stops + ')">' +
-          '<div class="ax-wheel-hub">❤️‍🔥</div>' +
+  var labels = WHEEL_RESULTS.map(function (item) {
+    var angle = item.index * segment + segment / 2;
+    var text = wheelLabels[item.id] || item.short || item.title;
+
+    return (
+      '<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
+      esc(text) +
+      '</span>'
+    );
+  }).join('');
+
+  var html =
+    '<div class="ax-wheel-stage">' +
+      '<div class="ax-wheel-wrap">' +
+        '<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
           labels +
         '</div>' +
-        '<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
-      '</div>';
+        '<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
+        '<div class="ax-wheel-pointer">▼</div>' +
+      '</div>' +
+      '<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
+    '</div>';
 
-    createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
+  createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
 
-    var wheel = $('axWheel');
-    if (!wheel) {
-      AX.wheelBusy = false;
-      return;
-    }
+  var rotor = $('axWheelRotor');
 
-    var center = result.index * segment + segment / 2;
-    var targetRotation = (360 * 5) - center;
-
-    requestAnimationFrame(function () {
-      wheel.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
-      wheel.style.transform = 'rotate(' + targetRotation + 'deg)';
-    });
-
-    setTimeout(function () {
-      showWheelResult(result);
-      AX.wheelBusy = false;
-    }, CONFIG.wheelSpinMs + 180);
+  if (!rotor) {
+    AX.wheelBusy = false;
+    return;
   }
+
+  var center = result.index * segment + segment / 2;
+  var targetRotation = (360 * 5) - center;
+
+  requestAnimationFrame(function () {
+    rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
+    rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
+  });
+
+  setTimeout(function () {
+    showWheelResult(result);
+    AX.wheelBusy = false;
+  }, CONFIG.wheelSpinMs + 180);
+}
 
   function showWheelResult(result) {
     var box = $('axWheelResult');

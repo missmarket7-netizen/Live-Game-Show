@@ -659,3 +659,320 @@
 [data-theme="light"] .ax-goal-count {
   color: #8a6d1f;
 }
+/* ═══ AX_CINEMATIC_WHEEL_V1 ═══ */
+
+.ax-wheel-stage {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  width: min(94vw, 430px) !important;
+  padding: 8px 0 0 !important;
+}
+
+.ax-wheel-wrap {
+  --ax-wheel-size: min(78vw, 320px);
+  --ax-wheel-label-radius: calc(var(--ax-wheel-size) * 0.34);
+  position: relative !important;
+  width: var(--ax-wheel-size) !important;
+  height: var(--ax-wheel-size) !important;
+  display: grid !important;
+  place-items: center !important;
+  isolation: isolate !important;
+}
+
+.ax-wheel-wrap::before {
+  content: "" !important;
+  position: absolute !important;
+  inset: -12px !important;
+  border-radius: 50% !important;
+  background: conic-gradient(
+    from 0deg,
+    rgba(255, 79, 154, 0.55),
+    rgba(53, 230, 247, 0.42),
+    rgba(255, 211, 110, 0.62),
+    rgba(145, 122, 255, 0.42),
+    rgba(100, 236, 173, 0.38),
+    rgba(255, 79, 154, 0.55)
+  ) !important;
+  filter: blur(16px) !important;
+  opacity: 0.52 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  animation: axWheelAura 9s linear infinite !important;
+}
+
+.ax-wheel-rotor {
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 50% !important;
+  border: 4px solid rgba(255, 211, 110, 0.62) !important;
+  box-shadow:
+    0 0 0 8px rgba(255, 255, 255, 0.035),
+    0 24px 70px rgba(0, 0, 0, 0.55),
+    0 0 42px rgba(255, 211, 110, 0.18),
+    inset 0 0 0 2px rgba(255, 255, 255, 0.10),
+    inset 0 0 30px rgba(0, 0, 0, 0.42) !important;
+  z-index: 1 !important;
+  overflow: visible !important;
+  transform: rotate(0deg) !important;
+  will-change: transform !important;
+}
+
+.ax-wheel-rotor::after {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  border-radius: 50% !important;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255, 255, 255, 0.34), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.34)) !important;
+  mix-blend-mode: soft-light !important;
+  pointer-events: none !important;
+  z-index: 2 !important;
+}
+
+.ax-wheel-segment-label {
+  position: absolute !important;
+  left: 50% !important;
+  top: 50% !important;
+  z-index: 3 !important;
+  width: 94px !important;
+  min-height: 30px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 5px 7px !important;
+  border-radius: 11px !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  background: rgba(4, 7, 20, 0.30) !important;
+  color: #ffffff !important;
+  font-family: var(--display, sans-serif) !important;
+  font-size: clamp(12px, 3.4vw, 18px) !important;
+  font-weight: 900 !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.02em !important;
+  text-align: center !important;
+  text-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.70),
+    0 0 12px rgba(255, 211, 110, 0.18) !important;
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.12),
+    0 8px 18px rgba(0, 0, 0, 0.24) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+  pointer-events: none !important;
+  white-space: normal !important;
+  word-break: keep-all !important;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--ax-angle))
+    translateY(calc(-1 * var(--ax-wheel-label-radius))) !important;
+  transform-origin: 50% 50% !important;
+}
+
+.ax-wheel-hub-fixed {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 4 !important;
+  display: grid !important;
+  place-items: center !important;
+  pointer-events: none !important;
+  font-size: clamp(46px, 13vw, 82px) !important;
+  line-height: 1 !important;
+  filter:
+    drop-shadow(0 0 18px rgba(255, 79, 154, 0.58))
+    drop-shadow(0 0 36px rgba(255, 211, 110, 0.30)) !important;
+  animation: axHeartBeat 1.25s ease-in-out infinite !important;
+}
+
+.ax-wheel-pointer {
+  position: absolute !important;
+  top: -9px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  z-index: 6 !important;
+  font-size: 29px !important;
+  line-height: 1 !important;
+  color: #ffd36e !important;
+  text-shadow:
+    0 0 16px rgba(255, 211, 110, 0.78),
+    0 4px 10px rgba(0, 0, 0, 0.55) !important;
+  pointer-events: none !important;
+}
+
+.ax-wheel-result {
+  position: relative !important;
+  z-index: 5 !important;
+  width: min(92vw, 360px) !important;
+  padding: 14px 16px !important;
+  border-radius: 18px !important;
+  border: 1px solid rgba(255, 211, 110, 0.38) !important;
+  background: rgba(12, 15, 38, 0.90) !important;
+  color: #ffffff !important;
+  text-align: center !important;
+  display: grid !important;
+  gap: 7px !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.34) !important;
+}
+
+.ax-wheel-result.hidden {
+  display: none !important;
+}
+
+.ax-wheel-result strong {
+  color: #ffd36e !important;
+  font-size: 19px !important;
+  font-weight: 900 !important;
+}
+
+.ax-wheel-result span {
+  color: #cbd0f0 !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+}
+
+.ax-wheel-hub,
+.ax-wheel-rays {
+  display: none !important;
+}
+
+@keyframes axWheelAura {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes axHeartBeat {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.085);
+  }
+}
+
+/* ═══ AX_GIFT_SIDE_FIXED_V1 ═══ */
+
+.ax-gift-side {
+  position: fixed !important;
+  top: 50% !important;
+  bottom: auto !important;
+  transform: translateY(-50%) !important;
+  z-index: 950 !important;
+  width: 58px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 6px !important;
+  pointer-events: none !important;
+}
+
+.ax-gift-side.hidden {
+  display: none !important;
+}
+
+.ax-gift-side-girls {
+  right: 8px !important;
+  left: auto !important;
+}
+
+.ax-gift-side-boys {
+  left: 8px !important;
+  right: auto !important;
+}
+
+.ax-gift-side .ax-goal-track {
+  pointer-events: none !important;
+  width: 17px !important;
+  height: 132px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 211, 110, 0.24) !important;
+  background: rgba(255, 255, 255, 0.07) !important;
+  box-shadow:
+    inset 0 0 12px rgba(0, 0, 0, 0.24),
+    0 8px 18px rgba(0, 0, 0, 0.18) !important;
+}
+
+.ax-gift-side .ax-goal-count {
+  pointer-events: none !important;
+  color: #ffd36e !important;
+  font-size: 9px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
+}
+
+.ax-gift-side .ax-goal-btn {
+  pointer-events: auto !important;
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 211, 110, 0.36) !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+  font-size: 19px !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.24) !important;
+}
+
+.ax-gift-side .ax-goal-btn:active {
+  transform: scale(0.94) !important;
+}
+
+@media (max-height: 720px) {
+  .ax-gift-side {
+    top: auto !important;
+    bottom: 96px !important;
+    transform: none !important;
+  }
+
+  .ax-gift-side .ax-goal-track {
+    height: 96px !important;
+  }
+}
+
+/* ═══ AX_CAPTAIN_YELLOW_INLINE_V1 ═══ */
+
+.captain-slot {
+  align-items: center !important;
+}
+
+.captain-slot .captain-done {
+  flex: 0 0 auto !important;
+}
+
+.ax-captain-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: auto !important;
+  min-width: 22px !important;
+  height: 21px !important;
+  padding: 0 4px !important;
+  margin: 0 0 0 3px !important;
+  border-radius: 6px !important;
+  border: 1px solid rgba(255, 211, 110, 0.38) !important;
+  background: rgba(255, 211, 110, 0.12) !important;
+  color: #ffd36e !important;
+  font-size: 11px !important;
+  line-height: 1 !important;
+  font-weight: 900 !important;
+  flex: 0 0 auto !important;
+  vertical-align: middle !important;
+  cursor: pointer !important;
+}
+
+.ax-captain-btn.used {
+  opacity: 0.42 !important;
+  cursor: not-allowed !important;
+}
