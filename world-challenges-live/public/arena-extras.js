@@ -1,14 +1,13 @@
 (function () {
   'use strict';
 
-  if (window.__AX_V3__) return;
-  window.__AX_V3__ = true;
+  if (window.__AX_V4__) return;
+  window.__AX_V4__ = true;
 
   var CONFIG = {
     giftGoalMax: 20,
     speedQuestions: 3,
     wheelSpinMs: 5000,
-    captainCardReset: 'round',
     sounds: {
       speed: ['speed', 'boom'],
       card: ['card', 'teamwork'],
@@ -73,11 +72,11 @@
   }
 
   function getState() {
+    if (window.state) return window.state;
     try {
-      return state;
-    } catch (e) {
-      return window.state || null;
-    }
+      if (typeof state !== 'undefined') return state;
+    } catch (e) {}
+    return null;
   }
 
   function callGlobal(name, args) {
@@ -287,27 +286,27 @@
     if (boysCount) boysCount.textContent = String(boysValue);
   }
 
-  function updateGiftSidesVisibility() {
+  function setGiftSidesVisible() {
     var gameScreen = $('gameScreen');
     var visible = Boolean(gameScreen && !gameScreen.classList.contains('hidden'));
 
     var girlsSide = $('axGiftGirlsSide');
     var boysSide = $('axGiftBoysSide');
 
-    if (girlsSide) girlsSide.classList.toggle('hidden', !visible);
-    if (boysSide) boysSide.classList.toggle('hidden', !visible);
+    if (girlsSide) girlsSide.classList.toggle('ax-off', !visible);
+    if (boysSide) boysSide.classList.toggle('ax-off', !visible);
   }
 
   function installGiftSides() {
-    if ($('axGiftGirlsSide') || $('axGiftBoysSide')) {
+    if ($('axGiftGirlsSide') && $('axGiftBoysSide')) {
       updateGiftUI();
-      updateGiftSidesVisibility();
+      setGiftSidesVisible();
       return;
     }
 
     var girls = document.createElement('div');
     girls.id = 'axGiftGirlsSide';
-    girls.className = 'ax-gift-side ax-gift-side-girls';
+    girls.className = 'ax-gift-side ax-gift-side-girls ax-off';
     girls.innerHTML =
       '<div class="ax-goal-track"><i id="axGoalGirlsFill"></i></div>' +
       '<div class="ax-goal-count"><span id="axGoalGirlsNum">0</span>/' + CONFIG.giftGoalMax + '</div>' +
@@ -315,7 +314,7 @@
 
     var boys = document.createElement('div');
     boys.id = 'axGiftBoysSide';
-    boys.className = 'ax-gift-side ax-gift-side-boys';
+    boys.className = 'ax-gift-side ax-gift-side-boys ax-off';
     boys.innerHTML =
       '<div class="ax-goal-track"><i id="axGoalBoysFill"></i></div>' +
       '<div class="ax-goal-count"><span id="axGoalBoysNum">0</span>/' + CONFIG.giftGoalMax + '</div>' +
@@ -340,7 +339,7 @@
     }
 
     updateGiftUI();
-    updateGiftSidesVisibility();
+    setGiftSidesVisible();
   }
 
   function addGift(team, amount) {
@@ -384,23 +383,24 @@
     }
   }
 
-  /* ═══ 3) كارت أصفر للكباتن — بجانب زر التأكيد فقط ═══ */
+  /* ═══ 3) كارت أصفر للكباتن — بجانب زر done فقط ═══ */
 
   function detectCaptainTeam(slot, input) {
-    if (input) {
-      var direct = input.getAttribute('data-team');
-      if (direct) return direct;
+    if (input && input.dataset && input.dataset.team) {
+      return input.dataset.team;
+    }
 
+    if (input) {
       var teamHost = input.closest('[data-team]');
       if (teamHost) return teamHost.getAttribute('data-team');
     }
 
     if (slot) {
-      if (slot.closest('.team-score-girls, .captain-girls, .girls-column, [data-team="girls"]')) {
+      if (slot.closest('.girls, .team-girls, .captain-girls, [data-team="girls"]')) {
         return 'girls';
       }
 
-      if (slot.closest('.team-score-boys, .captain-boys, .boys-column, [data-team="boys"]')) {
+      if (slot.closest('.boys, .team-boys, .captain-boys, [data-team="boys"]')) {
         return 'boys';
       }
     }
@@ -409,20 +409,20 @@
   }
 
   function getCaptainSlotIndex(input, slot, team) {
-    if (input && input.getAttribute('data-slot')) {
-      return input.getAttribute('data-slot');
-    }
-
-    if (slot && slot.parentNode) {
-      var children = Array.prototype.slice.call(slot.parentNode.children);
-      var index = children.indexOf(slot);
-      if (index >= 0) return String(index);
+    if (input && input.dataset && input.dataset.slot) {
+      return input.dataset.slot;
     }
 
     if (input && team) {
-      var inputs = $$('.captain-input[data-team="' + team + '"]');
-      var inputIndex = inputs.indexOf(input);
-      if (inputIndex >= 0) return String(inputIndex);
+      var list = $$('.captain-input[data-team="' + team + '"]');
+      var idx = list.indexOf(input);
+      if (idx >= 0) return String(idx);
+    }
+
+    if (slot && slot.parentNode) {
+      var kids = Array.prototype.slice.call(slot.parentNode.children);
+      var idx2 = kids.indexOf(slot);
+      if (idx2 >= 0) return String(idx2);
     }
 
     return '0';
@@ -430,7 +430,7 @@
 
   function refreshCaptainButtons() {
     $$('.ax-captain-btn').forEach(function (button) {
-      var key = button.dataset.axKey || '';
+      var key = button.getAttribute('data-ax-key') || '';
       var parts = key.split(':');
       var team = parts[0];
       var slot = parts[1];
@@ -442,17 +442,17 @@
   }
 
   function installCaptainCards() {
-    var hosts = $$('.captain-slot');
+    var slots = $$('.captain-slot');
 
-    if (!hosts.length) {
-      hosts = $$('.captain-input').map(function (input) {
+    if (!slots.length) {
+      slots = $$('.captain-input').map(function (input) {
         return input.parentElement;
-      });
+      }).filter(Boolean);
     }
 
     var seen = [];
 
-    hosts.forEach(function (slot) {
+    slots.forEach(function (slot) {
       if (!slot || seen.indexOf(slot) !== -1) return;
       seen.push(slot);
 
@@ -469,24 +469,23 @@
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'ax-captain-btn';
-      button.dataset.axKey = key;
+      button.setAttribute('data-ax-key', key);
       button.textContent = '🟨';
       button.title = 'كارت أصفر';
       button.disabled = Boolean(used);
       button.classList.toggle('used', Boolean(used));
 
-      var confirmButton = slot.querySelector('.captain-done');
-      if (!confirmButton) {
-        confirmButton = slot.querySelector('button:not(.ax-captain-btn)');
-      }
+      var doneButton = slot.querySelector('.captain-done');
 
-      if (confirmButton && confirmButton.parentNode) {
-        confirmButton.parentNode.insertBefore(button, confirmButton.nextSibling);
+      if (doneButton && doneButton.parentNode) {
+        doneButton.parentNode.insertBefore(button, doneButton.nextSibling);
       } else {
         slot.appendChild(button);
       }
 
-      button.addEventListener('click', function () {
+      button.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
         useCaptainCard(team, slotIndex, input ? input.value.trim() : '', button);
       });
     });
@@ -590,7 +589,7 @@
     {
       id: 'x3',
       title: 'الدعم X3',
-      short: 'X3 دعم',
+      short: '×3 دعم',
       desc: 'نقاط السؤال القادم ×3',
       sound: 'fight',
       apply: function () {
@@ -610,7 +609,7 @@
     {
       id: 'yellow',
       title: 'كارت أصفر',
-      short: 'كارت 🟨',
+      short: 'كارت',
       desc: 'اختر الفريق الذي سيُحظر في السؤال القادم',
       sound: 'teamwork',
       apply: null
@@ -618,7 +617,7 @@
     {
       id: 'x2',
       title: 'السؤال التالي X2',
-      short: 'X2',
+      short: '×2',
       desc: 'مضاعفة نقاط السؤال القادم',
       sound: 'advice',
       apply: function () {
@@ -673,75 +672,66 @@
     }
   }
 
-  /* __AX_WHEEL_CINEMATIC_V1__ */
-function openWheel() {
-  if (AX.wheelBusy || $('axWheelOverlay')) return;
+  function openWheel() {
+    if (AX.wheelBusy || $('axWheelOverlay')) return;
 
-  AX.wheelBusy = true;
+    AX.wheelBusy = true;
 
-  var result = WHEEL_RESULTS[Math.floor(Math.random() * WHEEL_RESULTS.length)];
-  var segment = 360 / WHEEL_RESULTS.length;
-  var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad'];
+    var result = WHEEL_RESULTS[Math.floor(Math.random() * WHEEL_RESULTS.length)];
+    var segment = 360 / WHEEL_RESULTS.length;
+    var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad'];
 
-  var wheelLabels = {
-    x3: '×3 دعم',
-    swap: 'تبديل',
-    yellow: 'كارت',
-    x2: '×2',
-    snatch: 'اخطف'
-  };
+    var stops = WHEEL_RESULTS.map(function (item, index) {
+      var start = index * segment;
+      var end = (index + 1) * segment;
+      return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
+    }).join(', ');
 
-  var stops = WHEEL_RESULTS.map(function (item, index) {
-    var start = index * segment;
-    var end = (index + 1) * segment;
-    return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
-  }).join(', ');
+    var labels = WHEEL_RESULTS.map(function (item) {
+      var angle = item.index * segment + segment / 2;
+      var text = item.short || item.title;
 
-  var labels = WHEEL_RESULTS.map(function (item) {
-    var angle = item.index * segment + segment / 2;
-    var text = wheelLabels[item.id] || item.short || item.title;
+      return (
+        '<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
+        esc(text) +
+        '</span>'
+      );
+    }).join('');
 
-    return (
-      '<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
-      esc(text) +
-      '</span>'
-    );
-  }).join('');
-
-  var html =
-    '<div class="ax-wheel-stage">' +
-      '<div class="ax-wheel-wrap">' +
-        '<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
-          labels +
+    var html =
+      '<div class="ax-wheel-stage">' +
+        '<div class="ax-wheel-wrap">' +
+          '<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
+            labels +
+          '</div>' +
+          '<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
+          '<div class="ax-wheel-pointer">▼</div>' +
         '</div>' +
-        '<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
-        '<div class="ax-wheel-pointer">▼</div>' +
-      '</div>' +
-      '<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
-    '</div>';
+        '<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
+      '</div>';
 
-  createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
+    createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
 
-  var rotor = $('axWheelRotor');
+    var rotor = $('axWheelRotor');
 
-  if (!rotor) {
-    AX.wheelBusy = false;
-    return;
+    if (!rotor) {
+      AX.wheelBusy = false;
+      return;
+    }
+
+    var center = result.index * segment + segment / 2;
+    var targetRotation = (360 * 5) - center;
+
+    requestAnimationFrame(function () {
+      rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
+      rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
+    });
+
+    setTimeout(function () {
+      showWheelResult(result);
+      AX.wheelBusy = false;
+    }, CONFIG.wheelSpinMs + 180);
   }
-
-  var center = result.index * segment + segment / 2;
-  var targetRotation = (360 * 5) - center;
-
-  requestAnimationFrame(function () {
-    rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
-    rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
-  });
-
-  setTimeout(function () {
-    showWheelResult(result);
-    AX.wheelBusy = false;
-  }, CONFIG.wheelSpinMs + 180);
-}
 
   function showWheelResult(result) {
     var box = $('axWheelResult');
@@ -825,7 +815,7 @@ function openWheel() {
     }
 
     updateBadges();
-    updateGiftSidesVisibility();
+    setGiftSidesVisible();
   }
 
   function resetRound() {
@@ -840,21 +830,23 @@ function openWheel() {
 
     AX.speedLeft = 0;
 
-    if (CONFIG.captainCardReset === 'round') {
-      AX.captainUsed = { girls: {}, boys: {} };
-      refreshCaptainButtons();
-    }
+    AX.captainUsed = {
+      girls: {},
+      boys: {}
+    };
 
+    refreshCaptainButtons();
     updateBadges();
   }
 
   function resetShow() {
     resetRound();
 
-    AX.giftGoal = { girls: 0, boys: 0 };
-    AX.captainUsed = { girls: {}, boys: {} };
+    AX.giftGoal = {
+      girls: 0,
+      boys: 0
+    };
 
-    refreshCaptainButtons();
     updateGiftUI();
   }
 
@@ -882,8 +874,12 @@ function openWheel() {
       window.applyPoint = function (team, points) {
         try {
           if (AX.blockedTeam === team) {
+            AX.blockedTeam = null;
+            updateBadges();
+
             toastSafe('محظور بالكارت الأصفر — لا نقاط في هذا السؤال', 'YELLOW CARD');
             playSoundSafe('wrong', 0.38);
+
             return;
           }
         } catch (e) {}
@@ -905,7 +901,7 @@ function openWheel() {
           }
 
           if (usedMultiplier) {
-            toastSafe('تم تطبيق المضاعف على هذا السؤال', 'MULTIPLIER');
+            toastSafe('تم تطبيق المضاعف', 'MULTIPLIER');
           }
 
           updateBadges();
@@ -950,12 +946,36 @@ function openWheel() {
         var result = originalShowScreen.apply(this, arguments);
 
         try {
-          updateGiftSidesVisibility();
+          setGiftSidesVisible();
         } catch (e) {}
 
         return result;
       };
     }
+  }
+
+  function watchGameScreen() {
+    var gameScreen = $('gameScreen');
+
+    if (!gameScreen) {
+      setTimeout(watchGameScreen, 500);
+      return;
+    }
+
+    if (window.MutationObserver) {
+      new MutationObserver(function () {
+        setGiftSidesVisible();
+      }).observe(gameScreen, {
+        attributes: true,
+        attributeFilter: ['class']
+      });
+    } else {
+      setInterval(function () {
+        setGiftSidesVisible();
+      }, 700);
+    }
+
+    setGiftSidesVisible();
   }
 
   function observeDynamicUI() {
@@ -973,7 +993,7 @@ function openWheel() {
         refreshCaptainButtons();
         updateGiftUI();
         updateBadges();
-        updateGiftSidesVisibility();
+        setGiftSidesVisible();
       }, 250);
     }
 
@@ -994,10 +1014,11 @@ function openWheel() {
     installCaptainCards();
 
     patchLifecycle();
+    watchGameScreen();
 
     updateBadges();
     updateGiftUI();
-    updateGiftSidesVisibility();
+    setGiftSidesVisible();
     observeDynamicUI();
   }
 
