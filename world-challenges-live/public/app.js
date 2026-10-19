@@ -1939,3 +1939,82 @@ document.addEventListener('DOMContentLoaded', init);
     } catch (e) {}
   };
 })();
+
+/* ═══ __FLAG_RENDER_IN_APP_V1__ ═══ */
+(function () {
+  'use strict';
+
+  function isFlagPath(text) {
+    if (!text || typeof text !== 'string') return false;
+    const t = text.trim();
+    // يقبل: flags/xx.svg, /flags/xx.svg, flags/xx.svg/, /flags/xx.svg/
+    return /^(\/?)?flags\/[a-z]{2}\.svg\/?$/i.test(t);
+  }
+
+  function normalizeFlagSrc(text) {
+    let t = String(text || '').trim();
+    // إزالة الشرطة المائلة الزائدة في النهاية
+    if (t.endsWith('/')) t = t.slice(0, -1);
+    // التأكد من وجود الشرطة المائلة الأولى
+    if (!t.startsWith('/')) t = '/' + t;
+    return t;
+  }
+
+  function renderFlagIntoElement(el, src) {
+    if (!el) return;
+
+    el.innerHTML = '';
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'huge-flag-container';
+    
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = 'خمن الدولة من العلم';
+    img.draggable = false;
+    img.loading = 'eager';
+    
+    wrapper.appendChild(img);
+    el.appendChild(wrapper);
+  }
+
+  const originalRenderQuestion = window.renderQuestion;
+
+  window.renderQuestion = function () {
+    const result = typeof originalRenderQuestion === 'function' 
+      ? originalRenderQuestion.apply(this, arguments) 
+      : undefined;
+
+    try {
+      const st = window.state;
+      if (!st || !Array.isArray(st.questions)) return result;
+
+      const q = st.questions[st.currentIndex];
+      if (!q || !isFlagPath(q.question)) return result;
+
+      const src = normalizeFlagSrc(q.question);
+      const questionEl = document.getElementById('questionText');
+      
+      if (questionEl) {
+        renderFlagIntoElement(questionEl, src);
+      }
+
+      // إخفاء رقم السؤال والفئة لأنها لا معنى لها مع الأعلام
+      const numEl = document.getElementById('questionNumber');
+      const catEl = document.getElementById('categoryBadge');
+      
+      if (numEl) numEl.style.display = 'none';
+      if (catEl) catEl.textContent = '🏳️ خمن الدولة';
+
+      // تحديث منطقة الاختيارات
+      const grid = document.getElementById('optionsGrid');
+      if (grid) {
+        grid.innerHTML = '<div class="think-pill huge-flag-hint">🔍 حدّد الدولة من شكل العلم...</div>';
+      }
+    } catch (e) {
+      console.warn('Flag render error:', e);
+    }
+
+    return result;
+  };
+})();
