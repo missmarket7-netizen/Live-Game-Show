@@ -1,0 +1,854 @@
+{
+  "root": "/workspaces/Live-Game-Show/world-challenges-live",
+  "package": {
+    "type": "module",
+    "scripts": [
+      "start",
+      "dev"
+    ],
+    "dependencies": [
+      "@libsql/client",
+      "dotenv",
+      "express",
+      "tiktok-live-connector"
+    ],
+    "devDependencies": []
+  },
+  "server": {
+    "path": "/workspaces/Live-Game-Show/world-challenges-live/server/server.js",
+    "envNames": [
+      "GEMINI_API_KEY",
+      "OPENROUTER_API_KEY",
+      "GROQ_API_KEY",
+      "RAILWAY_VOLUME_MOUNT_PATH",
+      "TURSO_URL",
+      "TURSO_DATABASE_URL",
+      "TURSO_AUTH_TOKEN",
+      "TURSO_TOKEN",
+      "PORT"
+    ],
+    "checks": {
+      "hasApiQuestions": true,
+      "hasGenerate": true,
+      "hasHealth": true,
+      "hasCycleStatus": true,
+      "hasResetCycle": true,
+      "hasTursoOrLibsql": true,
+      "hasServedState": true,
+      "hasAvoid": true,
+      "hasGraduatedDifficulty": true,
+      "readsAllJsonMaybe": true,
+      "importsLiveConnector": true
+    },
+    "routeOrder": {
+      "attachLiveRoutesIndex": 162,
+      "fallbackIndex": 761,
+      "liveProbablyBeforeFallback": true
+    },
+    "liveConnectorPath": "/workspaces/Live-Game-Show/world-challenges-live/server/live-connector.js",
+    "liveChecks": {
+      "hasLiveEvents": true,
+      "hasLiveFollow": false,
+      "hasLiveCommunity": false,
+      "hasLeaderboard": true
+    }
+  },
+  "questions": {
+    "dirs": [
+      "/workspaces/Live-Game-Show/world-challenges-live/server/questions"
+    ],
+    "files": [
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "count": 150
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "count": 95
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json",
+        "count": 100
+      },
+      {
+        "path": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "count": 24
+      }
+    ],
+    "total": 1119,
+    "unique": 1083,
+    "duplicatesCount": 36,
+    "invalidCount": 114,
+    "categories": {
+      "رياضة": 90,
+      "جغرافيا": 90,
+      "تاريخ": 90,
+      "سينما مصرية": 120,
+      "دين": 295,
+      "سرعة": 114,
+      "علوم": 90,
+      "سينما عربية": 60,
+      "معلومات عامة": 90,
+      "قرآن": 23,
+      "سيرة": 24,
+      "صحابة": 18,
+      "أنبياء": 15
+    },
+    "difficulties": {
+      "متوسط": 988,
+      "سهل": 105,
+      "صعب": 26
+    },
+    "shapes": {
+      "options_length_4": 1005,
+      "multi_choice_valid": 1005,
+      "has_explanation": 1119,
+      "options_length_0": 114,
+      "free_question": 114
+    },
+    "summary": {
+      "total": 1119,
+      "unique": 1083,
+      "duplicates": 36,
+      "invalid": 114,
+      "singleAnswerValid": 0,
+      "multiChoiceValid": 1005,
+      "freeQuestions": 114,
+      "hasAnswerField": 0,
+      "hasExplanation": 1119
+    },
+    "duplicates": [
+      {
+        "question": "كم عدد سور القرآن الكريم؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما أطول سورة في القرآن؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما أقصر سورة في القرآن؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما السورة التي لا تبدأ بالبسملة؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما أول ما نزل من القرآن؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما السورة التي وردت فيها البسملة مرتين؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من أول مؤذن في الإسلام؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من الصحابي الملقب بالفاروق؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من الصحابي الملقب بذي النورين؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من أكثر الصحابة رواية للحديث؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من النبي الذي ابتلعه الحوت؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "من النبي الذي بنى السفينة؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "كم عدد أركان الإسلام؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "كم عدد أركان الإيمان؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "كم عدد الصلوات المفروضة يومياً؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما أول قبلة للمسلمين؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما العيد الذي يأتي بعد رمضان؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما العيد المرتبط بموسم الحج؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json"
+      },
+      {
+        "question": "ما أطول سورة في القرآن الكريم؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "ما السورة التي لا تبدأ بالبسملة؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "ما السورة التي وردت فيها البسملة مرتين؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "ما السورة التي تُسمى أم الكتاب؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "ما السورة التي تعدل ثلث القرآن؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "ما السورة التي تنتهي بقوله تعالى (من الجنة والناس)؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "كم عدد أجزاء القرآن الكريم؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "من النبي الملقب بخليل الله؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "من النبي الملقب بذبيح الله؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "من أول شهيدة في الإسلام؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "كم عدد سجدات التلاوة في القرآن؟",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_religion.json"
+      },
+      {
+        "question": "اسم نادي مصري من كلمتين",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم فاكهة من 4 حروف",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم خضار يبدأ بحرف ب",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم مشروب ساخن من 4 حروف",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم لون من 4 حروف",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم شهر من 4 حروف",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      },
+      {
+        "question": "اسم بحر يبدأ بحرف أ",
+        "firstFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "currentFile": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json"
+      }
+    ],
+    "invalidSamples": [
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم ولد يبدأ بحرف ك",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم رياضة تبدأ بحرف ت",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم دولة آسيوية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم أداة تبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم مدينة مصرية من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم حلوى مصرية",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم فيلم مصري يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم ممثلة عربية تبدأ بحرف ل",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم شهر يبدأ بحرف أ",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم شخصية كرتونية من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم نادي مصري من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم مطربة عربية تبدأ بحرف ن",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم مدينة مصرية يبدأ بحرف أ",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم طائر يبدأ بحرف ب",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db1.json",
+        "question": "اسم جماد يبدأ بحرف ب",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم رياضة من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم أكلة مصرية من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم محافظة مصرية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم مطرب عربي يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم خضار يبدأ بحرف ب",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم أغنية من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم طائر يبدأ بحرف ح",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم وجبة إفطار مصرية",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم ممثل عربي يبدأ بحرف ن",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم ولد يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم منتخب يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم نهر يبدأ بحرف ن",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم مسلسل مصري من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم بحر يبدأ بحرف أ",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db2.json",
+        "question": "اسم مدينة تبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم دولة تبدأ بحرف ب",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم فاكهة تبدأ بحرف ت",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم عاصمة تبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم خضار من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم آلة موسيقية من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم بنت من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم بنت يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم فيلم عربي من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم مخرج مصري يبدأ بحرف ش",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم مادة دراسية تبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم مخرج عربي يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم محافظة مصرية تبدأ بحرف د",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم آلة موسيقية تبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم شيء موجود في المدرسة يبدأ بحرف ك",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db3.json",
+        "question": "اسم لاعب مصري يبدأ بحرف ح",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم حيوان يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم شهر من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم حيوان من 3 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم مدينة عربية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم حيوان بحري يبدأ بحرف د",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم بلد يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم مسلسل عربي يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم عاصمة من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم مشروب ساخن من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم دولة تبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم شيء موجود في المطبخ يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم بلد من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم لون من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم نبات من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db4.json",
+        "question": "اسم نادي كرة قدم يبدأ بحرف أ",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم ممثلة مصرية تبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم جماد من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم عاصمة تبدأ بحرف ب",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم دولة تبدأ بحرف ك",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم دولة أفريقية من 6 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم يوم يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم حشرة من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم نبات يبدأ بحرف ر",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم شيء في السيارة يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم محافظة مصرية تبدأ بحرف ق",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم شخصية كرتونية تبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم فاكهة من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم مهنة تبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم مادة دراسية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db5.json",
+        "question": "اسم لاعب كرة قدم يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم بنت من 5 حروف يبدأ بحرف م",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم ولد من 4 حروف يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم بنت من 4 حروف ينتهي بحرف ة",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم ولد من 5 حروف يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم دولة من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم دولة عربية من 6 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم مدينة مصرية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم حيوان من 4 حروف يبدأ بحرف ف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم حيوان من 5 حروف يبدأ بحرف أ",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم أكلة مصرية من 5 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم فاكهة من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم حيوان من 5 حروف يبدأ بحرف ن",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم شيء في البيت من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم دولة يبدأ بحرف ك",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db6.json",
+        "question": "اسم ولد يبدأ بحرف ك ويتكون من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم فيلم مصري من كلمتين يبدأ بحرف ا",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم ممثل مصري يبدأ بحرف ع",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم ممثلة مصرية يبدأ بحرف س",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم مسلسل عربي من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم مخرج مصري يبدأ بحرف ي",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم أغنية مصرية من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم مدينة مصرية يبدأ بحرف ش",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم نادي مصري من كلمتين",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم حيوان من 4 حروف يبدأ بحرف ق",
+        "reason": "no valid options/correctIndex and no answer field"
+      },
+      {
+        "file": "/workspaces/Live-Game-Show/world-challenges-live/server/questions/db7_speed.json",
+        "question": "اسم فاكهة من 4 حروف",
+        "reason": "no valid options/correctIndex and no answer field"
+      }
+    ]
+  },
+  "frontend": {
+    "appPath": "/workspaces/Live-Game-Show/world-challenges-live/public/app.js",
+    "appChecks": {
+      "hasRevealAnswer": true,
+      "rendersOptions": true,
+      "usesAnswerText": true,
+      "usesExplanationText": true,
+      "hasIsFreeQuestion": true,
+      "hasSingleAnswerPatch": false,
+      "callsApiQuestions": true,
+      "historyKey": "lgs_question_history_v7",
+      "savedKey": "lgs_saved_sets_v7"
+    },
+    "indexPath": "/workspaces/Live-Game-Show/world-challenges-live/public/index.html",
+    "scripts": [
+      "/app.js?v=35",
+      "arena-extras.js?v=35"
+    ],
+    "styles": [
+      "/style.css?v=35",
+      "arena-extras.css?v=35"
+    ],
+    "scriptOrder": {
+      "appIndex": 0,
+      "arenaIndex": 1,
+      "featuresIndex": -1
+    }
+  },
+  "warnings": []
+}

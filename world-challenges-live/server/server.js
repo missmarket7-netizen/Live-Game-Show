@@ -1,3 +1,4 @@
+import { installNoRepeatEngine } from "./no-repeat-engine.js";
 import "dotenv/config";
 import express from "express";
 import path from "node:path";
@@ -9,6 +10,8 @@ import { createClient } from "@libsql/client";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+installNoRepeatEngine(app);
+
 
 app.use((req, res, next) => {
   if (req.body === undefined) req.body = {};
