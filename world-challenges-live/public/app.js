@@ -472,7 +472,7 @@ function renderQuestion() {
   $('questionCounter').textContent = 'السؤال ' + String(state.currentIndex + 1).padStart(2, '0') + ' / ' + String(state.questions.length).padStart(2, '0');
   $('questionNumber').textContent = String(state.currentIndex + 1).padStart(2, '0');
   $('categoryBadge').textContent = (categoryEmoji[q.category] || '◈') + ' ' + (q.category || 'اختيارات متنوعة');
-  $('questionText').textContent = q.question;
+  /* __FLAG_RENDER_CALL_FIXED__ */ setQuestionVisual(q);
   $('answerText').textContent = '—';
   $('explanationText').textContent = '—';
   $('answerReveal').classList.add('hidden');
