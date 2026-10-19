@@ -1465,3 +1465,31 @@ body:has(#liveStatsChip) .floating-sound-controls {
     padding: 12px !important;
   }
 }
+/* ═══ SMART_FLAG_ERROR_CSS_V1 ═══ */
+.smart-flag-wrap {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: clamp(260px, 50vh, 420px) !important;
+}
+
+.smart-flag-error {
+  color: #ff83bd !important;
+  font-size: 18px !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+  padding: 40px 20px !important;
+  background: rgba(255, 79, 154, 0.08) !important;
+  border: 2px dashed rgba(255, 79, 154, 0.3) !important;
+  border-radius: 16px !important;
+}
+
+.smart-flag-error small {
+  display: block !important;
+  margin-top: 10px !important;
+  color: #cbd0f0 !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  opacity: 0.7 !important;
+}

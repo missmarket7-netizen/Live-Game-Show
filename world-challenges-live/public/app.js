@@ -2018,3 +2018,88 @@ document.addEventListener('DOMContentLoaded', init);
     return result;
   };
 })();
+
+/* ═══ __SMART_FLAG_RENDER_V2__ ═══ */
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  function getState() { return window.state || null; }
+  function getCurrentQuestion() {
+    var st = getState();
+    if (!st || !Array.isArray(st.questions)) return null;
+    return st.questions[st.currentIndex] || null;
+  }
+
+  // يقبل أي شكل: flags/xx.svg, /flags/xx.svg, flags/xx.svg/, ./flags/xx.svg
+  function isFlagLike(text) {
+    if (!text || typeof text !== 'string') return false;
+    var t = text.trim().toLowerCase();
+    return t.includes('flags/') && t.endsWith('.svg');
+  }
+
+  // تحويل أي شكل إلى مسار مطلق صحيح: /flags/xx.svg
+  function toAbsoluteFlagSrc(text) {
+    var t = String(text || '').trim();
+    while (t.startsWith('./')) t = t.slice(2);
+    while (t.startsWith('/')) t = t.slice(1);
+    while (t.endsWith('/')) t = t.slice(0, -1);
+    if (!t.startsWith('flags/')) t = 'flags/' + t;
+    return '/' + t;
+  }
+
+  function renderAsBigImage(container, src, altText) {
+    container.innerHTML = '';
+    var wrap = document.createElement('div');
+    wrap.className = 'huge-flag-container smart-flag-wrap';
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = altText || 'خمن الدولة من العلم';
+    img.draggable = false;
+    img.loading = 'eager';
+    img.onerror = function () {
+      wrap.innerHTML = '<div class="smart-flag-error">🏳️ تعذر تحميل العلم<br><small>' + src + '</small></div>';
+    };
+    wrap.appendChild(img);
+    container.appendChild(wrap);
+  }
+
+  var originalRenderQuestion = window.renderQuestion;
+
+  window.renderQuestion = function () {
+    var result;
+    try {
+      if (typeof originalRenderQuestion === 'function') {
+        result = originalRenderQuestion.apply(this, arguments);
+      }
+    } catch (e) {}
+
+    try {
+      var q = getCurrentQuestion();
+      if (!q || !isFlagLike(q.question)) return result;
+
+      var src = toAbsoluteFlagSrc(q.question);
+      var questionEl = $('questionText');
+      
+      if (questionEl) {
+        renderAsBigImage(questionEl, src, q.explanation ? '' : 'خمن الدولة من العلم');
+        
+        // إخفاء رقم السؤال والفئة لأنها لا معنى لها مع الأعلام
+        var numEl = $('questionNumber');
+        var catEl = $('categoryBadge');
+        if (numEl) numEl.style.display = 'none';
+        if (catEl) catEl.textContent = '🏳️ خمن الدولة';
+      }
+
+      // منطقة الاختيارات تصبح تلميحاً بسيطاً
+      var grid = $('optionsGrid');
+      if (grid) {
+        grid.innerHTML = '<div class="think-pill huge-flag-hint">🔍 حدّد الدولة من شكل العلم...</div>';
+      }
+    } catch (e) {
+      console.warn('Smart flag render error:', e);
+    }
+
+    return result;
+  };
+})();
