@@ -1411,3 +1411,57 @@ body:has(#liveStatsChip) .floating-sound-controls {
   width: 100%;
   text-align: center;
 }
+/* ═══ HUGE_FLAG_CSS_V1 ═══ */
+
+.huge-flag-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  height: clamp(280px, 55vh, 450px) !important;
+  margin: 10px auto !important;
+  padding: 15px !important;
+  background: rgba(255, 255, 255, 0.03) !important;
+  border: 2px solid rgba(255, 211, 110, 0.25) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 211, 110, 0.05) !important;
+  overflow: hidden !important;
+}
+
+.huge-flag-container img {
+  max-width: 90% !important;
+  max-height: 90% !important;
+  width: auto !important;
+  height: auto !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.5)) brightness(1.05) contrast(1.1) !important;
+  transition: transform 0.3s ease !important;
+}
+
+.huge-flag-container:hover img {
+  transform: scale(1.02) !important;
+}
+
+.huge-flag-hint {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  color: #ffd36e !important;
+  text-align: center !important;
+  padding: 15px !important;
+  background: rgba(255, 211, 110, 0.08) !important;
+  border: 1px dashed rgba(255, 211, 110, 0.3) !important;
+  border-radius: 12px !important;
+  letter-spacing: 0.5px !important;
+}
+
+@media (max-width: 480px) {
+  .huge-flag-container {
+    height: clamp(220px, 45vh, 350px) !important;
+    padding: 10px !important;
+  }
+  
+  .huge-flag-hint {
+    font-size: 14px !important;
+    padding: 12px !important;
+  }
+}
