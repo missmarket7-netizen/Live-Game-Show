@@ -2182,3 +2182,88 @@ document.addEventListener('DOMContentLoaded', init);
     return result;
   };
 })();
+
+/* ═══ __LOCAL_FLAG_RENDER_V4__ ═══ */
+(function () {
+  'use strict';
+
+  function isLocalFlagPath(text) {
+    if (!text || typeof text !== 'string') return false;
+    var t = text.trim().toLowerCase();
+    return t.startsWith('/flags/') && t.endsWith('.svg');
+  }
+
+  function renderLocalFlag(container, src) {
+    container.innerHTML = '';
+    container.style.cssText =
+      'display:flex!important;align-items:center!important;justify-content:center!important;' +
+      'min-height:clamp(220px,50vh,400px)!important;padding:15px!important;' +
+      'background:rgba(255,255,255,.02)!important;border-radius:16px!important;' +
+      'border:2px solid rgba(255,211,110,.2)!important;';
+
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = 'خمن الدولة من العلم';
+    img.draggable = false;
+    img.loading = 'eager';
+    img.style.cssText =
+      'max-width:85%!important;max-height:85%!important;width:auto!important;height:auto!important;' +
+      'object-fit:contain!important;border-radius:8px!important;' +
+      'box-shadow:0 15px 50px rgba(0,0,0,.6),0 0 40px rgba(255,211,110,.1)!important;' +
+      'filter:drop-shadow(0 4px 12px rgba(0,0,0,.5)) brightness(1.05)!important;';
+
+    img.onerror = function () {
+      container.innerHTML =
+        '<div style="color:#ff83bd;font-size:18px;font-weight:900;text-align:center;padding:40px;">' +
+        '🏳️ تعذر تحميل العلم<br><small style="color:#9298bf;font-size:12px;margin-top:10px;display:block;">' +
+        src + '</small></div>';
+    };
+
+    container.appendChild(img);
+  }
+
+  var originalRenderQuestion = window.renderQuestion;
+
+  window.renderQuestion = function () {
+    var result;
+    try {
+      if (typeof originalRenderQuestion === 'function') {
+        result = originalRenderQuestion.apply(this, arguments);
+      }
+    } catch (e) {}
+
+    try {
+      var st = window.state;
+      if (!st || !Array.isArray(st.questions)) return result;
+
+      var q = st.questions[st.currentIndex];
+      
+      // التحقق من المسار المحلي أو الرابط الخارجي
+      var isFlag = isLocalFlagPath(q.question) || 
+                   (typeof q.question === 'string' && q.question.startsWith('http') && q.question.includes('flag'));
+      
+      if (!q || !isFlag) return result;
+
+      var questionEl = document.getElementById('questionText');
+      if (questionEl) {
+        renderLocalFlag(questionEl, q.question);
+      }
+
+      var numEl = document.getElementById('questionNumber');
+      var catEl = document.getElementById('categoryBadge');
+      if (numEl) numEl.style.display = 'none';
+      if (catEl) catEl.textContent = '🏳️ خمن الدولة';
+
+      var grid = document.getElementById('optionsGrid');
+      if (grid) {
+        grid.innerHTML =
+          '<div class="think-pill" style="font-size:15px!important;color:#ffd36e!important;font-weight:800!important;">' +
+          '🔍 حدّد الدولة من شكل العلم...</div>';
+      }
+    } catch (e) {
+      console.warn('Local flag render error:', e);
+    }
+
+    return result;
+  };
+})();
