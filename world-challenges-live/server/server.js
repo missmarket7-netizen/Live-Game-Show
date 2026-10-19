@@ -116,97 +116,131 @@ function shuffleArray(input) {
 }
 
 /* __SANITIZE_SINGLE_ANSWER_V1__ */
-function sanitizeQuestion(q) {
-  if (!q || !q.question) return null;
+/* __SANITIZE_SINGLE_ANSWER_COMPAT_V2__ */
+function sanitizeQuestion(raw) {
+  if (!raw || typeof raw !== "object") return null;
 
-  const question = String(q.question || "").trim();
-  if (!question) return null;
+  var q = {};
+  var keys = Object.keys(raw);
 
-  const category = String(q.category || "معلومات عامة").trim();
-  const difficulty = String(q.difficulty || "متوسط").trim();
-
-  const normalizedCategory = category
-    .replace(/[أإآا]/g, "ا")
-    .replace(/ة/g, "ه")
-    .replace(/ى/g, "ي")
-    .toLowerCase();
-
-  const isFreeCategory =
-    normalizedCategory === "سرعه" ||
-    normalizedCategory === "الغاز" ||
-    normalizedCategory === "لغز" ||
-    normalizedCategory === "speed" ||
-    normalizedCategory === "riddles";
-
-  let rawOptions = [];
-
-  if (Array.isArray(q.options)) {
-    rawOptions = q.options
-      .map((o) => String(o == null ? "" : o).trim())
-      .filter(Boolean);
-  } else if (q.options && typeof q.options === "object") {
-    rawOptions = Object.values(q.options)
-      .map((o) => String(o == null ? "" : o).trim())
-      .filter(Boolean);
+  for (var i = 0; i < keys.length; i += 1) {
+    var k = keys[i];
+    var v = raw[k];
+    q[k] = typeof v === "string" ? v.trim() : v;
   }
 
-  const explicitAnswer = q.answer ? String(q.answer).trim() : "";
+  if (!q.question || typeof q.question !== "string" || !q.question.trim()) return null;
+  q.question = q.question.trim();
 
-  let correctIndex = null;
+  if (!Array.isArray(q.options)) q.options = [];
+
+  q.options = q.options
+    .map(function (o) {
+      return String(o == null ? "" : o).trim();
+    })
+    .filter(Boolean);
+
+  var category = String(q.category || "معلومات عامة").trim();
+  var difficulty = String(q.difficulty || "متوسط").trim();
+
+  var normCat = category
+    .toLowerCase()
+    .replace(/[أإآ]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي");
+
+  var isFree =
+    normCat.indexOf("سرعه") >= 0 ||
+    normCat.indexOf("الغاز") >= 0 ||
+    normCat.indexOf("لغز") >= 0;
+
+  var answer = q.answer ? String(q.answer).trim() : "";
+  var ci = null;
+
   if (
     q.correctIndex !== null &&
     q.correctIndex !== undefined &&
     q.correctIndex !== "" &&
     Number.isInteger(Number(q.correctIndex))
   ) {
-    correctIndex = Number(q.correctIndex);
+    ci = Number(q.correctIndex);
   }
 
-  let finalAnswer = explicitAnswer;
-
-  if (!finalAnswer && rawOptions.length === 1) {
-    finalAnswer = rawOptions[0];
+  if (!answer && Array.isArray(q.validAnswers) && q.validAnswers.length) {
+    answer = q.validAnswers
+      .map(function (v) {
+        return String(v == null ? "" : v).trim();
+      })
+      .filter(Boolean)
+      .join(" أو ");
   }
 
-  if (!finalAnswer && rawOptions.length > 1) {
-    if (
-      correctIndex !== null &&
-      correctIndex >= 0 &&
-      correctIndex < rawOptions.length
-    ) {
-      finalAnswer = String(rawOptions[correctIndex] || "").trim();
+  if (!answer && q.options.length === 1) {
+    answer = q.options[0];
+  }
+
+  if (!answer && q.options.length > 1) {
+    if (ci !== null && ci >= 0 && ci < q.options.length) {
+      answer = q.options[ci];
+    } else {
+      var exp = String(q.explanation || "");
+      var m = exp.match(/الإجابة\s+الصحيحة\s*[:\-]?\s*(.+?)\s*\.?$/);
+      if (m) answer = m[1].trim();
     }
   }
 
-  const explanation = String(q.explanation || "").trim();
-
-  if (finalAnswer) {
-    return {
-      category,
-      difficulty,
-      question,
-      options: [finalAnswer],
-      correctIndex: 0,
-      answer: finalAnswer,
-      explanation: explanation || ("الإجابة: " + finalAnswer),
-      source: q.source || "bank"
-    };
+  if (q.options.length === 0) {
+    if (answer) {
+      q.options = [answer];
+      q.correctIndex = 0;
+    } else if (isFree) {
+      q.category = category;
+      q.difficulty = difficulty;
+      q.correctIndex = null;
+      q.answer = "";
+      q.explanation = String(q.explanation || "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.").trim();
+      q.source = q.source || "bank";
+      return q;
+    } else {
+      return null;
+    }
   }
 
-  if (isFreeCategory) {
-    return {
-      category,
-      difficulty,
-      question,
-      options: [],
-      correctIndex: null,
-      answer: "",
-      explanation: explanation || "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
-      source: q.source || "bank"
-    };
+  if (q.options.length === 1) {
+    q.correctIndex = 0;
+    q.answer = q.options[0];
+  } else if (q.options.length === 4) {
+    if (ci === null || ci < 0 || ci > 3) {
+      if (answer) {
+        ci = q.options.indexOf(answer);
+      }
+    }
+
+    if (ci === null || ci < 0 || ci > 3) return null;
+
+    q.correctIndex = ci;
+    q.answer = q.options[ci];
+  } else {
+    if (answer) {
+      q.options = [answer];
+      q.correctIndex = 0;
+    } else if (ci !== null && ci >= 0 && ci < q.options.length) {
+      q.answer = q.options[ci];
+      q.options = [q.answer];
+      q.correctIndex = 0;
+    } else {
+      return null;
+    }
   }
 
-  return null;
+  if (!q.answer) return null;
+
+  q.category = category;
+  q.difficulty = difficulty;
+  q.explanation = String(q.explanation || ("الإجابة: " + q.answer)).trim();
+  q.source = q.source || "bank";
+
+  return q;
 }
 
 function parseQuestionsFromJson(data) {
@@ -680,12 +714,24 @@ function normalizeAiList(parsed) {
   return [];
 }
 
-function isValidAiQuestion(q) {
-  const s = sanitizeQuestion(q);
-  if (!s) return null;
-  if (!Array.isArray(s.options) || s.options.length !== 4) return null;
-  if (typeof s.correctIndex !== "number" || !Number.isInteger(s.correctIndex) || s.correctIndex < 0 || s.correctIndex > 3) return null;
-  return s;
+/* __IS_VALID_SINGLE_ANSWER_COMPAT_V2__ */
+function isValid(q) {
+  if (!q || typeof q.question !== "string" || !q.question.trim()) return false;
+  if (!Array.isArray(q.options)) return false;
+
+  if (q.options.length === 0) return true;
+
+  if (q.options.length !== 1 && q.options.length !== 4) return false;
+
+  if (
+    !Number.isInteger(q.correctIndex) ||
+    q.correctIndex < 0 ||
+    q.correctIndex >= q.options.length
+  ) {
+    return false;
+  }
+
+  return Boolean(q.answer || q.options[q.correctIndex]);
 }
 
 async function fetchWithTimeout(url, options, ms) {
