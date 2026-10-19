@@ -1613,3 +1613,186 @@ document.addEventListener('DOMContentLoaded', init);
     setTimeout(applyFlagQuestionStyle, 0);
   });
 })();
+
+/* ═══ __HIDDEN_SINGLE_ANSWER_REPAIR_V1__ ═══ */
+(function () {
+  'use strict';
+
+  if (window.__HIDDEN_SINGLE_ANSWER_REPAIR_V1__) return;
+  window.__HIDDEN_SINGLE_ANSWER_REPAIR_V1__ = true;
+
+  function getState() {
+    try {
+      return state;
+    } catch (e) {
+      return window.state || null;
+    }
+  }
+
+  function getCurrentQuestion() {
+    var st = getState();
+    if (!st || !Array.isArray(st.questions)) return null;
+    return st.questions[st.currentIndex] || null;
+  }
+
+  function getAnswer(q) {
+    if (!q) return '';
+
+    if (q.answer && String(q.answer).trim()) {
+      return String(q.answer).trim();
+    }
+
+    if (Array.isArray(q.options)) {
+      if (q.options.length === 1) {
+        return String(q.options[0] || '').trim();
+      }
+
+      if (q.options.length > 1) {
+        var idx = Number(q.correctIndex);
+        if (Number.isInteger(idx) && idx >= 0 && idx < q.options.length) {
+          return String(q.options[idx] || '').trim();
+        }
+      }
+    }
+
+    return '';
+  }
+
+  function isFree(q) {
+    if (!q) return true;
+    if (getAnswer(q)) return false;
+    return !Array.isArray(q.options) || q.options.length === 0;
+  }
+
+  window.isFreeQuestion = isFree;
+
+  var originalRenderQuestion = null;
+  var originalRevealAnswer = null;
+
+  try {
+    if (typeof renderQuestion === 'function') {
+      originalRenderQuestion = renderQuestion;
+    }
+  } catch (e) {}
+
+  try {
+    if (typeof revealAnswer === 'function') {
+      originalRevealAnswer = revealAnswer;
+    }
+  } catch (e) {}
+
+  function patchedRenderQuestion() {
+    var result;
+
+    try {
+      if (originalRenderQuestion) {
+        result = originalRenderQuestion.apply(this, arguments);
+      }
+    } catch (e) {}
+
+    try {
+      var q = getCurrentQuestion();
+
+      var grid = document.getElementById('optionsGrid');
+      if (grid) {
+        grid.innerHTML = '';
+
+        var pill = document.createElement('div');
+        pill.className = 'think-pill';
+        pill.textContent = isFree(q)
+          ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف'
+          : '🔒 الإجابة مخفية — تظهر عند كشف الإجابة';
+
+        grid.appendChild(pill);
+      }
+
+      var answerEl = document.getElementById('answerText');
+      if (answerEl) answerEl.textContent = '—';
+
+      var explanationEl = document.getElementById('explanationText');
+      if (explanationEl) explanationEl.textContent = '—';
+
+      var revealBox = document.getElementById('answerReveal');
+      if (revealBox) {
+        revealBox.classList.add('hidden');
+        revealBox.classList.remove('reveal-anim');
+      }
+
+      var revealBtn = document.getElementById('revealBtn');
+      if (revealBtn) revealBtn.disabled = false;
+
+      var nextBtn = document.getElementById('nextBtn');
+      if (nextBtn) nextBtn.disabled = false;
+    } catch (e) {}
+
+    return result;
+  }
+
+  function patchedRevealAnswer() {
+    var st = getState();
+
+    if (!st) {
+      if (originalRevealAnswer) {
+        return originalRevealAnswer.apply(this, arguments);
+      }
+      return;
+    }
+
+    if (st.isRevealed) return;
+
+    var q = getCurrentQuestion();
+    if (!q) return;
+
+    st.isRevealed = true;
+
+    try {
+      if (typeof stopTimer === 'function') {
+        stopTimer();
+      }
+    } catch (e) {}
+
+    var answer = getAnswer(q);
+
+    var answerEl = document.getElementById('answerText');
+    if (answerEl) {
+      answerEl.textContent = answer || '🎤 إجابة حرة — الحكم للمضيف';
+    }
+
+    var explanationEl = document.getElementById('explanationText');
+    if (explanationEl) {
+      explanationEl.textContent = q.explanation ||
+        (answer
+          ? 'الإجابة: ' + answer
+          : 'إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.');
+    }
+
+    var revealBox = document.getElementById('answerReveal');
+    if (revealBox) {
+      revealBox.classList.remove('hidden');
+      revealBox.classList.add('reveal-anim');
+    }
+
+    var revealBtn = document.getElementById('revealBtn');
+    if (revealBtn) revealBtn.disabled = true;
+
+    var nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) nextBtn.disabled = false;
+
+    try {
+      if (typeof playSound === 'function') {
+        playSound(answer ? 'correct' : 'tick', 0.35);
+      }
+    } catch (e) {}
+  }
+
+  try {
+    renderQuestion = patchedRenderQuestion;
+  } catch (e) {}
+
+  try {
+    revealAnswer = patchedRevealAnswer;
+  } catch (e) {}
+
+  window.renderQuestion = patchedRenderQuestion;
+  window.revealAnswer = patchedRevealAnswer;
+})();

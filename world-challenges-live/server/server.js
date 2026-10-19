@@ -115,48 +115,98 @@ function shuffleArray(input) {
   return arr;
 }
 
+/* __SANITIZE_SINGLE_ANSWER_V1__ */
 function sanitizeQuestion(q) {
   if (!q || !q.question) return null;
 
-  const out = { ...q };
+  const question = String(q.question || "").trim();
+  if (!question) return null;
 
-  out.question = String(out.question || "").trim();
-  if (!out.question) return null;
+  const category = String(q.category || "معلومات عامة").trim();
+  const difficulty = String(q.difficulty || "متوسط").trim();
 
-  if (Array.isArray(out.options)) {
-    out.options = out.options
+  const normalizedCategory = category
+    .replace(/[أإآا]/g, "ا")
+    .replace(/ة/g, "ه")
+    .replace(/ى/g, "ي")
+    .toLowerCase();
+
+  const isFreeCategory =
+    normalizedCategory === "سرعه" ||
+    normalizedCategory === "الغاز" ||
+    normalizedCategory === "لغز" ||
+    normalizedCategory === "speed" ||
+    normalizedCategory === "riddles";
+
+  let rawOptions = [];
+
+  if (Array.isArray(q.options)) {
+    rawOptions = q.options
       .map((o) => String(o == null ? "" : o).trim())
       .filter(Boolean);
-  } else if (out.options && typeof out.options === "object") {
-    out.options = Object.values(out.options)
+  } else if (q.options && typeof q.options === "object") {
+    rawOptions = Object.values(q.options)
       .map((o) => String(o == null ? "" : o).trim())
       .filter(Boolean);
-  } else {
-    out.options = [];
   }
 
-  if (out.options.length > 4) {
-    out.options = out.options.slice(0, 4);
+  const explicitAnswer = q.answer ? String(q.answer).trim() : "";
+
+  let correctIndex = null;
+  if (
+    q.correctIndex !== null &&
+    q.correctIndex !== undefined &&
+    q.correctIndex !== "" &&
+    Number.isInteger(Number(q.correctIndex))
+  ) {
+    correctIndex = Number(q.correctIndex);
   }
 
-  if (out.options.length > 0) {
-    let ci = Number(out.correctIndex);
-    if (!Number.isInteger(ci) || ci < 0 || ci >= out.options.length) {
-      ci = 0;
+  let finalAnswer = explicitAnswer;
+
+  if (!finalAnswer && rawOptions.length === 1) {
+    finalAnswer = rawOptions[0];
+  }
+
+  if (!finalAnswer && rawOptions.length > 1) {
+    if (
+      correctIndex !== null &&
+      correctIndex >= 0 &&
+      correctIndex < rawOptions.length
+    ) {
+      finalAnswer = String(rawOptions[correctIndex] || "").trim();
     }
-    out.correctIndex = ci;
-  } else {
-    out.correctIndex = null;
   }
 
-  out.category = String(out.category || "معلومات عامة").trim();
-  out.difficulty = String(out.difficulty || "متوسط").trim();
-  out.explanation = String(out.explanation || "").trim();
-  out.source = String(out.source || "bank").trim();
+  const explanation = String(q.explanation || "").trim();
 
-  if (EXCLUDED_CATEGORIES.has(out.category)) return null;
+  if (finalAnswer) {
+    return {
+      category,
+      difficulty,
+      question,
+      options: [finalAnswer],
+      correctIndex: 0,
+      answer: finalAnswer,
+      explanation: explanation || ("الإجابة: " + finalAnswer),
+      source: q.source || "bank"
+    };
+  }
 
-  return out;
+  if (isFreeCategory) {
+    return {
+      category,
+      difficulty,
+      question,
+      options: [],
+      correctIndex: null,
+      answer: "",
+      explanation: explanation || "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+      source: q.source || "bank"
+    };
+  }
+
+  return null;
 }
 
 function parseQuestionsFromJson(data) {

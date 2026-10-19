@@ -1393,3 +1393,21 @@ body:has(#liveStatsChip) .floating-sound-controls {
   text-shadow: 0 12px 28px rgba(26, 22, 66, 0.14) !important;
   filter: drop-shadow(0 8px 18px rgba(26, 22, 66, 0.10)) !important;
 }
+/* ═══ HIDDEN_ANSWER_REPAIR_V1 ═══ */
+
+#optionsGrid .option-btn,
+.options-grid .option-btn,
+.question-card .option-btn {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+#answerText {
+  font-weight: 900;
+  line-height: 1.35;
+}
+
+.think-pill {
+  width: 100%;
+  text-align: center;
+}
