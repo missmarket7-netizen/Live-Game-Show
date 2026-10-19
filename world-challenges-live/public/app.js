@@ -2103,3 +2103,82 @@ document.addEventListener('DOMContentLoaded', init);
     return result;
   };
 })();
+
+/* ═══ __CDN_FLAG_RENDER_V3__ ═══ */
+(function () {
+  'use strict';
+
+  function $(id) { return document.getElementById(id); }
+  
+  function getCurrentQuestion() {
+    var st = window.state;
+    if (!st || !Array.isArray(st.questions)) return null;
+    return st.questions[st.currentIndex] || null;
+  }
+
+  // التحقق مما إذا كان السؤال رابط صورة خارجي
+  function isImageUrl(text) {
+    if (!text || typeof text !== 'string') return false;
+    var t = text.trim().toLowerCase();
+    return (t.startsWith('http://') || t.startsWith('https://')) && 
+           (t.includes('.png') || t.includes('.jpg') || t.includes('.jpeg') || t.includes('.svg') || t.includes('.webp'));
+  }
+
+  function renderImage(container, src) {
+    container.innerHTML = '';
+    
+    var wrapper = document.createElement('div');
+    wrapper.className = 'huge-flag-container cdn-flag-wrap';
+    
+    var img = document.createElement('img');
+    img.src = src;
+    img.alt = 'خمن الدولة من العلم';
+    img.draggable = false;
+    img.loading = 'eager';
+    
+    // معالجة خطأ التحميل (لو انقطع النت مثلاً)
+    img.onerror = function() {
+      wrapper.innerHTML = '<div class="smart-flag-error"> تعذر تحميل الصورة<br><small>تحقق من الاتصال</small></div>';
+    };
+    
+    wrapper.appendChild(img);
+    container.appendChild(wrapper);
+  }
+
+  var originalRenderQuestion = window.renderQuestion;
+
+  window.renderQuestion = function () {
+    var result;
+    try {
+      if (typeof originalRenderQuestion === 'function') {
+        result = originalRenderQuestion.apply(this, arguments);
+      }
+    } catch (e) {}
+
+    try {
+      var q = getCurrentQuestion();
+      if (!q || !isImageUrl(q.question)) return result;
+
+      var questionEl = $('questionText');
+      
+      if (questionEl) {
+        renderImage(questionEl, q.question);
+        
+        // إخفاء التفاصيل الثانوية للتركيز على الصورة
+        var numEl = $('questionNumber');
+        var catEl = $('categoryBadge');
+        if (numEl) numEl.style.display = 'none';
+        if (catEl) catEl.textContent = '🏳️ خمن الدولة';
+      }
+
+      var grid = $('optionsGrid');
+      if (grid) {
+        grid.innerHTML = '<div class="think-pill huge-flag-hint">🔍 حدّد الدولة من شكل العلم...</div>';
+      }
+    } catch (e) {
+      console.warn('CDN Flag Render Error:', e);
+    }
+
+    return result;
+  };
+})();
