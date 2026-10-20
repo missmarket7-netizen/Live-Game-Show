@@ -955,3 +955,39 @@ img.flag-question-img {
   content: none !important;
   display: none !important;
 }
+
+/* ═══ FRAME_CLEAN_CSS_V1 — تصفير شامل لعنصر السؤال وحاوياته المباشرة ═══ */
+.redesigned-question-card #questionText,
+.redesigned-question-card .question-main,
+.redesigned-question-card .question-main h1,
+.question-card #questionText,
+.question-card .question-main h1 {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  aspect-ratio: auto !important;
+  border-radius: 0 !important;
+}
+
+.redesigned-question-card .question-main h1,
+.question-card .question-main h1,
+#questionText {
+  min-height: 90px !important;
+  height: auto !important;
+  max-height: none !important;
+}
+
+/* توسيط العلم يبقى عبر الغلاف فقط، بدون أي إطار */
+#questionText .flag-question-wrap {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  margin: 6px 0 4px !important;
+}
