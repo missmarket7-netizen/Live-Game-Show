@@ -7,6 +7,7 @@ const state = {
   fullShowDuration: 120, shieldGirls: false, shieldBoys: false, roundNumber: 1, isLoadingMore: false,
   x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }
 };
+window.state = state;
 const SAVED_KEY = 'lgs_saved_sets_v7';
 const HISTORY_KEY = 'lgs_question_history_v7';
 const SOUND_KEY = 'lgs_sound_v7';
@@ -32,7 +33,7 @@ const audioCache = {};
 const categoryEmoji = {
   'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'دين': '🕌',
   'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'لغز': '🧩', 'رياضة': '⚽', 'تكنولوجيا': '⌘',
-  'سرعة': '⚡', 'اختيارات متنوعة': '◈'
+  'سرعة': '⚡', 'خمن الدولة': '🏳️', 'معالم سياحية': '🗺️', 'اختيارات متنوعة': '◈'
 };
 
 /* __WEBAUDIO_V1__ — الصوت عبر Web Audio: تشغيل أكثر استقراراً داخل الصفحة */
@@ -458,7 +459,40 @@ function expandCaptainSlots() {
 function isFreeQuestion(q) {
   return !q || !Array.isArray(q.options) || q.options.length === 0;
 }
-
+function isVisualQuestion(q) {
+  if (!q) return false;
+  return [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].some((v) => typeof v === 'string' && /(^|\/)(flags|landmarks|landmark|tourism|tourist|images)\/|\.(svg|png|jpe?g|webp)(\?|\/|$)|flagcdn\.com/i.test(v.trim()));
+}
+function visualCandidates(q) {
+  const raw = [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].find((v) => typeof v === 'string' && v.trim());
+  if (!raw) return [];
+  const value = raw.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+  const match = value.match(/(?:^|\/)flags\/([a-z]{2})\.(?:svg|png)$/i) || value.match(/flagcdn\.com\/[^/]+\/([a-z]{2})\.png/i);
+  if (match) return [...new Set([`/flags/${match[1].toLowerCase()}.svg`, value, `https://flagcdn.com/w640/${match[1].toLowerCase()}.png`])];
+  return [value.startsWith('/') || /^https?:\/\//i.test(value) ? value : `/${value}`];
+}
+function setQuestionVisual(q) {
+  const node = $('questionText');
+  if (!node) return;
+  node.classList.remove('question-media-host', 'is-flag-visual', 'is-landmark-visual');
+  node.innerHTML = '';
+  if (!isVisualQuestion(q)) { node.textContent = q?.question || '—'; return; }
+  const sources = visualCandidates(q);
+  const figure = document.createElement('figure'); figure.className = 'question-visual-frame';
+  const img = document.createElement('img'); img.alt = q.answer ? `صورة السؤال — ${q.answer}` : 'صورة السؤال'; img.loading = 'eager'; img.decoding = 'async'; img.draggable = false;
+  const caption = document.createElement('figcaption');
+  const isFlag = /(?:^|\/)flags\/[a-z]{2}\.(?:svg|png)$|flagcdn\.com/i.test(sources[0] || '');
+  node.classList.add('question-media-host', isFlag ? 'is-flag-visual' : 'is-landmark-visual');
+  caption.textContent = isFlag ? '🏳️ حدّد الدولة من العلم' : '🗺️ حدّد المعلم أو الوجهة';
+  let i = 0; img.onerror = () => { if (i < sources.length) img.src = sources[i++]; else { img.remove(); figure.insertAdjacentHTML('afterbegin', '<div class="question-media-error"><b>تعذر تحميل صورة السؤال</b><small>تحقق من مسار الوسائط</small></div>'); } };
+  figure.append(img, caption); node.appendChild(figure); if (sources[0]) img.src = sources[i++];
+}
+function questionAnswer(q) {
+  if (q?.answer) return String(q.answer).trim();
+  if (q?.correctAnswer) return String(q.correctAnswer).trim();
+  if (Array.isArray(q?.options) && q.options.length) return String(q.options[q.correctIndex ?? 0] || q.options[0] || '').trim();
+  return '';
+}
 /* ═══ عرض السؤال والإجابة المخفية ═══ */
 function renderQuestion() {
   const q = state.questions[state.currentIndex];
@@ -504,12 +538,9 @@ function revealAnswer() {
   if (!q) return;
   state.isRevealed = true;
   stopTimer();
-  if (isFreeQuestion(q)) {
-    $('answerText').textContent = '🎤 إجابة حرة — الحكم للمضيف';
-  } else {
-    $('answerText').textContent = String.fromCharCode(65 + q.correctIndex) + '. ' + q.options[q.correctIndex];
-  }
-  $('explanationText').textContent = q.explanation || 'معلومة إضافية للمقدم.';
+  const answer = questionAnswer(q);
+  $('answerText').textContent = answer || '🎤 إجابة حرة — الحكم للمضيف';
+  $('explanationText').textContent = q.explanation || (answer ? 'الإجابة الصحيحة: ' + answer : 'معلومة إضافية للمقدم.');
   $('answerReveal').classList.remove('hidden');
   $('answerReveal').classList.add('reveal-anim');
   $('revealBtn').disabled = true;
