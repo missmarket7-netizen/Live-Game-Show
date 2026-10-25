@@ -251,11 +251,15 @@
     createOverlay(
       'axSpeedOverlay',
       'ax-speed-overlay',
-      '<div class="ax-modal ax-speed-modal">' +
+      '<div class="ax-speed-card">' +
+        '<div class="ax-speed-orbit"><span>⚡</span><b>LIVE</b></div>' +
+        '<small class="ax-speed-kicker">RAPID FIRE / ON AIR</small>' +
+        '<div class="ax-speed-badge-big">' + CONFIG.speedQuestions + '</div>' +
         '<h2>جولة السرعة</h2>' +
-        '<p>' + CONFIG.speedQuestions + ' أسئلة</p>' +
+        '<p>ثلاث لقطات حاسمة — بنفس طاقة جولة X2</p>' +
+        '<div class="ax-speed-rule"><i></i><span>READY TO RACE</span><i></i></div>' +
       '</div>',
-      2600
+      5200
     );
 
     confettiSafe();
