@@ -1058,3 +1058,65 @@
     initArenaExtras();
   }
 })();
+
+/* ═══ SHIELD_RULES_V1 — إنهاء درع الحماية عند الجولة التالية أو عند إضافة جولات بالهدايا ═══ */
+(function () {
+  'use strict';
+  if (window.__SHIELD_RULES_V1__) return;
+  window.__SHIELD_RULES_V1__ = true;
+
+  function clearShields() {
+    var st = window.state;
+    if (!st) return;
+    st.shieldGirls = false;
+    st.shieldBoys = false;
+    st.shieldTeam = null;
+    try { if (typeof window.updateScores === 'function') window.updateScores(); } catch (e) {}
+    try {
+      var g = document.getElementById('teamShieldGirls');
+      var b = document.getElementById('teamShieldBoys');
+      if (g) g.classList.add('hidden');
+      if (b) b.classList.add('hidden');
+    } catch (e) {}
+  }
+
+  function roundsTotal() {
+    var st = window.state;
+    if (!st) return 0;
+    return (Number(st.girlsRounds) || 0) + (Number(st.boysRounds) || 0);
+  }
+
+  function wrapFn(name, hooks) {
+    if (typeof window[name] !== 'function') return;
+    var orig = window[name];
+    window[name] = function () {
+      var ctx = {};
+      try { if (hooks.before) hooks.before.call(this, arguments, ctx); } catch (e) {}
+      var r = orig.apply(this, arguments);
+      try { if (hooks.after) hooks.after.call(this, arguments, ctx); } catch (e) {}
+      return r;
+    };
+  }
+
+  /* أي هدية تزيد جولات أي فريق → يسقط الدرع (عدا القلب لأنه لحظة التفعيل) */
+  function giftHooks() {
+    return {
+      before: function (args, ctx) {
+        ctx.total = roundsTotal();
+        ctx.gift = window.state ? window.state.activeGift : null;
+        if (args && args[0] && typeof args[0] === 'string') ctx.directGift = args[0];
+      },
+      after: function (args, ctx) {
+        var gift = ctx.directGift || ctx.gift;
+        if (gift === 'heart') return;
+        if (roundsTotal() > ctx.total) clearShields();
+      }
+    };
+  }
+
+  wrapFn('selectGift', giftHooks());
+  wrapFn('resolveGift', giftHooks());
+
+  /* زر الجولة التالية → يسقط الدرع دائمًا */
+  wrapFn('finishRound', { after: function () { clearShields(); } });
+})();

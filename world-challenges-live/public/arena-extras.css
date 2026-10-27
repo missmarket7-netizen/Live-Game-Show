@@ -752,3 +752,45 @@
 @media (max-width:560px){.ax-gift-side{width:42px!important;gap:4px!important}.ax-gift-side-girls{right:3px!important}.ax-gift-side-boys{left:3px!important}.ax-goal-track{width:11px!important;height:88px!important}.ax-goal-btn{width:34px!important;height:34px!important;font-size:14px!important}.ax-goal-count{font-size:8px!important}.ax-wheel-overlay{padding:10px}.ax-wheel-overlay .ax-wheel-stage{gap:12px}.ax-wheel-overlay .ax-wheel-wrap{--ax-wheel-size:min(80vw,300px)}}
 @media (max-height:760px) and (max-width:560px){.ax-wheel-overlay .ax-wheel-wrap{--ax-wheel-size:min(62vh,280px)}.ax-wheel-overlay .ax-wheel-stage{gap:8px}.ax-wheel-overlay .ax-wheel-result{padding:9px 12px}.ax-wheel-overlay .ax-wheel-result span{font-size:10px}}
 @keyframes axSpeedCardIn{from{opacity:0;transform:translateY(28px) scale(.82) rotateX(8deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}@keyframes axSpeedSpin{to{transform:rotate(360deg)}}@keyframes axSpeedPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}@keyframes axSpeedOrbit{to{transform:rotate(360deg)}}
+
+/* ═══ FLAG_CENTER_V1 — توسيط صورة العلم ونصها داخل مساحة السؤال (يلغي محاذاة RTL اليمنى) ═══ */
+#questionText.is-flag-question,
+#questionText:has(> img),
+#questionText:has(> .flag-question-wrap),
+.question-main h1:has(img) {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  width: 100% !important;
+  margin-inline: auto !important;
+}
+
+#questionText .flag-question-wrap,
+#questionText .question-visual-frame {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-inline: auto !important;
+}
+
+#questionText img,
+#questionText .flag-question-img,
+.question-visual-frame img {
+  display: block !important;
+  margin-inline: auto !important;
+  align-self: center !important;
+  justify-self: center !important;
+}
+
+#questionText .flag-question-prompt,
+#questionText .question-visual-frame figcaption,
+#questionText figcaption,
+#questionText p {
+  width: 100% !important;
+  text-align: center !important;
+  margin-inline: auto !important;
+}
