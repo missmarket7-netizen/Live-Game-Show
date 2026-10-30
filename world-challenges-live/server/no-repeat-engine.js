@@ -525,7 +525,7 @@ function applyFilters(pool, count, category, difficulty) {
   if (!isMixedCategory(category)) {
     const target = normalizeCategory(category);
     const byCategory = working.filter((q) => q.category === target);
-    if (byCategory.length >= count) {
+    if (byCategory.length) {
       working = byCategory;
     }
   }
@@ -608,6 +608,7 @@ export function installNoRepeatEngine(app) {
   } catch (e) {}
 
   app.post("/api/questions", async (req, res) => {
+    res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
     try {
       await ensureReady();
 

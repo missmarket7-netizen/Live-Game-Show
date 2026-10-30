@@ -927,6 +927,7 @@ async function askProviders(prompt, count) {
 }
 
 app.post("/api/questions", async (req, res) => {
+  res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
   try {
     const body = req.body || {};
     const count = Math.min(50, Math.max(1, Number(body.count) || 10));
@@ -1020,6 +1021,7 @@ app.post("/api/questions", async (req, res) => {
 });
 
 app.post("/api/generate", async (req, res) => {
+  res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
   try {
     const body = req.body || {};
     const count = Math.min(30, Math.max(1, Number(body.count) || 10));

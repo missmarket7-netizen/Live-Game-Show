@@ -1025,8 +1025,9 @@ function initActivity() {
 /* ═══ جلب الأسئلة من السيرفر ═══ */
 async function fetchQuestions(apiParams) {
   try {
-    const respObj = await fetch('/api/questions', {
+    const respObj = await fetch('/api/questions?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({}, apiParams, { avoid: (apiParams.avoid || state.questionHistory.slice(-150)) }))
     });
@@ -1042,8 +1043,9 @@ async function fetchQuestions(apiParams) {
 
 async function fetchAIQuestions(aiParams) {
   try {
-    const aiResp = await fetch('/api/generate', {
+    const aiResp = await fetch('/api/generate?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
       method: 'POST',
+      cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({}, aiParams, { avoid: state.questionHistory.slice(-300) }))
     });
