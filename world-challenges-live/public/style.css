@@ -1554,3 +1554,16 @@ body:has(#liveStatsChip) .floating-sound-controls {
   .question-main h1#questionText .question-visual-frame,
   .question-main h1#questionText .flag-question-wrap { width: 100% !important; }
 }
+
+/* MEDIA_CENTER_FINAL_V4 — one centered media column for every visual question */
+.question-main { display:flex !important; align-items:center !important; justify-content:center !important; gap:10px !important; direction:ltr !important; }
+.question-main > div { flex:1 1 auto !important; width:100% !important; min-width:0 !important; display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; direction:rtl !important; text-align:center !important; }
+.question-main .question-overline, .question-main #questionText { display:block !important; width:100% !important; margin-inline:auto !important; text-align:center !important; }
+.question-main #questionText.question-media-host, .question-main #questionText.is-flag-question { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
+.question-main #questionText .question-visual-frame, .question-main #questionText .flag-question-wrap { box-sizing:border-box !important; display:flex !important; flex:0 1 auto !important; width:100% !important; max-width:560px !important; margin:8px auto 0 !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
+.question-main #questionText .question-visual-frame img, .question-main #questionText .flag-question-img { display:block !important; position:static !important; inset:auto !important; margin:0 auto !important; align-self:center !important; object-position:50% 50% !important; }
+
+/* FLAG_RENDERER_CENTER_FINAL_V5 — override legacy renderer row/offset styles */
+.question-main #questionText .flag-question-wrap { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; width:min(100%,560px) !important; height:auto !important; min-height:clamp(205px,34vh,330px) !important; max-height:none !important; margin:8px auto 0 !important; padding:14px !important; box-sizing:border-box !important; overflow:hidden !important; }
+.question-main #questionText .flag-question-wrap .flag-question-img, .question-main #questionText img.flag-question-img { display:block !important; flex:0 0 auto !important; width:min(82%,340px) !important; max-width:340px !important; height:auto !important; max-height:215px !important; min-width:0 !important; min-height:0 !important; margin:0 auto !important; align-self:center !important; object-fit:contain !important; object-position:center center !important; }
+@media (max-width:560px) { .question-main { gap:6px !important; } .question-main #questionText .question-visual-frame, .question-main #questionText .flag-question-wrap { max-width:100% !important; } .question-main #questionText .flag-question-wrap { min-height:178px !important; padding:10px !important; } .question-main #questionText .flag-question-wrap .flag-question-img, .question-main #questionText img.flag-question-img { width:min(80%,280px) !important; max-height:170px !important; } }

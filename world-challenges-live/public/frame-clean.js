@@ -24,12 +24,8 @@
     strip(q);                                   // عنصر السؤال نفسه
     strip(q.parentElement);                     // .question-main إن حمل أنماطًا
 
-    // أغلفة الوسائط/الأعلام الداخلية: مسح أنماطها المباشرة فقط (تبقى الصورة)
-    var wraps = q.querySelectorAll('.flag-question-wrap, .question-visual-frame, figure, > div');
-    for (var i = 0; i < wraps.length; i++) strip(wraps[i]);
-
-    // أي ابن مباشر يحمل حدودًا/خلفية: تصفيره
-    for (var j = 0; j < q.children.length; j++) strip(q.children[j]);
+    // لا نمسح أنماط أغلفة الوسائط هنا. هذه الأغلفة هي المسؤولة عن التوسيط
+    // الكامل للعلم وصور guess/name داخل بطاقة السؤال.
   }
 
   function hook(name) {

@@ -30,10 +30,18 @@
            /^https?:\/\/\S+\.(svg|png|jpe?g|webp)/i.test(t);
   }
 
+  function isVisual(q) {
+    if (!q) return false;
+    return [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].some(function (v) {
+      return typeof v === 'string' && /(?:^|\/)(?:public\/)?(?:flags|guess|name|images|landmarks|landmark|tourism|tourist)\/|\.(?:svg|png|jpe?g|webp)(?:\?|\/|$)/i.test(v.trim());
+    });
+  }
+
   function normalizeSrc(raw) {
     var t = String(raw || '').trim().replace(/\/+$/, '');
     if (/^https?:\/\//i.test(t)) return t;
     t = t.replace(/^\.?\//, '');
+    t = t.replace(/^public\//i, '');
     if (!/^(flags|images)\//i.test(t)) t = 'flags/' + t;
     return '/' + t;
   }
@@ -83,6 +91,15 @@
   }
 
   function paintText(node, q) {
+    // setQuestionVisual() owns image questions. Never replace the figure with
+    // the raw path, such as public/name/002.jpg.
+    if (isVisual(q)) {
+      if (node.querySelector('.question-visual-frame, .flag-question-wrap, img')) return;
+      if (typeof window.setQuestionVisual === 'function') {
+        try { window.setQuestionVisual(q); } catch (e) {}
+      }
+      return;
+    }
     if (node.querySelector('img.flag-question-img') || node.querySelector('.flag-question-wrap')) {
       node.textContent = '';
       node.removeAttribute('data-flag-src');

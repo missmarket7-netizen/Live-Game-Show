@@ -461,15 +461,17 @@ function isFreeQuestion(q) {
 }
 function isVisualQuestion(q) {
   if (!q) return false;
-  return [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].some((v) => typeof v === 'string' && /(^|\/)(flags|landmarks|landmark|tourism|tourist|images)\/|\.(svg|png|jpe?g|webp)(\?|\/|$)|flagcdn\.com/i.test(v.trim()));
+  return [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].some((v) => typeof v === 'string' && /(^|\/)(public\/)?(flags|guess|name|landmarks|landmark|tourism|tourist|images)\/|\.(svg|png|jpe?g|webp)(\?|\/|$)|flagcdn\.com/i.test(v.trim()));
 }
 function visualCandidates(q) {
   const raw = [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].find((v) => typeof v === 'string' && v.trim());
   if (!raw) return [];
-  const value = raw.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+  let value = raw.trim().replace(/\\/g, '/').replace(/\/+$/, '');
+  value = value.replace(/^\/?public\//i, '/');
+  if (!value.startsWith('/') && !/^https?:\/\//i.test(value)) value = '/' + value;
   const match = value.match(/(?:^|\/)flags\/([a-z]{2})\.(?:svg|png)$/i) || value.match(/flagcdn\.com\/[^/]+\/([a-z]{2})\.png/i);
   if (match) return [...new Set([`/flags/${match[1].toLowerCase()}.svg`, value, `https://flagcdn.com/w640/${match[1].toLowerCase()}.png`])];
-  return [value.startsWith('/') || /^https?:\/\//i.test(value) ? value : `/${value}`];
+  return [value];
 }
 function setQuestionVisual(q) {
   const node = $('questionText');
@@ -483,7 +485,9 @@ function setQuestionVisual(q) {
   const caption = document.createElement('figcaption');
   const isFlag = /(?:^|\/)flags\/[a-z]{2}\.(?:svg|png)$|flagcdn\.com/i.test(sources[0] || '');
   node.classList.add('question-media-host', isFlag ? 'is-flag-visual' : 'is-landmark-visual');
-  caption.textContent = isFlag ? '🏳️ حدّد الدولة من العلم' : '🗺️ حدّد المعلم أو الوجهة';
+  const isName = /(?:^|\/)name\//i.test(sources[0] || '') || /خمن\s*الاسم/i.test(String(q.category || ''));
+  const isGuess = /(?:^|\/)guess\//i.test(sources[0] || '') || /خمن\s*(?:الدولة|المدينة)/i.test(String(q.category || ''));
+  caption.textContent = isFlag ? '🏳️ حدّد الدولة من العلم' : isName ? '🔤 خمن الاسم من الصورة' : isGuess ? '🧩 خمن الدولة أو المدينة' : '🗺️ حدّد المعلم أو الوجهة';
   let i = 0; img.onerror = () => { if (i < sources.length) img.src = sources[i++]; else { img.remove(); figure.insertAdjacentHTML('afterbegin', '<div class="question-media-error"><b>تعذر تحميل صورة السؤال</b><small>تحقق من مسار الوسائط</small></div>'); } };
   figure.append(img, caption); node.appendChild(figure); if (sources[0]) img.src = sources[i++];
 }
