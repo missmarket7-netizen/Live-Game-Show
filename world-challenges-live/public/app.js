@@ -19,15 +19,15 @@ const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
   'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
   'gift-crown': ['gift-crown'], begin: ['begin'], end: ['end'], learn: ['learn'], 'boys-mood': ['boys-mood'],
-  'girls-captin': ['girls-captin'], 'boys-captin': ['boys-captin'], 'girls-galaxy': ['girls-galaxy'],
-  'boys-galaxy': ['boys-galaxy'], 'girls-wheel': ['girls-wheel', 'girls-galaxy'], 'boys-wheel': ['boys-wheel', 'boys-galaxy'],
+  'girls-captin': ['girls-captin'], 'boys-captin': ['boys-captin'], 'girls-galaxy': ['girls-galaxy', 'boys-galaxy', 'celebration'],
+  'boys-galaxy': ['boys-galaxy'], 'girls-wheel': ['girls-wheel', 'girls-galaxy'], 'boys-wheel': ['boys-wheel', 'boys-galaxy', 'celebration'],
   girls2captin: ['girls2captin', 'girls-captin'], captin2boys: ['captin2boys', 'boys-captin'],
   'girls-round': ['girls-round'], 'boys-round': ['boys-round'], 'girls-lose': ['girls-lose'], 'boys-lose': ['boys-lose'],
   'girls-win': ['girls-win'], 'boys-win': ['boys-win'], Longway: ['longway', 'Longway'],
   'girls-replay-boys': ['girls-replay-boys'], 'boys-replay-girls': ['boys-replay-girls'],
   advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
-  'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong'],
-  laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration']
+  'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong', 'suspense', 'tick'], speed: ['speed', 'boom'], card: ['card', 'teamwork'], wheel: ['wheel', 'celebration'],
+  laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration', 'cheer']
 };
 const audioCache = {};
 const categoryEmoji = {

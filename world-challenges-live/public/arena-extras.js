@@ -17,6 +17,7 @@
 
   var AX = {
     speedLeft: 0,
+    speedMode: false,
     pendingBlockTeam: null,
     blockedTeam: null,
     pendingX2: false,
@@ -247,6 +248,9 @@
 
   function startSpeedRound() {
     AX.speedLeft = CONFIG.speedQuestions;
+    AX.speedMode = true;
+    var gameState = getState();
+    if (gameState) { gameState.timerDuration = 15; gameState.timerValue = 15; if (typeof gameState.isTimerRunning !== 'undefined') gameState.isTimerRunning = false; }
 
     createOverlay(
       'axSpeedOverlay',
@@ -830,8 +834,16 @@
     AX.activeX3 = Boolean(AX.pendingX3);
     AX.pendingX3 = false;
 
-    if (AX.speedLeft > 0) {
-      AX.speedLeft -= 1;
+    if (AX.speedMode) {
+      if (AX.speedLeft > 0) {
+        AX.speedLeft -= 1;
+        var speedState = getState();
+        if (speedState) speedState.timerDuration = 15;
+      } else {
+        AX.speedMode = false;
+        var normalState = getState();
+        if (normalState) normalState.timerDuration = 30;
+      }
     }
 
     updateBadges();

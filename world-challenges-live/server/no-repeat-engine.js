@@ -14,6 +14,7 @@ const FREE_CATEGORIES = new Set([
   "سرعة",
   "ألغاز"
 ]);
+const EXCLUDED_CATEGORIES = new Set(["سينما مصرية", "سينما عربية"]);
 
 const SKIP_FILES = new Set([
   "cycle_state.json",
@@ -41,6 +42,7 @@ const DATA_DIR_CANDIDATES = [
   process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
     : "",
+  "/data/questions",
   path.join(__dirname, "questions"),
   path.join(process.cwd(), "questions"),
   path.join(__dirname, "..", "questions")
@@ -199,69 +201,45 @@ function readJsonSafe(filePath) {
 
 function sanitizeQuestion(raw) {
   if (!raw || !raw.question) return null;
-
   const question = String(raw.question || "").trim();
   if (!question) return null;
-
   const category = normalizeCategory(raw.category);
   const difficulty = normalizeDifficulty(raw.difficulty);
-
-  let rawOptions = [];
-  if (Array.isArray(raw.options)) {
-    rawOptions = raw.options.slice();
-  } else if (raw.options && typeof raw.options === "object") {
-    rawOptions = Object.values(raw.options);
-  }
-
-  let correct = Number.isInteger(Number(raw.correctIndex))
-    ? Number(raw.correctIndex)
-    : null;
-
+  let options = Array.isArray(raw.options)
+    ? raw.options.slice()
+    : (raw.options && typeof raw.options === "object" ? Object.values(raw.options) : []);
+  options = options.map((o) => String(o == null ? "" : o).trim()).filter(Boolean);
+  let correctIndex = Number.isInteger(Number(raw.correctIndex)) ? Number(raw.correctIndex) : null;
   let answer = raw.answer ? String(raw.answer).trim() : "";
-
-  if (!answer && rawOptions.length) {
-    if (correct != null && correct >= 0 && correct < rawOptions.length) {
-      answer = String(rawOptions[correct] == null ? "" : rawOptions[correct]).trim();
+  if (options.length > 1) {
+    if (correctIndex == null || correctIndex < 0 || correctIndex >= options.length) {
+      correctIndex = answer ? options.indexOf(answer) : -1;
     }
-    if (!answer) {
-      answer = String(rawOptions[0] == null ? "" : rawOptions[0]).trim();
-    }
-  }
-
-  rawOptions = rawOptions
-    .map((o) => String(o == null ? "" : o).trim())
-    .filter(Boolean);
-
-  let options = [];
-  let correctIndex = null;
-
-  if (answer) {
+    if (correctIndex < 0 || correctIndex >= options.length) return null;
+    answer = options[correctIndex];
+  } else if (options.length === 1) {
+    correctIndex = 0;
+    answer = answer || options[0];
+  } else if (answer) {
     options = [answer];
     correctIndex = 0;
   } else if (FREE_CATEGORIES.has(category)) {
-    options = [];
     correctIndex = null;
   } else {
     return null;
   }
-
-  const explanation = String(raw.explanation || "").trim() ||
-    (answer
-      ? "الإجابة: " + answer
-      : "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.");
-
   return {
+    ...raw,
     category,
     difficulty,
     question,
     options,
     correctIndex,
     answer,
-    explanation,
+    explanation: String(raw.explanation || "").trim() || (answer ? "الإجابة: " + answer : "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."),
     source: raw.source || "bank"
   };
 }
-
 function questionScore(q) {
   return (q.answer ? 3 : 0) +
     (q.explanation ? Math.min(20, q.explanation.length / 10) : 0) +
@@ -326,18 +304,16 @@ function readFallbackState() {
 function writeFallbackState(state) {
   try {
     fs.mkdirSync(PRIMARY_DATA_DIR, { recursive: true });
-    fs.writeFileSync(
-      FALLBACK_STATE_FILE,
-      JSON.stringify({
-        cycle: Number(state.cycle) || 1,
-        usage: state.usage || {},
-        updatedAt: new Date().toISOString()
-      }, null, 2),
-      "utf8"
-    );
+    const payload = JSON.stringify({
+      cycle: Number(state.cycle) || 1,
+      usage: state.usage || {},
+      updatedAt: new Date().toISOString()
+    }, null, 2);
+    const tempFile = FALLBACK_STATE_FILE + ".tmp-" + process.pid;
+    fs.writeFileSync(tempFile, payload, "utf8");
+    fs.renameSync(tempFile, FALLBACK_STATE_FILE);
   } catch (e) {}
 }
-
 async function initTurso() {
   if (!TURSO_URL || !TURSO_TOKEN) {
     console.warn("⚠️ NO_REPEAT_ENGINE: Turso غير مربوط، سيُستخدم ملف محلي احتياطي.");
@@ -512,27 +488,15 @@ async function resetUsage() {
 
 function applyFilters(pool, count, category, difficulty) {
   let working = pool.slice();
-
   const diff = String(difficulty || "").trim();
-
   if (diff && normalizeText(diff) !== "متدرج") {
-    const byDifficulty = working.filter((q) => q.difficulty === diff);
-    if (byDifficulty.length >= count) {
-      working = byDifficulty;
-    }
+    working = working.filter((q) => q.difficulty === normalizeDifficulty(diff));
   }
-
   if (!isMixedCategory(category)) {
-    const target = normalizeCategory(category);
-    const byCategory = working.filter((q) => q.category === target);
-    if (byCategory.length) {
-      working = byCategory;
-    }
+    working = working.filter((q) => q.category === normalizeCategory(category));
   }
-
   return working;
 }
-
 function pickBalanced(items, count) {
   const source = (items || []).filter(Boolean);
   if (!source.length || count <= 0) return [];
@@ -609,138 +573,56 @@ export function installNoRepeatEngine(app) {
 
   app.post("/api/questions", async (req, res) => {
     res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
-    try {
-      await ensureReady();
-
-      const body = req.body || {};
-      const count = Math.min(50, Math.max(1, Number(body.count) || 10));
-      const category = body.category || "اختيارات متنوعة";
-      const difficulty = body.difficulty || "متدرج";
-
-      const avoidSet = new Set(
-        (Array.isArray(body.avoid) ? body.avoid : [])
-          .map(keyFromText)
-          .filter(Boolean)
-      );
-
-      const bank = loadBankQuestions();
-
-      if (!bank.length) {
-        return res.json({
-          questions: [],
-          meta: {
-            engine: VERSION,
-            source: "no-repeat-engine",
-            count: 0,
-            bankSize: 0,
-            persistent: Boolean(db || process.env.RAILWAY_VOLUME_MOUNT_PATH),
-            turso: Boolean(db),
-            lockHours: LOCK_HOURS
-          }
+    return withLock(async () => {
+      try {
+        await ensureReady();
+        const body = req.body || {};
+        const count = Math.min(50, Math.max(1, Number(body.count) || 10));
+        const category = body.category || "اختيارات متنوعة";
+        const difficulty = body.difficulty || "متدرج";
+        const avoidSet = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(keyFromText).filter(Boolean));
+        const bank = loadBankQuestions().filter((q) => !EXCLUDED_CATEGORIES.has(q.category));
+        const pool = applyFilters(bank.filter((q) => !avoidSet.has(questionKey(q))), count, category, difficulty);
+        const usage = await getUsageMap();
+        const now = Date.now();
+        const lockMs = LOCK_HOURS * 60 * 60 * 1000;
+        const softLockMs = SOFT_LOCK_HOURS * 60 * 60 * 1000;
+        const scored = pool.map((q) => {
+          const key = questionKey(q);
+          const u = usage.get(key);
+          const last = u ? Number(u.last) || 0 : 0;
+          const times = u ? Number(u.times) || 0 : 0;
+          const age = last ? now - last : Infinity;
+          return { key, q, last, times, eligible: !last || age >= lockMs, secondary: Boolean(last) && age >= softLockMs && age < lockMs };
         });
-      }
-
-      let pool = bank.filter((q) => !avoidSet.has(questionKey(q)));
-      if (!pool.length) pool = bank.slice();
-
-      pool = applyFilters(pool, count, category, difficulty);
-
-      const usage = await getUsageMap();
-      const now = Date.now();
-      const lockMs = LOCK_HOURS * 60 * 60 * 1000;
-      const softLockMs = SOFT_LOCK_HOURS * 60 * 60 * 1000;
-
-      const scored = pool.map((q) => {
-        const key = questionKey(q);
-        const u = usage.get(key);
-        const last = u ? Number(u.last) || 0 : 0;
-        const times = u ? Number(u.times) || 0 : 0;
-        const age = last ? now - last : Infinity;
-
-        return {
-          key,
-          q,
-          last,
-          times,
-          age,
-          eligible: !last || age >= lockMs,
-          secondary: Boolean(last) && age >= softLockMs && age < lockMs
-        };
-      });
-
-      let candidates = scored.filter((x) => x.eligible);
-
-      if (candidates.length < count) {
-        const existingKeys = new Set(candidates.map((x) => x.key));
-        const soft = scored.filter((x) => x.secondary && !existingKeys.has(x.key));
-        candidates = candidates.concat(soft);
-      }
-
-      let exhausted = false;
-
-      if (candidates.length < count) {
-        exhausted = true;
-        candidates = scored.slice().sort((a, b) => {
-          const lastA = a.last || 0;
-          const lastB = b.last || 0;
-          if (lastA !== lastB) return lastA - lastB;
-          return a.times - b.times;
-        });
-      }
-
-      let selected = pickBalanced(candidates.map((x) => x.q), count);
-
-      if (selected.length < count) {
-        const selectedKeys = new Set(selected.map(questionKey));
-        const fillers = scored
-          .filter((x) => !selectedKeys.has(x.key))
-          .sort((a, b) => (a.last || 0) - (b.last || 0) || a.times - b.times)
-          .map((x) => x.q);
-
-        selected = selected.concat(pickBalanced(fillers, count - selected.length));
-      }
-
-      selected = selected.slice(0, count);
-
-      const cycle = await getCycle();
-      const nextCycle = exhausted ? cycle + 1 : cycle;
-
-      await setCycle(nextCycle);
-      await markServed(selected.map(questionKey).filter(Boolean), nextCycle);
-
-      const enriched = selected.map((q, i) => ({
-        ...q,
-        id: "q_" + Date.now() + "_" + i,
-        source: q.source || "bank"
-      }));
-
-      return res.json({
-        questions: enriched,
-        meta: {
-          engine: VERSION,
-          source: "no-repeat-engine",
-          count: enriched.length,
-          bankSize: bank.length,
-          poolSize: pool.length,
-          cycle: nextCycle,
-          tracked: usage.size,
-          exhausted: exhausted,
-          mixed: isMixedCategory(category),
-          persistent: Boolean(db || process.env.RAILWAY_VOLUME_MOUNT_PATH),
-          turso: Boolean(db),
-          lockHours: LOCK_HOURS,
-          softLockHours: SOFT_LOCK_HOURS
+        let candidates = scored.filter((x) => x.eligible);
+        if (candidates.length < count) {
+          const used = new Set(candidates.map((x) => x.key));
+          candidates = candidates.concat(scored.filter((x) => x.secondary && !used.has(x.key)));
         }
-      });
-    } catch (err) {
-      return res.status(500).json({
-        error: "فشل محرك منع التكرار",
-        details: err.message,
-        engine: VERSION
-      });
-    }
+        let exhausted = false;
+        if (candidates.length < count) {
+          exhausted = true;
+          candidates = scored.slice().sort((a, b) => (a.last || 0) - (b.last || 0) || a.times - b.times);
+        }
+        const selected = pickBalanced(candidates.map((x) => x.q), count).slice(0, count);
+        const cycle = await getCycle();
+        const nextCycle = exhausted && selected.length ? cycle + 1 : cycle;
+        if (nextCycle !== cycle) await setCycle(nextCycle);
+        await markServed(selected.map(questionKey).filter(Boolean), nextCycle);
+        const enriched = selected.map((q, i) => ({ ...q, id: "q_" + Date.now() + "_" + i, source: q.source || "bank" }));
+        return res.json({ questions: enriched, meta: {
+          engine: VERSION, source: "no-repeat-engine", count: enriched.length, bankSize: bank.length,
+          poolSize: pool.length, cycle: nextCycle, tracked: usage.size, exhausted,
+          mixed: isMixedCategory(category), requestedCategory: normalizeCategory(category),
+          requestedDifficulty: normalizeDifficulty(difficulty), persistent: Boolean(db || process.env.RAILWAY_VOLUME_MOUNT_PATH),
+          turso: Boolean(db), lockHours: LOCK_HOURS, softLockHours: SOFT_LOCK_HOURS
+        }});
+      } catch (err) {
+        return res.status(500).json({ error: "فشل محرك منع التكرار", details: err.message, engine: VERSION });
+      }
+    });
   });
-
   app.get("/api/health", async (req, res) => {
     try {
       await ensureReady();

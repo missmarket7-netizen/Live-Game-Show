@@ -46,6 +46,7 @@ const DATA_CANDIDATES = [
   process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "questions")
     : "",
+  "/data/questions",
   path.join(__dirname, "questions"),
   path.join(process.cwd(), "questions"),
   path.join(__dirname, "..", "questions")
@@ -926,100 +927,6 @@ async function askProviders(prompt, count) {
   return null;
 }
 
-app.post("/api/questions", async (req, res) => {
-  res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
-  try {
-    const body = req.body || {};
-    const count = Math.min(50, Math.max(1, Number(body.count) || 10));
-    const category = body.category || "اختيارات متنوعة";
-    const difficulty = String(body.difficulty || "").trim();
-
-    const avoidSet = new Set(
-      (Array.isArray(body.avoid) ? body.avoid : [])
-        .map(normalizeText)
-        .filter(Boolean)
-    );
-
-    const bank = await getAllQuestions();
-
-    if (!bank.length) {
-      return res.json({
-        questions: [],
-        meta: {
-          source: "bank-cycle",
-          count: 0,
-          bankSize: 0,
-          cycle: 1,
-          served: 0,
-          persistent: hasPersistentStorage()
-        }
-      });
-    }
-
-    let pool = bank.filter((q) => !avoidSet.has(normalizeText(q.question)));
-    if (!pool.length) pool = bank.slice();
-
-    const result = await withCycleLock(async () => {
-      const st = await getCycleState();
-      const servedSet = new Set(st.served.filter(Boolean));
-      let cycle = st.cycle;
-
-      let fresh = pool.filter((q) => !servedSet.has(normalizeText(q.question)));
-      const freshBefore = fresh.length;
-
-      if (fresh.length === 0 && pool.length > 0) {
-        cycle += 1;
-        servedSet.clear();
-        fresh = shuffleArray(pool).slice();
-      }
-
-      const selected = pickBalanced(fresh, count, category, difficulty);
-
-      selected.forEach((q) => {
-        const key = normalizeText(q.question);
-        if (key) servedSet.add(key);
-      });
-
-      await setCycleState(cycle, Array.from(servedSet));
-
-      return {
-        selected,
-        cycle,
-        servedSize: servedSet.size,
-        bankSize: bank.length,
-        poolSize: pool.length,
-        freshBefore
-      };
-    });
-
-    const enriched = result.selected.map((q, i) => ({
-      ...q,
-      id: q.id || `q_${Date.now()}_${i}`,
-      source: q.source || "bank"
-    }));
-
-    return res.json({
-      questions: enriched,
-      meta: {
-        source: "bank-cycle",
-        count: enriched.length,
-        bankSize: result.bankSize,
-        poolSize: result.poolSize,
-        freshBefore: result.freshBefore,
-        cycle: result.cycle,
-        served: result.servedSize,
-        mixed: true,
-        persistent: hasPersistentStorage()
-      }
-    });
-  } catch (err) {
-    return res.status(500).json({
-      error: "فشل في جلب الأسئلة",
-      details: err.message
-    });
-  }
-});
-
 app.post("/api/generate", async (req, res) => {
   res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
   try {
@@ -1145,74 +1052,19 @@ app.get("/api/saved-questions", async (req, res) => {
     });
   }
 });
-app.post("/api/reset-cycle", async (req, res) => {
-  try {
-    await withCycleLock(async () => {
-      const st = await getCycleState();
-      await setCycleState(st.cycle + 1, []);
-    });
+app.use(express.static(staticRoot, {
+  extensions: ["html"],
+  immutable: false,
+  maxAge: process.env.NODE_ENV === "production" ? "1h" : 0
+}));
 
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({
-      error: "فشل تصفير الدورة",
-      details: err.message
-    });
+// Do not silently return index.html for missing images/audio/scripts.
+app.use((req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/api/") && !req.path.startsWith("/live/") && path.extname(req.path)) {
+    return res.status(404).json({ error: "asset_not_found", path: req.path });
   }
+  next();
 });
-
-app.get("/api/cycle-status", async (req, res) => {
-  try {
-    const st = await getCycleState();
-    const bank = await getAllQuestions();
-
-    res.json({
-      persistent: hasPersistentStorage(),
-      turso: Boolean(turso),
-      volume: Boolean(process.env.RAILWAY_VOLUME_MOUNT_PATH),
-      dataDir: PRIMARY_DATA_DIR,
-      dataCandidates: DATA_CANDIDATES,
-      cycle: st.cycle,
-      served: st.served.length,
-      bankSize: bank.length
-    });
-  } catch (err) {
-    res.status(500).json({
-      error: "فشل قراءة حالة الدورة",
-      details: err.message
-    });
-  }
-});
-
-app.get("/api/health", async (req, res) => {
-  try {
-    const st = await getCycleState();
-    const bank = await getAllQuestions();
-
-    res.json({
-      status: "ok",
-      bankCount: bank.length,
-      excluded: Array.from(EXCLUDED_CATEGORIES),
-      storage: {
-        persistent: hasPersistentStorage(),
-        turso: Boolean(turso),
-        volume: Boolean(process.env.RAILWAY_VOLUME_MOUNT_PATH),
-        dataDir: PRIMARY_DATA_DIR
-      },
-      cycle: {
-        cycle: st.cycle,
-        served: st.served.length
-      }
-    });
-  } catch (err) {
-    res.status(500).json({
-      status: "error",
-      details: err.message
-    });
-  }
-});
-
-app.use(express.static(staticRoot, { extensions: ["html"] }));
 
 try {
   attachLiveRoutes(app);
