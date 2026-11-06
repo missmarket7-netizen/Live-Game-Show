@@ -33,7 +33,7 @@ const audioCache = {};
 const categoryEmoji = {
   'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'دين': '🕌',
   'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'لغز': '🧩', 'رياضة': '⚽', 'تكنولوجيا': '⌘',
-  'سرعة': '⚡', 'خمن الدولة': '🏳️', 'خمن الدولة أو المدينة': '🧩', 'خمن الاسماء': '🔤', 'معالم سياحية': '🗺️', 'اختيارات متنوعة': '◈'
+  'سرعة': '⚡', 'خمن الدولة': '🏳️', 'خمن الدولة أو المدينة': '🧩', 'خمن الاسماء': '🔤', 'معالم سياحية': '🗺️', 'سؤال المضيف': '✎', 'اختيارات متنوعة': '◈'
 };
 
 /* __WEBAUDIO_V1__ — الصوت عبر Web Audio: تشغيل أكثر استقراراً داخل الصفحة */
@@ -239,14 +239,7 @@ document.addEventListener('pointerdown', function preloadOnce() {
     'tick',
     'correct',
     'wrong',
-    'begin',
-    'girls-round',
-    'boys-round',
-    'girls-lose',
-    'boys-lose',
-    'celebration',
-    'girls-captin',
-    'boys-captin'
+    'begin'
   ]);
 }, { passive: true });
 
@@ -563,8 +556,8 @@ function selectGift(gift) {
   if (gift === 'galaxy' || gift === 'wheel' || gift === 'heart' || gift === 'donut' || gift === 'corgi') {
     const tipMap = {
       heart: 'اختر الفريق لتفعيل درع الحماية',
-      donut: 'اختر الفريق (الجولة للبنات دائما)',
-      corgi: 'اختر الفريق (10 جولات للبنات دائما)',
+      donut: 'اختر الفريق المستفيد (+1 جولة)',
+      corgi: 'اختر الفريق المستفيد (+10 جولات)',
       galaxy: 'اختر الفريق (+50 جولة)',
       wheel: 'اختر الفريق (+100 جولة)'
     };
@@ -613,21 +606,23 @@ function resolveGift(team) {
     return;
   }
   if (gift === 'donut') {
-    state.girlsRounds += 1;
+    if (team === 'girls') state.girlsRounds += 1;
+    else state.boysRounds += 1;
     state.girlsScore = 0;
     state.boysScore = 0;
     playSound(team === 'girls' ? 'gift-donut' : 'gift-cat', 0.65);
-    showToast('+1 جولة لفريق البنات', 'GIFT LOCKED');
+    showToast('+1 جولة لفريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT LOCKED');
     closeGiftBanner();
     updateScores();
     return;
   }
   if (gift === 'corgi') {
-    state.girlsRounds += 10;
+    if (team === 'girls') state.girlsRounds += 10;
+    else state.boysRounds += 10;
     state.girlsScore = 0;
     state.boysScore = 0;
     playSound(team === 'girls' ? 'gift-corgi' : 'gift-crown', 0.65);
-    showToast('+10 جولات لفريق البنات', 'GIFT LOCKED');
+    showToast('+10 جولات لفريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT LOCKED');
     closeGiftBanner();
     updateScores();
     return;
@@ -777,9 +772,40 @@ function nextQuestion() {
     state.currentIndex += 1;
     renderQuestion();
     startTimer();
+    if ((state.currentIndex + 1) % 5 === 0) {
+      window.setTimeout(() => {
+        if (window.confirm('حان وقت سؤال المضيف بعد 5 أسئلة. هل تريد إضافته الآن؟')) addHostQuestion();
+      }, 120);
+    }
   } else {
     loadMoreQuestions();
   }
+}
+function addHostQuestion() {
+  const promptText = window.prompt('اكتب سؤال المضيف الذي سيظهر للجمهور:');
+  const questionText = String(promptText || '').trim();
+  if (!questionText) return;
+  const answerText = String(window.prompt('اكتب الإجابة الصحيحة (ستبقى مخفية حتى الكشف):') || '').trim();
+  if (!answerText) {
+    showToast('لم تتم إضافة السؤال لأن الإجابة مطلوبة', 'HOST QUESTION');
+    return;
+  }
+  const explanationText = String(window.prompt('شرح مختصر اختياري:') || '').trim();
+  const hostQuestion = {
+    category: 'سؤال المضيف',
+    difficulty: 'مخصص',
+    question: questionText,
+    answer: answerText,
+    explanation: explanationText || 'إجابة يحددها المضيف.',
+    source: 'host'
+  };
+  const insertAt = Math.min(state.currentIndex + 1, state.questions.length);
+  state.questions.splice(insertAt, 0, hostQuestion);
+  state.questionHistory.push(questionText);
+  state.questionHistory = state.questionHistory.slice(-400);
+  saveHistory();
+  updateScores();
+  showToast('تمت إضافة سؤال المضيف بعد السؤال الحالي', 'HOST QUESTION READY');
 }
 
 async function loadMoreQuestions() {
@@ -1442,6 +1468,14 @@ function initGame() {
   safeOn('startTimerBtn', 'click', startTimer);
   safeOn('revealBtn', 'click', revealAnswer);
   safeOn('nextBtn', 'click', nextQuestion);
+  const hostButton = document.createElement('button');
+  hostButton.id = 'hostQuestionBtn';
+  hostButton.type = 'button';
+  hostButton.className = 'text-control host-question-control';
+  hostButton.innerHTML = '<span>✎</span> سؤال المضيف';
+  hostButton.addEventListener('click', addHostQuestion);
+  const showActions = document.querySelector('.show-actions');
+  if (showActions && !document.getElementById('hostQuestionBtn')) showActions.insertBefore(hostButton, showActions.firstChild);
   safeOn('girlsPlusBtn', 'click', () => applyPoint('girls'));
   safeOn('girlsMinusBtn', 'click', () => subtractPoint('girls'));
   safeOn('boysPlusBtn', 'click', () => applyPoint('boys'));

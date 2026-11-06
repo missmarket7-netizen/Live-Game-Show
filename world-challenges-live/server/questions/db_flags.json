@@ -1,17 +1,10 @@
 [
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/sa.svg",
-    "answer": "المملكة العربية السعودية",
-    "explanation": "علم المملكة العربية السعودية يحتوي على سيف وسطر الشهادة."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/eg.svg",
-    "answer": "مصر",
-    "explanation": "علم مصر يتكون من ثلاثة ألوان أفقية أحمر وأسود وأبيض مع نسر صلاح الدين في المنتصف."
+    "difficulty": "متدرج",
+    "question": "/flags/ad.svg",
+    "answer": "أندورا",
+    "explanation": "علم أندورا."
   },
   {
     "category": "خمن الدولة",
@@ -22,153 +15,6 @@
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/kw.svg",
-    "answer": "الكويت",
-    "explanation": "علم الكويت يتكون من شريط أزرق مثلثي على اليسار وثلاثة أشرطة أفقية خضراء وبيضاء وحمراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/qa.svg",
-    "answer": "قطر",
-    "explanation": "علم قطر مميز بلونه العنابي (القرمزي) ذو الثمانية رؤوس الأسنان البيضاء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/bh.svg",
-    "answer": "البحرين",
-    "explanation": "علم البحرين يتكون من لونين أحمر وأبيض يفصل بينهما خمسة أسنان بيضاء تمثل أركان الإسلام الخمسة."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/om.svg",
-    "answer": "سلطنة عُمان",
-    "explanation": "علم عُمان يتكون من ثلاثة أشرطة أفقية حمراء وخضراء وبيضاء مع شعار السلطان قابوس على اليسار."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/jo.svg",
-    "answer": "الأردن",
-    "explanation": "علم الأردن مشابه لعلم فلسطين لكنه يحتوي على نجمة سباعية الرؤوس باللون الأبيض داخل المثلث الأحمر."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/lb.svg",
-    "answer": "لبنان",
-    "explanation": "علم لبنان يتكون من شريطين أحمرين أعلى وأسفل وشريط أبيض واسع في الوسط عليه شجرة أرز خضراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/sy.svg",
-    "answer": "سوريا",
-    "explanation": "علم سوريا الحالي يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع نجمتين خضراوين."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/iq.svg",
-    "answer": "العراق",
-    "explanation": "علم العراق يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع عبارة الله أكبر مكتوبة بالخط الكوفي الأخضر."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/ps.svg",
-    "answer": "فلسطين",
-    "explanation": "علم فلسطين مشابه لعلم الأردن لكنه يحتوي على ثلاثة ألوان أفقية سوداء وبيضاء وخضراء مع مثلث أحمر دون نجمة."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/ma.svg",
-    "answer": "المغرب",
-    "explanation": "علم المغرب أحمر اللون بالكامل ويحتوي على نجمة خماسية خضراء في المركز."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/dz.svg",
-    "answer": "الجزائر",
-    "explanation": "علم الجزائر ينقسم عموديًا إلى نصفين أخضر وأبيض، وفي وسطه هلال ونجمة حمراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/tn.svg",
-    "answer": "تونس",
-    "explanation": "علم تونس أحمر اللون ويحتوي على دائرة بيضاء في المنتصف بداخلها هلال ونجمة حمراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/ly.svg",
-    "answer": "ليبيا",
-    "explanation": "علم ليبيا الحالي يتكون من ثلاثة أشرطة أفقية حمراء وسوداء وخضراء مع هلال ونجمة بيضاء في الشريط الأسود."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/sd.svg",
-    "answer": "السودان",
-    "explanation": "علم السودان يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع مثلث أخضر على الجانب الأيسر."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/tr.svg",
-    "answer": "تركيا",
-    "explanation": "علم تركيا أحمر اللون ويحتوي على هلال ونجمة بيضاوين في المنتصف."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/ir.svg",
-    "answer": "إيران",
-    "explanation": "علم إيران يتكون من ثلاثة أشرطة أفقية خضراء وبيضاء وحمراء مع شعار الجمهورية الإسلامية باللون الأحمر في الوسط."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/pk.svg",
-    "answer": "باكستان",
-    "explanation": "علم باكستان أخضر اللون ويحتوي على شريط أبيض رأسي على اليسار وهلال ونجمة بيضاوين في الوسط."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/in.svg",
-    "answer": "الهند",
-    "explanation": "علم الهند يتكون من ثلاثة أشرطة أفقية برتقالية وبيضاء وخضراء مع عجلة أشوكا الزرقاء في الوسط."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/id.svg",
-    "answer": "إندونيسيا",
-    "explanation": "علم إندونيسيا يتكون من شريطين أفقيين أحمر فوق أبيض، وهو مطابق تقريبًا لعلم موناكو."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/my.svg",
-    "answer": "ماليزيا",
-    "explanation": "علم ماليزيا يحتوي على 14 شريطًا أفقيًا أحمر وأبيض، ومربع أزرق في الأعلى بهلال ونجمة صفراء ذات 14 رأسًا."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/bn.svg",
-    "answer": "بروناي",
-    "explanation": "علم سلطنة بروناي أصفر اللون ويتضمن شريطين قطريين أبيض وأسود وشعار الدولة في المنتصف."
-  },
-  {
-    "category": "خمن الدولة",
     "difficulty": "صعب",
     "question": "/flags/af.svg",
     "answer": "أفغانستان",
@@ -176,31 +22,24 @@
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/uz.svg",
-    "answer": "أوزبكستان",
-    "explanation": "علم أوزبكستان يتكون من ثلاثة أشرطة زرقاء وبيضاء وخضراء تفصل بينها خطوط حمراء رفيعة، ويحتوي على هلال ونجوم."
+    "difficulty": "متدرج",
+    "question": "/flags/ag.svg",
+    "answer": "أنتيغوا وبربودا",
+    "explanation": "علم أنتيغوا وبربودا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/kz.svg",
-    "answer": "كازاخستان",
-    "explanation": "علم كازاخستان سماوي اللون ويحتوي على شمس ذهبية وطائر العقاب، مع نقوش تقليدية على الجانب الأيسر."
+    "difficulty": "متدرج",
+    "question": "/flags/ai.svg",
+    "answer": "أنغويلا",
+    "explanation": "علم أنغويلا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/az.svg",
-    "answer": "أذربيجان",
-    "explanation": "علم أذربيجان يتكون من ثلاثة أشرطة أفقية زرقاء وحمراء وخضراء مع هلال ونجمة ثمانية الرؤوس بيضاء في الوسط."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/ge.svg",
-    "answer": "جورجيا",
-    "explanation": "علم جورجيا أبيض اللون ويحتوي على صليب أحمر كبير في المنتصف وأربعة صلبان أصغر في الزوايا."
+    "difficulty": "متدرج",
+    "question": "/flags/al.svg",
+    "answer": "ألبانيا",
+    "explanation": "علم ألبانيا."
   },
   {
     "category": "خمن الدولة",
@@ -211,66 +50,87 @@
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/us.svg",
-    "answer": "الولايات المتحدة الأمريكية",
-    "explanation": "علم أمريكا يحتوي على 13 خطًا أفقيًا أحمر وأبيض يمثل المستعمرات الأصلية، ومربع أزرق به 50 نجمة بيضاء تمثل الولايات."
+    "difficulty": "متدرج",
+    "question": "/flags/ao.svg",
+    "answer": "أنغولا",
+    "explanation": "علم أنغولا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/ca.svg",
-    "answer": "كندا",
-    "explanation": "علم كندا أحمر وبيض ويحتوي على ورقة قيقب حمراء في المنتصف."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/gb.svg",
-    "answer": "المملكة المتحدة",
-    "explanation": "علم بريطانيا يُعرف بـ Union Jack ويتكون من تداخل صلبان إنجلترا واسكتلندا وأيرلندا."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/fr.svg",
-    "answer": "فرنسا",
-    "explanation": "علم فرنسا يتكون من ثلاثة أشرطة رأسية زرقاء وبيضاء وحمراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/de.svg",
-    "answer": "ألمانيا",
-    "explanation": "علم ألمانيا يتكون من ثلاثة أشرطة أفقية سوداء وحمراء وذهبية."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/it.svg",
-    "answer": "إيطاليا",
-    "explanation": "علم إيطاليا يتكون من ثلاثة أشرطة رأسية خضراء وبيضاء وحمراء."
-  },
-  {
-    "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/es.svg",
-    "answer": "إسبانيا",
-    "explanation": "علم إسبانيا يتكون من شريطين أحمرين أعلى وأسفل وشريط أصفر مزدوج العرض في المنتصف يحمل شعار الملك."
+    "difficulty": "متدرج",
+    "question": "/flags/aq.svg",
+    "answer": "أنتاركتيكا",
+    "explanation": "علم أنتاركتيكا."
   },
   {
     "category": "خمن الدولة",
     "difficulty": "متوسط",
-    "question": "/flags/pt.svg",
-    "answer": "البرتغال",
-    "explanation": "علم البرتغال ينقسم عموديًا إلى أخضر وأحمر، ويحتوي على الكرة armillary والصدرية الوطنية فوق خط التقسيم."
+    "question": "/flags/ar.svg",
+    "answer": "الأرجنتين",
+    "explanation": "علم الأرجنتين يتكون من ثلاثة أشرطة أفقية زرقاء وبيضاء وزرقاء مع شمس مايو الصفراء في الوسط."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/as.svg",
+    "answer": "ساموا الأمريكية",
+    "explanation": "علم ساموا الأمريكية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/at.svg",
+    "answer": "النمسا",
+    "explanation": "علم النمسا."
   },
   {
     "category": "خمن الدولة",
     "difficulty": "متوسط",
-    "question": "/flags/nl.svg",
-    "answer": "هولندا",
-    "explanation": "علم هولندا يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وزرقاء."
+    "question": "/flags/au.svg",
+    "answer": "أستراليا",
+    "explanation": "علم أستراليا أزرق داكن ويحتوي على Union Jack في الزاوية العليا اليسرى ونجوم الجنوب الكبير."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/aw.svg",
+    "answer": "أروبا",
+    "explanation": "علم أروبا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ax.svg",
+    "answer": "جزر آلاند",
+    "explanation": "علم جزر آلاند."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/az.svg",
+    "answer": "أذربيجان",
+    "explanation": "علم أذربيجان يتكون من ثلاثة أشرطة أفقية زرقاء وحمراء وخضراء مع هلال ونجمة ثمانية الرؤوس بيضاء في الوسط."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ba.svg",
+    "answer": "البوسنة والهرسك",
+    "explanation": "علم البوسنة والهرسك."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bb.svg",
+    "answer": "بربادوس",
+    "explanation": "علم بربادوس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bd.svg",
+    "answer": "بنغلاديش",
+    "explanation": "علم بنغلاديش."
   },
   {
     "category": "خمن الدولة",
@@ -281,6 +141,160 @@
   },
   {
     "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bf.svg",
+    "answer": "بوركينا فاسو",
+    "explanation": "علم بوركينا فاسو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bg.svg",
+    "answer": "بلغاريا",
+    "explanation": "علم بلغاريا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/bh.svg",
+    "answer": "البحرين",
+    "explanation": "علم البحرين يتكون من لونين أحمر وأبيض يفصل بينهما خمسة أسنان بيضاء تمثل أركان الإسلام الخمسة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bi.svg",
+    "answer": "بوروندي",
+    "explanation": "علم بوروندي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bj.svg",
+    "answer": "بنين",
+    "explanation": "علم بنين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bl.svg",
+    "answer": "سان بارتليمي",
+    "explanation": "علم سان بارتليمي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bm.svg",
+    "answer": "برمودا",
+    "explanation": "علم برمودا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/bn.svg",
+    "answer": "بروناي",
+    "explanation": "علم سلطنة بروناي أصفر اللون ويتضمن شريطين قطريين أبيض وأسود وشعار الدولة في المنتصف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bo.svg",
+    "answer": "بوليفيا",
+    "explanation": "علم بوليفيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bq.svg",
+    "answer": "هولندا الكاريبية",
+    "explanation": "علم هولندا الكاريبية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/br.svg",
+    "answer": "البرازيل",
+    "explanation": "علم البرازيل أخضر اللون ويحتوي على معين أصفر بداخله دائرة زرقاء عليها نجوم وشريط أبيض بكلمات النظام."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bs.svg",
+    "answer": "جزر البهاما",
+    "explanation": "علم جزر البهاما."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bt.svg",
+    "answer": "بوتان",
+    "explanation": "علم بوتان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bv.svg",
+    "answer": "جزيرة بوفيه",
+    "explanation": "علم جزيرة بوفيه."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bw.svg",
+    "answer": "بوتسوانا",
+    "explanation": "علم بوتسوانا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/by.svg",
+    "answer": "بيلاروس",
+    "explanation": "علم بيلاروس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/bz.svg",
+    "answer": "بليز",
+    "explanation": "علم بليز."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/ca.svg",
+    "answer": "كندا",
+    "explanation": "علم كندا أحمر وبيض ويحتوي على ورقة قيقب حمراء في المنتصف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cc.svg",
+    "answer": "جزر كوكوس (كيلينغ)",
+    "explanation": "علم جزر كوكوس (كيلينغ)."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cd.svg",
+    "answer": "الكونغو - كينشاسا",
+    "explanation": "علم الكونغو - كينشاسا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cf.svg",
+    "answer": "جمهورية أفريقيا الوسطى",
+    "explanation": "علم جمهورية أفريقيا الوسطى."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cg.svg",
+    "answer": "الكونغو - برازافيل",
+    "explanation": "علم الكونغو - برازافيل."
+  },
+  {
+    "category": "خمن الدولة",
     "difficulty": "متوسط",
     "question": "/flags/ch.svg",
     "answer": "سويسرا",
@@ -288,38 +302,87 @@
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/se.svg",
-    "answer": "السويد",
-    "explanation": "علم السويد أزرق اللون ويحتوي على صليب شمالي أصفر يمتد حتى حواف العلم."
+    "difficulty": "متدرج",
+    "question": "/flags/ci.svg",
+    "answer": "ساحل العاج",
+    "explanation": "علم ساحل العاج."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/no.svg",
-    "answer": "النرويج",
-    "explanation": "علم النرويج أحمر اللون ويحتوي على صليب شمالي أزرق مغطى بإطار أبيض."
+    "difficulty": "متدرج",
+    "question": "/flags/ck.svg",
+    "answer": "جزر كوك",
+    "explanation": "علم جزر كوك."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/dk.svg",
-    "answer": "الدنمارك",
-    "explanation": "علم الدنمارك أحمر اللون ويحتوي على صليب شمالي أبيض يمتد حتى الحافة اليسرى."
+    "difficulty": "متدرج",
+    "question": "/flags/cl.svg",
+    "answer": "تشيلي",
+    "explanation": "علم تشيلي."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/fi.svg",
-    "answer": "فنلندا",
-    "explanation": "علم فنلندا أبيض اللون ويحتوي على صليب شمالي أزرق."
+    "difficulty": "متدرج",
+    "question": "/flags/cm.svg",
+    "answer": "الكاميرون",
+    "explanation": "علم الكاميرون."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/pl.svg",
-    "answer": "بولندا",
-    "explanation": "علم بولندا يتكون من شريطين أفقيين أبيض فوق أحمر."
+    "difficulty": "سهل",
+    "question": "/flags/cn.svg",
+    "answer": "الصين",
+    "explanation": "علم الصين أحمر اللون ويحتوي على خمس نجوم صفراء في الزاوية العليا اليسرى."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/co.svg",
+    "answer": "كولومبيا",
+    "explanation": "علم كولومبيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cr.svg",
+    "answer": "كوستاريكا",
+    "explanation": "علم كوستاريكا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cu.svg",
+    "answer": "كوبا",
+    "explanation": "علم كوبا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cv.svg",
+    "answer": "الرأس الأخضر",
+    "explanation": "علم الرأس الأخضر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cw.svg",
+    "answer": "كوراساو",
+    "explanation": "علم كوراساو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cx.svg",
+    "answer": "جزيرة كريسماس",
+    "explanation": "علم جزيرة كريسماس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/cy.svg",
+    "answer": "قبرص",
+    "explanation": "علم قبرص."
   },
   {
     "category": "خمن الدولة",
@@ -331,37 +394,702 @@
   {
     "category": "خمن الدولة",
     "difficulty": "سهل",
+    "question": "/flags/de.svg",
+    "answer": "ألمانيا",
+    "explanation": "علم ألمانيا يتكون من ثلاثة أشرطة أفقية سوداء وحمراء وذهبية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/dj.svg",
+    "answer": "جيبوتي",
+    "explanation": "علم جيبوتي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/dk.svg",
+    "answer": "الدنمارك",
+    "explanation": "علم الدنمارك أحمر اللون ويحتوي على صليب شمالي أبيض يمتد حتى الحافة اليسرى."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/dm.svg",
+    "answer": "دومينيكا",
+    "explanation": "علم دومينيكا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/do.svg",
+    "answer": "جمهورية الدومينيكان",
+    "explanation": "علم جمهورية الدومينيكان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/dz.svg",
+    "answer": "الجزائر",
+    "explanation": "علم الجزائر ينقسم عموديًا إلى نصفين أخضر وأبيض، وفي وسطه هلال ونجمة حمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ec.svg",
+    "answer": "الإكوادور",
+    "explanation": "علم الإكوادور."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ee.svg",
+    "answer": "إستونيا",
+    "explanation": "علم إستونيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/eg.svg",
+    "answer": "مصر",
+    "explanation": "علم مصر يتكون من ثلاثة ألوان أفقية أحمر وأسود وأبيض مع نسر صلاح الدين في المنتصف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/eh.svg",
+    "answer": "الصحراء الغربية",
+    "explanation": "علم الصحراء الغربية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/er.svg",
+    "answer": "إريتريا",
+    "explanation": "علم إريتريا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/es.svg",
+    "answer": "إسبانيا",
+    "explanation": "علم إسبانيا يتكون من شريطين أحمرين أعلى وأسفل وشريط أصفر مزدوج العرض في المنتصف يحمل شعار الملك."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/et.svg",
+    "answer": "إثيوبيا",
+    "explanation": "علم إثيوبيا يتكون من ثلاثة أشرطة أفقية خضراء وصفراء وحمراء مع نجمة خماسية ذهبية في دائرة زرقاء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/fi.svg",
+    "answer": "فنلندا",
+    "explanation": "علم فنلندا أبيض اللون ويحتوي على صليب شمالي أزرق."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/fj.svg",
+    "answer": "فيجي",
+    "explanation": "علم فيجي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/fk.svg",
+    "answer": "جزر فوكلاند",
+    "explanation": "علم جزر فوكلاند."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/fm.svg",
+    "answer": "ميكرونيزيا",
+    "explanation": "علم ميكرونيزيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/fo.svg",
+    "answer": "جزر فارو",
+    "explanation": "علم جزر فارو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/fr.svg",
+    "answer": "فرنسا",
+    "explanation": "علم فرنسا يتكون من ثلاثة أشرطة رأسية زرقاء وبيضاء وحمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ga.svg",
+    "answer": "الغابون",
+    "explanation": "علم الغابون."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/gb.svg",
+    "answer": "المملكة المتحدة",
+    "explanation": "علم بريطانيا يُعرف بـ Union Jack ويتكون من تداخل صلبان إنجلترا واسكتلندا وأيرلندا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gd.svg",
+    "answer": "غرينادا",
+    "explanation": "علم غرينادا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/ge.svg",
+    "answer": "جورجيا",
+    "explanation": "علم جورجيا أبيض اللون ويحتوي على صليب أحمر كبير في المنتصف وأربعة صلبان أصغر في الزوايا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gf.svg",
+    "answer": "غويانا الفرنسية",
+    "explanation": "علم غويانا الفرنسية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gg.svg",
+    "answer": "غيرنزي",
+    "explanation": "علم غيرنزي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gh.svg",
+    "answer": "غانا",
+    "explanation": "علم غانا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gi.svg",
+    "answer": "جبل طارق",
+    "explanation": "علم جبل طارق."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gl.svg",
+    "answer": "غرينلاند",
+    "explanation": "علم غرينلاند."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gm.svg",
+    "answer": "غامبيا",
+    "explanation": "علم غامبيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gn.svg",
+    "answer": "غينيا",
+    "explanation": "علم غينيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gp.svg",
+    "answer": "غوادلوب",
+    "explanation": "علم غوادلوب."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gq.svg",
+    "answer": "غينيا الاستوائية",
+    "explanation": "علم غينيا الاستوائية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
     "question": "/flags/gr.svg",
     "answer": "اليونان",
     "explanation": "علم اليونان يحتوي على تسعة خطوط أفقية زرقاء وبيضاء ومربع أزرق في الأعلى به صليب أبيض."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/ru.svg",
-    "answer": "روسيا",
-    "explanation": "علم روسيا يتكون من ثلاثة أشرطة أفقية بيضاء وزرقاء وحمراء."
+    "difficulty": "متدرج",
+    "question": "/flags/gs.svg",
+    "answer": "جورجيا الجنوبية وجزر ساندويتش الجنوبية",
+    "explanation": "علم جورجيا الجنوبية وجزر ساندويتش الجنوبية."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/ua.svg",
-    "answer": "أوكرانيا",
-    "explanation": "علم أوكرانيا يتكون من شريطين أفقيين أزرق فوق أصفر."
+    "difficulty": "متدرج",
+    "question": "/flags/gt.svg",
+    "answer": "غواتيمالا",
+    "explanation": "علم غواتيمالا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/br.svg",
-    "answer": "البرازيل",
-    "explanation": "علم البرازيل أخضر اللون ويحتوي على معين أصفر بداخله دائرة زرقاء عليها نجوم وشريط أبيض بكلمات النظام."
+    "difficulty": "متدرج",
+    "question": "/flags/gu.svg",
+    "answer": "غوام",
+    "explanation": "علم غوام."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gw.svg",
+    "answer": "غينيا بيساو",
+    "explanation": "علم غينيا بيساو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/gy.svg",
+    "answer": "غيانا",
+    "explanation": "علم غيانا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/hk.svg",
+    "answer": "هونغ كونغ الصينية (منطقة إدارية خاصة)",
+    "explanation": "علم هونغ كونغ الصينية (منطقة إدارية خاصة)."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/hm.svg",
+    "answer": "جزيرة هيرد وجزر ماكدونالد",
+    "explanation": "علم جزيرة هيرد وجزر ماكدونالد."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/hn.svg",
+    "answer": "هندوراس",
+    "explanation": "علم هندوراس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/hr.svg",
+    "answer": "كرواتيا",
+    "explanation": "علم كرواتيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ht.svg",
+    "answer": "هايتي",
+    "explanation": "علم هايتي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/hu.svg",
+    "answer": "هنغاريا",
+    "explanation": "علم هنغاريا."
   },
   {
     "category": "خمن الدولة",
     "difficulty": "متوسط",
-    "question": "/flags/ar.svg",
-    "answer": "الأرجنتين",
-    "explanation": "علم الأرجنتين يتكون من ثلاثة أشرطة أفقية زرقاء وبيضاء وزرقاء مع شمس مايو الصفراء في الوسط."
+    "question": "/flags/id.svg",
+    "answer": "إندونيسيا",
+    "explanation": "علم إندونيسيا يتكون من شريطين أفقيين أحمر فوق أبيض، وهو مطابق تقريبًا لعلم موناكو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ie.svg",
+    "answer": "أيرلندا",
+    "explanation": "علم أيرلندا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/il.svg",
+    "answer": "إسرائيل",
+    "explanation": "علم إسرائيل."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/im.svg",
+    "answer": "جزيرة مان",
+    "explanation": "علم جزيرة مان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/in.svg",
+    "answer": "الهند",
+    "explanation": "علم الهند يتكون من ثلاثة أشرطة أفقية برتقالية وبيضاء وخضراء مع عجلة أشوكا الزرقاء في الوسط."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/io.svg",
+    "answer": "الإقليم البريطاني في المحيط الهندي",
+    "explanation": "علم الإقليم البريطاني في المحيط الهندي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/iq.svg",
+    "answer": "العراق",
+    "explanation": "علم العراق يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع عبارة الله أكبر مكتوبة بالخط الكوفي الأخضر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/ir.svg",
+    "answer": "إيران",
+    "explanation": "علم إيران يتكون من ثلاثة أشرطة أفقية خضراء وبيضاء وحمراء مع شعار الجمهورية الإسلامية باللون الأحمر في الوسط."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/is.svg",
+    "answer": "آيسلندا",
+    "explanation": "علم آيسلندا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/it.svg",
+    "answer": "إيطاليا",
+    "explanation": "علم إيطاليا يتكون من ثلاثة أشرطة رأسية خضراء وبيضاء وحمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/je.svg",
+    "answer": "جيرسي",
+    "explanation": "علم جيرسي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/jm.svg",
+    "answer": "جامايكا",
+    "explanation": "علم جامايكا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/jo.svg",
+    "answer": "الأردن",
+    "explanation": "علم الأردن مشابه لعلم فلسطين لكنه يحتوي على نجمة سباعية الرؤوس باللون الأبيض داخل المثلث الأحمر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/jp.svg",
+    "answer": "اليابان",
+    "explanation": "علم اليابان أبيض اللون ويحتوي على دائرة حمراء في المنتصف تمثل الشمس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/ke.svg",
+    "answer": "كينيا",
+    "explanation": "علم كينيا يتكون من أشرطة سوداء وحمراء وخضراء تفصل بينها خطوط بيضاء رفيعة مع درع ورمحين في المنتصف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/kg.svg",
+    "answer": "قيرغيزستان",
+    "explanation": "علم قيرغيزستان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/kh.svg",
+    "answer": "كمبوديا",
+    "explanation": "علم كمبوديا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ki.svg",
+    "answer": "كيريباتي",
+    "explanation": "علم كيريباتي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/km.svg",
+    "answer": "جزر القمر",
+    "explanation": "علم جزر القمر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/kn.svg",
+    "answer": "سانت كيتس ونيفيس",
+    "explanation": "علم سانت كيتس ونيفيس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/kp.svg",
+    "answer": "كوريا الشمالية",
+    "explanation": "علم كوريا الشمالية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/kr.svg",
+    "answer": "كوريا الجنوبية",
+    "explanation": "علم كوريا الجنوبية أبيض اللون ويحتوي على رمز Taegeuk أحمر وأزرق في المنتصف وأربعة تريغرامات سوداء في الزوايا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/kw.svg",
+    "answer": "الكويت",
+    "explanation": "علم الكويت يتكون من شريط أزرق مثلثي على اليسار وثلاثة أشرطة أفقية خضراء وبيضاء وحمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ky.svg",
+    "answer": "جزر كايمان",
+    "explanation": "علم جزر كايمان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/kz.svg",
+    "answer": "كازاخستان",
+    "explanation": "علم كازاخستان سماوي اللون ويحتوي على شمس ذهبية وطائر العقاب، مع نقوش تقليدية على الجانب الأيسر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/la.svg",
+    "answer": "لاوس",
+    "explanation": "علم لاوس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/lb.svg",
+    "answer": "لبنان",
+    "explanation": "علم لبنان يتكون من شريطين أحمرين أعلى وأسفل وشريط أبيض واسع في الوسط عليه شجرة أرز خضراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lc.svg",
+    "answer": "سانت لوسيا",
+    "explanation": "علم سانت لوسيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/li.svg",
+    "answer": "ليختنشتاين",
+    "explanation": "علم ليختنشتاين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lk.svg",
+    "answer": "سريلانكا",
+    "explanation": "علم سريلانكا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lr.svg",
+    "answer": "ليبيريا",
+    "explanation": "علم ليبيريا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ls.svg",
+    "answer": "ليسوتو",
+    "explanation": "علم ليسوتو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lt.svg",
+    "answer": "ليتوانيا",
+    "explanation": "علم ليتوانيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lu.svg",
+    "answer": "لوكسمبورغ",
+    "explanation": "علم لوكسمبورغ."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/lv.svg",
+    "answer": "لاتفيا",
+    "explanation": "علم لاتفيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/ly.svg",
+    "answer": "ليبيا",
+    "explanation": "علم ليبيا الحالي يتكون من ثلاثة أشرطة أفقية حمراء وسوداء وخضراء مع هلال ونجمة بيضاء في الشريط الأسود."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/ma.svg",
+    "answer": "المغرب",
+    "explanation": "علم المغرب أحمر اللون بالكامل ويحتوي على نجمة خماسية خضراء في المركز."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mc.svg",
+    "answer": "موناكو",
+    "explanation": "علم موناكو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/md.svg",
+    "answer": "مولدوفا",
+    "explanation": "علم مولدوفا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/me.svg",
+    "answer": "الجبل الأسود",
+    "explanation": "علم الجبل الأسود."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mf.svg",
+    "answer": "سان مارتن",
+    "explanation": "علم سان مارتن."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mg.svg",
+    "answer": "مدغشقر",
+    "explanation": "علم مدغشقر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mh.svg",
+    "answer": "جزر مارشال",
+    "explanation": "علم جزر مارشال."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mk.svg",
+    "answer": "مقدونيا الشمالية",
+    "explanation": "علم مقدونيا الشمالية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ml.svg",
+    "answer": "مالي",
+    "explanation": "علم مالي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mm.svg",
+    "answer": "ميانمار (بورما)",
+    "explanation": "علم ميانمار (بورما)."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mn.svg",
+    "answer": "منغوليا",
+    "explanation": "علم منغوليا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mo.svg",
+    "answer": "منطقة ماكاو الإدارية الخاصة",
+    "explanation": "علم منطقة ماكاو الإدارية الخاصة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mp.svg",
+    "answer": "جزر ماريانا الشمالية",
+    "explanation": "علم جزر ماريانا الشمالية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mq.svg",
+    "answer": "جزر المارتينيك",
+    "explanation": "علم جزر المارتينيك."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mr.svg",
+    "answer": "موريتانيا",
+    "explanation": "علم موريتانيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ms.svg",
+    "answer": "مونتسرات",
+    "explanation": "علم مونتسرات."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mt.svg",
+    "answer": "مالطا",
+    "explanation": "علم مالطا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mu.svg",
+    "answer": "موريشيوس",
+    "explanation": "علم موريشيوس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mv.svg",
+    "answer": "جزر المالديف",
+    "explanation": "علم جزر المالديف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/mw.svg",
+    "answer": "ملاوي",
+    "explanation": "علم ملاوي."
   },
   {
     "category": "خمن الدولة",
@@ -373,44 +1101,44 @@
   {
     "category": "خمن الدولة",
     "difficulty": "متوسط",
-    "question": "/flags/au.svg",
-    "answer": "أستراليا",
-    "explanation": "علم أستراليا أزرق داكن ويحتوي على Union Jack في الزاوية العليا اليسرى ونجوم الجنوب الكبير."
+    "question": "/flags/my.svg",
+    "answer": "ماليزيا",
+    "explanation": "علم ماليزيا يحتوي على 14 شريطًا أفقيًا أحمر وأبيض، ومربع أزرق في الأعلى بهلال ونجمة صفراء ذات 14 رأسًا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/nz.svg",
-    "answer": "نيوزيلندا",
-    "explanation": "علم نيوزيلندا مشابه لأستراليا لكنه يحتوي على أربع نجوم حمراء ذات حدود بيضاء بدلاً من النجوم البيضاء."
+    "difficulty": "متدرج",
+    "question": "/flags/mz.svg",
+    "answer": "موزمبيق",
+    "explanation": "علم موزمبيق."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/jp.svg",
-    "answer": "اليابان",
-    "explanation": "علم اليابان أبيض اللون ويحتوي على دائرة حمراء في المنتصف تمثل الشمس."
+    "difficulty": "متدرج",
+    "question": "/flags/na.svg",
+    "answer": "ناميبيا",
+    "explanation": "علم ناميبيا."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "سهل",
-    "question": "/flags/cn.svg",
-    "answer": "الصين",
-    "explanation": "علم الصين أحمر اللون ويحتوي على خمس نجوم صفراء في الزاوية العليا اليسرى."
+    "difficulty": "متدرج",
+    "question": "/flags/nc.svg",
+    "answer": "كاليدونيا الجديدة",
+    "explanation": "علم كاليدونيا الجديدة."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "متوسط",
-    "question": "/flags/kr.svg",
-    "answer": "كوريا الجنوبية",
-    "explanation": "علم كوريا الجنوبية أبيض اللون ويحتوي على رمز Taegeuk أحمر وأزرق في المنتصف وأربعة تريغرامات سوداء في الزوايا."
+    "difficulty": "متدرج",
+    "question": "/flags/ne.svg",
+    "answer": "النيجر",
+    "explanation": "علم النيجر."
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/za.svg",
-    "answer": "جنوب أفريقيا",
-    "explanation": "علم جنوب أفريقيا فريد بتصميمه الذي يجمع بين الحرف Y الأفقي والألوان الستة المختلفة."
+    "difficulty": "متدرج",
+    "question": "/flags/nf.svg",
+    "answer": "جزيرة نورفولك",
+    "explanation": "علم جزيرة نورفولك."
   },
   {
     "category": "خمن الدولة",
@@ -421,16 +1149,597 @@
   },
   {
     "category": "خمن الدولة",
-    "difficulty": "صعب",
-    "question": "/flags/ke.svg",
-    "answer": "كينيا",
-    "explanation": "علم كينيا يتكون من أشرطة سوداء وحمراء وخضراء تفصل بينها خطوط بيضاء رفيعة مع درع ورمحين في المنتصف."
+    "difficulty": "متدرج",
+    "question": "/flags/ni.svg",
+    "answer": "نيكاراغوا",
+    "explanation": "علم نيكاراغوا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/nl.svg",
+    "answer": "هولندا",
+    "explanation": "علم هولندا يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وزرقاء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/no.svg",
+    "answer": "النرويج",
+    "explanation": "علم النرويج أحمر اللون ويحتوي على صليب شمالي أزرق مغطى بإطار أبيض."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/np.svg",
+    "answer": "نيبال",
+    "explanation": "علم نيبال."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/nr.svg",
+    "answer": "ناورو",
+    "explanation": "علم ناورو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/nu.svg",
+    "answer": "نيوي",
+    "explanation": "علم نيوي."
   },
   {
     "category": "خمن الدولة",
     "difficulty": "صعب",
-    "question": "/flags/et.svg",
-    "answer": "إثيوبيا",
-    "explanation": "علم إثيوبيا يتكون من ثلاثة أشرطة أفقية خضراء وصفراء وحمراء مع نجمة خماسية ذهبية في دائرة زرقاء."
+    "question": "/flags/nz.svg",
+    "answer": "نيوزيلندا",
+    "explanation": "علم نيوزيلندا مشابه لأستراليا لكنه يحتوي على أربع نجوم حمراء ذات حدود بيضاء بدلاً من النجوم البيضاء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/om.svg",
+    "answer": "سلطنة عُمان",
+    "explanation": "علم عُمان يتكون من ثلاثة أشرطة أفقية حمراء وخضراء وبيضاء مع شعار السلطان قابوس على اليسار."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pa.svg",
+    "answer": "بنما",
+    "explanation": "علم بنما."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pe.svg",
+    "answer": "بيرو",
+    "explanation": "علم بيرو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pf.svg",
+    "answer": "بولينيزيا الفرنسية",
+    "explanation": "علم بولينيزيا الفرنسية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pg.svg",
+    "answer": "بابوا غينيا الجديدة",
+    "explanation": "علم بابوا غينيا الجديدة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ph.svg",
+    "answer": "الفلبين",
+    "explanation": "علم الفلبين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/pk.svg",
+    "answer": "باكستان",
+    "explanation": "علم باكستان أخضر اللون ويحتوي على شريط أبيض رأسي على اليسار وهلال ونجمة بيضاوين في الوسط."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/pl.svg",
+    "answer": "بولندا",
+    "explanation": "علم بولندا يتكون من شريطين أفقيين أبيض فوق أحمر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pm.svg",
+    "answer": "سان بيير ومكويلون",
+    "explanation": "علم سان بيير ومكويلون."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pn.svg",
+    "answer": "جزر بيتكيرن",
+    "explanation": "علم جزر بيتكيرن."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pr.svg",
+    "answer": "بورتوريكو",
+    "explanation": "علم بورتوريكو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/ps.svg",
+    "answer": "فلسطين",
+    "explanation": "علم فلسطين مشابه لعلم الأردن لكنه يحتوي على ثلاثة ألوان أفقية سوداء وبيضاء وخضراء مع مثلث أحمر دون نجمة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/pt.svg",
+    "answer": "البرتغال",
+    "explanation": "علم البرتغال ينقسم عموديًا إلى أخضر وأحمر، ويحتوي على الكرة armillary والصدرية الوطنية فوق خط التقسيم."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/pw.svg",
+    "answer": "بالاو",
+    "explanation": "علم بالاو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/py.svg",
+    "answer": "باراغواي",
+    "explanation": "علم باراغواي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/qa.svg",
+    "answer": "قطر",
+    "explanation": "علم قطر مميز بلونه العنابي (القرمزي) ذو الثمانية رؤوس الأسنان البيضاء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/re.svg",
+    "answer": "روينيون",
+    "explanation": "علم روينيون."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ro.svg",
+    "answer": "رومانيا",
+    "explanation": "علم رومانيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/rs.svg",
+    "answer": "صربيا",
+    "explanation": "علم صربيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/ru.svg",
+    "answer": "روسيا",
+    "explanation": "علم روسيا يتكون من ثلاثة أشرطة أفقية بيضاء وزرقاء وحمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/rw.svg",
+    "answer": "رواندا",
+    "explanation": "علم رواندا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/sa.svg",
+    "answer": "المملكة العربية السعودية",
+    "explanation": "علم المملكة العربية السعودية يحتوي على سيف وسطر الشهادة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sb.svg",
+    "answer": "جزر سليمان",
+    "explanation": "علم جزر سليمان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sc.svg",
+    "answer": "سيشل",
+    "explanation": "علم سيشل."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/sd.svg",
+    "answer": "السودان",
+    "explanation": "علم السودان يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع مثلث أخضر على الجانب الأيسر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/se.svg",
+    "answer": "السويد",
+    "explanation": "علم السويد أزرق اللون ويحتوي على صليب شمالي أصفر يمتد حتى حواف العلم."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sg.svg",
+    "answer": "سنغافورة",
+    "explanation": "علم سنغافورة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sh.svg",
+    "answer": "سانت هيلينا",
+    "explanation": "علم سانت هيلينا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/si.svg",
+    "answer": "سلوفينيا",
+    "explanation": "علم سلوفينيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sj.svg",
+    "answer": "سفالبارد وجان ماين",
+    "explanation": "علم سفالبارد وجان ماين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sk.svg",
+    "answer": "سلوفاكيا",
+    "explanation": "علم سلوفاكيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sl.svg",
+    "answer": "سيراليون",
+    "explanation": "علم سيراليون."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sm.svg",
+    "answer": "سان مارينو",
+    "explanation": "علم سان مارينو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sn.svg",
+    "answer": "السنغال",
+    "explanation": "علم السنغال."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/so.svg",
+    "answer": "الصومال",
+    "explanation": "علم الصومال."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sr.svg",
+    "answer": "سورينام",
+    "explanation": "علم سورينام."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ss.svg",
+    "answer": "جنوب السودان",
+    "explanation": "علم جنوب السودان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/st.svg",
+    "answer": "ساو تومي وبرينسيبي",
+    "explanation": "علم ساو تومي وبرينسيبي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sv.svg",
+    "answer": "السلفادور",
+    "explanation": "علم السلفادور."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sx.svg",
+    "answer": "سانت مارتن",
+    "explanation": "علم سانت مارتن."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متوسط",
+    "question": "/flags/sy.svg",
+    "answer": "سوريا",
+    "explanation": "علم سوريا الحالي يتكون من ثلاثة أشرطة أفقية حمراء وبيضاء وسوداء مع نجمتين خضراوين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/sz.svg",
+    "answer": "إسواتيني",
+    "explanation": "علم إسواتيني."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tc.svg",
+    "answer": "جزر توركس وكايكوس",
+    "explanation": "علم جزر توركس وكايكوس."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/td.svg",
+    "answer": "تشاد",
+    "explanation": "علم تشاد."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tf.svg",
+    "answer": "الأقاليم الجنوبية الفرنسية",
+    "explanation": "علم الأقاليم الجنوبية الفرنسية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tg.svg",
+    "answer": "توغو",
+    "explanation": "علم توغو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/th.svg",
+    "answer": "تايلاند",
+    "explanation": "علم تايلاند."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tj.svg",
+    "answer": "طاجيكستان",
+    "explanation": "علم طاجيكستان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tk.svg",
+    "answer": "توكيلاو",
+    "explanation": "علم توكيلاو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tl.svg",
+    "answer": "تيمور - ليشتي",
+    "explanation": "علم تيمور - ليشتي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tm.svg",
+    "answer": "تركمانستان",
+    "explanation": "علم تركمانستان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/tn.svg",
+    "answer": "تونس",
+    "explanation": "علم تونس أحمر اللون ويحتوي على دائرة بيضاء في المنتصف بداخلها هلال ونجمة حمراء."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/to.svg",
+    "answer": "تونغا",
+    "explanation": "علم تونغا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/tr.svg",
+    "answer": "تركيا",
+    "explanation": "علم تركيا أحمر اللون ويحتوي على هلال ونجمة بيضاوين في المنتصف."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tt.svg",
+    "answer": "ترينيداد وتوباغو",
+    "explanation": "علم ترينيداد وتوباغو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tv.svg",
+    "answer": "توفالو",
+    "explanation": "علم توفالو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tw.svg",
+    "answer": "تايوان",
+    "explanation": "علم تايوان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/tz.svg",
+    "answer": "تنزانيا",
+    "explanation": "علم تنزانيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/ua.svg",
+    "answer": "أوكرانيا",
+    "explanation": "علم أوكرانيا يتكون من شريطين أفقيين أزرق فوق أصفر."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ug.svg",
+    "answer": "أوغندا",
+    "explanation": "علم أوغندا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/um.svg",
+    "answer": "جزر الولايات المتحدة النائية",
+    "explanation": "علم جزر الولايات المتحدة النائية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "سهل",
+    "question": "/flags/us.svg",
+    "answer": "الولايات المتحدة الأمريكية",
+    "explanation": "علم أمريكا يحتوي على 13 خطًا أفقيًا أحمر وأبيض يمثل المستعمرات الأصلية، ومربع أزرق به 50 نجمة بيضاء تمثل الولايات."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/uy.svg",
+    "answer": "أورغواي",
+    "explanation": "علم أورغواي."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/uz.svg",
+    "answer": "أوزبكستان",
+    "explanation": "علم أوزبكستان يتكون من ثلاثة أشرطة زرقاء وبيضاء وخضراء تفصل بينها خطوط حمراء رفيعة، ويحتوي على هلال ونجوم."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/va.svg",
+    "answer": "الفاتيكان",
+    "explanation": "علم الفاتيكان."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/vc.svg",
+    "answer": "سانت فنسنت وجزر غرينادين",
+    "explanation": "علم سانت فنسنت وجزر غرينادين."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ve.svg",
+    "answer": "فنزويلا",
+    "explanation": "علم فنزويلا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/vg.svg",
+    "answer": "جزر فيرجن البريطانية",
+    "explanation": "علم جزر فيرجن البريطانية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/vi.svg",
+    "answer": "جزر فيرجن الأمريكية",
+    "explanation": "علم جزر فيرجن الأمريكية."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/vn.svg",
+    "answer": "فيتنام",
+    "explanation": "علم فيتنام."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/vu.svg",
+    "answer": "فانواتو",
+    "explanation": "علم فانواتو."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/wf.svg",
+    "answer": "جزر والس وفوتونا",
+    "explanation": "علم جزر والس وفوتونا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ws.svg",
+    "answer": "ساموا",
+    "explanation": "علم ساموا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/ye.svg",
+    "answer": "اليمن",
+    "explanation": "علم اليمن."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/yt.svg",
+    "answer": "مايوت",
+    "explanation": "علم مايوت."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "صعب",
+    "question": "/flags/za.svg",
+    "answer": "جنوب أفريقيا",
+    "explanation": "علم جنوب أفريقيا فريد بتصميمه الذي يجمع بين الحرف Y الأفقي والألوان الستة المختلفة."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/zm.svg",
+    "answer": "زامبيا",
+    "explanation": "علم زامبيا."
+  },
+  {
+    "category": "خمن الدولة",
+    "difficulty": "متدرج",
+    "question": "/flags/zw.svg",
+    "answer": "زيمبابوي",
+    "explanation": "علم زيمبابوي."
   }
 ]

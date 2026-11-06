@@ -6,7 +6,8 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "node --watch server/server.js"
+    "dev": "node --watch server/server.js",
+    "test:quality": "node scripts/validate-banks.mjs && node --check public/app.js && node --check public/flag-view.js && node --check public/arena-extras.js && node --check server/server.js && node --check server/no-repeat-engine.js"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

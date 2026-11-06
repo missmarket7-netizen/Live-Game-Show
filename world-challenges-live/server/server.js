@@ -1055,7 +1055,15 @@ app.get("/api/saved-questions", async (req, res) => {
 app.use(express.static(staticRoot, {
   extensions: ["html"],
   immutable: false,
-  maxAge: process.env.NODE_ENV === "production" ? "1h" : 0
+  maxAge: process.env.NODE_ENV === "production" ? "1h" : 0,
+  setHeaders(res, filePath) {
+    const requestUrl = String(res.req && res.req.url || "");
+    if (/\.html$/i.test(filePath)) {
+      res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+    } else if (/[?&]v=[^&]+/i.test(requestUrl)) {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    }
+  }
 }));
 
 // Do not silently return index.html for missing images/audio/scripts.
