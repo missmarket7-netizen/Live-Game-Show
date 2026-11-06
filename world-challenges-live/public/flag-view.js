@@ -1,169 +1,146 @@
-/* ═══ FLAG_VIEW_V1 — إصلاح عرض أسئلة الأعلام ونص السؤال — بدون أي تغيير في التصميم ═══ */
+/* FLAG_VIEW_V2 — رسم موحّد وثابت لأسئلة الأعلام بعد انتهاء كل طبقات الواجهة */
 (function () {
   'use strict';
-  if (window.__FLAG_VIEW_V1__) return;
-  window.__FLAG_VIEW_V1__ = true;
+  if (window.__FLAG_VIEW_V2__) return;
+  window.__FLAG_VIEW_V2__ = true;
 
-  var PLACEHOLDERS = ['جاهز للسؤال الأول؟', '—', ''];
+  var RETRIES = [0, 80, 180, 360, 700];
+  var paintTimer = null;
+  var lastKey = '';
 
-  function current() {
-    var s = window.state;
+  function stateNow() {
+    return window.state || null;
+  }
+
+  function currentQuestion() {
+    var s = stateNow();
     return s && Array.isArray(s.questions) ? (s.questions[s.currentIndex] || null) : null;
   }
 
-  function titleNodes() {
-    var out = [];
-    var byId = document.getElementById('questionText');
-    if (byId) out.push(byId);
-    Array.prototype.forEach.call(
-      document.querySelectorAll('.question-main h1, .redesigned-question-card h1'),
-      function (n) { if (out.indexOf(n) === -1) out.push(n); }
-    );
-    return out;
-  }
-
-  function isFlag(q) {
+  function isFlagQuestion(q) {
     if (!q) return false;
-    if (/خمن\s*الدولة|أعلام|flags/i.test(String(q.category || ''))) return true;
-    var t = String(q.question || '').trim();
-    return /(^|\/)flags\/[a-z]{2}\.(svg|png|jpe?g|webp)/i.test(t) ||
-           /^https?:\/\/\S+\.(svg|png|jpe?g|webp)/i.test(t);
+    var category = String(q.category || '').trim();
+    var value = String(q.question || q.image || q.flag || '').trim();
+    return /خمن\s*الدولة|أعلام|flags/i.test(category) || /(?:^|\/)flags\/[a-z]{2}\.(?:svg|png|jpe?g|webp)(?:$|\?)/i.test(value);
   }
 
-  function isVisual(q) {
-    if (!q) return false;
-    return [q.image, q.imageUrl, q.media, q.asset, q.visual, q.question].some(function (v) {
-      return typeof v === 'string' && /(?:^|\/)(?:public\/)?(?:flags|guess|name|images|landmarks|landmark|tourism|tourist)\/|\.(?:svg|png|jpe?g|webp)(?:\?|\/|$)/i.test(v.trim());
-    });
+  function flagSource(q) {
+    var value = String(q.question || q.image || q.flag || '').trim().replace(/\\/g, '/');
+    value = value.replace(/^\.?\//, '');
+    value = value.replace(/^public\//i, '');
+    if (/^https?:\/\//i.test(value)) return value;
+    if (!/^flags\//i.test(value)) {
+      var code = value.match(/(?:^|\/)flags\/([a-z]{2})\.(?:svg|png|jpe?g|webp)/i);
+      value = code ? 'flags/' + code[1].toLowerCase() + '.svg' : 'flags/' + value.replace(/^\/+/, '');
+    }
+    return '/' + value.replace(/^\/+/, '');
   }
 
-  function normalizeSrc(raw) {
-    var t = String(raw || '').trim().replace(/\/+$/, '');
-    if (/^https?:\/\//i.test(t)) return t;
-    t = t.replace(/^\.?\//, '');
-    t = t.replace(/^public\//i, '');
-    if (!/^(flags|images)\//i.test(t)) t = 'flags/' + t;
-    return '/' + t;
+  function titleNode() {
+    return document.getElementById('questionText');
   }
 
-  function flagCode(src) {
-    var m = String(src || '').match(/([a-z]{2})\.(?:svg|png|jpe?g|webp)/i);
-    return m ? m[1].toLowerCase() : '';
-  }
-
-  function paintFlag(node, q) {
-    var src = normalizeSrc(q.question || q.image || q.flag);
-    var code = flagCode(src);
-    if (node.getAttribute('data-flag-src') === src && node.querySelector('img.flag-question-img')) return;
-
-    node.setAttribute('data-flag-src', src);
-    node.classList.add('is-flag-question');
-    node.textContent = '';
-
-    var wrap = document.createElement('div');
-    wrap.className = 'flag-question-wrap';
+  function makeImage(src, q, host) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'flag-question-wrap stable-flag-wrap';
+    wrapper.setAttribute('data-stable-flag', src);
 
     var img = document.createElement('img');
-    img.className = 'flag-question-img';
-    img.alt = 'علم الدولة';
+    img.className = 'flag-question-img stable-flag-img';
+    img.alt = q.answer ? 'علم ' + String(q.answer) : 'علم الدولة';
+    img.draggable = false;
+    img.loading = 'eager';
+    img.decoding = 'async';
     img.src = src;
+
     img.onerror = function () {
-      if (code && String(img.src).indexOf('flagcdn.com') === -1) {
-        img.onerror = null;
-        img.src = 'https://flagcdn.com/w320/' + code + '.png';
-      } else if (!img.dataset.fell) {
-        img.dataset.fell = '1';
-        img.onerror = null;
-        var fb = document.createElement('div');
-        fb.className = 'flag-question-fallback';
-        fb.textContent = '🏳️';
-        img.replaceWith(fb);
+      wrapper.classList.add('flag-load-error');
+      img.removeAttribute('src');
+      var error = wrapper.querySelector('.flag-question-fallback');
+      if (!error) {
+        error = document.createElement('div');
+        error.className = 'flag-question-fallback';
+        error.textContent = '🏳️ تعذر تحميل العلم';
+        wrapper.appendChild(error);
       }
     };
 
-    var p = document.createElement('p');
-    p.className = 'flag-question-prompt';
-    p.textContent = 'ما اسم هذه الدولة؟';
-
-    wrap.appendChild(img);
-    wrap.appendChild(p);
-    node.appendChild(wrap);
-  }
-
-  function paintText(node, q) {
-    // setQuestionVisual() owns image questions. Never replace the figure with
-    // the raw path, such as public/name/002.jpg.
-    if (isVisual(q)) {
-      if (node.querySelector('.question-visual-frame, .flag-question-wrap, img')) return;
-      if (typeof window.setQuestionVisual === 'function') {
-        try { window.setQuestionVisual(q); } catch (e) {}
-      }
-      return;
-    }
-    if (node.querySelector('img.flag-question-img') || node.querySelector('.flag-question-wrap')) {
-      node.textContent = '';
-      node.removeAttribute('data-flag-src');
-      node.classList.remove('is-flag-question');
-    }
-    var t = String(node.textContent || '').trim();
-    var looksPath = /(^|\/)flags\/[a-z]{2}\./i.test(t) || /^https?:\/\/\S+\.(svg|png)/i.test(t);
-    var isPlaceholder = PLACEHOLDERS.indexOf(t) !== -1;
-    if (isPlaceholder || looksPath || t !== String(q.question || '')) {
-      node.textContent = q.question || '';
-    }
-    node.removeAttribute('data-flag-src');
+    var prompt = document.createElement('p');
+    prompt.className = 'flag-question-prompt';
+    prompt.textContent = 'ما اسم هذه الدولة؟';
+    wrapper.appendChild(img);
+    wrapper.appendChild(prompt);
+    host.replaceChildren(wrapper);
   }
 
   function paint() {
-    var q = current();
-    if (!q) return;
-    titleNodes().forEach(function (node) {
-      try {
-        if (isFlag(q)) paintFlag(node, q);
-        else paintText(node, q);
-      } catch (e) {}
+    var q = currentQuestion();
+    var host = titleNode();
+    if (!q || !host) return;
+
+    if (!isFlagQuestion(q)) {
+      host.classList.remove('is-flag-question', 'question-media-host', 'is-flag-visual');
+      return;
+    }
+
+    var src = flagSource(q);
+    var key = String(stateNow().currentIndex) + '|' + src;
+    var current = host.querySelector('.stable-flag-wrap');
+    if (!current || current.getAttribute('data-stable-flag') !== src || lastKey !== key) {
+      host.classList.remove('question-media-host', 'is-landmark-visual');
+      host.classList.add('is-flag-question', 'question-media-host', 'is-flag-visual');
+      host.setAttribute('data-flag-src', src);
+      makeImage(src, q, host);
+      lastKey = key;
+    }
+
+    var number = document.getElementById('questionNumber');
+    var category = document.getElementById('categoryBadge');
+    if (number) number.style.display = 'none';
+    if (category) category.textContent = '🏳️ خمن الدولة';
+
+    var grid = document.getElementById('optionsGrid');
+    if (grid && !grid.querySelector('.stable-flag-hint')) {
+      grid.replaceChildren();
+      var hint = document.createElement('div');
+      hint.className = 'think-pill huge-flag-hint stable-flag-hint';
+      hint.textContent = '🔍 حدّد الدولة من شكل العلم… الإجابة تظهر عند الكشف';
+      grid.appendChild(hint);
+    }
+  }
+
+  function schedulePaint() {
+    RETRIES.forEach(function (delay) {
+      window.setTimeout(paint, delay);
     });
   }
 
-  function wrapFn(name, marker, after) {
-    if (window[marker]) return;
-    if (typeof window[name] !== 'function') return;
+  function wrap(name, marker) {
+    if (window[marker] || typeof window[name] !== 'function') return;
     window[marker] = true;
-    var orig = window[name];
+    var original = window[name];
     window[name] = function () {
-      var r;
-      try { r = orig.apply(this, arguments); } catch (e) {}
-      try { after(); } catch (e) {}
-      return r;
+      var result = original.apply(this, arguments);
+      schedulePaint();
+      return result;
     };
   }
 
   function boot() {
-    wrapFn('renderQuestion', '__FLAG_VIEW_WRAPPED__', function () {
-      setTimeout(paint, 0);
-      setTimeout(paint, 120);
-    });
-    wrapFn('revealAnswer', '__FLAG_VIEW_REVEAL_WRAPPED__', function () {
-      var q = current();
-      if (q && q.answer && (!q.options || !q.options.length)) {
-        var a = document.getElementById('answerText');
-        if (a) a.textContent = q.answer;
-      }
-    });
-    paint();
+    wrap('renderQuestion', '__FLAG_RENDER_WRAP_V2__');
+    schedulePaint();
+    if (window.MutationObserver) {
+      var observer = new MutationObserver(function () {
+        if (paintTimer) window.clearTimeout(paintTimer);
+        paintTimer = window.setTimeout(paint, 40);
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+    }
   }
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () { setTimeout(boot, 60); });
+    document.addEventListener('DOMContentLoaded', function () { window.setTimeout(boot, 40); });
   } else {
-    setTimeout(boot, 60);
-  }
-
-  if (window.MutationObserver) {
-    var t = null;
-    new MutationObserver(function () {
-      if (t) clearTimeout(t);
-      t = setTimeout(paint, 80);
-    }).observe(document.body, { childList: true, subtree: true });
+    window.setTimeout(boot, 40);
   }
 })();
