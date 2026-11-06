@@ -24,7 +24,8 @@
     { key: 'abu',      aliases: ['abu muhammed', 'abu', 'ابو محمد', 'أبو محمد'] },
     { key: 'melina', aliases: ['melina', 'ميلانيا'] },
     { key: 'memo',     aliases: ['memo', 'ميمو'] },
-    { key: 'sara',     aliases: ['sara', 'سارة'] }
+    { key: 'sara',     aliases: ['sara', 'سارة'] },
+    { key: 'osama',    aliases: ['osama', 'أسامة'] }
   ];
 
   var FALLBACK_BY_KEY = {
@@ -34,7 +35,8 @@
     ahmed: 'boys-captin', seif: 'boys-captin', yousef: 'boys-captin',
     mina: 'boys-captin', abdallah: 'boys-captin', abu: 'boys-captin', melina: 'girls-captin',
     memo: 'boys-captin',
-    sara: 'girls-captin'
+    sara: 'girls-captin',
+    osama: 'boys-captin'
   };
 
   function norm(s) {
