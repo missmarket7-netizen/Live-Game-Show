@@ -33,7 +33,7 @@ const audioCache = {};
 const categoryEmoji = {
   'معلومات عامة': '🧠', 'جغرافيا': '🌍', 'علوم': '🔬', 'تاريخ': '📜', 'دين': '🕌',
   'أسئلة دينية': '🕌', 'ألغاز': '🧩', 'لغز': '🧩', 'رياضة': '⚽', 'تكنولوجيا': '⌘',
-  'سرعة': '⚡', 'خمن الدولة': '🏳️', 'خمن الدولة أو المدينة': '🧩', 'خمن الاسماء': '🔤', 'معالم سياحية': '🗺️', 'سؤال المضيف': '✎', 'اختيارات متنوعة': '◈'
+  'سرعة': '⚡', 'خمن الدولة': '🏳️', 'خمن الدولة أو المدينة': '🧩', 'خمن الاسماء': '🔤', 'معالم سياحية': '🗺️', 'سؤال عشوائي': '🎲', 'اختيارات متنوعة': '◈'
 };
 
 /* __WEBAUDIO_V1__ — الصوت عبر Web Audio: تشغيل أكثر استقراراً داخل الصفحة */
@@ -772,49 +772,18 @@ function nextQuestion() {
     state.currentIndex += 1;
     renderQuestion();
     startTimer();
-    if ((state.currentIndex + 1) % 5 === 0) {
-      window.setTimeout(() => {
-        if (window.confirm('حان وقت سؤال المضيف بعد 5 أسئلة. هل تريد إضافته الآن؟')) addHostQuestion();
-      }, 120);
-    }
   } else {
     loadMoreQuestions();
   }
 }
-function addHostQuestion() {
-  const promptText = window.prompt('اكتب سؤال المضيف الذي سيظهر للجمهور:');
-  const questionText = String(promptText || '').trim();
-  if (!questionText) return;
-  const answerText = String(window.prompt('اكتب الإجابة الصحيحة (ستبقى مخفية حتى الكشف):') || '').trim();
-  if (!answerText) {
-    showToast('لم تتم إضافة السؤال لأن الإجابة مطلوبة', 'HOST QUESTION');
-    return;
-  }
-  const explanationText = String(window.prompt('شرح مختصر اختياري:') || '').trim();
-  const hostQuestion = {
-    category: 'سؤال المضيف',
-    difficulty: 'مخصص',
-    question: questionText,
-    answer: answerText,
-    explanation: explanationText || 'إجابة يحددها المضيف.',
-    source: 'host'
-  };
-  const insertAt = Math.min(state.currentIndex + 1, state.questions.length);
-  state.questions.splice(insertAt, 0, hostQuestion);
-  state.questionHistory.push(questionText);
-  state.questionHistory = state.questionHistory.slice(-400);
-  saveHistory();
-  updateScores();
-  showToast('تمت إضافة سؤال المضيف بعد السؤال الحالي', 'HOST QUESTION READY');
-}
-function showRandomHostQuestion() {
+function showRandomQuestion() {
   const q = {
-    category: 'سؤال المضيف',
+    category: 'سؤال عشوائي',
     difficulty: 'مخصص',
-    question: 'سؤال المضيف العشوائي — من يختاره المضيف الآن؟',
+    question: 'سؤال عشوائي — من يختاره الجمهور الآن؟',
     answer: '',
     explanation: 'إجابة حرة يحددها المضيف أثناء اللايف.',
-    source: 'host-random'
+    source: 'random-host'
   };
   const insertAt = Math.min(state.currentIndex + 1, state.questions.length);
   state.questions.splice(insertAt, 0, q);
@@ -822,7 +791,7 @@ function showRandomHostQuestion() {
   state.isRevealed = false;
   renderQuestion();
   stopTimer();
-  showToast('ظهر سؤال عشوائي للمضيف — الإجابة حرة عند الكشف', 'RANDOM HOST');
+  showToast('ظهر سؤال عشوائي — الإجابة حرة عند الكشف', 'RANDOM QUESTION');
 }
 const raceState = { active: false, seconds: 60, timer: null, girls: 0, boys: 0, autoTeam: 'girls', auto: true, connected: false };
 function raceOverlay() {
@@ -1545,27 +1514,33 @@ function initGame() {
   safeOn('startTimerBtn', 'click', startTimer);
   safeOn('revealBtn', 'click', revealAnswer);
   safeOn('nextBtn', 'click', nextQuestion);
-  const hostButton = document.createElement('button');
-  hostButton.id = 'hostQuestionBtn';
-  hostButton.type = 'button';
-  hostButton.className = 'text-control host-question-control';
-  hostButton.innerHTML = '<span>✎</span> سؤال المضيف';
-  hostButton.addEventListener('click', addHostQuestion);
   const showActions = document.querySelector('.show-actions');
-  if (showActions && !document.getElementById('hostQuestionBtn')) showActions.insertBefore(hostButton, showActions.firstChild);
   const randomButton = document.createElement('button');
   randomButton.id = 'randomHostQuestionBtn';
   randomButton.type = 'button';
   randomButton.className = 'text-control random-host-control';
   randomButton.innerHTML = '<span>🎲</span> عشوائي';
-  randomButton.addEventListener('click', showRandomHostQuestion);
+  randomButton.addEventListener('click', showRandomQuestion);
   const raceButton = document.createElement('button');
   raceButton.id = 'giftRaceBtn';
   raceButton.type = 'button';
   raceButton.className = 'text-control gift-race-control';
   raceButton.innerHTML = '<span>🏁</span> سباق 60ث';
   raceButton.addEventListener('click', startGiftRace);
-  if (showActions) { showActions.insertBefore(randomButton, showActions.firstChild); showActions.insertBefore(raceButton, showActions.firstChild); }
+  const audienceRaceButton = document.createElement('button');
+  audienceRaceButton.id = 'audienceRaceBtn';
+  audienceRaceButton.type = 'button';
+  audienceRaceButton.className = 'text-control audience-race-control';
+  audienceRaceButton.innerHTML = '<span>◉</span> سباق الجمهور';
+  audienceRaceButton.addEventListener('click', () => {
+    if (typeof window.openAudienceRace === 'function') window.openAudienceRace();
+    else showToast('ميزة سباق الجمهور لم تُحمّل بعد', 'AUDIENCE RACE');
+  });
+  if (showActions) {
+    showActions.insertBefore(randomButton, showActions.firstChild);
+    showActions.insertBefore(raceButton, showActions.firstChild);
+    showActions.insertBefore(audienceRaceButton, showActions.firstChild);
+  }
   safeOn('girlsPlusBtn', 'click', () => applyPoint('girls'));
   safeOn('girlsMinusBtn', 'click', () => subtractPoint('girls'));
   safeOn('boysPlusBtn', 'click', () => applyPoint('boys'));
