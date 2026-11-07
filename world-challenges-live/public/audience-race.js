@@ -75,10 +75,21 @@
     var input = $('audience' + (team === 'girls' ? 'Girls' : 'Boys') + 'Input');
     var value = clean(input.value);
     if (!value) return setStatus('اكتب اسمًا قبل الإضافة');
-    if (data[team].all.length >= MAX) return setStatus('الحد الأقصى 30 اسمًا لفريق ' + teamLabel(team));
+    if (data[team].all.length + pending[team].length >= MAX) return setStatus('الحد الأقصى 30 اسمًا لفريق ' + teamLabel(team));
     if (data[team].all.some(function (n) { return norm(n) === norm(value); }) || pending[team].some(function (n) { return norm(n) === norm(value); })) return setStatus('الاسم موجود بالفعل داخل الفريق');
     if (busy) pending[team].push(value); else { data[team].all.push(value); data[team].available.push(value); save(); }
     input.value = ''; render(); setStatus(busy ? 'تمت جدولة الاسم للمواجهة التالية' : 'تمت إضافة ' + value);
+  }
+  function addExternal(team, name, source) {
+    if (team !== 'girls' && team !== 'boys') return false;
+    var value = clean(name);
+    if (!value || data[team].all.length + pending[team].length >= MAX) return false;
+    if (data[team].all.some(function (n) { return norm(n) === norm(value); }) || pending[team].some(function (n) { return norm(n) === norm(value); })) return false;
+    if (busy) pending[team].push(value); else { data[team].all.push(value); data[team].available.push(value); save(); }
+    render();
+    setStatus((busy ? 'تمت جدولة ' : 'تمت إضافة ') + value + ' تلقائيًا من ' + (source === 'gift' ? 'هدية' : 'تعليق'));
+    toast('انضم ' + value + ' إلى فريق ' + teamLabel(team));
+    return true;
   }
   function remove(team, name) {
     if (busy) return setStatus('انتظر انتهاء الدوران قبل تعديل القوائم');
@@ -129,7 +140,7 @@
     });
     document.querySelectorAll('[data-remove-team]').forEach(function (button) { button.onclick = function () { remove(button.dataset.removeTeam, button.dataset.removeName); }; });
     document.querySelectorAll('[data-edit-team]').forEach(function (button) { button.onclick = function () { edit(button.dataset.editTeam, button.dataset.editName); }; });
-    renderWheel('boys', 'audienceOuterWheel', true); renderWheel('girls', 'audienceInnerWheel', false);
+    if (!busy) { renderWheel('boys', 'audienceOuterWheel', true); renderWheel('girls', 'audienceInnerWheel', false); }
     var can = data.girls.all.length >= MIN && data.boys.all.length >= MIN && getAvailable('girls').length > 0 && getAvailable('boys').length > 0 && !busy;
     $('audienceSpin').disabled = !can;
     if (!busy && can) setStatus('جاهز لاختيار مواجهة جديدة');
@@ -143,7 +154,7 @@
     busy = true; render(); $('audienceResult').classList.add('hidden');
     var gi = randomIndex(girls.length), bi = randomIndex(boys.length), innerTurns = 4 + randomIndex(3), outerTurns = 5 + randomIndex(3);
     var inner = $('audienceInnerWheel'), outer = $('audienceOuterWheel');
-    var ia = -(gi * 360 / girls.length + 180 / girls.length), oa = bi * 360 / boys.length + 180 / boys.length;
+    var ia = -(gi * 360 / girls.length + 180 / girls.length), oa = -(bi * 360 / boys.length + 180 / boys.length);
     inner.style.setProperty('--spin-to', (innerTurns * 360 + ia) + 'deg'); outer.style.setProperty('--spin-to', (-outerTurns * 360 + oa) + 'deg');
     inner.classList.add('is-spinning'); outer.classList.add('is-spinning');
     window.setTimeout(function () {
@@ -162,4 +173,5 @@
   function open() { var el = overlay(); el.classList.remove('hidden'); render(); }
   function close() { if (busy) return setStatus('انتظر انتهاء الدوران قبل الإغلاق'); var el = $('audienceRaceOverlay'); if (el) el.classList.add('hidden'); }
   window.openAudienceRace = open;
+  window.addAudienceParticipant = addExternal;
 })();

@@ -33,6 +33,14 @@ const ACCOUNTS = [
   { username: String(process.env.TIKTOK_USERNAME_2 || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID_2 || "").trim() }
 ].filter((a) => a.username);
 
+function normLiveText(value) {
+  return String(value || "").toLowerCase().replace(/[\u064B-\u0652\u0670\u0640]/g, "").replace(/[\u0622\u0623\u0625\u0671]/g, "ا").replace(/\s+/g, " ").trim();
+}
+const AUDIENCE_PREFIX = normLiveText(process.env.AUDIENCE_JOIN_PREFIX || "انضم");
+const AUDIENCE_GIRLS_COMMENT = normLiveText(process.env.AUDIENCE_GIRLS_COMMENT || "");
+const AUDIENCE_BOYS_COMMENT = normLiveText(process.env.AUDIENCE_BOYS_COMMENT || "");
+const AUDIENCE_GIRLS_GIFT = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
+const AUDIENCE_BOYS_GIFT = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
 const LIVE_CONFIG = { autoReconnect: true, communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]), enableStats: true };
 const clients = new Set();
 const connections = new Map();
@@ -41,7 +49,7 @@ let lastEventAt = null;
 
 function overallStatus() {
   const accounts = ACCOUNTS.map((a) => { const c = connections.get(a.username); return c ? { username: a.username, connected: c.connected, error: c.error, lastEventAt: c.lastEventAt } : { username: a.username, connected: false, error: "لم يبدأ" }; });
-  return { connected: accounts.some((a) => a.connected), accounts: accounts, lastEventAt: lastEventAt, error: (accounts.find((a) => a.error) || {}).error || null };
+  return { connected: accounts.some((a) => a.connected), accounts: accounts, lastEventAt: lastEventAt, error: (accounts.find((a) => a.error) || {}).error || null, audienceImport: { commentPrefix: Boolean(AUDIENCE_PREFIX), girlsComment: Boolean(AUDIENCE_GIRLS_COMMENT), boysComment: Boolean(AUDIENCE_BOYS_COMMENT), girlsGift: Boolean(AUDIENCE_GIRLS_GIFT), boysGift: Boolean(AUDIENCE_BOYS_GIFT) } };
 }
 function broadcast(type, payload) {
   lastEventAt = new Date().toISOString();
@@ -50,6 +58,29 @@ function broadcast(type, payload) {
 }
 function giftNameOf(d) { return String(d.giftName || (d.gift && d.gift.name) || "").trim().toLowerCase(); }
 function bump(map, key, n) { if (key) map.set(key, (map.get(key) || 0) + n); }
+function audienceTeamFromComment(comment) {
+  const text = normLiveText(comment);
+  if (!text) return null;
+  if (AUDIENCE_GIRLS_COMMENT && text === AUDIENCE_GIRLS_COMMENT) return "girls";
+  if (AUDIENCE_BOYS_COMMENT && text === AUDIENCE_BOYS_COMMENT) return "boys";
+  const parts = text.split(" ");
+  if (AUDIENCE_PREFIX && parts[0] === AUDIENCE_PREFIX) {
+    const team = parts.slice(1).join(" ");
+    if (["بنات", "بناتنا", "girls", "girl"].includes(team)) return "girls";
+    if (["شباب", "الشباب", "boys", "boy"].includes(team)) return "boys";
+  }
+  return null;
+}
+function audienceTeamFromGift(giftKey) {
+  const key = normLiveText(giftKey);
+  if (AUDIENCE_GIRLS_GIFT && key === AUDIENCE_GIRLS_GIFT) return "girls";
+  if (AUDIENCE_BOYS_GIFT && key === AUDIENCE_BOYS_GIFT) return "boys";
+  return null;
+}
+function broadcastAudienceJoin(team, payload) {
+  if (!team || !payload || !payload.name) return;
+  broadcast("audience-join", Object.assign({}, payload, { team: team }));
+}
 
 function startConnection(account) {
   const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false };
@@ -74,13 +105,21 @@ function startConnection(account) {
         const k = d.uniqueId || d.nickname;
         const count = Number(d.repeatCount || 1);
         if (LIVE_CONFIG.enableStats) bump(stats.gifts, k, Number(d.diamondCount || 0) * count);
-        broadcast("gift", { account: account.username, name: d.nickname || d.uniqueId || "مشاهد", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, giftKey: name, count: count, diamonds: Number(d.diamondCount || 0) * count });
+        const giftPayload = { account: account.username, name: d.nickname || d.uniqueId || "مشاهد", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, giftKey: name, count: count, diamonds: Number(d.diamondCount || 0) * count };
+        broadcast("gift", giftPayload);
+        broadcastAudienceJoin(audienceTeamFromGift(name), Object.assign({}, giftPayload, { source: "gift" }));
         if (LIVE_CONFIG.communityGiftNames.has(name)) broadcast("community", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, count: d.repeatCount || 1 });
       });
       if (LIVE_CONFIG.enableStats) {
         conn.on("like", (d) => bump(stats.likes, d.uniqueId || d.nickname, d.likeCount || 1));
         conn.on("share", (d) => bump(stats.shares, d.uniqueId || d.nickname, d.shareCount || 1));
-        conn.on("chat", (d) => bump(stats.chats, d.uniqueId || d.nickname, 1));
+        conn.on("chat", (d) => {
+          const chatName = d.nickname || d.uniqueId || "مشاهد";
+          const chatText = d.comment || d.message || d.content || "";
+          bump(stats.chats, d.uniqueId || d.nickname, 1);
+          broadcast("chat", { account: account.username, name: chatName, uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", comment: chatText });
+          broadcastAudienceJoin(audienceTeamFromComment(chatText), { account: account.username, name: chatName, uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", comment: chatText, source: "comment" });
+        });
       }
       conn.on("disconnected", () => { st.connected = false; console.warn("⚠️ انقطع الاتصال:", account.username); broadcast("status", overallStatus()); schedule(); });
     } catch (e) { fail(String((e && e.message) || e)); }

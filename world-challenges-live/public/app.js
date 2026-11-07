@@ -1387,6 +1387,7 @@ function connectLiveStream() {
     if (parsedMsg.type === 'hello' || parsedMsg.type === 'status') updateRaceConnection(parsedMsg.payload);
     else if (parsedMsg.type === 'follow') showFollowWelcome(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId);
     else if (parsedMsg.type === 'gift') receiveLiveGiftForRace(parsedMsg.payload);
+    else if (parsedMsg.type === 'audience-join' && parsedMsg.payload && typeof window.addAudienceParticipant === 'function') window.addAudienceParticipant(parsedMsg.payload.team, parsedMsg.payload.name, parsedMsg.payload.source);
     else if (parsedMsg.type === 'community') communityBurst(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId, parsedMsg.payload.gift, parsedMsg.payload.count);
   };
 }
