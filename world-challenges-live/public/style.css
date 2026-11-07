@@ -1567,3 +1567,32 @@ body:has(#liveStatsChip) .floating-sound-controls {
 .question-main #questionText .flag-question-wrap { display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important; width:min(100%,560px) !important; height:auto !important; min-height:clamp(205px,34vh,330px) !important; max-height:none !important; margin:8px auto 0 !important; padding:14px !important; box-sizing:border-box !important; overflow:hidden !important; }
 .question-main #questionText .flag-question-wrap .flag-question-img, .question-main #questionText img.flag-question-img { display:block !important; flex:0 0 auto !important; width:min(82%,340px) !important; max-width:340px !important; height:auto !important; max-height:215px !important; min-width:0 !important; min-height:0 !important; margin:0 auto !important; align-self:center !important; object-fit:contain !important; object-position:center center !important; }
 @media (max-width:560px) { .question-main { gap:6px !important; } .question-main #questionText .question-visual-frame, .question-main #questionText .flag-question-wrap { max-width:100% !important; } .question-main #questionText .flag-question-wrap { min-height:178px !important; padding:10px !important; } .question-main #questionText .flag-question-wrap .flag-question-img, .question-main #questionText img.flag-question-img { width:min(80%,280px) !important; max-height:170px !important; } }
+/* HOST_RANDOM_AND_GIFT_RACE_V1 */
+.show-actions { flex-wrap: wrap; }
+.random-host-control { color: #ffd36e; border-color: rgba(255,211,110,.35); }
+.gift-race-control { color: #c8ff51; border-color: rgba(200,255,81,.42); }
+.gift-race-overlay { position: fixed; z-index: 1800; inset: 0; display: grid; place-items: center; padding: 12px; background: radial-gradient(circle at 50% 42%, rgba(255,79,154,.18), rgba(3,5,18,.96) 62%); backdrop-filter: blur(12px); }
+.gift-race-overlay.hidden { display: none !important; }
+.gift-race-card { position: relative; width: min(100%, 760px); min-height: min(92vh, 620px); padding: clamp(18px,4vw,42px); border: 1px solid rgba(255,255,255,.2); border-radius: 30px; background: linear-gradient(145deg, rgba(18,25,59,.98), rgba(9,11,26,.99) 58%, rgba(40,12,47,.98)); box-shadow: 0 0 0 1px rgba(200,255,81,.08), 0 0 90px rgba(53,230,247,.16), 0 30px 100px rgba(0,0,0,.7); text-align: center; animation: cardIn .45s var(--ease) both; }
+.gift-race-head { display:flex; align-items:center; justify-content:space-between; color:#c8ff51; font:700 10px var(--display); letter-spacing:.18em; }
+.gift-race-head button { width:34px; height:34px; border:1px solid rgba(255,255,255,.22); border-radius:50%; background:rgba(255,255,255,.06); color:#fff; font-size:22px; cursor:pointer; }
+.gift-race-card h2 { margin:12px 0 0; color:#fff; font-size:clamp(26px,6vw,48px); }
+.gift-race-timer { display:grid; place-items:center; width:clamp(100px,20vw,150px); height:clamp(100px,20vw,150px); margin:18px auto 26px; border:7px solid #ffd36e; border-radius:50%; color:#fff0a4; font:700 clamp(38px,8vw,65px) var(--display); box-shadow:0 0 0 9px rgba(255,211,110,.08), 0 0 50px rgba(255,211,110,.24), inset 0 0 30px rgba(255,211,110,.08); }
+.gift-race-teams { display:grid; grid-template-columns:1fr 70px 1fr; align-items:center; gap:clamp(8px,3vw,24px); direction:rtl; }
+.gift-race-team { min-height:230px; display:flex; flex-direction:column; justify-content:center; align-items:center; gap:10px; padding:18px 10px; border-radius:22px; direction:rtl; }
+.gift-race-girls { border:1px solid rgba(255,79,154,.7); background:linear-gradient(145deg,rgba(255,79,154,.22),rgba(255,79,154,.04)); box-shadow:0 0 45px rgba(255,79,154,.12); }
+.gift-race-boys { border:1px solid rgba(53,230,247,.7); background:linear-gradient(145deg,rgba(53,230,247,.18),rgba(53,230,247,.04)); box-shadow:0 0 45px rgba(53,230,247,.12); }
+.gift-race-team b { font-size:clamp(17px,4vw,27px); }
+.gift-race-team strong { font:700 clamp(50px,12vw,100px) var(--display); line-height:1; }
+.gift-race-girls strong { color:#ff70b4; }
+.gift-race-boys strong { color:#54e8ff; }
+.gift-race-vs { color:#ffd36e; font:700 22px var(--display); }
+.gift-race-team label { color:#b4bad2; font-size:10px; }
+.gift-race-team input { width:78px; margin-inline-start:6px; padding:6px; border:1px solid rgba(255,255,255,.2); border-radius:8px; background:rgba(0,0,0,.28); color:#fff; text-align:center; }
+.gift-race-team button, .gift-race-controls button { min-height:32px; padding:6px 11px; border:1px solid rgba(255,255,255,.23); border-radius:9px; background:rgba(255,255,255,.08); color:#fff; font-size:10px; font-weight:800; cursor:pointer; }
+.gift-race-controls { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; margin-top:22px; }
+.gift-race-controls span { width:100%; color:#aeb7d1; font-size:10px; }
+.gift-race-controls button:first-of-type { color:#c8ff51; border-color:rgba(200,255,81,.42); }
+.gift-race-controls button:last-of-type { color:#ff91ba; border-color:rgba(255,79,154,.42); }
+.gift-race-note { margin:15px 0 0; color:#7f89a9; font-size:9px; }
+@media (max-width:560px) { .gift-race-card { min-height:0; padding:16px 10px 20px; border-radius:22px; } .gift-race-timer { margin:12px auto 16px; } .gift-race-teams { grid-template-columns:1fr 32px 1fr; gap:4px; } .gift-race-team { min-height:190px; padding:10px 4px; } .gift-race-team label { font-size:8px; } .gift-race-team input { display:block; width:58px; margin:4px auto 0; } .gift-race-vs { font-size:15px; } }

@@ -72,7 +72,9 @@ function startConnection(account) {
       conn.on("gift", (d) => {
         const name = giftNameOf(d); if (!name) return;
         const k = d.uniqueId || d.nickname;
-        if (LIVE_CONFIG.enableStats) bump(stats.gifts, k, d.diamondCount || 0);
+        const count = Number(d.repeatCount || 1);
+        if (LIVE_CONFIG.enableStats) bump(stats.gifts, k, Number(d.diamondCount || 0) * count);
+        broadcast("gift", { account: account.username, name: d.nickname || d.uniqueId || "مشاهد", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, giftKey: name, count: count, diamonds: Number(d.diamondCount || 0) * count });
         if (LIVE_CONFIG.communityGiftNames.has(name)) broadcast("community", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, count: d.repeatCount || 1 });
       });
       if (LIVE_CONFIG.enableStats) {

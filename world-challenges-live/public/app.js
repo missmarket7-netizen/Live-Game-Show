@@ -807,6 +807,81 @@ function addHostQuestion() {
   updateScores();
   showToast('تمت إضافة سؤال المضيف بعد السؤال الحالي', 'HOST QUESTION READY');
 }
+function showRandomHostQuestion() {
+  const q = {
+    category: 'سؤال المضيف',
+    difficulty: 'مخصص',
+    question: 'سؤال المضيف العشوائي — من يختاره المضيف الآن؟',
+    answer: '',
+    explanation: 'إجابة حرة يحددها المضيف أثناء اللايف.',
+    source: 'host-random'
+  };
+  const insertAt = Math.min(state.currentIndex + 1, state.questions.length);
+  state.questions.splice(insertAt, 0, q);
+  state.currentIndex = insertAt;
+  state.isRevealed = false;
+  renderQuestion();
+  stopTimer();
+  showToast('ظهر سؤال عشوائي للمضيف — الإجابة حرة عند الكشف', 'RANDOM HOST');
+}
+const raceState = { active: false, seconds: 60, timer: null, girls: 0, boys: 0, autoTeam: 'girls', auto: true, connected: false };
+function raceOverlay() {
+  let el = document.getElementById('giftRaceOverlay');
+  if (el) return el;
+  el = document.createElement('div');
+  el.id = 'giftRaceOverlay';
+  el.className = 'gift-race-overlay hidden';
+  el.innerHTML = '<div class="gift-race-card" dir="rtl"><div class="gift-race-head"><span>LIVE GIFT RACE</span><button id="closeGiftRace" type="button">×</button></div><h2>سباق الهدايا</h2><div class="gift-race-timer" id="giftRaceTimer">60</div><div class="gift-race-teams"><section class="gift-race-team gift-race-girls"><b>البنات</b><strong id="giftRaceGirls">0</strong><label>إدخال يدوي<input id="giftRaceGirlsInput" type="number" min="0" inputmode="numeric" value="0"></label><button id="giftRaceGirlsAdd" type="button">+ هدية</button></section><div class="gift-race-vs">VS</div><section class="gift-race-team gift-race-boys"><b>الشباب</b><strong id="giftRaceBoys">0</strong><label>إدخال يدوي<input id="giftRaceBoysInput" type="number" min="0" inputmode="numeric" value="0"></label><button id="giftRaceBoysAdd" type="button">+ هدية</button></section></div><div class="gift-race-controls"><span id="giftRaceConnection">وضع يدوي — اربط TikTok للتحديث المباشر</span><button id="giftRaceAutoTeam" type="button">التلقائي: البنات</button><button id="giftRaceFinish" type="button">إنهاء السباق</button></div><p class="gift-race-note">في الوضع التلقائي تُسجّل الهدايا الواردة للفريق المحدد. غيّر الفريق عند الحاجة من الزر.</p></div>';
+  document.body.appendChild(el);
+  $('closeGiftRace').addEventListener('click', finishGiftRace);
+  $('giftRaceFinish').addEventListener('click', finishGiftRace);
+  $('giftRaceGirlsAdd').addEventListener('click', () => addRaceGift('girls', 1));
+  $('giftRaceBoysAdd').addEventListener('click', () => addRaceGift('boys', 1));
+  $('giftRaceGirlsInput').addEventListener('input', (event) => { raceState.girls = Math.max(0, Number(event.target.value) || 0); renderGiftRace(); });
+  $('giftRaceBoysInput').addEventListener('input', (event) => { raceState.boys = Math.max(0, Number(event.target.value) || 0); renderGiftRace(); });
+  $('giftRaceAutoTeam').addEventListener('click', () => { raceState.autoTeam = raceState.autoTeam === 'girls' ? 'boys' : 'girls'; $('giftRaceAutoTeam').textContent = 'التلقائي: ' + (raceState.autoTeam === 'girls' ? 'البنات' : 'الشباب'); });
+  return el;
+}
+function renderGiftRace() {
+  const el = raceOverlay();
+  $('giftRaceGirls').textContent = String(raceState.girls);
+  $('giftRaceBoys').textContent = String(raceState.boys);
+  $('giftRaceGirlsInput').value = String(raceState.girls);
+  $('giftRaceBoysInput').value = String(raceState.boys);
+  $('giftRaceTimer').textContent = String(Math.max(0, raceState.seconds)).padStart(2, '0');
+  $('giftRaceConnection').textContent = raceState.connected ? 'TikTok متصل — تلقائي: ' + (raceState.autoTeam === 'girls' ? 'البنات' : 'الشباب') + ' — الهدايا الواردة تُحسب مباشرة' : 'وضع يدوي — اربط TikTok للتحديث المباشر';
+  el.classList.remove('hidden');
+}
+function addRaceGift(team, count) {
+  if (!raceState.active) return;
+  const n = Math.max(1, Number(count) || 1);
+  raceState[team] += n;
+  renderGiftRace();
+}
+function startGiftRace() {
+  if (raceState.active) return;
+  raceState.active = true; raceState.seconds = 60; raceState.girls = 0; raceState.boys = 0; raceState.auto = true;
+  renderGiftRace();
+  raceState.timer = window.setInterval(() => { raceState.seconds -= 1; renderGiftRace(); if (raceState.seconds <= 0) finishGiftRace(); }, 1000);
+  playSound('speed', 0.7);
+}
+function finishGiftRace() {
+  if (!raceState.active && document.getElementById('giftRaceOverlay')?.classList.contains('hidden')) return;
+  raceState.active = false;
+  if (raceState.timer) window.clearInterval(raceState.timer);
+  raceState.timer = null;
+  const winner = raceState.girls === raceState.boys ? 'تعادل مثير' : (raceState.girls > raceState.boys ? 'فوز البنات' : 'فوز الشباب');
+  if (document.getElementById('giftRaceOverlay')) document.getElementById('giftRaceOverlay').classList.add('hidden');
+  showToast(winner + ' — ' + raceState.girls + ' مقابل ' + raceState.boys, 'GIFT RACE COMPLETE');
+  if (raceState.girls !== raceState.boys) fireConfetti();
+}
+function receiveLiveGiftForRace(payload) {
+  if (raceState.active && raceState.auto && raceState.connected) addRaceGift(raceState.autoTeam, payload.count || 1);
+}
+function updateRaceConnection(status) {
+  raceState.connected = Boolean(status && status.connected);
+  if (raceState.active) renderGiftRace();
+}
 
 async function loadMoreQuestions() {
   if (state.isLoadingMore) return;
@@ -1340,7 +1415,9 @@ function connectLiveStream() {
   eventStream.onmessage = (msgEvent) => {
     let parsedMsg;
     try { parsedMsg = JSON.parse(msgEvent.data); } catch (parseErr) { return; }
-    if (parsedMsg.type === 'follow') showFollowWelcome(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId);
+    if (parsedMsg.type === 'hello' || parsedMsg.type === 'status') updateRaceConnection(parsedMsg.payload);
+    else if (parsedMsg.type === 'follow') showFollowWelcome(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId);
+    else if (parsedMsg.type === 'gift') receiveLiveGiftForRace(parsedMsg.payload);
     else if (parsedMsg.type === 'community') communityBurst(parsedMsg.payload.name, parsedMsg.payload.avatar, parsedMsg.payload.uniqueId, parsedMsg.payload.gift, parsedMsg.payload.count);
   };
 }
@@ -1476,6 +1553,19 @@ function initGame() {
   hostButton.addEventListener('click', addHostQuestion);
   const showActions = document.querySelector('.show-actions');
   if (showActions && !document.getElementById('hostQuestionBtn')) showActions.insertBefore(hostButton, showActions.firstChild);
+  const randomButton = document.createElement('button');
+  randomButton.id = 'randomHostQuestionBtn';
+  randomButton.type = 'button';
+  randomButton.className = 'text-control random-host-control';
+  randomButton.innerHTML = '<span>🎲</span> عشوائي';
+  randomButton.addEventListener('click', showRandomHostQuestion);
+  const raceButton = document.createElement('button');
+  raceButton.id = 'giftRaceBtn';
+  raceButton.type = 'button';
+  raceButton.className = 'text-control gift-race-control';
+  raceButton.innerHTML = '<span>🏁</span> سباق 60ث';
+  raceButton.addEventListener('click', startGiftRace);
+  if (showActions) { showActions.insertBefore(randomButton, showActions.firstChild); showActions.insertBefore(raceButton, showActions.firstChild); }
   safeOn('girlsPlusBtn', 'click', () => applyPoint('girls'));
   safeOn('girlsMinusBtn', 'click', () => subtractPoint('girls'));
   safeOn('boysPlusBtn', 'click', () => applyPoint('boys'));
