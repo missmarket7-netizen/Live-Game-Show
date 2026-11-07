@@ -515,9 +515,11 @@ function renderQuestion() {
   grid.innerHTML = '';
   const pill = document.createElement('div');
   pill.className = 'think-pill';
-  pill.textContent = isFreeQuestion(q)
-    ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف'
-    : '🤔 فكّروا جيدا… الإجابة الصحيحة تظهر عند «كشف الإجابة»';
+  pill.textContent = q.source === 'random-host'
+    ? '🎙️ سؤال عشوائي من المضيف — إجابة حرة عند «كشف الإجابة»'
+    : (isFreeQuestion(q)
+      ? '⚡ سؤال سرعة — إجابة حرة، الحكم للمضيف'
+      : '🤔 فكّروا جيدا… الإجابة الصحيحة تظهر عند «كشف الإجابة»');
   grid.appendChild(pill);
   const card = document.querySelector('.question-card');
   if (card) {
@@ -536,8 +538,8 @@ function revealAnswer() {
   state.isRevealed = true;
   stopTimer();
   const answer = questionAnswer(q);
-  $('answerText').textContent = answer || '🎤 إجابة حرة — الحكم للمضيف';
-  $('explanationText').textContent = q.explanation || (answer ? 'الإجابة الصحيحة: ' + answer : 'معلومة إضافية للمقدم.');
+  $('answerText').textContent = q.source === 'random-host' ? '🎤 إجابة حرة' : (answer || '🎤 إجابة حرة — الحكم للمضيف');
+  $('explanationText').textContent = q.source === 'random-host' ? 'إجابة حرة يحددها المضيف أثناء البث.' : (q.explanation || (answer ? 'الإجابة الصحيحة: ' + answer : 'معلومة إضافية للمقدم.'));
   $('answerReveal').classList.remove('hidden');
   $('answerReveal').classList.add('reveal-anim');
   $('revealBtn').disabled = true;
@@ -780,9 +782,9 @@ function showRandomQuestion() {
   const q = {
     category: 'سؤال عشوائي',
     difficulty: 'مخصص',
-    question: 'سؤال عشوائي — من يختاره الجمهور الآن؟',
+    question: 'سؤال عشوائي من المضيف ؟',
     answer: '',
-    explanation: 'إجابة حرة يحددها المضيف أثناء اللايف.',
+    explanation: 'إجابة حرة يحددها المضيف أثناء البث.',
     source: 'random-host'
   };
   const insertAt = Math.min(state.currentIndex + 1, state.questions.length);

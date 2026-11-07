@@ -1,5 +1,5 @@
-const CACHE_NAME = "wcq-v20261108-audience-import";
-const APP_SHELL = ["/", "/index.html", "/style.css?v=20261108-audience-race", "/arena-extras.css?v=20261106", "/manifest.json?v=20261108-audience-import", "/favicon.svg"];
+const CACHE_NAME = "wcq-v20261108-cinematic-audience";
+const APP_SHELL = ["/", "/index.html", "/style.css?v=20261108-cinematic-audience", "/arena-extras.css?v=20261106", "/manifest.json?v=20261108-cinematic-audience", "/favicon.svg"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });

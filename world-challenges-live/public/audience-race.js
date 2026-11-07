@@ -52,11 +52,11 @@
     var el = document.createElement('div');
     el.id = 'audienceRaceOverlay'; el.className = 'audience-race-overlay hidden';
     el.innerHTML = '<div class="audience-race-card" dir="rtl">' +
-      '<div class="audience-race-head"><div><span class="audience-race-kicker">AUDIENCE SHOWDOWN</span><h2>سباق الجمهور</h2><p>اختيار مواجهة مباشرة من الفريقين</p></div><button id="audienceRaceClose" class="audience-race-close" type="button">×</button></div>' +
+      '<div class="audience-race-head"><div><span class="audience-race-kicker">AUDIENCE SHOWDOWN</span><h2>سباق الجمهور</h2><p>اختيار مواجهة مباشرة من الفريقين</p></div><div class="audience-sponsor"><img src="/images/qaddaha.png" alt="قدها"><span>برعاية<br><b>قدها؟</b></span></div><button id="audienceRaceClose" class="audience-race-close" type="button">×</button></div>' +
       '<div class="audience-race-layout"><aside class="audience-roster girls-roster"><h3>فريق البنات <b id="audienceGirlsCount">0</b></h3><div class="audience-add"><input id="audienceGirlsInput" maxlength="32" placeholder="اسم المشاهدة"><button id="audienceGirlsAdd" type="button">إضافة</button></div><div id="audienceGirlsList" class="audience-list"></div><div class="audience-roster-foot"><span>متاح <b id="audienceGirlsAvailable">0</b></span><span>اختير <b id="audienceGirlsPicked">0</b></span></div><button id="audienceGirlsReset" class="audience-reset" type="button">إعادة دورة البنات</button></aside>' +
-      '<main class="audience-wheel-main"><div class="audience-wheel-stage"><div class="audience-wheel-pointer">▼</div><div id="audienceOuterWheel" class="audience-wheel audience-wheel-outer"></div><div id="audienceInnerWheel" class="audience-wheel audience-wheel-inner"></div><div class="audience-wheel-hub">VS</div></div><button id="audienceSpin" class="audience-spin" type="button">ابدأ المواجهة</button><div id="audienceResult" class="audience-result hidden"></div><p id="audienceRaceStatus" class="audience-race-status">أضف 5 أسماء على الأقل لكل فريق للبدء</p></main>' +
+      '<main class="audience-wheel-main"><div class="audience-wheel-stage"><div class="audience-wheel-glow"></div><div class="audience-wheel-pointer">▼</div><div class="audience-wheel-column audience-wheel-outer"><div class="audience-column-head"><span>01</span><b>الشباب</b><small>مسار الاختيار</small></div><div id="audienceOuterWheel" class="audience-wheel"></div></div><div class="audience-wheel-center"><span>VS</span><i></i></div><div class="audience-wheel-column audience-wheel-inner"><div class="audience-column-head"><span>02</span><b>البنات</b><small>مسار الاختيار</small></div><div id="audienceInnerWheel" class="audience-wheel"></div></div></div><button id="audienceSpin" class="audience-spin" type="button"><span>ابدأ الاختيار</span><small>تدوير المواجهة</small></button><div id="audienceResult" class="audience-result hidden"></div><p id="audienceRaceStatus" class="audience-race-status">أضف 5 أسماء على الأقل لكل فريق للبدء</p></main>' +
       '<aside class="audience-roster boys-roster"><h3>فريق الشباب <b id="audienceBoysCount">0</b></h3><div class="audience-add"><input id="audienceBoysInput" maxlength="32" placeholder="اسم المشاهد"><button id="audienceBoysAdd" type="button">إضافة</button></div><div id="audienceBoysList" class="audience-list"></div><div class="audience-roster-foot"><span>متاح <b id="audienceBoysAvailable">0</b></span><span>اختير <b id="audienceBoysPicked">0</b></span></div><button id="audienceBoysReset" class="audience-reset" type="button">إعادة دورة الشباب</button></aside></div>' +
-      '<div class="audience-race-footer"><span>الإضافة أثناء الدوران تدخل في المواجهة التالية</span><button id="audienceRaceResetAll" type="button">إعادة الفريقين</button></div></div>';
+      '<div class="audience-race-footer"><span>التعليقات والهدايا والإضافة اليدوية تعمل معًا — قدها؟ الراعي الرسمي</span><button id="audienceRaceResetAll" type="button">إعادة الفريقين</button></div></div>';
     document.body.appendChild(el);
     bind(); return el;
   }
@@ -127,7 +127,13 @@
     wheel.innerHTML = ''; wheel.style.setProperty('--segments', Math.max(1, names.length));
     var colors = outer ? ['#123b68', '#176b91', '#0e506f', '#239cb5'] : ['#6e235c', '#9e2b70', '#6e2f8f', '#c13d86'];
     wheel.style.background = names.length ? 'conic-gradient(' + names.map(function (_, i) { return colors[i % colors.length] + ' ' + (i * 360 / names.length) + 'deg ' + ((i + 1) * 360 / names.length) + 'deg'; }).join(',') + ')' : 'conic-gradient(#222943 0 360deg)';
-    names.forEach(function (name, i) { var label = document.createElement('span'); label.className = 'audience-wheel-label'; label.style.setProperty('--angle', (i * 360 / names.length + 180 / names.length) + 'deg'); label.textContent = name; wheel.appendChild(label); });
+    names.forEach(function (name, i) {
+      var slot = document.createElement('div'); slot.className = 'audience-slot';
+      var index = document.createElement('span'); index.className = 'audience-slot-index'; index.textContent = String(i + 1).padStart(2, '0');
+      var label = document.createElement('span'); label.className = 'audience-slot-name'; label.textContent = name;
+      var state = document.createElement('small'); state.className = 'audience-slot-state'; state.textContent = 'متاح';
+      slot.appendChild(index); slot.appendChild(label); slot.appendChild(state); wheel.appendChild(slot);
+    });
   }
   function render() {
     if (!$('audienceRaceOverlay')) return;
