@@ -1,5 +1,5 @@
-const CACHE_NAME = "wcq-v20261106";
-const APP_SHELL = ["/", "/index.html", "/style.css?v=20261106", "/arena-extras.css?v=20261106", "/manifest.json?v=20261106", "/favicon.svg"];
+const CACHE_NAME = "wcq-v20261107-audio";
+const APP_SHELL = ["/", "/index.html", "/style.css?v=20261107-race", "/arena-extras.css?v=20261106", "/manifest.json?v=20261107-audio", "/favicon.svg"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });

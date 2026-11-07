@@ -90,7 +90,7 @@ function loadBuffer(key) {
 
     for (let i = 0; i < candidates.length; i += 1) {
       try {
-        const res = await fetch('/sounds/' + candidates[i] + '.mp3');
+        const res = await fetch('/sounds/' + candidates[i] + '.mp3?v=20261107-audio');
         if (!res.ok) continue;
         const arrayBuffer = await res.arrayBuffer();
         return await decodeBuf(ctx, arrayBuffer);
@@ -151,14 +151,14 @@ function getAudio(key) {
   if (audioCache[key]) return audioCache[key];
 
   const candidates = soundFiles[key] || [key];
-  const audio = new Audio('/sounds/' + candidates[0] + '.mp3');
+  const audio = new Audio('/sounds/' + candidates[0] + '.mp3?v=20261107-audio');
   audio.preload = 'none';
 
   let index = 0;
   audio.addEventListener('error', () => {
     index += 1;
     if (index < candidates.length) {
-      audio.src = '/sounds/' + candidates[index] + '.mp3';
+      audio.src = '/sounds/' + candidates[index] + '.mp3?v=20261107-audio';
     }
   });
 

@@ -97,7 +97,7 @@
 
   /* تشغيل المؤثر الخاص مع حد 35 ثانية، وعند الفشل يحتياطي الفريق */
   function playCapped(key, fallbackKey) {
-    var a = new Audio('/sounds/' + key + '.mp3');
+    var a = new Audio('/sounds/' + key + '.mp3?v=20261107-audio');
     a.volume = 0.85;
     var settled = false;
 
