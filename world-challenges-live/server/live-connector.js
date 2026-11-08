@@ -41,6 +41,16 @@ const AUDIENCE_GIRLS_COMMENT = normLiveText(process.env.AUDIENCE_GIRLS_COMMENT |
 const AUDIENCE_BOYS_COMMENT = normLiveText(process.env.AUDIENCE_BOYS_COMMENT || "");
 const AUDIENCE_GIRLS_GIFT = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
 const AUDIENCE_BOYS_GIFT = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
+const LOUNGE_JOIN_COMMENTS = new Set(["good live", "عالم التحديات", "تحدي مروان", "قدها"].map(normLiveText));
+const LOUNGE_GIFT_ACTIONS = [
+  { action: "CHEER", duration: 2600, names: ["قلب صغير", "small heart", "heart me"] },
+  { action: "COMEDY", duration: 3200, names: ["كرة بتدور", "كرة تدور", "spinning ball", "ball"] },
+  { action: "DANCE", duration: 6200, names: ["قلب", "heart"] },
+  { action: "RUN_CHAOS", duration: 7200, names: ["العطر", "عطر", "perfume"] },
+  { action: "FLIP_DANCE", duration: 7800, names: ["الدونتس", "دونتس", "donut", "doughnut"] },
+  { action: "SOLO_DANCE", duration: 9000, names: ["قلب بايدي", "قلب بيدي", "heart hands", "hands heart"] },
+  { action: "ZERO_GRAVITY", duration: 11000, names: ["كورجي", "corgi"] }
+].map((rule) => ({ ...rule, names: rule.names.map(normLiveText) }));
 const LIVE_CONFIG = { autoReconnect: true, communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]), enableStats: true };
 const clients = new Set();
 const connections = new Map();
@@ -77,6 +87,13 @@ function audienceTeamFromGift(giftKey) {
   if (AUDIENCE_BOYS_GIFT && key === AUDIENCE_BOYS_GIFT) return "boys";
   return null;
 }
+function loungeActionFromGift(giftKey) {
+  const key = normLiveText(giftKey);
+  return LOUNGE_GIFT_ACTIONS.find((rule) => rule.names.includes(key)) || null;
+}
+function isLoungeJoinComment(comment) {
+  return LOUNGE_JOIN_COMMENTS.has(normLiveText(comment));
+}
 function broadcastAudienceJoin(team, payload) {
   if (!team || !payload || !payload.name) return;
   broadcast("audience-join", Object.assign({}, payload, { team: team }));
@@ -107,6 +124,8 @@ function startConnection(account) {
         if (LIVE_CONFIG.enableStats) bump(stats.gifts, k, Number(d.diamondCount || 0) * count);
         const giftPayload = { account: account.username, name: d.nickname || d.uniqueId || "مشاهد", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, giftKey: name, count: count, diamonds: Number(d.diamondCount || 0) * count };
         broadcast("gift", giftPayload);
+        const loungeRule = loungeActionFromGift(name);
+        if (loungeRule) broadcast("lounge-gift", Object.assign({}, giftPayload, { action: loungeRule.action, duration: loungeRule.duration }));
         broadcastAudienceJoin(audienceTeamFromGift(name), Object.assign({}, giftPayload, { source: "gift" }));
         if (LIVE_CONFIG.communityGiftNames.has(name)) broadcast("community", { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", gift: d.giftName || name, count: d.repeatCount || 1 });
       });
@@ -118,6 +137,7 @@ function startConnection(account) {
           const chatText = d.comment || d.message || d.content || "";
           bump(stats.chats, d.uniqueId || d.nickname, 1);
           broadcast("chat", { account: account.username, name: chatName, uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", comment: chatText });
+          if (isLoungeJoinComment(chatText)) broadcast("lounge-join", { account: account.username, name: chatName, uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", comment: chatText, source: "comment" });
           broadcastAudienceJoin(audienceTeamFromComment(chatText), { account: account.username, name: chatName, uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "", comment: chatText, source: "comment" });
         });
       }

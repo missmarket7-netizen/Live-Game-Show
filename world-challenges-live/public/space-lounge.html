@@ -8,7 +8,7 @@
 <link rel="icon" type="image/png" href="/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/space-lounge.css?v=20261108-v1">
+<link rel="stylesheet" href="/space-lounge.css?v=20261108-v2">
 </head>
 <body>
 <div class="space-page">
@@ -19,6 +19,7 @@
     <div class="space-brand"><img src="/images/logo.png" alt="عالم التحديات"><div><span>LIVE GAME SHOW / 02</span><strong>استراحة الفضاء</strong></div></div>
     <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false"><span class="music-dot"></span><span id="musicLabel">الموسيقى</span></button>
   </header>
+  <div class="sponsor-rail" aria-label="رعاة استراحة الفضاء"><span>برعاية</span><img src="/images/qaddaha.png" alt="قدها"><b>قدها</b><i></i><img src="/images/mytwinlogo.png" alt="My Twin"><b>My Twin</b></div>
 
   <main>
     <section class="space-hero">
@@ -34,26 +35,39 @@
 
     <section id="arena" class="arena-section" aria-label="ساحة استراحة الفضاء">
       <div class="arena-heading"><div><span class="section-kicker">SPACE LOUNGE / 01</span><h2>المحطة المدارية</h2></div><div class="live-chip"><i></i> READY FOR LIVE</div></div>
-      <div class="arena-scene">
+      <div class="lounge-controls">
+        <form id="manualParticipantForm" class="participant-form">
+          <span class="form-kicker">HOST CONTROL / ADD PLAYER</span>
+          <label><span>اسم المشارك</span><input id="manualName" maxlength="28" placeholder="مثال: مروان" required></label>
+          <label><span>الصورة اختيارية</span><input id="manualAvatar" type="url" placeholder="رابط صورة الحساب"></label>
+          <div class="gender-picker" role="group" aria-label="نوع الأفاتار"><button type="button" class="gender-choice is-active" data-gender="female">أنثى</button><button type="button" class="gender-choice" data-gender="male">ذكر</button></div>
+          <button class="add-player-btn" type="submit">إضافة للساحة <b>+</b></button>
+        </form>
+        <div class="live-bridge"><span class="form-kicker">TIKTOK BRIDGE</span><strong id="loungeConnection">غير متصل — الإدخال اليدوي جاهز</strong><small>الدخول التلقائي عند تعليق: <b>good live</b> أو <b>عالم التحديات</b> أو <b>تحدي مروان</b> أو <b>قدها</b></small><button id="clearParticipants" type="button">إخلاء الساحة</button></div>
+      </div>
+      <div class="arena-scene" id="loungeStage" aria-label="مسرح الشخصيات">
         <div class="scanline"></div><div class="planet-horizon"></div><div class="floating-rock rock-one"></div><div class="floating-rock rock-two"></div>
         <div class="gate gate-entry"><span>بوابة الدخول</span><b>ENTER</b><i></i></div>
         <div class="gate gate-exit"><span>بوابة الخروج</span><b>EXIT</b><i></i></div>
         <div class="lounge-deck"><div class="seat seat-one"><span>✦</span></div><div class="seat seat-two"><span>✦</span></div><div class="seat seat-three"><span>✦</span></div><div class="table"><i></i><i></i><i></i></div></div>
         <div class="dance-floor"><div class="floor-ring ring-one"></div><div class="floor-ring ring-two"></div><span>ZERO<br><b>GRAVITY</b></span></div>
         <div class="space-console"><span class="console-light"></span><span class="console-line"></span><span class="console-line short"></span><b>SL / 01</b></div>
+        <div id="participantLayer" class="participant-layer" aria-live="polite"></div>
+        <div id="actionToast" class="action-toast" aria-live="polite"></div>
         <div class="scene-caption"><span>المشهد الثابت</span><b>استراحة، لا ازدحام</b></div>
       </div>
+      <div class="stage-legend"><span><i class="legend-dot legend-pink"></i>شخصيات المشاركين</span><span><i class="legend-dot legend-lime"></i>الهدايا تشغّل الحركة وتقرّب الكاميرا</span><b id="participantCount">0 / 12</b></div>
     </section>
 
     <section id="rules" class="lounge-grid">
       <article class="info-card info-card-main"><span class="card-number">01</span><div><span class="section-kicker">FIRST RELEASE</span><h2>إيقاع هادئ<br>قبل الجولة التالية</h2><p>صممنا البداية لتكون سريعة التحميل وواضحة على شاشة الهاتف والكمبيوتر، مع أقل قدر من الحركة حتى تبقى المسابقة الأساسية مستقرة.</p></div></article>
-      <article class="info-card"><span class="card-icon">↗</span><h3>دخول مجاني</h3><p>كلمة الدخول والتفاعل الحي سيأتيان في المرحلة التالية بعد اعتماد المشهد.</p></article>
-      <article class="info-card"><span class="card-icon">◌</span><h3>حركات مرئية</h3><p>رقص، جري، وانعدام جاذبية — ستُربط بالأحداث الموثقة فقط، دون تخمين Gift IDs.</p></article>
+      <article class="info-card"><span class="card-icon">↗</span><h3>دخول مجاني</h3><p>اكتب good live أو عالم التحديات أو تحدي مروان أو قدها في اللايف لتظهر شخصيتك تلقائيًا.</p></article>
+      <article class="info-card"><span class="card-icon">◌</span><h3>هدايا بحركات</h3><p>القلب للرقص، العطر للجري والشغب، الدونتس للّفة والرقص، والكورجي لـ Zero Gravity — مع مدة مستقلة لكل حركة.</p></article>
       <article class="info-card"><span class="card-icon">⌁</span><h3>بصوت اختياري</h3><p>اضغط زر الموسيقى لتشغيل نغمة فضائية خفيفة؛ لا يوجد تشغيل تلقائي أو طلب صلاحيات.</p></article>
     </section>
   </main>
   <footer class="space-footer"><span>عالم التحديات</span><span class="footer-line"></span><span>SPACE LOUNGE / MVP 01</span></footer>
 </div>
-<script src="/space-lounge.js?v=20261108-v1"></script>
+<script src="/space-lounge.js?v=20261108-v2"></script>
 </body>
 </html>
