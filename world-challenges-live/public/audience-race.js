@@ -158,6 +158,7 @@
     if (data.girls.all.length < MIN || data.boys.all.length < MIN) return setStatus('يلزم إدخال 5 أسماء على الأقل لكل فريق للبدء');
     if (girls.length < 1 || boys.length < 1 || busy) return setStatus('انتهت أسماء أحد الفريقين — أعد الدورة أو أضف أسماء جديدة');
     busy = true; render(); $('audienceResult').classList.add('hidden');
+    if (typeof window.playSound === 'function') window.playSound('audience-race-start', 0.78);
     var gi = randomIndex(girls.length), bi = randomIndex(boys.length), innerTurns = 4 + randomIndex(3), outerTurns = 5 + randomIndex(3);
     var inner = $('audienceInnerWheel'), outer = $('audienceOuterWheel');
     var ia = -(gi * 360 / girls.length + 180 / girls.length), oa = -(bi * 360 / boys.length + 180 / boys.length);
@@ -168,12 +169,27 @@
       var pickedGirls = girls[gi], pickedBoys = boys[bi];
       data.girls.available = data.girls.available.filter(function (n) { return norm(n) !== norm(pickedGirls); }); data.boys.available = data.boys.available.filter(function (n) { return norm(n) !== norm(pickedBoys); });
       data.girls.picked.push(pickedGirls); data.boys.picked.push(pickedBoys); data.last = { girls: pickedGirls, boys: pickedBoys, at: new Date().toISOString() }; data.matches.push(data.last); save();
-      Object.keys(pending).forEach(function (team) { pending[team].forEach(function (n) { data[team].all.push(n); data[team].available.push(n); }); pending[team] = []; }); save(); busy = false; render(); showResult(pickedGirls, pickedBoys);
+      Object.keys(pending).forEach(function (team) { pending[team].forEach(function (n) { data[team].all.push(n); data[team].available.push(n); }); pending[team] = []; }); save(); busy = false; render();
+      if (typeof window.playSound === 'function') window.playSound('audience-race-pick', 0.72);
+      showResult(pickedGirls, pickedBoys);
     }, 5200);
   }
   function showResult(girls, boys) {
-    var box = $('audienceResult'); box.classList.remove('hidden'); box.innerHTML = '<span>مواجهة جديدة</span><strong><i>' + esc(girls) + '</i><b>VS</b><i>' + esc(boys) + '</i></strong><div><button id="audienceConfirm" type="button">تأكيد المواجهة</button><button id="audienceCancel" type="button">إلغاء الاختيار</button></div>';
-    $('audienceConfirm').onclick = function () { box.classList.add('hidden'); toast('تم تأكيد مواجهة ' + girls + ' ضد ' + boys); if (typeof window.fireConfetti === 'function') window.fireConfetti(); };
+    var box = $('audienceResult'); box.classList.remove('hidden'); box.innerHTML = '<span>تم اختيار المنافسين</span><strong><i>' + esc(girls) + '</i><b>VS</b><i>' + esc(boys) + '</i></strong><div class="audience-winner-actions"><button id="audienceGirlsWinner" type="button">فوز البنات + نقطة</button><button id="audienceBoysWinner" type="button">فوز الشباب + نقطة</button></div><button id="audienceCancel" type="button">إلغاء الاختيار</button>';
+    var winnerLocked = false;
+    function announceWinner(team, winner, loser) {
+      if (winnerLocked) return;
+      winnerLocked = true;
+      if (typeof window.playSound === 'function') window.playSound('audience-race-winner', 0.9);
+      box.classList.add('winner-' + team);
+      box.querySelector('.audience-winner-actions').innerHTML = '<strong class="audience-winner-banner">🏆 الفائز: ' + esc(winner) + '</strong><small>تمت إضافة نقطة إلى فريق ' + teamLabel(team) + '</small>';
+      toast('🏆 فوز ' + winner + ' — تمت إضافة نقطة لفريق ' + teamLabel(team));
+      if (typeof window.fireConfetti === 'function') window.fireConfetti();
+      window.setTimeout(function () { if (typeof window.applyPoint === 'function') window.applyPoint(team, 1); }, 420);
+      window.setTimeout(function () { box.classList.add('hidden'); }, 1800);
+    }
+    $('audienceGirlsWinner').onclick = function () { announceWinner('girls', girls, boys); };
+    $('audienceBoysWinner').onclick = function () { announceWinner('boys', boys, girls); };
     $('audienceCancel').onclick = function () { data.girls.available.push(girls); data.boys.available.push(boys); data.girls.picked = data.girls.picked.filter(function (n) { return norm(n) !== norm(girls); }); data.boys.picked = data.boys.picked.filter(function (n) { return norm(n) !== norm(boys); }); data.matches.pop(); data.last = null; save(); box.classList.add('hidden'); render(); toast('تم إلغاء الاختيار وإعادة الاسمين'); };
   }
   function open() { var el = overlay(); el.classList.remove('hidden'); render(); }

@@ -27,6 +27,7 @@ const soundFiles = {
   'girls-replay-boys': ['girls-replay-boys'], 'boys-replay-girls': ['boys-replay-girls'],
   advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
   'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong', 'suspense', 'tick'], speed: ['speed', 'boom'], card: ['card', 'teamwork'], wheel: ['wheel', 'celebration'],
+  'audience-race-start': ['start', 'begin'], 'audience-race-pick': ['suspense', 'tick'], 'audience-race-winner': ['celebration', 'cheer'],
   laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration', 'cheer']
 };
 const audioCache = {};
@@ -376,6 +377,8 @@ function startShowClock() {
 }
 
 function updateScores() {
+  const previousGirlsScore = Number(state.__arenaLastGirlsScore);
+  const previousBoysScore = Number(state.__arenaLastBoysScore);
   if ($('girlsScoreValue')) $('girlsScoreValue').textContent = state.girlsScore;
   if ($('boysScoreValue')) $('boysScoreValue').textContent = state.boysScore;
   if ($('girlsProgress')) $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * 20) + '%';
@@ -386,6 +389,18 @@ function updateScores() {
   if ($('roundDisplay')) $('roundDisplay').textContent = 'الجولة ' + state.roundNumber;
   if ($('teamShieldGirls')) $('teamShieldGirls').classList.toggle('hidden', !state.shieldGirls);
   if ($('teamShieldBoys')) $('teamShieldBoys').classList.toggle('hidden', !state.shieldBoys);
+  if (Number.isFinite(previousGirlsScore) && state.girlsScore > previousGirlsScore) pulseArenaCharacter('girls');
+  if (Number.isFinite(previousBoysScore) && state.boysScore > previousBoysScore) pulseArenaCharacter('boys');
+  state.__arenaLastGirlsScore = state.girlsScore;
+  state.__arenaLastBoysScore = state.boysScore;
+}
+function pulseArenaCharacter(team) {
+  const character = document.querySelector('.arena-character-' + team);
+  if (!character) return;
+  character.classList.remove('is-scoring');
+  void character.offsetWidth;
+  character.classList.add('is-scoring');
+  window.setTimeout(() => character.classList.remove('is-scoring'), 1100);
 }
 
 function updateTimer() {
@@ -712,6 +727,10 @@ function applyPoint(team, points) {
     showToast('اكتملت 5 نقاط! اضغط «الجولة التالية»', 'ROUND READY');
   }
 }
+
+/* جسر رسمي لميزات السباق والطبقات الخارجية */
+window.playSound = playSound;
+window.applyPoint = applyPoint;
 
 /* ═══ إنهاء الجولة مع دعم X2 ═══ */
 function finishRound() {
