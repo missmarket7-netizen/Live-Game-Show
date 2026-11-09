@@ -5,6 +5,10 @@
   var MAX = 30;
   var MIN = 5;
   var busy = false;
+  var raceTimer = null;
+  var raceDuration = 20;
+  var raceSeconds = 20;
+  var raceTimerRunning = false;
   var pending = { girls: [], boys: [] };
 
   function $(id) { return document.getElementById(id); }
@@ -54,7 +58,7 @@
     el.innerHTML = '<div class="audience-race-card" dir="rtl">' +
       '<div class="audience-race-head"><div><span class="audience-race-kicker">AUDIENCE SHOWDOWN</span><h2>سباق الجمهور</h2><p>اختيار مواجهة مباشرة من الفريقين</p></div><div class="audience-sponsor"><img src="/images/qaddaha.png" alt="قدها"><span>برعاية<br><b>قدها؟</b></span></div><button id="audienceRaceClose" class="audience-race-close" type="button">×</button></div>' +
       '<div class="audience-race-layout"><aside class="audience-roster girls-roster"><h3>فريق البنات <b id="audienceGirlsCount">0</b></h3><div class="audience-add"><input id="audienceGirlsInput" maxlength="32" placeholder="اسم المشاهدة"><button id="audienceGirlsAdd" type="button">إضافة</button></div><div id="audienceGirlsList" class="audience-list"></div><div class="audience-roster-foot"><span>متاح <b id="audienceGirlsAvailable">0</b></span><span>اختير <b id="audienceGirlsPicked">0</b></span></div><button id="audienceGirlsReset" class="audience-reset" type="button">إعادة دورة البنات</button></aside>' +
-      '<main class="audience-wheel-main"><div class="audience-wheel-stage"><div class="audience-wheel-glow"></div><div class="audience-wheel-pointer">▼</div><div class="audience-wheel-column audience-wheel-outer"><div class="audience-column-head"><span>01</span><b>الشباب</b><small>مسار الاختيار</small></div><div id="audienceOuterWheel" class="audience-wheel"></div></div><div class="audience-wheel-center"><span>VS</span><i></i></div><div class="audience-wheel-column audience-wheel-inner"><div class="audience-column-head"><span>02</span><b>البنات</b><small>مسار الاختيار</small></div><div id="audienceInnerWheel" class="audience-wheel"></div></div></div><button id="audienceSpin" class="audience-spin" type="button"><span>ابدأ الاختيار</span><small>تدوير المواجهة</small></button><div id="audienceResult" class="audience-result hidden"></div><p id="audienceRaceStatus" class="audience-race-status">أضف 5 أسماء على الأقل لكل فريق للبدء</p></main>' +
+      '<main class="audience-wheel-main"><div class="audience-wheel-stage"><div class="audience-wheel-glow"></div><div class="audience-wheel-pointer">▼</div><div class="audience-wheel-column audience-wheel-outer"><div class="audience-column-head"><span>01</span><b>الشباب</b><small>مسار الاختيار</small></div><div id="audienceOuterWheel" class="audience-wheel"></div></div><div class="audience-wheel-center"><span>VS</span><i></i></div><div class="audience-wheel-column audience-wheel-inner"><div class="audience-column-head"><span>02</span><b>البنات</b><small>مسار الاختيار</small></div><div id="audienceInnerWheel" class="audience-wheel"></div></div></div><div class="audience-timer-panel"><div class="audience-timer-options"><button type="button" data-audience-seconds="15">15 ثانية</button><button type="button" data-audience-seconds="20" class="is-active">20 ثانية</button></div><div class="audience-timer-readout"><span id="audienceTimerValue">20</span><small>ثانية</small></div><button id="audienceTimerStart" class="audience-timer-start" type="button">▶ تشغيل المؤقت</button></div><button id="audienceSpin" class="audience-spin" type="button"><span>ابدأ الاختيار</span><small>تدوير المواجهة</small></button><div id="audienceResult" class="audience-result hidden"></div><p id="audienceRaceStatus" class="audience-race-status">أضف 5 أسماء على الأقل لكل فريق للبدء</p></main>' +
       '<aside class="audience-roster boys-roster"><h3>فريق الشباب <b id="audienceBoysCount">0</b></h3><div class="audience-add"><input id="audienceBoysInput" maxlength="32" placeholder="اسم المشاهد"><button id="audienceBoysAdd" type="button">إضافة</button></div><div id="audienceBoysList" class="audience-list"></div><div class="audience-roster-foot"><span>متاح <b id="audienceBoysAvailable">0</b></span><span>اختير <b id="audienceBoysPicked">0</b></span></div><button id="audienceBoysReset" class="audience-reset" type="button">إعادة دورة الشباب</button></aside></div>' +
       '<div class="audience-race-footer"><span>التعليقات والهدايا والإضافة اليدوية تعمل معًا — قدها؟ الراعي الرسمي</span><button id="audienceRaceResetAll" type="button">إعادة الفريقين</button></div></div>';
     document.body.appendChild(el);
@@ -63,6 +67,8 @@
   function bind() {
     $('audienceRaceClose').onclick = close;
     $('audienceSpin').onclick = spin;
+    document.querySelectorAll('[data-audience-seconds]').forEach(function (button) { button.onclick = function () { selectTimer(Number(button.dataset.audienceSeconds)); }; });
+    $('audienceTimerStart').onclick = startTimer;
     $('audienceGirlsAdd').onclick = function () { add('girls'); };
     $('audienceBoysAdd').onclick = function () { add('boys'); };
     $('audienceGirlsInput').onkeydown = function (e) { if (e.key === 'Enter') add('girls'); };
@@ -70,6 +76,31 @@
     $('audienceGirlsReset').onclick = function () { resetTeam('girls'); };
     $('audienceBoysReset').onclick = function () { resetTeam('boys'); };
     $('audienceRaceResetAll').onclick = resetAll;
+  }
+  function selectTimer(seconds) {
+    if (raceTimerRunning || busy) return;
+    raceDuration = seconds === 15 ? 15 : 20;
+    raceSeconds = raceDuration;
+    document.querySelectorAll('[data-audience-seconds]').forEach(function (button) { button.classList.toggle('is-active', Number(button.dataset.audienceSeconds) === raceSeconds); });
+    updateTimerReadout();
+  }
+  function updateTimerReadout() { var el = $('audienceTimerValue'); if (el) el.textContent = raceSeconds; }
+  function stopTimer() {
+    if (raceTimer) window.clearInterval(raceTimer);
+    raceTimer = null; raceTimerRunning = false;
+    var button = $('audienceTimerStart'); if (button) { button.disabled = false; button.textContent = '▶ تشغيل المؤقت'; }
+    var value = $('audienceTimerValue'); if (value) value.classList.remove('is-urgent');
+  }
+  function startTimer() {
+    if (raceTimerRunning || busy) return;
+    raceTimerRunning = true; raceSeconds = raceDuration; updateTimerReadout();
+    var button = $('audienceTimerStart'); if (button) { button.disabled = true; button.textContent = '⏸ المؤقت يعمل'; }
+    if (typeof window.playSound === 'function') window.playSound('audience-race-timer-start', 0.78);
+    raceTimer = window.setInterval(function () {
+      raceSeconds -= 1; updateTimerReadout();
+      if (raceSeconds <= 5 && raceSeconds > 0) { var value = $('audienceTimerValue'); if (value) value.classList.add('is-urgent'); if (typeof window.playSound === 'function') window.playSound('audience-race-countdown', 0.3); }
+      if (raceSeconds <= 0) { stopTimer(); if (typeof window.playSound === 'function') window.playSound('audience-race-timer-end', 0.8); setStatus('انتهى المؤقت — اختر المنافسين الآن'); }
+    }, 1000);
   }
   function add(team) {
     var input = $('audience' + (team === 'girls' ? 'Girls' : 'Boys') + 'Input');
@@ -154,6 +185,7 @@
     else if (!busy && (!getAvailable('girls').length || !getAvailable('boys').length)) setStatus('انتهت أسماء أحد الفريقين — أعد الدورة أو أضف أسماء جديدة');
   }
   function spin() {
+    if (raceTimerRunning) stopTimer();
     var girls = getAvailable('girls'), boys = getAvailable('boys');
     if (data.girls.all.length < MIN || data.boys.all.length < MIN) return setStatus('يلزم إدخال 5 أسماء على الأقل لكل فريق للبدء');
     if (girls.length < 1 || boys.length < 1 || busy) return setStatus('انتهت أسماء أحد الفريقين — أعد الدورة أو أضف أسماء جديدة');
@@ -192,8 +224,8 @@
     $('audienceBoysWinner').onclick = function () { announceWinner('boys', boys, girls); };
     $('audienceCancel').onclick = function () { data.girls.available.push(girls); data.boys.available.push(boys); data.girls.picked = data.girls.picked.filter(function (n) { return norm(n) !== norm(girls); }); data.boys.picked = data.boys.picked.filter(function (n) { return norm(n) !== norm(boys); }); data.matches.pop(); data.last = null; save(); box.classList.add('hidden'); render(); toast('تم إلغاء الاختيار وإعادة الاسمين'); };
   }
-  function open() { var el = overlay(); el.classList.remove('hidden'); render(); }
-  function close() { if (busy) return setStatus('انتظر انتهاء الدوران قبل الإغلاق'); var el = $('audienceRaceOverlay'); if (el) el.classList.add('hidden'); }
+  function open() { var el = overlay(); el.classList.remove('hidden'); updateTimerReadout(); render(); }
+  function close() { if (busy) return setStatus('انتظر انتهاء الدوران قبل الإغلاق'); stopTimer(); var el = $('audienceRaceOverlay'); if (el) el.classList.add('hidden'); }
   window.openAudienceRace = open;
   window.addAudienceParticipant = addExternal;
 })();

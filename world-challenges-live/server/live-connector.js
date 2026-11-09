@@ -37,8 +37,8 @@ function normLiveText(value) {
   return String(value || "").toLowerCase().replace(/[\u064B-\u0652\u0670\u0640]/g, "").replace(/[\u0622\u0623\u0625\u0671]/g, "ا").replace(/\s+/g, " ").trim();
 }
 const AUDIENCE_PREFIX = normLiveText(process.env.AUDIENCE_JOIN_PREFIX || "انضم");
-const AUDIENCE_GIRLS_COMMENT = normLiveText(process.env.AUDIENCE_GIRLS_COMMENT || "");
-const AUDIENCE_BOYS_COMMENT = normLiveText(process.env.AUDIENCE_BOYS_COMMENT || "");
+const AUDIENCE_GIRLS_COMMENT = normLiveText(process.env.AUDIENCE_GIRLS_COMMENT || "ملكة");
+const AUDIENCE_BOYS_COMMENT = normLiveText(process.env.AUDIENCE_BOYS_COMMENT || "ملك");
 const AUDIENCE_GIRLS_GIFT = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
 const AUDIENCE_BOYS_GIFT = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
 const LOUNGE_JOIN_COMMENTS = new Set(["good live", "عالم التحديات", "تحدي مروان", "قدها"].map(normLiveText));
@@ -71,8 +71,8 @@ function bump(map, key, n) { if (key) map.set(key, (map.get(key) || 0) + n); }
 function audienceTeamFromComment(comment) {
   const text = normLiveText(comment);
   if (!text) return null;
-  if (AUDIENCE_GIRLS_COMMENT && text === AUDIENCE_GIRLS_COMMENT) return "girls";
-  if (AUDIENCE_BOYS_COMMENT && text === AUDIENCE_BOYS_COMMENT) return "boys";
+  if (text === "ملكة" || (AUDIENCE_GIRLS_COMMENT && text === AUDIENCE_GIRLS_COMMENT)) return "girls";
+  if (text === "ملك" || (AUDIENCE_BOYS_COMMENT && text === AUDIENCE_BOYS_COMMENT)) return "boys";
   const parts = text.split(" ");
   if (AUDIENCE_PREFIX && parts[0] === AUDIENCE_PREFIX) {
     const team = parts.slice(1).join(" ");

@@ -27,7 +27,7 @@ const soundFiles = {
   'girls-replay-boys': ['girls-replay-boys'], 'boys-replay-girls': ['boys-replay-girls'],
   advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
   'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong', 'suspense', 'tick'], speed: ['speed', 'boom'], card: ['card', 'teamwork'], wheel: ['wheel', 'celebration'],
-  'audience-race-start': ['start', 'begin'], 'audience-race-pick': ['suspense', 'tick'], 'audience-race-winner': ['celebration', 'cheer'],
+  'audience-race-start': ['start', 'begin'], 'audience-race-pick': ['suspense', 'tick'], 'audience-race-winner': ['celebration', 'cheer'], 'audience-race-timer-start': ['start', 'begin'], 'audience-race-countdown': ['tick', 'suspense'], 'audience-race-timer-end': ['cheer', 'celebration'],
   laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration', 'cheer']
 };
 const audioCache = {};
