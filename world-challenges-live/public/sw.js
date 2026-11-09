@@ -1,5 +1,5 @@
-const CACHE_NAME = "wcq-v20261108-space-lounge-v3";
-const APP_SHELL = ["/", "/index.html", "/style.css?v=20261108-cinematic-audience", "/arena-extras.css?v=20261106", "/manifest.json?v=20261108-cinematic-audience", "/favicon.svg", "/space-lounge", "/space-lounge.css?v=20261108-v3", "/space-lounge.js?v=20261108-v3", "/images/mytwinlogo.png", "/manus-routes.json"];
+const CACHE_NAME = "wcq-v20261109-space-lounge-v4";
+const APP_SHELL = ["/", "/index.html", "/style.css?v=20261108-cinematic-audience", "/arena-extras.css?v=20261106", "/manifest.json?v=20261108-cinematic-audience", "/favicon.svg", "/space-lounge", "/space-lounge.css?v=20261108-v4", "/space-lounge.js?v=20261108-v4", "/images/mytwinlogo.png", "/manus-routes.json"];
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
 });
