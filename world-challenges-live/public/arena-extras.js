@@ -1132,3 +1132,102 @@
   /* زر الجولة التالية → يسقط الدرع دائمًا */
   wrapFn('finishRound', { after: function () { clearShields(); } });
 })();
+
+/* ═══ LIVE_UI_V1 — عرض المتابعين والهدايا والـ leaderboard ═══ */
+(function () {
+  'use strict';
+  if (window.__LIVE_UI_V1__) return;
+  window.__LIVE_UI_V1__ = true;
+
+  function createLivePanel() {
+    if (document.getElementById('live-panel')) return;
+
+    const panel = document.createElement('div');
+    panel.id = 'live-panel';
+    panel.className = 'live-panel';
+    panel.innerHTML = `
+      <div class="live-section">
+        <h3>🏆 الأكثر إعجاباً</h3>
+        <div id="likes-leaderboard" class="leaderboard"></div>
+      </div>
+      <div class="live-section">
+        <h3>📢 الأكثر مشاركة</h3>
+        <div id="shares-leaderboard" class="leaderboard"></div>
+      </div>
+      <div class="live-section">
+        <h3>👥 متابعون جدد</h3>
+        <div id="recent-follows" class="recent-list"></div>
+      </div>
+      <div class="live-section">
+        <h3>🎁 هدايا واردة</h3>
+        <div id="recent-gifts" class="recent-list"></div>
+      </div>
+    `;
+    document.body.appendChild(panel);
+  }
+
+  function renderLeaderboard(containerId, items) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = items.slice(0, 5).map((item, i) =>
+      `<div class="leaderboard-item rank-${i + 1}">
+        <span class="rank">#${i + 1}</span>
+        <span class="name">${item.name}</span>
+        <span class="count">${item.count}</span>
+      </div>`
+    ).join('') || '<div class="empty">لا يوجد بيانات</div>';
+  }
+
+  function renderRecentList(containerId, items, type) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    el.innerHTML = items.slice(0, 8).map(item => {
+      if (type === 'follow') {
+        return `<div class="recent-item">
+          <span class="name">${item.name}</span>
+          <span class="badge">تابع</span>
+        </div>`;
+      } else {
+        return `<div class="recent-item">
+          <span class="name">${item.name}</span>
+          <span class="gift">${item.gift} ×${item.count}</span>
+        </div>`;
+      }
+    }).join('') || '<div class="empty">لا يوجد بيانات</div>';
+  }
+
+  function connectSSE() {
+    const evtSource = new EventSource('/live/events');
+    
+    evtSource.addEventListener('leaderboard-update', (e) => {
+      const data = JSON.parse(e.data).payload;
+      renderLeaderboard('likes-leaderboard', data.likes || []);
+      renderLeaderboard('shares-leaderboard', data.shares || []);
+    });
+
+    evtSource.addEventListener('recent-follows', (e) => {
+      const data = JSON.parse(e.data).payload;
+      renderRecentList('recent-follows', data.follows || [], 'follow');
+    });
+
+    evtSource.addEventListener('recent-gifts', (e) => {
+      const data = JSON.parse(e.data).payload;
+      renderRecentList('recent-gifts', data.gifts || [], 'gift');
+    });
+
+    evtSource.onerror = () => {
+      setTimeout(connectSSE, 5000);
+    };
+  }
+
+  function init() {
+    createLivePanel();
+    connectSSE();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

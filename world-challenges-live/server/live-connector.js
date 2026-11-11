@@ -1,12 +1,9 @@
-/* ═══ طبقة استقبال TikTok LIVE — حسابين + Euler API Key + SSE ═══ */
+/* ═══ طبقة استقبال TikTok LIVE — حسابان + طرق مجانية ═══ */
 import { createRequire } from "node:module";
 const requireCJS = createRequire(import.meta.url);
 
 let WebcastPushConnection = null;
-let SignConfigRef = null;
-let eulerConfigured = false;
 
-/* بصمة هيكلية: أي فئة تملك connect + on على الـ prototype هي الموصل */
 function isConnector(x) {
   return typeof x === "function" && x.prototype && typeof x.prototype.connect === "function" && typeof x.prototype.on === "function";
 }
@@ -24,41 +21,6 @@ function pickConn(mod) {
     }
   }
   return null;
-}
-
-function pickSignConfig(mod) {
-  if (!mod) return null;
-  if (mod.SignConfig && typeof mod.SignConfig === "object") return mod.SignConfig;
-  if (mod.default && mod.default.SignConfig && typeof mod.default.SignConfig === "object") return mod.default.SignConfig;
-  return null;
-}
-
-function applyEulerConfig(mod) {
-  if (eulerConfigured) return;
-  const key = String(process.env.EULER_API_KEY || process.env.SIGN_API_KEY || process.env.EULERSTREAM_API_KEY || "").trim();
-  if (!key) {
-    console.warn("⚠️ لا يوجد EULER_API_KEY — سيتم الاعتماد على مسار التوقيع الافتراضي (قد يفشل على بعض الخطط)");
-    eulerConfigured = true;
-    return;
-  }
-
-  SignConfigRef = pickSignConfig(mod);
-  if (SignConfigRef) {
-    try {
-      SignConfigRef.apiKey = key;
-      if (SignConfigRef.baseOptions && typeof SignConfigRef.baseOptions === "object") {
-        SignConfigRef.baseOptions.headers = Object.assign({}, SignConfigRef.baseOptions.headers || {}, {
-          "x-api-key": key,
-        });
-      }
-      console.log("✅ تم ضبط Euler SignConfig.apiKey من متغيرات البيئة");
-    } catch (e) {
-      console.warn("⚠️ تعذر كتابة SignConfig.apiKey:", e && e.message ? e.message : e);
-    }
-  } else {
-    console.warn("⚠️ المكتبة لا تصدّر SignConfig — سيتم تمرير signApiKey في خيارات الاتصال فقط");
-  }
-  eulerConfigured = true;
 }
 
 async function loadConnector() {
@@ -84,7 +46,6 @@ async function loadConnector() {
     const desc = mod ? Object.keys(mod).map((k) => k + ":" + typeof mod[k]).join(", ") : "(لا يوجد module)";
     throw new Error("tiktok-live-connector: شكل تصدير غير معروف | exports => " + desc + (lastErr ? " | err: " + lastErr.message : ""));
   }
-  applyEulerConfig(mod);
   WebcastPushConnection = found;
   console.log("✅ تم تحميل موصل تيك توك (فئة):", found.name || "anonymous");
   return found;
@@ -130,6 +91,8 @@ const LIVE_CONFIG = {
 const clients = new Set();
 const connections = new Map();
 const stats = { likes: new Map(), shares: new Map(), chats: new Map(), gifts: new Map() };
+const recentFollows = [];
+const recentGifts = [];
 let lastEventAt = null;
 
 function overallStatus() {
@@ -144,7 +107,7 @@ function overallStatus() {
     accounts,
     lastEventAt,
     error: (accounts.find((a) => a.error) || {}).error || null,
-    eulerKeyConfigured: Boolean(String(process.env.EULER_API_KEY || process.env.SIGN_API_KEY || process.env.EULERSTREAM_API_KEY || "").trim()),
+    eulerKeyConfigured: false,
     audienceImport: {
       commentPrefix: Boolean(AUDIENCE_PREFIX),
       girlsComment: Boolean(AUDIENCE_GIRLS_COMMENT),
@@ -209,19 +172,14 @@ function broadcastAudienceJoin(team, payload) {
 }
 
 function buildConnOptions(account) {
-  const eulerKey = String(process.env.EULER_API_KEY || process.env.SIGN_API_KEY || process.env.EULERSTREAM_API_KEY || "").trim();
   const options = {
     enableExtendedGiftInfo: true,
-    processInitialData: true,
+    processInitialData: false,
   };
 
   if (account.sessionId) {
     options.sessionId = account.sessionId;
     options.authenticateWs = true;
-  }
-
-  if (eulerKey) {
-    options.signApiKey = eulerKey;
   }
 
   return options;
@@ -265,17 +223,20 @@ function startConnection(account) {
         })
         .catch((err) => fail(String((err && err.message) || err)));
 
-      /* متابعة */
-      conn.on("follow", (d) =>
-        broadcast("follow", {
+      conn.on("follow", (d) => {
+        const followData = {
           account: account.username,
           name: d.nickname || d.uniqueId || "متابع",
           uniqueId: d.uniqueId || "",
           avatar: d.profilePictureUrl || "",
-        })
-      );
+        };
+        broadcast("follow", followData);
+        
+        recentFollows.unshift(followData);
+        if (recentFollows.length > 10) recentFollows.pop();
+        broadcast("recent-follows", { follows: recentFollows });
+      });
 
-      /* هدايا */
       conn.on("gift", (d) => {
         const name = giftNameOf(d);
         if (!name) return;
@@ -295,6 +256,10 @@ function startConnection(account) {
         };
 
         broadcast("gift", giftPayload);
+        
+        recentGifts.unshift(giftPayload);
+        if (recentGifts.length > 10) recentGifts.pop();
+        broadcast("recent-gifts", { gifts: recentGifts });
 
         const loungeRule = loungeActionFromGift(name);
         if (loungeRule) {
@@ -316,13 +281,16 @@ function startConnection(account) {
       });
 
       if (LIVE_CONFIG.enableStats) {
-        /* إعجابات */
-        conn.on("like", (d) => bump(stats.likes, d.uniqueId || d.nickname, d.likeCount || 1));
+        conn.on("like", (d) => {
+          bump(stats.likes, d.uniqueId || d.nickname, d.likeCount || 1);
+          broadcast("leaderboard-update", getLeaderboard());
+        });
 
-        /* مشاركة */
-        conn.on("share", (d) => bump(stats.shares, d.uniqueId || d.nickname, d.shareCount || 1));
+        conn.on("share", (d) => {
+          bump(stats.shares, d.uniqueId || d.nickname, d.shareCount || 1);
+          broadcast("leaderboard-update", getLeaderboard());
+        });
 
-        /* تعليقات + دخول الجمهور / الاستراحة */
         conn.on("chat", (d) => {
           const chatName = d.nickname || d.uniqueId || "مشاهد";
           const chatText = d.comment || d.message || d.content || "";
@@ -377,6 +345,20 @@ function startConnection(account) {
   connect();
 }
 
+function getLeaderboard() {
+  const top = (m) =>
+    [...m.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([name, count]) => ({ name, count }));
+  return {
+    likes: top(stats.likes),
+    shares: top(stats.shares),
+    chats: top(stats.chats),
+    gifts: top(stats.gifts),
+  };
+}
+
 export function attachLiveRoutes(app) {
   app.get("/live/events", (req, res) => {
     res.writeHead(200, {
@@ -385,6 +367,9 @@ export function attachLiveRoutes(app) {
       Connection: "keep-alive",
     });
     res.write("data: " + JSON.stringify({ type: "hello", payload: overallStatus() }) + "\n\n");
+    res.write("data: " + JSON.stringify({ type: "leaderboard-update", payload: getLeaderboard() }) + "\n\n");
+    res.write("data: " + JSON.stringify({ type: "recent-follows", payload: { follows: recentFollows } }) + "\n\n");
+    res.write("data: " + JSON.stringify({ type: "recent-gifts", payload: { gifts: recentGifts } }) + "\n\n");
     clients.add(res);
     req.on("close", () => clients.delete(res));
   });
@@ -392,18 +377,18 @@ export function attachLiveRoutes(app) {
   app.get("/live/status", (req, res) => res.json(overallStatus()));
 
   app.get("/live/leaderboard", (req, res) => {
-    const top = (m) =>
-      [...m.entries()]
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5)
-        .map(([name, count]) => ({ name, count }));
     res.json({
       enabled: LIVE_CONFIG.enableStats,
-      likes: top(stats.likes),
-      shares: top(stats.shares),
-      chats: top(stats.chats),
-      gifts: top(stats.gifts),
+      ...getLeaderboard(),
     });
+  });
+
+  app.get("/live/recent-follows", (req, res) => {
+    res.json({ follows: recentFollows });
+  });
+
+  app.get("/live/recent-gifts", (req, res) => {
+    res.json({ gifts: recentGifts });
   });
 
   if (!ACCOUNTS.length) {
@@ -413,8 +398,5 @@ export function attachLiveRoutes(app) {
 
   ACCOUNTS.forEach(startConnection);
   console.log("🎥 طبقة الاستقبال: حسابات مفعّلة =", ACCOUNTS.map((a) => a.username).join(" , "));
-  console.log(
-    "🔑 Euler key:",
-    String(process.env.EULER_API_KEY || process.env.SIGN_API_KEY || process.env.EULERSTREAM_API_KEY || "").trim() ? "مضبوط" : "غير مضبوط"
-  );
+  console.log("🔓 استخدام الطرق المجانية (بدون Sign API)");
 }
