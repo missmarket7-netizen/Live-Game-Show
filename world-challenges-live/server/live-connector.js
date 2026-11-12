@@ -1,54 +1,15 @@
-/* ═══ طبقة استقبال TikTok LIVE — حسابان + طرق مجانية ═══ */
-import { createRequire } from "node:module";
-const requireCJS = createRequire(import.meta.url);
+/* ═══ طبقة استقبال TikTok LIVE — إنتاجية بالكامل (بدون Sign API) ═══ */
+import * as PirateTok from "piratetok-live-js";
 
-let WebcastPushConnection = null;
+// استخراج فئة الاتصال بشكل آمن يدعم جميع إصدارات piratetok-live-js
+const ConnectionClass = 
+  PirateTok.TikTokLiveConnection || 
+  PirateTok.WebcastPushConnection || 
+  PirateTok.default || 
+  PirateTok;
 
-function isConnector(x) {
-  return typeof x === "function" && x.prototype && typeof x.prototype.connect === "function" && typeof x.prototype.on === "function";
-}
-
-function pickConn(mod) {
-  if (!mod) return null;
-  if (isConnector(mod.WebcastPushConnection)) return mod.WebcastPushConnection;
-  for (const k of Object.keys(mod)) {
-    if (isConnector(mod[k])) return mod[k];
-  }
-  if (isConnector(mod.default)) return mod.default;
-  if (mod.default && typeof mod.default === "object") {
-    for (const k of Object.keys(mod.default)) {
-      if (isConnector(mod.default[k])) return mod.default[k];
-    }
-  }
-  return null;
-}
-
-async function loadConnector() {
-  if (WebcastPushConnection) return WebcastPushConnection;
-  let mod = null;
-  let lastErr = null;
-  try {
-    mod = await import("tiktok-live-connector");
-  } catch (e) {
-    lastErr = e;
-  }
-  let found = pickConn(mod);
-  if (!found) {
-    try {
-      const cjs = requireCJS("tiktok-live-connector");
-      found = pickConn(cjs);
-      if (!mod) mod = cjs;
-    } catch (e) {
-      lastErr = e;
-    }
-  }
-  if (!found) {
-    const desc = mod ? Object.keys(mod).map((k) => k + ":" + typeof mod[k]).join(", ") : "(لا يوجد module)";
-    throw new Error("tiktok-live-connector: شكل تصدير غير معروف | exports => " + desc + (lastErr ? " | err: " + lastErr.message : ""));
-  }
-  WebcastPushConnection = found;
-  console.log("✅ تم تحميل موصل تيك توك (فئة):", found.name || "anonymous");
-  return found;
+if (!ConnectionClass || typeof ConnectionClass !== "function") {
+  console.error("❌ [LIVE] فئة الاتصال TikTokLiveConnection غير متوفرة في piratetok-live-js. تأكد من التثبيت.");
 }
 
 const ACCOUNTS = [
@@ -124,7 +85,9 @@ function broadcast(type, payload) {
   for (const res of clients) {
     try {
       res.write("data: " + data + "\n\n");
-    } catch (e) {}
+    } catch (e) {
+      // العميل أغلق الاتصال
+    }
   }
 }
 
@@ -171,45 +134,57 @@ function broadcastAudienceJoin(team, payload) {
   broadcast("audience-join", Object.assign({}, payload, { team }));
 }
 
-function buildConnOptions(account) {
-  const options = {
-    enableExtendedGiftInfo: true,
-    processInitialData: false,
-  };
-
-  if (account.sessionId) {
-    options.sessionId = account.sessionId;
-    options.authenticateWs = true;
-  }
-
-  return options;
-}
-
 function startConnection(account) {
-  const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false };
+  const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false, offlineTimer: null };
   connections.set(account.username, st);
 
-  const schedule = () => {
+  // إعادة المحاولة بذكاء مع تصاعد الوقت (Exponential Backoff) لتجنب حظر السيرفر
+  const schedule = (delayMs) => {
     if (!LIVE_CONFIG.autoReconnect || st.stopped) return;
     st.fails += 1;
-    setTimeout(connect, Math.min(60000, 6000 * st.fails));
+    const backoff = Math.min(60000, 5000 * st.fails); // بحد أقصى دقيقة
+    const jitter = Math.random() * 3000;
+    setTimeout(connect, delayMs || (backoff + jitter));
   };
 
-  const fail = (msg) => {
+  const fail = (msg, isOffline = false) => {
     st.connected = false;
     st.error = msg;
-    st.fails += 1;
-    if (st.fails % 5 === 1) console.error("❌ [" + account.username + "] محاولة " + st.fails + ":", msg);
+    
+    if (isOffline) {
+      st.fails = 0; // تصفير العداد لأن المذيع أوقف البث فقط
+      if (st.offlineTimer) clearTimeout(st.offlineTimer);
+      // إعادة الفحص كل 45 ثانية إذا كان المذيع غير متصل
+      st.offlineTimer = setTimeout(connect, 45000); 
+    } else {
+      schedule();
+    }
+    
+    if (st.fails % 5 === 1 || isOffline) {
+      console.error(`❌ [${account.username}] ${msg}`);
+    }
+    
     broadcast("status", overallStatus());
-    schedule();
   };
 
   async function connect() {
     if (st.stopped) return;
+    if (!ConnectionClass) return fail("مكتبة piratetok-live-js غير محملة");
+    
     try {
-      const Conn = await loadConnector();
-      const options = buildConnOptions(account);
-      const conn = new Conn(account.username, options);
+      // إعدادات الاتصال السريع والآمن بدون طلبات زائدة
+      const options = {
+        enableExtendedGiftInfo: true,
+        processInitialData: false,
+        fetchRoomInfoOnConnect: false,
+      };
+
+      if (account.sessionId) {
+        options.sessionId = account.sessionId;
+        options.authenticateWs = true;
+      }
+
+      const conn = new ConnectionClass(account.username, options);
 
       conn
         .connect()
@@ -221,7 +196,14 @@ function startConnection(account) {
           console.log("✅ TikTok LIVE متصل:", account.username);
           broadcast("status", overallStatus());
         })
-        .catch((err) => fail(String((err && err.message) || err)));
+        .catch((err) => {
+          const msg = String((err && err.message) || err);
+          if (msg.includes("isn't online") || msg.includes("is not online")) {
+            fail("المذيع غير متصل حالياً (البث مغلق)", true);
+          } else {
+            fail(msg, false);
+          }
+        });
 
       conn.on("follow", (d) => {
         const followData = {
@@ -235,6 +217,22 @@ function startConnection(account) {
         recentFollows.unshift(followData);
         if (recentFollows.length > 10) recentFollows.pop();
         broadcast("recent-follows", { follows: recentFollows });
+      });
+
+      // دعم حدث social لمنع تفويت أي متابعات
+      conn.on("social", (d) => {
+        if (d.displayType && d.displayType.includes("follow")) {
+          const followData = {
+            account: account.username,
+            name: d.nickname || d.uniqueId || "متابع",
+            uniqueId: d.uniqueId || "",
+            avatar: d.profilePictureUrl || "",
+          };
+          broadcast("follow", followData);
+          recentFollows.unshift(followData);
+          if (recentFollows.length > 10) recentFollows.pop();
+          broadcast("recent-follows", { follows: recentFollows });
+        }
       });
 
       conn.on("gift", (d) => {
