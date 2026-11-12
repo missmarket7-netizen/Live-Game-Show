@@ -784,3 +784,84 @@
 @keyframes liveEvOut{to{opacity:0;transform:translateY(-8px) scale(.96);}}
 .ax-pulse{animation:axPulse .6s ease;}
 @keyframes axPulse{0%{transform:scale(1);}40%{transform:scale(1.25);}100%{transform:scale(1);}}
+
+/* ═══ LIVE_TOP_POPUP_V1 — الشريط قابل للنقر + لوحة آخر 3 حسابات ═══ */
+#liveStatsChip {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+}
+#liveStatsChip .ls-row { cursor: pointer; }
+#liveStatsChip .ls-row:hover strong { text-decoration: underline; }
+#liveTopPopup {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(58px + env(safe-area-inset-bottom));
+  z-index: 1250;
+  width: min(92vw, 340px);
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 211, 110, 0.4);
+  background: rgba(8, 10, 24, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  display: none;
+}
+#liveTopPopup.open { display: block; }
+#liveTopPopup h4 {
+  margin: 0 0 8px;
+  color: var(--gold-hot, #fff0a4);
+  font-size: 12px;
+  font-weight: 900;
+  text-align: center;
+}
+.ltp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  margin-bottom: 5px;
+}
+.ltp-row img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 211, 110, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+}
+.ltp-avatar-fb {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #ff4f9a, #5de2ff);
+  color: #05060d;
+  font-weight: 900;
+  font-size: 14px;
+  flex: 0 0 auto;
+}
+.ltp-name {
+  flex: 1;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ltp-count {
+  color: var(--neon-lime, #c8ff51);
+  font-size: 11px;
+  font-weight: 900;
+}
+.ltp-empty {
+  color: #8f96bd;
+  font-size: 11px;
+  text-align: center;
+  padding: 8px;
+}

@@ -1,4 +1,4 @@
-/* ═══ طبقة استقبال TikTok LIVE — v4: حسابان، مجاني، بدون تعطيل أبدي ═══ */
+/* ═══ طبقة استقبال TikTok LIVE — v5: حسابان مجانيان + ملفات متفاعلين (اسم وصورة) ═══ */
 import { createRequire } from "node:module";
 const requireCJS = createRequire(import.meta.url);
 
@@ -87,6 +87,34 @@ const clients = new Set();
 const connections = new Map();
 const stats = { likes: new Map(), shares: new Map(), chats: new Map(), gifts: new Map() };
 const recent = { follows: [], gifts: [], joins: [], chats: [] };
+
+/* ═══ ملفات المتفاعلين: اسم + صورة لكل معرف ═══ */
+const profiles = new Map();
+const recentLikeKeys = [];
+const recentShareKeys = [];
+
+function noteProfile(d) {
+  const key = String((d && (d.uniqueId || d.nickname)) || "").trim();
+  if (!key) return "";
+  const prev = profiles.get(key) || {};
+  profiles.set(key, {
+    name: d.nickname || key,
+    uniqueId: d.uniqueId || "",
+    avatar: d.profilePictureUrl || prev.avatar || ""
+  });
+  return key;
+}
+function pushRecentKey(arr, key) {
+  if (!key) return;
+  const idx = arr.indexOf(key);
+  if (idx >= 0) arr.splice(idx, 1);
+  arr.unshift(key);
+  if (arr.length > 12) arr.pop();
+}
+function profileOf(key) {
+  return profiles.get(key) || { name: key, uniqueId: "", avatar: "" };
+}
+
 let lastEventAt = null;
 let lbTimer = null;
 
@@ -102,8 +130,16 @@ function bump(map, key, n) { if (key) map.set(key, (map.get(key) || 0) + n); }
 function giftNameOf(d) { return String(d.giftName || (d.gift && d.gift.name) || "").trim().toLowerCase(); }
 
 function getLeaderboard() {
-  const top = (m) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }));
-  return { likes: top(stats.likes), shares: top(stats.shares), chats: top(stats.chats), gifts: top(stats.gifts) };
+  const top = (m) => [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)
+    .map(([key, count]) => Object.assign({ count }, profileOf(key)));
+  return {
+    likes: top(stats.likes),
+    shares: top(stats.shares),
+    chats: top(stats.chats),
+    gifts: top(stats.gifts),
+    recentLikes: recentLikeKeys.slice(0, 3).map(profileOf),
+    recentShares: recentShareKeys.slice(0, 3).map(profileOf)
+  };
 }
 function overallStatus() {
   const accounts = ACCOUNTS.map((a) => {
@@ -126,7 +162,7 @@ function broadcast(type, payload) {
 }
 function broadcastLeaderboardSoon() {
   if (lbTimer) return;
-  lbTimer = setTimeout(() => { lbTimer = null; broadcast("leaderboard-update", getLeaderboard()); }, 4000);
+  lbTimer = setTimeout(() => { lbTimer = null; broadcast("leaderboard-update", getLeaderboard()); }, 3000);
 }
 
 function audienceTeamFromComment(t0) {
@@ -140,6 +176,14 @@ function audienceTeamFromComment(t0) {
     if (["بنات", "بناتنا", "girls", "girl"].includes(team)) return "girls";
     if (["شباب", "الشباب", "boys", "boy"].includes(team)) return "boys";
   }
+  return null;
+}
+function audienceTeamFromGiftName(k0) {
+  const key = normLiveText(k0);
+  const g = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
+  const b = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
+  if (g && key === g) return "girls";
+  if (b && key === b) return "boys";
   return null;
 }
 function loungeActionFromGift(k0) {
@@ -206,6 +250,7 @@ function startConnection(account) {
       }).catch((err) => fail(describeErr(err)));
 
       conn.on("follow", (d) => {
+        noteProfile(d);
         const item = { account: account.username, name: d.nickname || d.uniqueId || "متابع", uniqueId: d.uniqueId || "", avatar: d.profilePictureUrl || "" };
         push(recent.follows, item, 10);
         broadcast("follow", item);
@@ -214,6 +259,7 @@ function startConnection(account) {
       conn.on("gift", (d) => {
         const name = giftNameOf(d);
         if (!name) return;
+        noteProfile(d);
         const count = Number(d.repeatCount || 1);
         const item = {
           account: account.username,
@@ -233,10 +279,24 @@ function startConnection(account) {
         if (COMMUNITY_GIFTS.has(name)) broadcast("community", item);
       });
 
-      conn.on("like", (d) => { bump(stats.likes, d.uniqueId || d.nickname, d.likeCount || 1); broadcastLeaderboardSoon(); });
-      conn.on("share", (d) => { bump(stats.shares, d.uniqueId || d.nickname, d.shareCount || 1); broadcastLeaderboardSoon(); });
+      conn.on("like", (d) => {
+        const key = noteProfile(d);
+        bump(stats.likes, key, d.likeCount || 1);
+        pushRecentKey(recentLikeKeys, key);
+        broadcast("like", Object.assign({ count: d.likeCount || 1 }, profileOf(key)));
+        broadcastLeaderboardSoon();
+      });
+
+      conn.on("share", (d) => {
+        const key = noteProfile(d);
+        bump(stats.shares, key, d.shareCount || 1);
+        pushRecentKey(recentShareKeys, key);
+        broadcast("share", Object.assign({ count: d.shareCount || 1 }, profileOf(key)));
+        broadcastLeaderboardSoon();
+      });
 
       conn.on("chat", (d) => {
+        noteProfile(d);
         const name = d.nickname || d.uniqueId || "مشاهد";
         const text = d.comment || d.message || d.content || "";
         bump(stats.chats, d.uniqueId || d.nickname, 1);
@@ -264,14 +324,6 @@ function startConnection(account) {
     }
   }
   connect();
-}
-function audienceTeamFromGiftName(key0) {
-  const key = normLiveText(key0);
-  const g = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
-  const b = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
-  if (g && key === g) return "girls";
-  if (b && key === b) return "boys";
-  return null;
 }
 
 export function attachLiveRoutes(app) {
