@@ -3,3 +3,4 @@
 !.env.example
 server/questions/cycle_state*.json
 *.tmp-*
+node_modules/
