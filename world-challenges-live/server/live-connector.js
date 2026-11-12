@@ -1,4 +1,4 @@
-/* ═══ طبقة استقبال TikTok LIVE — tiktok-live-connector (مسار مجاني بدون Sign API) ═══ */
+/* ═══ طبقة استقبال TikTok LIVE — حسابان بالطريقة المجانية (بدون Sign API) ═══ */
 import { createRequire } from "node:module";
 const requireCJS = createRequire(import.meta.url);
 
@@ -39,6 +39,7 @@ async function loadConn() {
   return ConnClass;
 }
 
+/* ═══ حسابان: عالم التحديات + تحدي مروان ═══ */
 const ACCOUNTS = [
   { username: String(process.env.TIKTOK_USERNAME || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID || "").trim() },
   { username: String(process.env.TIKTOK_USERNAME_2 || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID_2 || "").trim() }
@@ -56,23 +57,18 @@ function normLiveText(value) {
 const AUDIENCE_PREFIX = normLiveText(process.env.AUDIENCE_JOIN_PREFIX || "انضم");
 const AUDIENCE_GIRLS_COMMENT = normLiveText(process.env.AUDIENCE_GIRLS_COMMENT || "ملكة");
 const AUDIENCE_BOYS_COMMENT = normLiveText(process.env.AUDIENCE_BOYS_COMMENT || "ملك");
-const AUDIENCE_GIRLS_GIFT = normLiveText(process.env.AUDIENCE_GIRLS_GIFT || "");
-const AUDIENCE_BOYS_GIFT = normLiveText(process.env.AUDIENCE_BOYS_GIFT || "");
 
 const LOUNGE_JOIN_COMMENTS = new Set(["good live", "عالم التحديات", "تحدي مروان", "قدها"].map(normLiveText));
 const LOUNGE_GIFT_ACTIONS = [
-  { action: "CHEER", duration: 2600, names: ["قلب صغير", "small heart", "heart me"] },
-  { action: "COMEDY", duration: 3200, names: ["كرة بتدور", "كرة تدور", "spinning ball", "ball"] },
+  { action: "CHEER", duration: 2600, names: ["قلب صغير", "small heart"] },
   { action: "DANCE", duration: 6200, names: ["قلب", "heart"] },
-  { action: "RUN_CHAOS", duration: 7200, names: ["العطر", "عطر", "perfume"] },
-  { action: "FLIP_DANCE", duration: 7800, names: ["الدونتس", "دونتس", "donut", "doughnut"] },
-  { action: "SOLO_DANCE", duration: 9000, names: ["قلب بايدي", "قلب بيدي", "heart hands", "hands heart"] },
+  { action: "FLIP_DANCE", duration: 7800, names: ["الدونتس", "دونتس", "donut"] },
   { action: "ZERO_GRAVITY", duration: 11000, names: ["كورجي", "corgi"] }
 ].map((rule) => ({ ...rule, names: rule.names.map(normLiveText) }));
 
 const LIVE_CONFIG = {
   autoReconnect: true,
-  communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]),
+  communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني"]),
   enableStats: true
 };
 
@@ -95,14 +91,7 @@ function overallStatus() {
     accounts,
     lastEventAt,
     error: (accounts.find((a) => a.error) || {}).error || null,
-    signApi: "disabled-free-mode",
-    audienceImport: {
-      commentPrefix: Boolean(AUDIENCE_PREFIX),
-      girlsComment: Boolean(AUDIENCE_GIRLS_COMMENT),
-      boysComment: Boolean(AUDIENCE_BOYS_COMMENT),
-      girlsGift: Boolean(AUDIENCE_GIRLS_GIFT),
-      boysGift: Boolean(AUDIENCE_BOYS_GIFT)
-    }
+    mode: "free-no-sign-api"
   };
 }
 
@@ -125,21 +114,14 @@ function bump(map, key, n) {
 function audienceTeamFromComment(comment) {
   const text = normLiveText(comment);
   if (!text) return null;
-  if (text === "ملكة" || (AUDIENCE_GIRLS_COMMENT && text === AUDIENCE_GIRLS_COMMENT)) return "girls";
-  if (text === "ملك" || (AUDIENCE_BOYS_COMMENT && text === AUDIENCE_BOYS_COMMENT)) return "boys";
+  if (text === "ملكة") return "girls";
+  if (text === "ملك") return "boys";
   const parts = text.split(" ");
   if (AUDIENCE_PREFIX && parts[0] === AUDIENCE_PREFIX) {
     const team = parts.slice(1).join(" ");
-    if (["بنات", "بناتنا", "girls", "girl"].includes(team)) return "girls";
-    if (["شباب", "الشباب", "boys", "boy"].includes(team)) return "boys";
+    if (["بنات", "girls"].includes(team)) return "girls";
+    if (["شباب", "boys"].includes(team)) return "boys";
   }
-  return null;
-}
-
-function audienceTeamFromGift(giftKey) {
-  const key = normLiveText(giftKey);
-  if (AUDIENCE_GIRLS_GIFT && key === AUDIENCE_GIRLS_GIFT) return "girls";
-  if (AUDIENCE_BOYS_GIFT && key === AUDIENCE_BOYS_GIFT) return "boys";
   return null;
 }
 
@@ -152,22 +134,23 @@ function isLoungeJoinComment(comment) {
   return LOUNGE_JOIN_COMMENTS.has(normLiveText(comment));
 }
 
-function broadcastAudienceJoin(team, payload) {
-  if (!team || !payload || !payload.name) return;
-  broadcast("audience-join", Object.assign({}, payload, { team }));
-}
-
 function getLeaderboard() {
   const top = (m) =>
     [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }));
   return { likes: top(stats.likes), shares: top(stats.shares), chats: top(stats.chats), gifts: top(stats.gifts) };
 }
 
-/* خيارات اتصال مجانية تمامًا: لا signApiKey ولا Euler إطلاقًا */
+/* ═══ خيارات اتصال: مجانية تمامًا بدون Sign API ═══ */
 function connOptions(account) {
-  const o = { processInitialData: true, enableExtendedGiftInfo: true };
-  if (account.sessionId) { o.sessionId = account.sessionId; o.authenticateWs = true; }
-  return o;
+  const opts = {
+    processInitialData: false,
+    enableExtendedGiftInfo: true
+  };
+  if (account.sessionId) {
+    opts.sessionId = account.sessionId;
+    opts.authenticateWs = true;
+  }
+  return opts;
 }
 
 function startConnection(account) {
@@ -177,14 +160,17 @@ function startConnection(account) {
   const schedule = (extraMs) => {
     if (!LIVE_CONFIG.autoReconnect || st.stopped) return;
     st.fails += 1;
-    const base = Math.min(60000, 6000 * st.fails);
+    const base = Math.min(60000, 8000 * st.fails);
     setTimeout(connect, base + (extraMs || 0));
   };
 
   const fail = (msg, extraMs) => {
     st.connected = false;
     st.error = msg;
-    if (st.fails % 5 === 1) console.error("❌ [" + account.username + "] محاولة " + (st.fails + 1) + ":", msg);
+    // تسجيل فقط كل 10 محاولات لتجنب إغراق الـ logs
+    if (st.fails % 10 === 1) {
+      console.error("❌ [" + account.username + "] محاولة " + (st.fails + 1) + ":", msg);
+    }
     broadcast("status", overallStatus());
     schedule(extraMs);
   };
@@ -193,7 +179,8 @@ function startConnection(account) {
     if (st.stopped) return;
     try {
       const Conn = await loadConn();
-      const conn = new Conn(account.username, connOptions(account));
+      const options = connOptions(account);
+      const conn = new Conn(account.username, options);
 
       conn.connect()
         .then(() => {
@@ -206,26 +193,42 @@ function startConnection(account) {
         })
         .catch((err) => {
           const msg = String((err && err.message) || err);
+          
+          /* حالة 1: الحساب ليس في وضع البث — انتظار هادئ */
           if (/isn't online|not live|live ended/i.test(msg)) {
-            if (st.fails % 10 === 0) console.warn("⏳ [" + account.username + "] الحساب ليس في وضع البث الآن — إعادة المحاولة لاحقًا");
-            st.error = "الحساب ليس في وضع البث";
+            if (st.fails % 15 === 0) {
+              console.log("⏳ [" + account.username + "] في انتظار بدء البث...");
+            }
+            st.error = "في انتظار البث";
             st.fails += 1;
             broadcast("status", overallStatus());
-            schedule(15000);
+            schedule(20000); // إعادة كل 20 ثانية
             return;
           }
+          
+          /* حالة 2: يتطلب Sign API مدفوع — تعطيل الحساب نهائيًا */
+          if (/Business plan|requires.*plan|Euler|Sign.*API/i.test(msg)) {
+            console.warn("⛔ [" + account.username + "] يتطلب Sign API مدفوع — تم تعطيله لتجنب الأخطاء");
+            st.error = "يتطلب Sign API (معطّل)";
+            st.stopped = true;
+            broadcast("status", overallStatus());
+            return;
+          }
+          
+          /* حالة 3: أخطاء أخرى — إعادة محاولة عادية */
           fail(msg);
         });
 
+      /* ═══ متابعة الأحداث ═══ */
       conn.on("follow", (d) => {
-        const followData = {
+        const data = {
           account: account.username,
           name: d.nickname || d.uniqueId || "متابع",
           uniqueId: d.uniqueId || "",
           avatar: d.profilePictureUrl || ""
         };
-        broadcast("follow", followData);
-        recentFollows.unshift(followData);
+        broadcast("follow", data);
+        recentFollows.unshift(data);
         if (recentFollows.length > 10) recentFollows.pop();
         broadcast("recent-follows", { follows: recentFollows });
       });
@@ -243,7 +246,6 @@ function startConnection(account) {
           uniqueId: d.uniqueId || "",
           avatar: d.profilePictureUrl || "",
           gift: d.giftName || name,
-          giftKey: name,
           count,
           diamonds: Number(d.diamondCount || 0) * count
         };
@@ -254,16 +256,14 @@ function startConnection(account) {
         broadcast("recent-gifts", { gifts: recentGifts });
 
         const loungeRule = loungeActionFromGift(name);
-        if (loungeRule) broadcast("lounge-gift", Object.assign({}, giftPayload, { action: loungeRule.action, duration: loungeRule.duration }));
-
-        broadcastAudienceJoin(audienceTeamFromGift(name), Object.assign({}, giftPayload, { source: "gift" }));
+        if (loungeRule) {
+          broadcast("lounge-gift", Object.assign({}, giftPayload, { action: loungeRule.action, duration: loungeRule.duration }));
+        }
 
         if (LIVE_CONFIG.communityGiftNames.has(name)) {
           broadcast("community", {
             account: account.username,
             name: d.nickname || d.uniqueId || "متابع",
-            uniqueId: d.uniqueId || "",
-            avatar: d.profilePictureUrl || "",
             gift: d.giftName || name,
             count: d.repeatCount || 1
           });
@@ -283,14 +283,13 @@ function startConnection(account) {
 
         conn.on("chat", (d) => {
           const chatName = d.nickname || d.uniqueId || "مشاهد";
-          const chatText = d.comment || d.message || d.content || "";
+          const chatText = d.comment || d.message || "";
           bump(stats.chats, d.uniqueId || d.nickname, 1);
 
           broadcast("chat", {
             account: account.username,
             name: chatName,
             uniqueId: d.uniqueId || "",
-            avatar: d.profilePictureUrl || "",
             comment: chatText
           });
 
@@ -298,21 +297,19 @@ function startConnection(account) {
             broadcast("lounge-join", {
               account: account.username,
               name: chatName,
-              uniqueId: d.uniqueId || "",
-              avatar: d.profilePictureUrl || "",
-              comment: chatText,
-              source: "comment"
+              comment: chatText
             });
           }
 
-          broadcastAudienceJoin(audienceTeamFromComment(chatText), {
-            account: account.username,
-            name: chatName,
-            uniqueId: d.uniqueId || "",
-            avatar: d.profilePictureUrl || "",
-            comment: chatText,
-            source: "comment"
-          });
+          const team = audienceTeamFromComment(chatText);
+          if (team) {
+            broadcast("audience-join", {
+              account: account.username,
+              name: chatName,
+              team,
+              source: "comment"
+            });
+          }
         });
       }
 
@@ -324,9 +321,11 @@ function startConnection(account) {
       });
 
       conn.on("error", (err) => {
-        const msg = String((err && err.message) || err || "خطأ غير معروف");
-        if (st.fails % 5 === 0) console.error("⚠️ خطأ موصل [" + account.username + "]:", msg);
+        if (st.fails % 10 === 0) {
+          console.error("⚠️ [" + account.username + "]:", String((err && err.message) || err));
+        }
       });
+
     } catch (e) {
       fail(String((e && e.message) || e));
     }
@@ -336,6 +335,7 @@ function startConnection(account) {
 }
 
 export function attachLiveRoutes(app) {
+  /* ═══ SSE endpoint ═══ */
   app.get("/live/events", (req, res) => {
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
@@ -344,27 +344,21 @@ export function attachLiveRoutes(app) {
     });
     res.write("data: " + JSON.stringify({ type: "hello", payload: overallStatus() }) + "\n\n");
     res.write("data: " + JSON.stringify({ type: "leaderboard-update", payload: getLeaderboard() }) + "\n\n");
-    res.write("data: " + JSON.stringify({ type: "recent-follows", payload: { follows: recentFollows } }) + "\n\n");
-    res.write("data: " + JSON.stringify({ type: "recent-gifts", payload: { gifts: recentGifts } }) + "\n\n");
     clients.add(res);
     req.on("close", () => clients.delete(res));
   });
 
   app.get("/live/status", (req, res) => res.json(overallStatus()));
-
-  app.get("/live/leaderboard", (req, res) => {
-    res.json(Object.assign({ enabled: LIVE_CONFIG.enableStats }, getLeaderboard()));
-  });
-
+  app.get("/live/leaderboard", (req, res) => res.json(Object.assign({ enabled: LIVE_CONFIG.enableStats }, getLeaderboard())));
   app.get("/live/recent-follows", (req, res) => res.json({ follows: recentFollows }));
   app.get("/live/recent-gifts", (req, res) => res.json({ gifts: recentGifts }));
 
   if (!ACCOUNTS.length) {
-    console.warn("⚠️ لا يوجد TIKTOK_USERNAME / TIKTOK_USERNAME_2 — طبقة الاستقبال معطلة");
+    console.warn("⚠️ لا توجد حسابات TikTok — طبقة الاستقبال معطلة");
     return;
   }
 
   ACCOUNTS.forEach(startConnection);
-  console.log("🎥 طبقة الاستقبال: حسابات مفعّلة =", ACCOUNTS.map((a) => a.username).join(" , "));
-  console.log("🔓 وضع مجاني: بدون Sign API / بدون Euler نهائيًا");
+  console.log("🎥 طبقة الاستقبال (مجانية):", ACCOUNTS.map((a) => a.username).join(" + "));
+  console.log("🔓 الوضع: بدون Sign API — الاعتماد على الطرق المجانية فقط");
 }
