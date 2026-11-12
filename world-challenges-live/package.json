@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node --watch server/server.js",
-    "test:quality": "node scripts/validate-banks.mjs && node --check public/app.js && node --check public/flag-view.js && node --check public/arena-extras.js && node --check server/server.js && node --check server/no-repeat-engine.js"
+    "build:space-lounge": "esbuild scripts/space-lounge-3d.js --bundle --minify --format=esm --legal-comments=inline --outfile=public/space-lounge-3d.js",
+    "test:quality": "node scripts/validate-banks.mjs && node scripts/test-space-lounge.mjs && node --check public/app.js && node --check public/flag-view.js && node --check public/arena-extras.js && node --check scripts/space-lounge-3d.js && node --check public/space-lounge-3d.js && node --check server/server.js && node --check server/no-repeat-engine.js"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
@@ -18,5 +19,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "esbuild": "^0.25.0",
+    "three": "^0.187.0"
   }
 }
