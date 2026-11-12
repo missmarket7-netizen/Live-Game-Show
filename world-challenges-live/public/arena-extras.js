@@ -308,8 +308,6 @@
   if (boysCount) boysCount.textContent = String(boysValue);
 }
 
-
-
   function setGiftSidesVisible() {
     var gameScreen = $('gameScreen');
     var visible = Boolean(gameScreen && !gameScreen.classList.contains('hidden'));
@@ -1132,3 +1130,4 @@
   /* زر الجولة التالية → يسقط الدرع دائمًا */
   wrapFn('finishRound', { after: function () { clearShields(); } });
 })();
+
