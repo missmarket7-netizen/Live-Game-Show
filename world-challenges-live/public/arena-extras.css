@@ -753,3 +753,34 @@
 @media (max-height:760px) and (max-width:560px){.ax-wheel-overlay .ax-wheel-wrap{--ax-wheel-size:min(62vh,280px)}.ax-wheel-overlay .ax-wheel-stage{gap:8px}.ax-wheel-overlay .ax-wheel-result{padding:9px 12px}.ax-wheel-overlay .ax-wheel-result span{font-size:10px}}
 @keyframes axSpeedCardIn{from{opacity:0;transform:translateY(28px) scale(.82) rotateX(8deg)}to{opacity:1;transform:translateY(0) scale(1) rotateX(0)}}@keyframes axSpeedSpin{to{transform:rotate(360deg)}}@keyframes axSpeedPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}@keyframes axSpeedOrbit{to{transform:rotate(360deg)}}
 
+
+/* ═══ LIVE_EVENTS_UI_V2 — ترحيب سينمائي وسط الشاشة + سباق الجمهور ═══ */
+.live-center-stage{position:fixed;inset:0;z-index:1260;display:flex;align-items:center;justify-content:center;pointer-events:none;}
+.live-center-card{position:relative;min-width:min(78vw,340px);max-width:88vw;padding:22px 26px;border-radius:22px;background:rgba(8,10,24,.88);border:2px solid rgba(255,211,110,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 24px 70px rgba(0,0,0,.6),0 0 60px rgba(255,211,110,.18);text-align:center;animation:lcIn .65s cubic-bezier(.2,1.4,.3,1) both;pointer-events:none;}
+.live-center-card.out{animation:lcOut .7s ease both;}
+.lc-emoji{font-size:clamp(40px,10vw,64px);line-height:1;filter:drop-shadow(0 6px 18px rgba(255,211,110,.45));animation:lcPop .8s cubic-bezier(.2,1.6,.3,1) both;}
+.lc-title{margin-top:6px;font-size:13px;font-weight:800;letter-spacing:.06em;color:#cbd0f0;}
+.lc-name{margin-top:4px;font-size:clamp(26px,8vw,46px);font-weight:900;background:linear-gradient(180deg,#fff6c9,#ffd36e 55%,#b8860b);-webkit-background-clip:text;background-clip:text;color:transparent;animation:lcName .9s ease both;}
+.lc-sub{margin-top:4px;font-size:11px;color:#9298bf;font-weight:700;}
+.lc-ring{position:absolute;inset:-6px;border-radius:26px;border:2px solid rgba(255,211,110,.35);animation:lcRing 1.6s ease-out infinite;}
+.live-center-card.ev-follow{border-color:rgba(255,79,154,.55);}
+.live-center-card.ev-follow .lc-name{background:linear-gradient(180deg,#ffe0ef,#ff83bd 55%,#c2255c);-webkit-background-clip:text;background-clip:text;}
+.live-center-card.ev-community{border-color:rgba(53,230,247,.55);}
+.live-center-card.ev-community .lc-name{background:linear-gradient(180deg,#d9fbff,#5de2ff 55%,#0b7285);-webkit-background-clip:text;background-clip:text;}
+@keyframes lcIn{0%{opacity:0;transform:scale(.6) translateY(30px) rotate(-3deg);}60%{opacity:1;transform:scale(1.06) translateY(-6px);}100%{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes lcOut{to{opacity:0;transform:scale(.85) translateY(-24px);}}
+@keyframes lcPop{0%{transform:scale(0);}70%{transform:scale(1.25);}100%{transform:scale(1);}}
+@keyframes lcName{from{opacity:0;letter-spacing:.2em;}to{opacity:1;letter-spacing:0;}}
+@keyframes lcRing{0%{opacity:.8;transform:scale(1);}100%{opacity:0;transform:scale(1.25);}}
+.live-ev-stack{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:1245;display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:none;width:min(92vw,420px);}
+.live-ev-card{padding:8px 14px;border-radius:12px;border:1px solid rgba(255,211,110,.4);background:rgba(8,10,24,.92);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#fff;font-size:12px;font-weight:800;text-align:center;box-shadow:0 10px 26px rgba(0,0,0,.4);animation:liveEvIn .3s ease both;}
+.live-ev-card.out{animation:liveEvOut .5s ease both;}
+.live-ev-card strong{color:var(--gold-hot,#fff0a4);}
+.live-ev-card.ev-girls{border-color:rgba(255,79,154,.5);}
+.live-ev-card.ev-girls strong{color:var(--pink-hot,#ff83bd);}
+.live-ev-card.ev-boys{border-color:rgba(53,230,247,.5);}
+.live-ev-card.ev-boys strong{color:var(--cyan,#5de2ff);}
+@keyframes liveEvIn{from{opacity:0;transform:translateY(-10px) scale(.94);}to{opacity:1;transform:none;}}
+@keyframes liveEvOut{to{opacity:0;transform:translateY(-8px) scale(.96);}}
+.ax-pulse{animation:axPulse .6s ease;}
+@keyframes axPulse{0%{transform:scale(1);}40%{transform:scale(1.25);}100%{transform:scale(1);}}
