@@ -15,7 +15,7 @@
     "dotenv": "^16.4.5",
     "express": "^4.22.3",
     "flag-icons": "^7.6.0",
-    "piratetok-live-js": "^0.3.0"
+    "tiktok-live-connector": "^2.5.0"
   },
   "engines": {
     "node": ">=18"

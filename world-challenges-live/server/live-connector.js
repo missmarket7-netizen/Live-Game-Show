@@ -1,20 +1,47 @@
-/* ═══ طبقة استقبال TikTok LIVE — إنتاجية بالكامل (بدون Sign API) ═══ */
-import * as PirateTok from "piratetok-live-js";
+/* ═══ طبقة استقبال TikTok LIVE — tiktok-live-connector (مسار مجاني بدون Sign API) ═══ */
+import { createRequire } from "node:module";
+const requireCJS = createRequire(import.meta.url);
 
-// استخراج فئة الاتصال بشكل آمن يدعم جميع إصدارات piratetok-live-js
-const ConnectionClass = 
-  PirateTok.TikTokLiveConnection || 
-  PirateTok.WebcastPushConnection || 
-  PirateTok.default || 
-  PirateTok;
+let ConnClass = null;
 
-if (!ConnectionClass || typeof ConnectionClass !== "function") {
-  console.error("❌ [LIVE] فئة الاتصال TikTokLiveConnection غير متوفرة في piratetok-live-js. تأكد من التثبيت.");
+function isConn(x) {
+  return typeof x === "function" && x.prototype &&
+    typeof x.prototype.connect === "function" &&
+    typeof x.prototype.on === "function";
+}
+
+function pick(mod) {
+  if (!mod) return null;
+  if (isConn(mod.WebcastPushConnection)) return mod.WebcastPushConnection;
+  if (isConn(mod.TikTokLiveConnection)) return mod.TikTokLiveConnection;
+  if (isConn(mod.default)) return mod.default;
+  if (mod.default && typeof mod.default === "object") {
+    if (isConn(mod.default.WebcastPushConnection)) return mod.default.WebcastPushConnection;
+    if (isConn(mod.default.TikTokLiveConnection)) return mod.default.TikTokLiveConnection;
+    for (const k of Object.keys(mod.default)) if (isConn(mod.default[k])) return mod.default[k];
+  }
+  for (const k of Object.keys(mod)) if (isConn(mod[k])) return mod[k];
+  return null;
+}
+
+async function loadConn() {
+  if (ConnClass) return ConnClass;
+  let mod = null;
+  try { mod = requireCJS("tiktok-live-connector"); } catch (e) { mod = null; }
+  if (!mod) { try { mod = await import("tiktok-live-connector"); } catch (e) { mod = null; } }
+  const found = pick(mod);
+  if (!found) {
+    const desc = mod ? Object.keys(mod).map((k) => k + ":" + typeof mod[k]).join(", ") : "(لا يوجد module)";
+    throw new Error("tiktok-live-connector: شكل تصدير غير معروف => " + desc);
+  }
+  ConnClass = found;
+  console.log("✅ تم تحميل موصل تيك توك (فئة):", found.name || "anonymous");
+  return ConnClass;
 }
 
 const ACCOUNTS = [
   { username: String(process.env.TIKTOK_USERNAME || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID || "").trim() },
-  { username: String(process.env.TIKTOK_USERNAME_2 || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID_2 || "").trim() },
+  { username: String(process.env.TIKTOK_USERNAME_2 || "").trim(), sessionId: String(process.env.TIKTOK_SESSION_ID_2 || "").trim() }
 ].filter((a) => a.username);
 
 function normLiveText(value) {
@@ -40,13 +67,13 @@ const LOUNGE_GIFT_ACTIONS = [
   { action: "RUN_CHAOS", duration: 7200, names: ["العطر", "عطر", "perfume"] },
   { action: "FLIP_DANCE", duration: 7800, names: ["الدونتس", "دونتس", "donut", "doughnut"] },
   { action: "SOLO_DANCE", duration: 9000, names: ["قلب بايدي", "قلب بيدي", "heart hands", "hands heart"] },
-  { action: "ZERO_GRAVITY", duration: 11000, names: ["كورجي", "corgi"] },
+  { action: "ZERO_GRAVITY", duration: 11000, names: ["كورجي", "corgi"] }
 ].map((rule) => ({ ...rule, names: rule.names.map(normLiveText) }));
 
 const LIVE_CONFIG = {
   autoReconnect: true,
   communityGiftNames: new Set(["love you", "love me", "أحبك", "أحبني", "love"]),
-  enableStats: true,
+  enableStats: true
 };
 
 const clients = new Set();
@@ -68,14 +95,14 @@ function overallStatus() {
     accounts,
     lastEventAt,
     error: (accounts.find((a) => a.error) || {}).error || null,
-    eulerKeyConfigured: false,
+    signApi: "disabled-free-mode",
     audienceImport: {
       commentPrefix: Boolean(AUDIENCE_PREFIX),
       girlsComment: Boolean(AUDIENCE_GIRLS_COMMENT),
       boysComment: Boolean(AUDIENCE_BOYS_COMMENT),
       girlsGift: Boolean(AUDIENCE_GIRLS_GIFT),
-      boysGift: Boolean(AUDIENCE_BOYS_GIFT),
-    },
+      boysGift: Boolean(AUDIENCE_BOYS_GIFT)
+    }
   };
 }
 
@@ -83,11 +110,7 @@ function broadcast(type, payload) {
   lastEventAt = new Date().toISOString();
   const data = JSON.stringify({ type, payload: Object.assign({}, payload, { ts: Date.now() }) });
   for (const res of clients) {
-    try {
-      res.write("data: " + data + "\n\n");
-    } catch (e) {
-      // العميل أغلق الاتصال
-    }
+    try { res.write("data: " + data + "\n\n"); } catch (e) {}
   }
 }
 
@@ -134,60 +157,45 @@ function broadcastAudienceJoin(team, payload) {
   broadcast("audience-join", Object.assign({}, payload, { team }));
 }
 
+function getLeaderboard() {
+  const top = (m) =>
+    [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, count]) => ({ name, count }));
+  return { likes: top(stats.likes), shares: top(stats.shares), chats: top(stats.chats), gifts: top(stats.gifts) };
+}
+
+/* خيارات اتصال مجانية تمامًا: لا signApiKey ولا Euler إطلاقًا */
+function connOptions(account) {
+  const o = { processInitialData: true, enableExtendedGiftInfo: true };
+  if (account.sessionId) { o.sessionId = account.sessionId; o.authenticateWs = true; }
+  return o;
+}
+
 function startConnection(account) {
-  const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false, offlineTimer: null };
+  const st = { connected: false, error: null, lastEventAt: null, fails: 0, stopped: false };
   connections.set(account.username, st);
 
-  // إعادة المحاولة بذكاء مع تصاعد الوقت (Exponential Backoff) لتجنب حظر السيرفر
-  const schedule = (delayMs) => {
+  const schedule = (extraMs) => {
     if (!LIVE_CONFIG.autoReconnect || st.stopped) return;
     st.fails += 1;
-    const backoff = Math.min(60000, 5000 * st.fails); // بحد أقصى دقيقة
-    const jitter = Math.random() * 3000;
-    setTimeout(connect, delayMs || (backoff + jitter));
+    const base = Math.min(60000, 6000 * st.fails);
+    setTimeout(connect, base + (extraMs || 0));
   };
 
-  const fail = (msg, isOffline = false) => {
+  const fail = (msg, extraMs) => {
     st.connected = false;
     st.error = msg;
-    
-    if (isOffline) {
-      st.fails = 0; // تصفير العداد لأن المذيع أوقف البث فقط
-      if (st.offlineTimer) clearTimeout(st.offlineTimer);
-      // إعادة الفحص كل 45 ثانية إذا كان المذيع غير متصل
-      st.offlineTimer = setTimeout(connect, 45000); 
-    } else {
-      schedule();
-    }
-    
-    if (st.fails % 5 === 1 || isOffline) {
-      console.error(`❌ [${account.username}] ${msg}`);
-    }
-    
+    if (st.fails % 5 === 1) console.error("❌ [" + account.username + "] محاولة " + (st.fails + 1) + ":", msg);
     broadcast("status", overallStatus());
+    schedule(extraMs);
   };
 
   async function connect() {
     if (st.stopped) return;
-    if (!ConnectionClass) return fail("مكتبة piratetok-live-js غير محملة");
-    
     try {
-      // إعدادات الاتصال السريع والآمن بدون طلبات زائدة
-      const options = {
-        enableExtendedGiftInfo: true,
-        processInitialData: false,
-        fetchRoomInfoOnConnect: false,
-      };
+      const Conn = await loadConn();
+      const conn = new Conn(account.username, connOptions(account));
 
-      if (account.sessionId) {
-        options.sessionId = account.sessionId;
-        options.authenticateWs = true;
-      }
-
-      const conn = new ConnectionClass(account.username, options);
-
-      conn
-        .connect()
+      conn.connect()
         .then(() => {
           st.connected = true;
           st.error = null;
@@ -198,11 +206,15 @@ function startConnection(account) {
         })
         .catch((err) => {
           const msg = String((err && err.message) || err);
-          if (msg.includes("isn't online") || msg.includes("is not online")) {
-            fail("المذيع غير متصل حالياً (البث مغلق)", true);
-          } else {
-            fail(msg, false);
+          if (/isn't online|not live|live ended/i.test(msg)) {
+            if (st.fails % 10 === 0) console.warn("⏳ [" + account.username + "] الحساب ليس في وضع البث الآن — إعادة المحاولة لاحقًا");
+            st.error = "الحساب ليس في وضع البث";
+            st.fails += 1;
+            broadcast("status", overallStatus());
+            schedule(15000);
+            return;
           }
+          fail(msg);
         });
 
       conn.on("follow", (d) => {
@@ -210,29 +222,12 @@ function startConnection(account) {
           account: account.username,
           name: d.nickname || d.uniqueId || "متابع",
           uniqueId: d.uniqueId || "",
-          avatar: d.profilePictureUrl || "",
+          avatar: d.profilePictureUrl || ""
         };
         broadcast("follow", followData);
-        
         recentFollows.unshift(followData);
         if (recentFollows.length > 10) recentFollows.pop();
         broadcast("recent-follows", { follows: recentFollows });
-      });
-
-      // دعم حدث social لمنع تفويت أي متابعات
-      conn.on("social", (d) => {
-        if (d.displayType && d.displayType.includes("follow")) {
-          const followData = {
-            account: account.username,
-            name: d.nickname || d.uniqueId || "متابع",
-            uniqueId: d.uniqueId || "",
-            avatar: d.profilePictureUrl || "",
-          };
-          broadcast("follow", followData);
-          recentFollows.unshift(followData);
-          if (recentFollows.length > 10) recentFollows.pop();
-          broadcast("recent-follows", { follows: recentFollows });
-        }
       });
 
       conn.on("gift", (d) => {
@@ -250,19 +245,16 @@ function startConnection(account) {
           gift: d.giftName || name,
           giftKey: name,
           count,
-          diamonds: Number(d.diamondCount || 0) * count,
+          diamonds: Number(d.diamondCount || 0) * count
         };
 
         broadcast("gift", giftPayload);
-        
         recentGifts.unshift(giftPayload);
         if (recentGifts.length > 10) recentGifts.pop();
         broadcast("recent-gifts", { gifts: recentGifts });
 
         const loungeRule = loungeActionFromGift(name);
-        if (loungeRule) {
-          broadcast("lounge-gift", Object.assign({}, giftPayload, { action: loungeRule.action, duration: loungeRule.duration }));
-        }
+        if (loungeRule) broadcast("lounge-gift", Object.assign({}, giftPayload, { action: loungeRule.action, duration: loungeRule.duration }));
 
         broadcastAudienceJoin(audienceTeamFromGift(name), Object.assign({}, giftPayload, { source: "gift" }));
 
@@ -273,7 +265,7 @@ function startConnection(account) {
             uniqueId: d.uniqueId || "",
             avatar: d.profilePictureUrl || "",
             gift: d.giftName || name,
-            count: d.repeatCount || 1,
+            count: d.repeatCount || 1
           });
         }
       });
@@ -299,7 +291,7 @@ function startConnection(account) {
             name: chatName,
             uniqueId: d.uniqueId || "",
             avatar: d.profilePictureUrl || "",
-            comment: chatText,
+            comment: chatText
           });
 
           if (isLoungeJoinComment(chatText)) {
@@ -309,7 +301,7 @@ function startConnection(account) {
               uniqueId: d.uniqueId || "",
               avatar: d.profilePictureUrl || "",
               comment: chatText,
-              source: "comment",
+              source: "comment"
             });
           }
 
@@ -319,7 +311,7 @@ function startConnection(account) {
             uniqueId: d.uniqueId || "",
             avatar: d.profilePictureUrl || "",
             comment: chatText,
-            source: "comment",
+            source: "comment"
           });
         });
       }
@@ -343,26 +335,12 @@ function startConnection(account) {
   connect();
 }
 
-function getLeaderboard() {
-  const top = (m) =>
-    [...m.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10)
-      .map(([name, count]) => ({ name, count }));
-  return {
-    likes: top(stats.likes),
-    shares: top(stats.shares),
-    chats: top(stats.chats),
-    gifts: top(stats.gifts),
-  };
-}
-
 export function attachLiveRoutes(app) {
   app.get("/live/events", (req, res) => {
     res.writeHead(200, {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
-      Connection: "keep-alive",
+      Connection: "keep-alive"
     });
     res.write("data: " + JSON.stringify({ type: "hello", payload: overallStatus() }) + "\n\n");
     res.write("data: " + JSON.stringify({ type: "leaderboard-update", payload: getLeaderboard() }) + "\n\n");
@@ -375,19 +353,11 @@ export function attachLiveRoutes(app) {
   app.get("/live/status", (req, res) => res.json(overallStatus()));
 
   app.get("/live/leaderboard", (req, res) => {
-    res.json({
-      enabled: LIVE_CONFIG.enableStats,
-      ...getLeaderboard(),
-    });
+    res.json(Object.assign({ enabled: LIVE_CONFIG.enableStats }, getLeaderboard()));
   });
 
-  app.get("/live/recent-follows", (req, res) => {
-    res.json({ follows: recentFollows });
-  });
-
-  app.get("/live/recent-gifts", (req, res) => {
-    res.json({ gifts: recentGifts });
-  });
+  app.get("/live/recent-follows", (req, res) => res.json({ follows: recentFollows }));
+  app.get("/live/recent-gifts", (req, res) => res.json({ gifts: recentGifts }));
 
   if (!ACCOUNTS.length) {
     console.warn("⚠️ لا يوجد TIKTOK_USERNAME / TIKTOK_USERNAME_2 — طبقة الاستقبال معطلة");
@@ -396,5 +366,5 @@ export function attachLiveRoutes(app) {
 
   ACCOUNTS.forEach(startConnection);
   console.log("🎥 طبقة الاستقبال: حسابات مفعّلة =", ACCOUNTS.map((a) => a.username).join(" , "));
-  console.log("🔓 استخدام الطرق المجانية (بدون Sign API)");
+  console.log("🔓 وضع مجاني: بدون Sign API / بدون Euler نهائيًا");
 }
