@@ -56,3 +56,8 @@
 }
 .astronaut-participant.is-focused .participant-tools,
 .astronaut-participant:hover .participant-tools { opacity: 1; }
+
+/* MOBILE WIDTH GUARD — preserve the 3D stage inside narrow viewports */
+.arena-section{width:min(calc(100% - 22px),540px);box-sizing:border-box}
+.arena-scene{width:100%;box-sizing:border-box}
+@media(max-width:560px){.arena-section{width:min(calc(100% - 16px),520px);max-width:calc(100vw - 16px)}.arena-scene{width:100%;max-width:100%;min-width:0}}
