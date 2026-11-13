@@ -25,7 +25,7 @@ const soundFiles = {
   'girls-round': ['girls-round'], 'boys-round': ['boys-round'], 'girls-lose': ['girls-lose'], 'boys-lose': ['boys-lose'],
   'girls-win': ['girls-win'], 'boys-win': ['boys-win'], Longway: ['longway', 'Longway'],
   'girls-replay-boys': ['girls-replay-boys'], 'boys-replay-girls': ['boys-replay-girls'],
-  advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'],
+  advice: ['advice'], teamwork: ['teamwork'], boom: ['boom'], days: ['days'], 'round-complete': ['round-complete'],
   'kont-feen': ['kont-feen'], fight: ['fight'], tick: ['tick'], correct: ['correct'], wrong: ['wrong', 'suspense', 'tick'], speed: ['speed', 'boom'], card: ['card', 'teamwork'], wheel: ['wheel', 'celebration'],
   'audience-race-start': ['start', 'begin'], 'audience-race-pick': ['suspense', 'tick'], 'audience-race-winner': ['celebration', 'cheer'], 'audience-race-timer-start': ['start', 'begin'], 'audience-race-countdown': ['tick', 'suspense'], 'audience-race-timer-end': ['cheer', 'celebration'],
   laugh: ['laugh'], celebration: ['celebration'], cheer: ['cheer'], 'community-love': ['community-love', 'celebration', 'cheer']
@@ -91,7 +91,7 @@ function loadBuffer(key) {
 
     for (let i = 0; i < candidates.length; i += 1) {
       try {
-        const res = await fetch('/sounds/' + candidates[i] + '.mp3?v=20261107-audio');
+        const res = await fetch('/sounds/' + candidates[i] + '.mp3?v=20261113-audio-compressed');
         if (!res.ok) continue;
         const arrayBuffer = await res.arrayBuffer();
         return await decodeBuf(ctx, arrayBuffer);
@@ -152,14 +152,14 @@ function getAudio(key) {
   if (audioCache[key]) return audioCache[key];
 
   const candidates = soundFiles[key] || [key];
-  const audio = new Audio('/sounds/' + candidates[0] + '.mp3?v=20261107-audio');
+  const audio = new Audio('/sounds/' + candidates[0] + '.mp3?v=20261113-audio-compressed');
   audio.preload = 'none';
 
   let index = 0;
   audio.addEventListener('error', () => {
     index += 1;
     if (index < candidates.length) {
-      audio.src = '/sounds/' + candidates[index] + '.mp3?v=20261107-audio';
+      audio.src = '/sounds/' + candidates[index] + '.mp3?v=20261113-audio-compressed';
     }
   });
 
@@ -729,6 +729,7 @@ function finishRound() {
   }
   let winnerMsg = 'تعادل رائع بين الفريقين';
   const multiplier = state.x2Active ? 2 : 1;
+  playSound('round-complete', 0.55);
   if (state.girlsScore >= 5 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
     state.girlsRounds += multiplier;
     winnerMsg = 'فوز فريق البنات' + (multiplier > 1 ? ' (×2!)' : '');

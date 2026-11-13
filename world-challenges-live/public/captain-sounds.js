@@ -12,7 +12,7 @@
     { key: 'jojo',     aliases: ['jojo', 'جوجو'] },
     { key: 'moon',     aliases: ['mooon', 'moon', 'مون'] },
     { key: 'saja',     aliases: ['saja', 'سچي', 'سجي'] },
-    { key: 'chemo',    aliases: ['chimoo', 'chemo', 'شيمو'] },
+    { key: 'chimo',    aliases: ['chimoo', 'chimo', 'chemo', 'شيمو'] },
     { key: 'saad',     aliases: ['saad', 'سعد'] },
     { key: 'mokhtar',  aliases: ['mokhtar', 'المختار', 'مختار'] },
     { key: 'abdo',     aliases: ['abdo', 'عبده'] },
@@ -33,7 +33,7 @@
 
   var FALLBACK_BY_KEY = {
     nancy: 'girls-captin', lara: 'girls-captin', jojo: 'girls-captin',
-    moon: 'girls-captin', saja: 'girls-captin', chemo: 'girls-captin',
+    moon: 'girls-captin', saja: 'girls-captin', chimo: 'girls-captin',
     saad: 'boys-captin', mokhtar: 'boys-captin', abdo: 'boys-captin',
     ahmed: 'boys-captin', seif: 'boys-captin', yousef: 'boys-captin',
     mina: 'boys-captin', abdallah: 'boys-captin', abu: 'boys-captin', melina: 'girls-captin',
@@ -103,7 +103,7 @@
 
   /* تشغيل المؤثر الخاص مع حد 35 ثانية، وعند الفشل يحتياطي الفريق */
   function playCapped(key, fallbackKey) {
-    var a = new Audio('/sounds/' + key + '.mp3?v=20261107-audio');
+    var a = new Audio('/sounds/' + key + '.mp3?v=20261113-audio-compressed');
     a.volume = 0.85;
     var settled = false;
 
