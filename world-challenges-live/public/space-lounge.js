@@ -1,70 +1,310 @@
-(() => {
-  const $ = (id) => document.getElementById(id);
-  const button = $('musicToggle'); const label = $('musicLabel');
-  let audioContext = null; let master = null; let timer = null; let active = false; let noteIndex = 0;
-  const notes = [196, 246.94, 293.66, 369.99, 440];
-  const fxLayer = $('fxLayer');
-  function playSfx(kind) {
-    if (!audioContext || !master) return;
-    const patterns = { join:[330, .045, .18], step:[220, .028, .12], gift:[520, .065, .24], focus:[740, .045, .32], coffee:[260, .035, .2] };
-    const [frequency, volume, length] = patterns[kind] || patterns.step;
-    const osc = audioContext.createOscillator(); const gain = audioContext.createGain();
-    osc.type = kind === 'gift' || kind === 'focus' ? 'triangle' : 'sine'; osc.frequency.setValueAtTime(frequency, audioContext.currentTime); osc.frequency.exponentialRampToValueAtTime(frequency * (kind === 'join' ? 1.45 : .72), audioContext.currentTime + length);
-    gain.gain.setValueAtTime(.0001, audioContext.currentTime); gain.gain.exponentialRampToValueAtTime(volume, audioContext.currentTime + .025); gain.gain.exponentialRampToValueAtTime(.0001, audioContext.currentTime + length); osc.connect(gain).connect(master); osc.start(); osc.stop(audioContext.currentTime + length + .03);
-  }
-  function playNote() { if (!active || !audioContext || !master) return; const osc = audioContext.createOscillator(); const gain = audioContext.createGain(); osc.type = 'sine'; osc.frequency.value = notes[noteIndex++ % notes.length]; gain.gain.setValueAtTime(.0001, audioContext.currentTime); gain.gain.exponentialRampToValueAtTime(.035, audioContext.currentTime + .6); gain.gain.exponentialRampToValueAtTime(.0001, audioContext.currentTime + 3.8); osc.connect(gain).connect(master); osc.start(); osc.stop(audioContext.currentTime + 4); }
-  async function startMusic() { audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)(); if (audioContext.state === 'suspended') await audioContext.resume(); master = master || audioContext.createGain(); master.gain.value = .34; master.connect(audioContext.destination); active = true; playNote(); timer = window.setInterval(playNote, 2200); button.classList.add('is-on'); button.setAttribute('aria-pressed', 'true'); label.textContent = 'إيقاف الموسيقى'; }
-  function stopMusic() { active = false; if (timer) clearInterval(timer); timer = null; if (master) master.gain.exponentialRampToValueAtTime(.0001, (audioContext?.currentTime || 0) + .5); button.classList.remove('is-on'); button.setAttribute('aria-pressed', 'false'); label.textContent = 'الموسيقى'; }
-  button?.addEventListener('click', () => active ? stopMusic() : startMusic().catch(() => { label.textContent = 'الموسيقى غير متاحة'; }));
+/* ═══ SPACE LOUNGE V5 — مصدر الحقيقة الوحيد: بيانات + DOM + SSE ═══ */
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+  var stage = $('loungeStage'), layer = $('participantLayer'), fx = $('fxLayer');
+  var countLabel = $('participantCount'), connLabel = $('loungeConnection');
+  var toast = $('actionToast'), camLabel = $('cameraLabel');
+  var MAX = 50, tileId = 0;
+  var participants = new Map();
 
-  const stage = $('loungeStage'); const layer = $('participantLayer'); const countLabel = $('participantCount'); const connectionLabel = $('loungeConnection'); const toast = $('actionToast'); const cameraLabel = $('cameraLabel');
-  const participants = new Map(); let selectedGender = 'female'; let tileId = 0;
-  const MAX_PARTICIPANTS = 50;
-  const escapeHtml = (value) => String(value || '').replace(/[&<>'"]/g, (ch) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[ch]));
-  const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
-  function setLogicalPosition(node, left, top) { node.dataset.sceneLeft = String(left); node.dataset.sceneTop = String(top); node.style.left = `${left}%`; node.style.top = `${top}%`; }
-  const zoneLabels = { seats:'جلس في الاستراحة', stage:'على المسرح', coffee:'يجهز مشروبًا' };
-  const actionMeta = { CHEER:['احتفال قصير','anim-cheer'], COMEDY:['حركة كوميدية','anim-comedy'], DANCE:['رقص','anim-dance'], RUN_CHAOS:['جري وشغب','anim-run'], FLIP_DANCE:['شقلبة ورقص','anim-flip'], SOLO_DANCE:['عرض منفرد','anim-solo'], ZERO_GRAVITY:['Zero Gravity','anim-zero'] };
-  const cameraLayer = document.createElement('div'); cameraLayer.className = 'camera-layer';
-  [...stage.children].filter((node) => !node.classList.contains('camera-vignette') && !node.classList.contains('camera-spotlight') && !node.classList.contains('camera-bars') && !node.classList.contains('camera-label') && !node.classList.contains('action-toast') && !node.classList.contains('fx-layer')).forEach((node) => cameraLayer.appendChild(node)); stage.prepend(cameraLayer);
-  function showToast(text) { toast.textContent = text; toast.classList.add('is-visible'); clearTimeout(showToast.timer); showToast.timer = setTimeout(() => toast.classList.remove('is-visible'), 2600); }
-  function emitFx(kind, p) {
-    if (!fxLayer || !p) return;
-    const count = kind === 'gift' ? 9 : 5;
-    while (fxLayer.children.length > 28) fxLayer.firstElementChild?.remove();
-    const burst = document.createElement('div'); burst.className = `fx-burst fx-${kind}`; burst.style.left = `${p.left}%`; burst.style.top = `${p.top}%`; burst.innerHTML = `<i></i><i></i><i></i><i></i><b>${kind === 'gift' ? '✦' : '＋'}</b>`; fxLayer.appendChild(burst);
-    for (let i = 0; i < count; i += 1) { const spark = document.createElement('span'); spark.className = 'fx-spark'; spark.textContent = kind === 'gift' ? (i % 2 ? '✦' : '•') : '·'; spark.style.left = `${p.left}%`; spark.style.top = `${p.top}%`; spark.style.setProperty('--dx', `${Math.cos(i / count * Math.PI * 2) * (24 + Math.random() * 24)}px`); spark.style.setProperty('--dy', `${Math.sin(i / count * Math.PI * 2) * (24 + Math.random() * 24)}px`); fxLayer.appendChild(spark); }
-    setTimeout(() => burst.remove(), 900); setTimeout(() => [...fxLayer.querySelectorAll('.fx-spark')].slice(0, count).forEach((node) => node.remove()), 900);
+  var esc = function (v) { return String(v == null ? '' : v).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  var clamp = function (v, a, b) { return Math.max(a, Math.min(b, v)); };
+  function hashHue(id) { var h = 17; for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h % 360; }
+
+  var ZONES = { floor: [32, 68, 32, 68], bar: [74, 90, 38, 62], roam: [8, 92, 22, 84] };
+  var ZONE_LABEL = { floor: 'يرقص على المسرح', bar: 'عند البار', roam: 'يتجول بالمحطة' };
+
+  function setLogicalPosition(node, left, top) { node.dataset.sceneLeft = String(left); node.dataset.sceneTop = String(top); node.style.left = left + '%'; node.style.top = top + '%'; }
+  function randomPosition(zone) { var r = ZONES[zone] || ZONES.roam; return { left: r[0] + Math.random() * (r[1] - r[0]), top: r[2] + Math.random() * (r[3] - r[2]) }; }
+  function stableId(data) { return String(data.uniqueId || data.name || ('manual-' + (++tileId))).trim().toLowerCase(); }
+
+  function showToast(text) { toast.textContent = text; toast.classList.add('is-visible'); clearTimeout(showToast.t); showToast.t = setTimeout(function () { toast.classList.remove('is-visible'); }, 2600); }
+
+  /* ── صوت محيطي اختياري (بدون تشغيل تلقائي) ── */
+  var actx = null, master = null, musicOn = false, noteIdx = 0, musicTimer = null;
+  var NOTES = [196, 246.94, 293.66, 369.99, 440, 293.66];
+  function playSfx(kind) {
+    if (!actx || !master) return;
+    var pat = { join: [330, .045, .18], step: [220, .028, .12], gift: [520, .065, .24], focus: [740, .045, .32] };
+    var p = pat[kind] || pat.step;
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = kind === 'gift' || kind === 'focus' ? 'triangle' : 'sine';
+    o.frequency.setValueAtTime(p[0], actx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(p[0] * (kind === 'join' ? 1.45 : .72), actx.currentTime + p[2]);
+    g.gain.setValueAtTime(.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(p[1], actx.currentTime + .025);
+    g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + p[2]);
+    o.connect(g).connect(master); o.start(); o.stop(actx.currentTime + p[2] + .03);
   }
-  function updateCount() { countLabel.textContent = `${participants.size} / ${MAX_PARTICIPANTS}`; updateCrowdScale(); }
-  function updateCrowdScale() { const scale = clamp(1 - Math.max(0, participants.size - 8) * .012, .52, 1); stage.style.setProperty('--crowd-scale', scale.toFixed(3)); participants.forEach((p) => p.node?.style.setProperty('--crowd-scale', scale.toFixed(3))); }
-  function stableId(data) { return String(data.uniqueId || data.name || `manual-${++tileId}`).trim().toLowerCase(); }
-  function positionFor(index, zone = 'seats') { const ranges = { seats:[8,92,64,86], stage:[35,65,39,67], coffee:[70,91,35,62] }; const range = ranges[zone] || ranges.seats; const columns = zone === 'seats' ? 9 : 5; const row = Math.floor(index / columns); const col = index % columns; const left = clamp(range[0] + (col / Math.max(1, columns - 1)) * (range[1] - range[0]) + ((row % 2) * 2 - 1) * 1.4, range[0], range[1]); const top = clamp(range[2] + ((row % 4) / 3) * (range[3] - range[2]), range[2], range[3]); return { left, top }; }
-  function randomPosition(zone) { const ranges = { seats:[8,92,64,86], stage:[35,65,39,67], coffee:[70,91,35,62] }; const r = ranges[zone] || ranges.seats; return { left:r[0] + Math.random() * (r[1] - r[0]), top:r[2] + Math.random() * (r[3] - r[2]) }; }
-  function accountBadge(p) { return p.avatar ? `<img class="account-avatar" src="${escapeHtml(p.avatar)}" alt="">` : `<span class="account-initial">${escapeHtml((p.name || 'م').slice(0,1))}</span>`; }
-  function astronautMarkup(p) { return `<div class="astronaut-avatar" aria-hidden="true"><div class="astronaut-body"><div class="astronaut-backpack"></div><div class="astronaut-helmet"><div class="helmet-glow"></div><div class="helmet-window">${accountBadge(p)}</div><i class="helmet-reflection"></i></div><div class="astronaut-suit"><i class="suit-panel"></i><i class="suit-badge">✦</i></div><div class="astronaut-arm arm-left"></div><div class="astronaut-arm arm-right"></div><div class="astronaut-boot boot-left"></div><div class="astronaut-boot boot-right"></div></div></div>`; }
-  function shortName(name) { const value = String(name || 'مشارك'); return value.length > 13 ? `${value.slice(0, 12)}…` : value; }
-  function updateQueueBadge(p) { const badge = p.node?.querySelector('.queue-badge'); if (!badge) return; badge.textContent = p.pending > 0 ? `في الانتظار (${p.pending})` : ''; badge.classList.toggle('is-visible', p.pending > 0); }
-  function renderParticipant(p) { const node = document.createElement('div'); node.className = `participant astronaut-participant zone-${p.zone}`; node.dataset.id = p.id; node.dataset.gender = p.gender; setLogicalPosition(node, p.left, p.top); node.style.setProperty('--crowd-scale', stage.style.getPropertyValue('--crowd-scale') || '1'); node.innerHTML = `<div class="participant-nameplate" title="${escapeHtml(p.name)}"><b>${escapeHtml(shortName(p.name))}</b><small>${escapeHtml(p.uniqueId ? '@' + p.uniqueId : p.source === 'tiktok' ? 'TikTok LIVE' : 'ضيف يدوي')}</small><em class="participant-status">${zoneLabels[p.zone]}</em><span class="queue-badge"></span></div><div class="participant-avatar-wrap">${astronautMarkup(p)}<span class="participant-move-hint">✦</span></div><div class="participant-tools"><button type="button" data-gender-toggle>${p.gender === 'female' ? 'ذكر' : 'أنثى'}</button><button type="button" data-remove>×</button></div>`; layer.appendChild(node); p.node = node; bindDrag(p); bindParticipantTools(p); updateCount(); return node; }
-  function bindParticipantTools(p) { p.node.querySelector('[data-gender-toggle]').addEventListener('click', (event) => { event.stopPropagation(); p.gender = p.gender === 'female' ? 'male' : 'female'; p.node.dataset.gender = p.gender; event.currentTarget.textContent = p.gender === 'female' ? 'ذكر' : 'أنثى'; }); p.node.querySelector('[data-remove]').addEventListener('click', (event) => { event.stopPropagation(); removeParticipant(p.id); }); }
-  function zoneForPoint(x, y) { const match = [...cameraLayer.querySelectorAll('.space-zone')].find((zone) => { const r = zone.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; }); return match?.dataset.zone || 'seats'; }
-  function applyZone(p, zone, announce = true) { const changed = p.zone !== zone; p.zone = zone; p.node.classList.remove('zone-seats', 'zone-stage', 'zone-coffee', 'is-working', 'is-performing'); p.node.classList.add(`zone-${zone}`); if (zone === 'stage') p.node.classList.add('is-performing'); if (zone === 'coffee') p.node.classList.add('is-working'); const status = p.node.querySelector('.participant-status'); if (status) status.textContent = zoneLabels[zone]; if (announce) { showToast(`${p.name} ${zoneLabels[zone]}`); if (changed) { emitFx(zone === 'coffee' ? 'coffee' : 'step', p); playSfx(zone === 'coffee' ? 'coffee' : 'step'); } } }
-  function scheduleWander(p, delay = 6000 + Math.random() * 7000) { clearTimeout(p.wanderTimer); p.wanderTimer = setTimeout(() => wander(p), delay); }
-  function wander(p) { if (!participants.has(p.id)) return; if (p.dragging || p.busy || Date.now() < (p.manualHoldUntil || 0)) return scheduleWander(p, Math.max(2500, (p.manualHoldUntil || 0) - Date.now())); const zones = p.zone === 'stage' ? ['seats','coffee','stage'] : ['seats','stage','coffee']; const zone = zones[Math.floor(Math.random() * zones.length)]; const target = randomPosition(zone); p.node.classList.add('is-walking'); p.node.classList.toggle('walk-left', target.left < p.left); p.left = target.left; p.top = target.top; setLogicalPosition(p.node, p.left, p.top); applyZone(p, zone, false); setTimeout(() => p.node?.classList.remove('is-walking'), 1200); scheduleWander(p, 6500 + Math.random() * 9000); }
-  function bindDrag(p) { let offsetX = 0; let offsetY = 0; const move = (event) => { if (!p.dragging) return; const point = event.touches ? event.touches[0] : event; const rect = cameraLayer.getBoundingClientRect(); const x = clamp(point.clientX - rect.left - offsetX, 0, rect.width - p.node.offsetWidth); const y = clamp(point.clientY - rect.top - offsetY, 0, rect.height - p.node.offsetHeight); p.left = x / rect.width * 100; p.top = y / rect.height * 100; setLogicalPosition(p.node, p.left, p.top); }; const end = (event) => { if (!p.dragging) return; p.dragging = false; p.manualHoldUntil = Date.now() + 22000; p.node.classList.remove('is-focused', 'is-dragging'); window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', end); const point = event.changedTouches ? event.changedTouches[0] : event; applyZone(p, zoneForPoint(point.clientX, point.clientY)); scheduleWander(p, 22000); }; p.node.addEventListener('pointerdown', (event) => { if (event.target.closest('button')) return; p.dragging = true; clearTimeout(p.wanderTimer); p.node.classList.add('is-focused', 'is-dragging'); const rect = p.node.getBoundingClientRect(); offsetX = event.clientX - rect.left; offsetY = event.clientY - rect.top; window.addEventListener('pointermove', move); window.addEventListener('pointerup', end); }); }
-  function addParticipant(data, source = 'manual') { if (participants.size >= MAX_PARTICIPANTS) { showToast('الساحة ممتلئة — الحد الأقصى 50 رائد فضاء'); return null; } const id = stableId(data); if (participants.has(id)) { const existing = participants.get(id); existing.node?.classList.add('is-focused'); setTimeout(() => existing.node?.classList.remove('is-focused'), 900); showToast(`${existing.name} موجود بالفعل في الساحة`); return existing; } const pos = positionFor(participants.size, 'seats'); const p = { id, name:data.name || data.uniqueId || 'مشارك', uniqueId:data.uniqueId || '', avatar:data.avatar || '', gender:data.gender === 'male' ? 'male' : 'female', source, zone:'seats', left:pos.left, top:pos.top, node:null, queue:Promise.resolve(), pending:0, dragging:false, busy:false }; participants.set(id, p); renderParticipant(p); showToast(`${p.name} دخل وجلس في الاستراحة`); emitFx('join', p); playSfx('join'); scheduleWander(p, 4500 + Math.random() * 5000); return p; }
-  function removeParticipant(id) { const p = participants.get(id); if (!p) return; clearTimeout(p.wanderTimer); p.node.classList.add('is-exiting'); setTimeout(() => { p.node.remove(); participants.delete(id); updateCount(); }, 1100); }
-  function focusParticipant(p, duration, title) { const x = clamp(p.left, 18, 82); const y = clamp(p.top, 25, 75); stage.style.setProperty('--camera-x', `${x}%`); stage.style.setProperty('--camera-y', `${y}%`); stage.style.setProperty('--focus-x', `${x}%`); stage.style.setProperty('--focus-y', `${y}%`); stage.classList.add('is-cinematic-focus'); p.node.classList.add('is-focused'); cameraLabel.querySelector('b').textContent = `${shortName(p.name)} · ${title}`; cameraLabel.classList.add('is-visible'); clearTimeout(p.focusTimer); p.focusTimer = setTimeout(() => { stage.classList.remove('is-cinematic-focus'); p.node.classList.remove('is-focused'); cameraLabel.classList.remove('is-visible'); }, duration); }
-  function isCinematicGift(data) { const value = Number(data.value || data.diamonds || data.price || data.duration || 0); return value >= 4500 || ['DANCE','SOLO_DANCE','ZERO_GRAVITY'].includes(data.action); }
-  function runAction(data) { const candidates = [...participants.values()]; if (!candidates.length) { showToast('وصلت الهدية — أضف رائد فضاء أولًا'); return; } const key = stableId(data); const p = participants.get(key) || candidates[Math.floor(Math.random() * candidates.length)]; const duration = Number(data.duration) || 4000; const meta = actionMeta[data.action] || ['حركة خاصة','anim-dance']; p.pending += 1; updateQueueBadge(p); p.queue = p.queue.then(() => new Promise((resolve) => { p.pending = Math.max(0, p.pending - 1); updateQueueBadge(p); p.busy = true; applyZone(p, 'stage', false); emitFx('gift', p); playSfx('gift'); if (isCinematicGift(data)) { focusParticipant(p, duration, meta[0]); playSfx('focus'); } else { p.node.classList.add('is-gift-highlight'); setTimeout(() => p.node?.classList.remove('is-gift-highlight'), Math.min(duration, 1100)); } p.node.classList.remove(...Object.values(actionMeta).map((x) => x[1])); void p.node.offsetWidth; p.node.classList.add(meta[1]); showToast(`${p.name} · ${meta[0]} · ${data.gift || 'هدية'}`); setTimeout(() => { p.node.classList.remove(meta[1]); p.busy = false; scheduleWander(p, 4500); resolve(); }, duration); })); }
-  document.querySelectorAll('.gender-choice').forEach((choice) => choice.addEventListener('click', () => { selectedGender = choice.dataset.gender; document.querySelectorAll('.gender-choice').forEach((item) => item.classList.toggle('is-active', item === choice)); }));
-  $('manualParticipantForm')?.addEventListener('submit', (event) => { event.preventDefault(); const name = $('manualName').value.trim(); if (!name) return; addParticipant({ name, avatar:$('manualAvatar').value.trim(), gender:selectedGender }, 'manual'); event.target.reset(); });
-  $('clearParticipants')?.addEventListener('click', () => [...participants.keys()].forEach(removeParticipant));
-  $('toggleFullscreen')?.addEventListener('click', async () => { try { if (!document.fullscreenElement) await stage.requestFullscreen(); else await document.exitFullscreen(); } catch (_) { showToast('ملء الشاشة غير متاح — استمر بالوضع العادي'); } });
-  $('hostPanelToggle')?.addEventListener('click', () => { document.querySelector('.lounge-controls')?.classList.toggle('is-collapsed'); });
-  $('groupDance')?.addEventListener('click', () => { if (!participants.size) return showToast('أضف مشاركين أولًا للرقص الجماعي'); participants.forEach((p) => runAction({ uniqueId:p.uniqueId || p.id, action:'DANCE', duration:2600, gift:'رقص جماعي' })); showToast('بدأ الرقص الجماعي على المسرح'); });
-  function connectLive() { if (new URLSearchParams(location.search).get('perf') === '50') return; if (!window.EventSource) { connectionLabel.textContent = 'المتصفح لا يدعم البث المباشر — الإدخال اليدوي جاهز'; return; } const es = new EventSource('/live/events'); es.onmessage = (event) => { let message; try { message = JSON.parse(event.data); } catch (_) { return; } const payload = message.payload || {}; if (message.type === 'status' || message.type === 'hello') connectionLabel.textContent = payload.connected ? 'TikTok متصل — الدخول التلقائي فعال' : 'TikTok غير متصل — الإدخال اليدوي جاهز'; if (message.type === 'lounge-join') addParticipant({ name:payload.name, uniqueId:payload.uniqueId, avatar:payload.avatar, gender:'female' }, 'tiktok'); if (message.type === 'lounge-gift') runAction(payload); }; es.onerror = () => { connectionLabel.textContent = 'TikTok غير متصل — الإدخال اليدوي جاهز'; }; }
-  function runPerformanceProbe() { if (new URLSearchParams(location.search).get('perf') !== '50') return; const started = performance.now(); for (let i = 0; i < MAX_PARTICIPANTS; i += 1) addParticipant({ name:`Probe ${i + 1}`, uniqueId:`probe_${i + 1}`, gender:i % 2 ? 'male' : 'female' }, 'perf'); const addMs = performance.now() - started; const motionStarted = performance.now(); for (let frame = 0; frame < 90; frame += 1) participants.forEach((p, index) => { p.node.style.left = `${8 + ((index + frame) % 84)}%`; p.node.style.top = `${64 + ((index + frame) % 20)}%`; p.node.classList.toggle('is-walking', frame % 2 === 0); }); const motionMs = performance.now() - motionStarted; participants.forEach((p) => clearTimeout(p.wanderTimer)); document.body.dataset.spacePerf = JSON.stringify({ participants:participants.size, addMs:Number(addMs.toFixed(2)), motionMs:Number(motionMs.toFixed(2)), motionUpdates:MAX_PARTICIPANTS * 90, domNodes:layer.children.length, fxNodes:fxLayer?.children.length || 0 }); }
+  function playNote() {
+    if (!musicOn || !actx) return;
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = 'sine'; o.frequency.value = NOTES[noteIdx++ % NOTES.length];
+    g.gain.setValueAtTime(.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.035, actx.currentTime + .6);
+    g.gain.exponentialRampToValueAtTime(.0001, actx.currentTime + 3.4);
+    o.connect(g).connect(master); o.start(); o.stop(actx.currentTime + 3.6);
+  }
+  $('musicToggle').addEventListener('click', function () {
+    var btn = this;
+    if (!musicOn) {
+      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === 'suspended') actx.resume();
+      master = master || actx.createGain(); master.gain.value = .34; master.connect(actx.destination);
+      musicOn = true; playNote();
+      musicTimer = setInterval(playNote, 1800);
+      btn.classList.add('is-on'); btn.setAttribute('aria-pressed', 'true'); btn.textContent = '♪ إيقاف';
+    } else {
+      musicOn = false; clearInterval(musicTimer); musicTimer = null;
+      btn.classList.remove('is-on'); btn.setAttribute('aria-pressed', 'false'); btn.textContent = '♪ الموسيقى';
+    }
+  });
+
+  function updateCount() {
+    countLabel.textContent = participants.size + ' / ' + MAX;
+    var scale = clamp(1 - Math.max(0, participants.size - 8) * .012, .52, 1).toFixed(3);
+    stage.style.setProperty('--sl-scale', scale);
+    participants.forEach(function (p) { if (p.node) p.node.style.setProperty('--sl-scale', scale); });
+  }
+
+  function emitFx(kind, p) {
+    if (!fx || !p) return;
+    while (fx.children.length > 24) fx.removeChild(fx.firstChild);
+    for (var i = 0; i < 6; i++) {
+      var s = document.createElement('span');
+      s.className = 'fx-spark';
+      s.textContent = kind === 'gift' ? '✦' : '·';
+      s.style.left = p.left + '%'; s.style.top = p.top + '%';
+      s.style.setProperty('--dx', (Math.cos(i / 6 * Math.PI * 2) * 26) + 'px');
+      s.style.setProperty('--dy', (Math.sin(i / 6 * Math.PI * 2) * 26) + 'px');
+      fx.appendChild(s);
+      setTimeout(function (n) { return function () { n.remove(); }; }(s), 950);
+    }
+  }
+
+  /* ── بناء عقدة المشارك: اسم + @حساب فقط (لا جنس، لا صورة) ── */
+  function renderParticipant(p) {
+    var node = document.createElement('div');
+    node.className = 'sl-participant zone-' + p.zone;
+    node.dataset.id = p.id;
+    setLogicalPosition(node, p.left, p.top);
+    node.innerHTML =
+      '<div class="sl-plate" style="--pc:hsl(' + hashHue(p.id) + ' 90% 62%)">' +
+      '<b><i></i>' + esc(p.name) + '</b>' +
+      '<small>' + esc(p.uniqueId ? '@' + p.uniqueId : (p.source === 'tiktok' ? 'TikTok LIVE' : 'ضيف المحطة')) + '</small>' +
+      '<em class="sl-status">' + ZONE_LABEL[p.zone] + '</em>' +
+      '<span class="sl-x" title="إخراج">×</span>' +
+      '</div>';
+    layer.appendChild(node);
+    p.node = node;
+    node.querySelector('.sl-x').addEventListener('click', function (e) { e.stopPropagation(); removeParticipant(p.id); });
+    bindDrag(p);
+    return node;
+  }
+
+  function zoneForPoint(x, y) {
+    var zones = stage.querySelectorAll('.sl-zone');
+    for (var i = 0; i < zones.length; i++) {
+      var r = zones[i].getBoundingClientRect();
+      if (x >= r.left && x <= r.right && y >= r.top && y <= r.bottom) return zones[i].dataset.zone;
+    }
+    return 'roam';
+  }
+  function applyZone(p, zone) {
+    if (p.zone === zone) return;
+    p.zone = zone;
+    p.node.classList.remove('zone-floor', 'zone-bar', 'zone-roam');
+    p.node.classList.add('zone-' + zone);
+    var st = p.node.querySelector('.sl-status');
+    if (st) st.textContent = ZONE_LABEL[zone];
+  }
+
+  function scheduleWander(p, delay) {
+    clearTimeout(p.wanderTimer);
+    p.wanderTimer = setTimeout(function () { wander(p); }, delay || (7000 + Math.random() * 7000));
+  }
+  function wander(p) {
+    if (!participants.has(p.id)) return;
+    if (p.dragging || p.busy || Date.now() < (p.holdUntil || 0)) { scheduleWander(p, 3000); return; }
+    var choices = p.zone === 'floor' ? ['floor', 'roam', 'bar'] : p.zone === 'bar' ? ['bar', 'roam', 'floor'] : ['roam', 'floor', 'bar'];
+    var zone = choices[Math.floor(Math.random() * choices.length)];
+    var pos = randomPosition(zone);
+    p.node.classList.add('is-walking');
+    setLogicalPosition(p.node, pos.left, pos.top);
+    p.left = pos.left; p.top = pos.top;
+    applyZone(p, zone);
+    setTimeout(function () { if (p.node) p.node.classList.remove('is-walking'); }, 1300);
+    scheduleWander(p);
+  }
+
+  function bindDrag(p) {
+    var ox = 0, oy = 0;
+    var move = function (ev) {
+      if (!p.dragging) return;
+      var pt = ev.touches ? ev.touches[0] : ev;
+      var r = stage.getBoundingClientRect();
+      p.left = clamp((pt.clientX - r.left - ox) / r.width * 100, 2, 98);
+      p.top = clamp((pt.clientY - r.top - oy) / r.height * 100, 8, 92);
+      setLogicalPosition(p.node, p.left, p.top);
+    };
+    var end = function (ev) {
+      if (!p.dragging) return;
+      p.dragging = false; p.holdUntil = Date.now() + 20000;
+      p.node.classList.remove('is-focused', 'is-dragging');
+      removeEventListener('pointermove', move); removeEventListener('pointerup', end);
+      var pt = ev.changedTouches ? ev.changedTouches[0] : ev;
+      applyZone(p, zoneForPoint(pt.clientX, pt.clientY));
+      scheduleWander(p, 20000);
+    };
+    p.node.addEventListener('pointerdown', function (ev) {
+      if (ev.target.closest('.sl-x')) return;
+      p.dragging = true; clearTimeout(p.wanderTimer);
+      p.node.classList.add('is-focused', 'is-dragging');
+      var r = p.node.getBoundingClientRect();
+      ox = ev.clientX - r.left; oy = ev.clientY - r.top;
+      addEventListener('pointermove', move); addEventListener('pointerup', end);
+    });
+  }
+
+  function addParticipant(data, source) {
+    if (participants.size >= MAX) { showToast('الساحة ممتلئة — الحد 50 رائدًا'); return null; }
+    var id = stableId(data);
+    if (participants.has(id)) {
+      var ex = participants.get(id);
+      if (ex.node) { ex.node.classList.add('is-focused'); setTimeout(function () { ex.node && ex.node.classList.remove('is-focused'); }, 900); }
+      showToast(ex.name + ' موجود بالفعل في الساحة');
+      return ex;
+    }
+    var zone = participants.size % 3 === 0 ? 'floor' : (participants.size % 3 === 1 ? 'roam' : 'bar');
+    var pos = randomPosition(zone);
+    var p = { id: id, name: data.name || data.uniqueId || 'رائد', uniqueId: data.uniqueId || '', source: source || 'manual', zone: zone, left: pos.left, top: pos.top, node: null, queue: Promise.resolve(), pending: 0, dragging: false, busy: false, holdUntil: 0 };
+    participants.set(id, p);
+    renderParticipant(p);
+    updateCount();
+    showToast(p.name + ' دخل المحطة');
+    emitFx('join', p); playSfx('join');
+    scheduleWander(p, 4500 + Math.random() * 5000);
+    return p;
+  }
+  function removeParticipant(id) {
+    var p = participants.get(id);
+    if (!p) return;
+    clearTimeout(p.wanderTimer);
+    p.node.classList.add('is-exiting');
+    setTimeout(function () { p.node.remove(); participants.delete(id); updateCount(); }, 1100);
+  }
+
+  /* ── الهدايا → رقصات + كاميرا سينمائية ── */
+  var ACTION = {
+    CHEER: ['احتفال', 'anim-cheer', 3200], COMEDY: ['حركة كوميدية', 'anim-comedy', 3600],
+    DANCE: ['رقص', 'anim-dance', 4200], RUN_CHAOS: ['جري وشغب', 'anim-run', 4200],
+    FLIP_DANCE: ['شقلبة', 'anim-flip', 3800], SOLO_DANCE: ['عرض منفرد', 'anim-solo', 4600],
+    ZERO_GRAVITY: ['انعدام جاذبية', 'anim-zero', 6000], FLY: ['طيران', 'anim-fly', 5200]
+  };
+  function showCamLabel(text, ms) {
+    camLabel.textContent = text;
+    camLabel.classList.add('is-visible');
+    clearTimeout(showCamLabel.t);
+    showCamLabel.t = setTimeout(function () { camLabel.classList.remove('is-visible'); }, ms || 3600);
+  }
+  function runAction(data) {
+    var list = Array.from(participants.values());
+    if (!list.length) { showToast('وصلت هدية — أضف رائدًا أولًا'); return; }
+    var p = participants.get(stableId(data)) || list[Math.floor(Math.random() * list.length)];
+    var meta = ACTION[data.action] || ACTION.DANCE;
+    var dur = Number(data.duration) || meta[2];
+    var big = Number(data.diamonds || 0) >= 4500 || data.action === 'ZERO_GRAVITY' || data.action === 'SOLO_DANCE' || data.action === 'FLIP_DANCE';
+    p.queue = p.queue.then(function () {
+      return new Promise(function (resolve) {
+        p.busy = true;
+        applyZone(p, 'floor');
+        emitFx('gift', p); playSfx('gift');
+        if (window.SpaceLounge3D) {
+          window.SpaceLounge3D.focus(p.id, dur);
+          if (big) window.SpaceLounge3D.shake(1);
+        }
+        showCamLabel('🎯 ' + p.name + ' · ' + meta[0], dur);
+        p.node.classList.add(meta[1], 'is-focused');
+        showToast(p.name + ' · ' + meta[0] + (data.gift ? ' · ' + data.gift : ''));
+        setTimeout(function () {
+          p.node.classList.remove(meta[1], 'is-focused');
+          p.busy = false; scheduleWander(p, 4500); resolve();
+        }, dur);
+      });
+    });
+  }
+  function groupAction(kind) {
+    var cls = kind === 'zero' ? 'anim-zero' : kind === 'fly' ? 'anim-fly' : 'anim-dance';
+    var label = kind === 'zero' ? '🪽 انعدام جاذبية جماعي!' : kind === 'fly' ? '🚀 عاصفة طيران!' : '💃 رقصة جماعية على المسرح!';
+    participants.forEach(function (p) {
+      applyZone(p, 'floor');
+      p.node.classList.add(cls, 'is-focused');
+      setTimeout(function () { if (p.node) p.node.classList.remove(cls, 'is-focused'); }, 6000);
+    });
+    if (window.SpaceLounge3D) window.SpaceLounge3D.shake(.4);
+    showToast(label);
+  }
+
+  /* ── SSE: ربط تيك توك المجاني ── */
+  function connectLive() {
+    if (new URLSearchParams(location.search).get('perf') === '50') return;
+    if (!window.EventSource) { connLabel.innerHTML = '<span class="dot"></span> الإدخال اليدوي جاهز'; return; }
+    var es = new EventSource('/live/events');
+    es.onmessage = function (ev) {
+      var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
+      var p = m.payload || {};
+      if (m.type === 'hello' || m.type === 'status') {
+        connLabel.classList.toggle('is-on', !!p.connected);
+        connLabel.innerHTML = '<span class="dot"></span> ' + (p.connected ? 'TikTok متصل — دخول تلقائي' : 'بانتظار الاتصال…');
+      } else if (m.type === 'lounge-join') {
+        addParticipant({ name: p.name, uniqueId: p.uniqueId }, 'tiktok');
+      } else if (m.type === 'lounge-gift') {
+        runAction(p);
+      }
+    };
+    es.onerror = function () { connLabel.classList.remove('is-on'); connLabel.innerHTML = '<span class="dot"></span> إعادة الاتصال…'; };
+  }
+
+  /* ── لوحة المضيف والأزرار ── */
+  $('manualParticipantForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var name = $('manualName').value.trim();
+    if (!name) return;
+    addParticipant({ name: name, uniqueId: $('manualHandle').value.trim() }, 'manual');
+    this.reset();
+  });
+  $('clearParticipants').addEventListener('click', function () { Array.from(participants.keys()).forEach(removeParticipant); });
+  $('groupDanceBtn').addEventListener('click', function () { groupAction('dance'); });
+  $('zeroGBtn').addEventListener('click', function () { groupAction('zero'); });
+  $('flyBtn').addEventListener('click', function () { groupAction('fly'); });
+  $('hostPanelToggle').addEventListener('click', function () { $('hostPanel').classList.toggle('is-collapsed'); });
+  $('toggleFullscreen').addEventListener('click', function () {
+    if (!document.fullscreenElement) { if (stage.requestFullscreen) stage.requestFullscreen(); }
+    else if (document.exitFullscreen) document.exitFullscreen();
+  });
+  var CAM_MODES = [['sweep', '🎥 مسح'], ['orbit', '🛰 مداري'], ['front', '🎯 أمامي']];
+  var camIdx = 0;
+  $('cameraBtn').addEventListener('click', function () {
+    camIdx = (camIdx + 1) % CAM_MODES.length;
+    this.textContent = CAM_MODES[camIdx][1];
+    if (window.SpaceLounge3D) window.SpaceLounge3D.setMode(CAM_MODES[camIdx][0]);
+  });
+
+  /* ── مسبار الأداء ?perf=50 ── */
+  function runPerformanceProbe() {
+    if (new URLSearchParams(location.search).get('perf') !== '50') return;
+    var t0 = performance.now();
+    for (var i = 0; i < MAX; i++) addParticipant({ name: 'رائد ' + (i + 1), uniqueId: 'probe_' + i }, 'perf');
+    var addMs = performance.now() - t0;
+    var t1 = performance.now();
+    for (var f = 0; f < 60; f++) participants.forEach(function (p, idx) { setLogicalPosition(p.node, 10 + ((idx + f) % 80), 25 + ((idx + f) % 55)); });
+    document.body.dataset.spacePerf = JSON.stringify({ participants: participants.size, addMs: +addMs.toFixed(1), motionMs: +(performance.now() - t1).toFixed(1) });
+    showToast('مسبار الأداء: ' + participants.size + ' رائدًا — النتائج في dataset');
+  }
+
+  window.SpaceLounge = { participants: participants, add: addParticipant, run: runAction, group: groupAction };
   connectLive();
   runPerformanceProbe();
+  updateCount();
 })();

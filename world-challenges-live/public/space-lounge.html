@@ -2,76 +2,61 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#080b24">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#05060d">
 <title>استراحة الفضاء — عالم التحديات</title>
-<link rel="icon" type="image/png" href="/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/space-lounge.css?v=20261112-v2">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="space-lounge.css?v=5">
 </head>
 <body>
-<div class="space-page">
-  <div class="stars stars-a" aria-hidden="true"></div>
-  <div class="stars stars-b" aria-hidden="true"></div>
-  <header class="space-topbar">
-    <a class="back-link" href="/" aria-label="العودة إلى عالم التحديات"><span>↩</span> العودة للبرنامج</a>
-    <div class="space-brand"><img src="/images/logo.png" alt="عالم التحديات"><div><span>LIVE GAME SHOW / 02</span><strong>استراحة الفضاء</strong></div></div>
-    <button id="musicToggle" class="music-toggle" type="button" aria-pressed="false"><span class="music-dot"></span><span id="musicLabel">الموسيقى</span></button>
-  </header>
-  <div class="sponsor-rail" aria-label="رعاة استراحة الفضاء"><span>برعاية</span><img src="/images/qaddaha.png" alt="قدها"><b>قدها</b><i></i><img src="/images/mytwinlogo.png" alt="My Twin"><b>My Twin</b></div>
+<header class="sl-topbar">
+  <a class="sl-chip" href="/">↩ البرنامج</a>
+  <div class="sl-brand"><img src="/images/logo.png" alt=""><span>استراحة الفضاء<small>SPACE LOUNGE V5</small></span></div>
+  <div class="sl-spacer"></div>
+  <span class="sl-chip" id="loungeConnection"><span class="dot"></span> جارٍ الاتصال…</span>
+  <span class="sl-chip" id="participantCount">0 / 50</span>
+  <button class="sl-chip" id="cameraBtn" type="button">🎥 مسح</button>
+  <button class="sl-chip" id="musicToggle" type="button" aria-pressed="false">♪ الموسيقى</button>
+  <button class="sl-chip" id="hostPanelToggle" type="button">⚙️ المضيف</button>
+</header>
 
-  <main>
-    <section class="space-hero">
-      <div class="hero-copy">
-        <p class="eyebrow"><i></i> THE LOUNGE IS OPEN <i></i></p>
-        <h1>استراحة<br><em>الفضاء</em></h1>
-        <p class="hero-lede">لحظة تنفّس سينمائية بين جولات التحدّي؛ مساحة خفيفة للحضور، الحركة، والضحكة القادمة من اللايف.</p>
-        <div class="hero-actions"><a class="primary-action" href="#arena">ادخل الساحة <span>←</span></a><a class="ghost-action" href="#rules">كيف تعمل؟</a></div>
-        <div class="hero-note"><span>01</span><b>المشهد المجسّم جاهز</b><small>تفاعل TikTok مستقل عن نقاط التحدّي</small></div>
-      </div>
-      <div class="orbital-mark" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="planet"><span></span></div><div class="planet-moon"></div><div class="signal signal-one">LIVE</div><div class="signal signal-two">SPACE</div></div>
-    </section>
+<main id="loungeStage">
+  <div class="sl-zone sl-zone-roam" data-zone="roam"></div>
+  <div class="sl-zone sl-zone-bar" data-zone="bar"></div>
+  <div class="sl-zone sl-zone-floor" data-zone="floor"></div>
+  <div id="participantLayer"></div>
+  <div class="sl-fx" id="fxLayer"></div>
+</main>
 
-    <section id="arena" class="arena-section" aria-label="ساحة استراحة الفضاء">
-      <div class="arena-heading"><div><span class="section-kicker">SPACE LOUNGE / 01</span><h2>المحطة المدارية</h2></div><div class="live-chip"><i></i> READY FOR LIVE</div></div>
-      <div class="lounge-controls">
-        <form id="manualParticipantForm" class="participant-form">
-          <span class="form-kicker">HOST CONTROL / ADD PLAYER</span>
-          <label><span>اسم المشارك</span><input id="manualName" maxlength="28" placeholder="مثال: مروان" required></label>
-          <label><span>الصورة اختيارية</span><input id="manualAvatar" type="url" placeholder="رابط صورة الحساب"></label>
-          <div class="gender-picker" role="group" aria-label="نوع الأفاتار"><button type="button" class="gender-choice is-active" data-gender="female">أنثى</button><button type="button" class="gender-choice" data-gender="male">ذكر</button></div>
-          <button class="add-player-btn" type="submit">إضافة للساحة <b>+</b></button>
-        </form>
-        <div class="live-bridge"><span class="form-kicker">TIKTOK BRIDGE</span><strong id="loungeConnection">غير متصل — الإدخال اليدوي جاهز</strong><small>الدخول التلقائي عند تعليق: <b>good live</b> أو <b>عالم التحديات</b> أو <b>تحدي مروان</b> أو <b>قدها</b></small><div class="bridge-actions"><button id="clearParticipants" type="button">إخلاء الساحة</button><button id="toggleFullscreen" type="button">ملء الشاشة</button><button id="groupDance" type="button">رقص جماعي</button><button id="hostPanelToggle" type="button">لوحة المضيف</button></div></div>
-      </div>
-      <div class="arena-scene" id="loungeStage" aria-label="مسرح الشخصيات">
-        <div class="scanline"></div><div class="planet-horizon"></div><div class="floating-rock rock-one"></div><div class="floating-rock rock-two"></div>
-        <div class="gate gate-entry"><span>بوابة الدخول</span><b>ENTER</b><i></i></div>
-        <div class="gate gate-exit"><span>بوابة الخروج</span><b>EXIT</b><i></i></div>
-        <div class="space-zone zone-seats" data-zone="seats"><span class="zone-title">LOUNGE SEATS</span><small>منطقة الجلوس</small><div class="lounge-deck"><div class="seat seat-one"><span>✦</span></div><div class="seat seat-two"><span>✦</span></div><div class="seat seat-three"><span>✦</span></div><div class="table"><i></i><i></i><i></i></div></div></div>
-        <div class="space-zone zone-stage" data-zone="stage"><span class="zone-title">LIVE STAGE</span><small>اسحب الشخصية للرقص والتصفيق</small><div class="dance-floor"><div class="floor-ring ring-one"></div><div class="floor-ring ring-two"></div><span>SPACE<br><b>STAGE</b></span></div></div>
-        <div class="space-zone zone-coffee" data-zone="coffee"><span class="zone-title">COFFEE CORNER</span><small>تحضير مشروب</small><div class="coffee-machine"><i></i><b>COFFEE</b><span></span></div><div class="coffee-cup">☕</div></div>
-        <div class="space-console"><span class="console-light"></span><span class="console-line"></span><span class="console-line short"></span><b>SL / 01</b></div>
-        <div id="participantLayer" class="participant-layer" aria-live="polite"></div>
-        <div class="camera-vignette" aria-hidden="true"></div><div class="camera-spotlight" aria-hidden="true"></div><div class="camera-bars camera-bar-top" aria-hidden="true"></div><div class="camera-bars camera-bar-bottom" aria-hidden="true"></div>
-        <div id="cameraLabel" class="camera-label" aria-live="polite"><span>LIVE FOCUS</span><b>استراحة الفضاء</b></div><div id="fxLayer" class="fx-layer" aria-hidden="true"></div>
-        <div id="actionToast" class="action-toast" aria-live="polite"></div>
-        <div class="scene-caption"><span>مشهد ثلاثي الأبعاد</span><b>استراحة، حركة، وضيافة</b></div>
-      </div>
-      <div class="stage-legend"><span><i class="legend-dot legend-pink"></i>شخصيات المشاركين</span><span><i class="legend-dot legend-lime"></i>تجوال تلقائي + تركيز سينمائي للهدايا</span><b id="participantCount">0 / 50</b></div>
-    </section>
+<div class="sl-toast" id="actionToast"></div>
+<div class="sl-camlabel" id="cameraLabel"></div>
 
-    <section id="rules" class="lounge-grid">
-      <article class="info-card info-card-main"><span class="card-number">01</span><div><span class="section-kicker">FIRST RELEASE</span><h2>إيقاع هادئ<br>قبل الجولة التالية</h2><p>صممنا البداية لتكون سريعة التحميل وواضحة على شاشة الهاتف والكمبيوتر، مع أقل قدر من الحركة حتى تبقى المسابقة الأساسية مستقرة.</p></div></article>
-      <article class="info-card"><span class="card-icon">↗</span><h3>دخول مجاني</h3><p>اكتب good live أو عالم التحديات أو تحدي مروان أو قدها في اللايف لتظهر شخصيتك تلقائيًا.</p></article>
-      <article class="info-card"><span class="card-icon">◌</span><h3>هدايا بحركات</h3><p>القلب للرقص، العطر للجري والشغب، الدونتس للّفة والرقص، والكورجي لـ Zero Gravity — مع مدة مستقلة لكل حركة.</p></article>
-      <article class="info-card"><span class="card-icon">⌁</span><h3>بصوت اختياري</h3><p>اضغط زر الموسيقى لتشغيل نغمة فضائية خفيفة؛ لا يوجد تشغيل تلقائي أو طلب صلاحيات.</p></article>
-    </section>
-  </main>
-  <footer class="space-footer"><span>عالم التحديات</span><span class="footer-line"></span><span>SPACE LOUNGE / MVP 01</span></footer>
-</div>
-<script src="/space-lounge.js?v=20261112-v6"></script>
-<script type="module" src="/space-lounge-3d.js?v=20261112-v4"></script>
+<aside class="sl-host" id="hostPanel">
+  <h3>لوحة المضيف</h3>
+  <form id="manualParticipantForm">
+    <label for="manualName">اسم المشارك</label>
+    <input id="manualName" maxlength="24" placeholder="الاسم الذي يظهر فوق الرأس" required>
+    <label for="manualHandle" style="margin-top:6px">@الحساب (اختياري)</label>
+    <input id="manualHandle" maxlength="24" placeholder="unique_id من تيك توك">
+    <button class="sl-btn" type="submit" style="width:100%;margin-top:8px">＋ إضافة للساحة</button>
+  </form>
+  <div class="sl-row">
+    <button class="sl-btn" id="groupDanceBtn" type="button">💃 رقصة جماعية</button>
+    <button class="sl-btn" id="zeroGBtn" type="button">🪽 انعدام جاذبية</button>
+  </div>
+  <div class="sl-row">
+    <button class="sl-btn" id="flyBtn" type="button">🚀 عاصفة طيران</button>
+    <button class="sl-btn danger" id="clearParticipants" type="button">🧹 إخلاء</button>
+  </div>
+  <div class="sl-row">
+    <button class="sl-btn" id="toggleFullscreen" type="button">⛶ ملء الشاشة</button>
+  </div>
+  <p class="sl-hint">الدخول التلقائي عند تعليق: good live / عالم التحديات / تحدي مروان / قدها. الهدايا تشغّل رقصتها وتركّز الكاميرا سينمائيًا. لا جنس ولا صور — الاسم و@الحساب فقط فوق الرأس.</p>
+</aside>
+
+<script src="three-r187.bundle.js?v=1"></script>
+<script src="space-lounge-3d.js?v=5"></script>
+<script src="space-lounge.js?v=5"></script>
 </body>
 </html>
