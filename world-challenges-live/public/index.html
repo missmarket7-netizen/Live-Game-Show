@@ -8,7 +8,7 @@
 <link rel="manifest" href="/manifest.json?v=20261106">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261109-audience-timer">
+<link rel="stylesheet" href="/style.css?v=20261114-studio-output-1">
 <link rel="stylesheet" href="arena-extras.css?v=110" />
 </head>
 <body>
@@ -26,6 +26,9 @@
 <h1>ساحة<br><span>التحدّي</span></h1>
 <p class="hero-subtitle">مواجهة بنات × شباب، لحظات حاسمة، وهدايا تغيّر مسار الجولة أمام جمهور اللايف.</p>
 <div class="host-line"><span>المضيف التنفيذي</span><strong>مروان حكيم</strong></div>
+<button id="studioPanelToggle" class="studio-entry-btn" type="button" aria-controls="studioSetupPanel" aria-expanded="false">
+<span class="studio-entry-mark" aria-hidden="true">K / 01</span><span class="studio-entry-copy"><strong>استديو قدها</strong><small>اضبط الجولة، ثم ابدأ المنافسة من بنك الأسئلة المحلي</small></span><span class="studio-entry-arrow" aria-hidden="true">＋</span>
+</button>
 </div>
 <div class="hero-app-visual">
 <span class="visual-label">OFFICIAL LIVE APP</span>
@@ -34,6 +37,24 @@
 <span class="orbit-tag orbit-tag-two">LIVE</span>
 <span class="app-scanline"></span>
 </div>
+</section>
+<section id="studioSetupPanel" class="studio-setup-panel glass-card hidden" aria-labelledby="studioPanelTitle" aria-hidden="true">
+<div class="studio-panel-heading"><div><span class="section-kicker">QADDAHA / STUDIO CONTROL</span><h2 id="studioPanelTitle">إعداد المنافسة</h2></div><button id="studioPanelClose" class="close-button" type="button" aria-label="إغلاق إعداد المنافسة">×</button></div>
+<p class="studio-panel-intro">اختر أسئلتك وإيقاع الجولة. البدء هنا لا يعتمد على TikTok أو الاتصال الخارجي.</p>
+<div class="field-grid studio-field-grid">
+<label class="field"><span>مصدر الأسئلة</span><select id="studioSource"><option value="local" selected>البنك المحلي — افتراضي</option></select></label>
+<label class="field"><span>الفئة</span><select id="studioCategory"><option value="اختيارات متنوعة">◈ خليط</option></select></label>
+<label class="field"><span>المستوى</span><select id="studioDifficulty"><option value="سهل">⭐ سهل</option><option value="متوسط" selected>⭐⭐ متوسط</option><option value="صعب">⭐⭐⭐ صعب</option><option value="متدرج">↗ متدرج</option></select></label>
+<label class="field"><span>عدد الأسئلة</span><input id="studioCount" type="number" inputmode="numeric" min="3" max="30" step="1" value="10"></label>
+</div>
+<div class="option-row studio-option-row"><span class="field-label">مدة البرنامج<small class="field-hint">مدة مستهدفة؛ لا توقف العرض تلقائيًا في هذه المرحلة</small></span><div class="pill-group" role="group" aria-label="مدة البرنامج">
+<button class="pill" data-studio-duration="30" type="button" aria-pressed="false">30 د</button><button class="pill" data-studio-duration="45" type="button" aria-pressed="false">45 د</button><button class="pill is-active" data-studio-duration="60" type="button" aria-pressed="true">60 د</button><button class="pill" data-studio-duration="90" type="button" aria-pressed="false">90 د</button>
+</div></div>
+<div class="option-row studio-option-row"><span class="field-label">مؤقت السؤال<small class="field-hint">الوقت الذي يملكه الفريق للإجابة</small></span><div class="pill-group" role="group" aria-label="مؤقت السؤال">
+<button class="pill" data-studio-timer="15" type="button" aria-pressed="false">15 ث</button><button class="pill is-active" data-studio-timer="20" type="button" aria-pressed="true">20 ث</button><button class="pill" data-studio-timer="30" type="button" aria-pressed="false">30 ث</button><button class="pill" data-studio-timer="45" type="button" aria-pressed="false">45 ث</button>
+</div></div>
+<p id="studioSetupStatus" class="studio-setup-status" role="status" aria-live="polite">المصدر المحلي جاهز. إذا تعذّر جلب الأسئلة ستبقى هذه اللوحة مفتوحة.</p>
+<div class="studio-panel-actions"><button id="studioStartBtn" class="primary-cta" type="button"><span class="cta-icon">▶</span><div><b>ابدأ المنافسة</b><small>تحميل من البنك المحلي وفتح شاشة اللعبة</small></div><span class="cta-arrow">←</span></button><a class="studio-output-link" href="/output" target="_blank" rel="noopener noreferrer">معاينة مخرج العرض /output</a></div>
 </section>
 <a class="space-lounge-entry" href="/space-lounge" aria-label="الانتقال إلى استراحة الفضاء"><span class="space-lounge-entry-orbit"><img src="/images/logo.png" alt="ساحة الفضاء"></span><span><b>ساحة استراحة الفضاء</b><small>لحظة هادئة بين الجولات · ادخل الساحة</small></span><strong>←</strong></a>
 <section class="intro-spotlight glass-card">
@@ -162,7 +183,7 @@
 <button class="sound-trigger" data-sound="ana" type="button">🎙️ Ana</button></div></div></div>
 <canvas id="confettiCanvas"></canvas>
 
-<script src="/app.js?v=20261108-random-host-cinematic-v2"></script>
+<script src="/app.js?v=20261115-qaddaha-output-v2"></script>
 <script src="audience-race.js?v=20261109-timer-king-queen"></script>
 <script src="flag-renderer.js?v=20261106"></script>
 <script src="arena-extras.js?v=109"></script>
@@ -170,6 +191,6 @@
 <script src="frame-clean.js?v=20261106"></script>
 <script src="captain-sounds.js?v=106"></script>
 <script src="flag-view.js?v=20261107"></script>
-<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261113-audio-compressed-v1").catch(function(){});</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261115-studio-output-v2").catch(function(){});</script>
 </body>
 </html>

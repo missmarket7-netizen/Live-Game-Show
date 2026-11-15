@@ -117,6 +117,16 @@ function profileOf(key) {
 
 let lastEventAt = null;
 let lbTimer = null;
+const diagnostics = {
+  processStartedAt: new Date().toISOString(),
+  sse: { opened: 0, closed: 0, writeErrors: 0 },
+  events: { broadcasts: 0, lastType: null, lastAt: null, counts: Object.create(null) },
+  connector: {
+    attempts: 0, successfulConnections: 0, failures: 0, errors: 0,
+    disconnects: 0, reconnectsScheduled: 0,
+    lastErrorAt: null, lastErrorClass: null, lastReconnectScheduledAt: null
+  }
+};
 
 function describeErr(e) {
   if (e && typeof e === "object") {
@@ -157,8 +167,16 @@ function overallStatus() {
 }
 function broadcast(type, payload) {
   lastEventAt = new Date().toISOString();
+  diagnostics.events.broadcasts += 1;
+  diagnostics.events.lastType = String(type || "unknown").slice(0, 64);
+  diagnostics.events.lastAt = lastEventAt;
+  diagnostics.events.counts[diagnostics.events.lastType] =
+    (diagnostics.events.counts[diagnostics.events.lastType] || 0) + 1;
   const data = JSON.stringify({ type, payload: Object.assign({}, payload, { ts: Date.now() }) });
-  for (const res of clients) { try { res.write("data: " + data + "\n\n"); } catch (e) {} }
+  for (const res of clients) {
+    try { res.write("data: " + data + "\n\n"); }
+    catch (e) { diagnostics.sse.writeErrors += 1; }
+  }
 }
 function broadcastLeaderboardSoon() {
   if (lbTimer) return;
@@ -207,7 +225,12 @@ function connOptions(account) {
 function startConnection(account) {
   const st = { status: "idle", fails: 0, lastErr: null, lastEventAt: null, timer: null };
   connections.set(account.username, st);
-  const retry = (ms) => { if (st.timer) clearTimeout(st.timer); st.timer = setTimeout(connect, ms); };
+  const retry = (ms) => {
+    if (st.timer) clearTimeout(st.timer);
+    diagnostics.connector.reconnectsScheduled += 1;
+    diagnostics.connector.lastReconnectScheduledAt = new Date().toISOString();
+    st.timer = setTimeout(connect, ms);
+  };
   const classify = (msg) => {
     if (/isn't online|not live|live ended|room not found|stream ended/i.test(msg)) return "waiting";
     if (/business plan|sign|signature|euler/i.test(msg)) return "signblocked";
@@ -216,6 +239,9 @@ function startConnection(account) {
   const fail = (msg) => {
     st.lastErr = msg; st.fails += 1;
     const kind = classify(msg);
+    diagnostics.connector.failures += 1;
+    diagnostics.connector.lastErrorAt = new Date().toISOString();
+    diagnostics.connector.lastErrorClass = kind;
     if (kind === "waiting") {
       st.status = "waiting";
       if (st.fails % 15 === 1) console.log("⏳ [" + account.username + "] ليس في بث الآن — إعادة المحاولة بهدوء");
@@ -238,6 +264,7 @@ function startConnection(account) {
   async function connect() {
     if (st.status === "live") return;
     st.status = "connecting";
+    diagnostics.connector.attempts += 1;
     try {
       const Conn = await loadConn();
       const conn = new Conn(account.username, connOptions(account));
@@ -245,6 +272,7 @@ function startConnection(account) {
       conn.connect().then(() => {
         st.status = "live"; st.fails = 0; st.lastErr = null;
         st.lastEventAt = new Date().toISOString();
+        diagnostics.connector.successfulConnections += 1;
         console.log("✅ TikTok LIVE متصل:", account.username, "عبر", ConnPkg);
         broadcast("status", overallStatus());
       }).catch((err) => fail(describeErr(err)));
@@ -310,6 +338,7 @@ function startConnection(account) {
 
       conn.on("disconnected", () => {
         st.status = "waiting";
+        diagnostics.connector.disconnects += 1;
         console.warn("⚠️ انقطع الاتصال:", account.username);
         broadcast("status", overallStatus());
         retry(10000);
@@ -317,6 +346,9 @@ function startConnection(account) {
       conn.on("error", (err) => {
         const msg = describeErr(err);
         st.lastErr = msg;
+        diagnostics.connector.errors += 1;
+        diagnostics.connector.lastErrorAt = new Date().toISOString();
+        diagnostics.connector.lastErrorClass = "connector-error";
         if (st.fails % 10 === 0) console.error("⚠️ [" + account.username + "]:", msg);
       });
     } catch (e) {
@@ -335,9 +367,47 @@ export function attachLiveRoutes(app) {
     res.write("data: " + JSON.stringify({ type: "recent-gifts", payload: { gifts: recent.gifts } }) + "\n\n");
     res.write("data: " + JSON.stringify({ type: "recent-joins", payload: { joins: recent.joins } }) + "\n\n");
     clients.add(res);
-    req.on("close", () => clients.delete(res));
+    diagnostics.sse.opened += 1;
+    req.on("close", () => {
+      if (clients.delete(res)) diagnostics.sse.closed += 1;
+    });
   });
   app.get("/live/status", (req, res) => res.json(overallStatus()));
+  app.get("/live/diagnostics", (req, res) => {
+    res.set("Cache-Control", "no-store");
+    const accounts = Array.from(connections.values());
+    return res.json({
+      status: "ok",
+      processStartedAt: diagnostics.processStartedAt,
+      sampledAt: new Date().toISOString(),
+      sse: {
+        activeClients: clients.size,
+        opened: diagnostics.sse.opened,
+        closed: diagnostics.sse.closed,
+        writeErrors: diagnostics.sse.writeErrors
+      },
+      events: {
+        broadcasts: diagnostics.events.broadcasts,
+        lastType: diagnostics.events.lastType,
+        lastAt: diagnostics.events.lastAt,
+        counts: Object.assign({}, diagnostics.events.counts)
+      },
+      connector: {
+        configuredAccounts: ACCOUNTS.length,
+        accountStates: accounts.map((accountState) => accountState.status),
+        attempts: diagnostics.connector.attempts,
+        successfulConnections: diagnostics.connector.successfulConnections,
+        failures: diagnostics.connector.failures,
+        errors: diagnostics.connector.errors,
+        disconnects: diagnostics.connector.disconnects,
+        reconnectsScheduled: diagnostics.connector.reconnectsScheduled,
+        lastErrorAt: diagnostics.connector.lastErrorAt,
+        lastErrorClass: diagnostics.connector.lastErrorClass,
+        lastReconnectScheduledAt: diagnostics.connector.lastReconnectScheduledAt
+      },
+      retention: "process-memory-only; counters reset when the server restarts"
+    });
+  });
   app.get("/live/leaderboard", (req, res) => res.json(Object.assign({ enabled: true }, getLeaderboard())));
   app.get("/live/recent-follows", (req, res) => res.json({ follows: recent.follows }));
   app.get("/live/recent-gifts", (req, res) => res.json({ gifts: recent.gifts }));

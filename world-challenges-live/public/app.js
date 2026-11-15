@@ -5,9 +5,11 @@ const state = {
   timerDuration: 30, timerValue: 30, timerInterval: null, isTimerRunning: false, isRevealed: false,
   soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
   fullShowDuration: 120, shieldGirls: false, shieldBoys: false, roundNumber: 1, isLoadingMore: false,
-  x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }
+  x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }, studioConfig: null
 };
 window.state = state;
+const OUTPUT_CHANNEL_NAME = 'wcq-output-v1';
+let outputChannel = null;
 const SAVED_KEY = 'lgs_saved_sets_v7';
 const HISTORY_KEY = 'lgs_question_history_v7';
 const SOUND_KEY = 'lgs_sound_v7';
@@ -387,11 +389,69 @@ function updateScores() {
   if ($('roundDisplay')) $('roundDisplay').textContent = 'الجولة ' + state.roundNumber;
   if ($('teamShieldGirls')) $('teamShieldGirls').classList.toggle('hidden', !state.shieldGirls);
   if ($('teamShieldBoys')) $('teamShieldBoys').classList.toggle('hidden', !state.shieldBoys);
+  publishOutputSnapshot();
 }
 
 function updateTimer() {
   if ($('timerDisplay')) $('timerDisplay').textContent = state.timerValue;
   if ($('timerRing')) $('timerRing').classList.toggle('urgent', state.timerValue <= 3 && state.timerValue > 0);
+  publishOutputSnapshot();
+}
+
+function createOutputSnapshot() {
+  const currentQuestion = state.questions[state.currentIndex] || null;
+  const safeText = (value, maxLength) => String(value == null ? '' : value)
+    .replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLength);
+  const outputQuestionText = (question) => {
+    const candidate = safeText(question && question.question, 320);
+    const isMediaPath = /^(?:https?:\/\/|\/|(?:public\/)?(?:flags|guess|name|landmarks?|tourism|images)\/)|\.(?:svg|png|jpe?g|webp)(?:[?#]|$)/i.test(candidate);
+    if (candidate && !isMediaPath) return candidate;
+    const category = safeText(question && question.category, 80);
+    if (/خمن\s*(?:الدولة\s*أو\s*المدينة|المدينة)/i.test(category)) return 'خمن الدولة أو المدينة من الصورة';
+    if (/خمن\s*الدولة|أعلام/i.test(category)) return 'ما اسم هذه الدولة؟';
+    if (/خمن\s*الاسم/i.test(category)) return 'خمن الاسم من الصورة';
+    if (/معالم|سياحية/i.test(category)) return 'حدّد المعلم أو الوجهة من الصورة';
+    return category ? 'سؤال بصري من فئة ' + category : 'سؤال بصري';
+  };
+  const safeScore = (value) => {
+    const score = Number(value);
+    return Number.isFinite(score) ? Math.max(-9999, Math.min(9999, score)) : 0;
+  };
+  const safeCaptains = (team) => Array.isArray(state.captains && state.captains[team])
+    ? state.captains[team].map((name) => safeText(name, 48)).filter(Boolean).slice(0, 5)
+    : [];
+  const timerDuration = Math.max(1, Math.min(3600, Number(state.timerDuration) || 30));
+  return {
+    schemaVersion: 1,
+    sentAt: Date.now(),
+    ready: Boolean(currentQuestion),
+    scores: { girls: safeScore(state.girlsScore), boys: safeScore(state.boysScore) },
+    question: { text: outputQuestionText(currentQuestion) },
+    timer: {
+      remainingSeconds: Math.max(0, Math.min(3600, Number(state.timerValue) || 0)),
+      durationSeconds: timerDuration,
+      running: Boolean(state.isTimerRunning)
+    },
+    captains: { girls: safeCaptains('girls'), boys: safeCaptains('boys') }
+  };
+}
+
+function publishOutputSnapshot() {
+  if (!outputChannel) return;
+  try {
+    outputChannel.postMessage({ channel: OUTPUT_CHANNEL_NAME, type: 'snapshot', snapshot: createOutputSnapshot() });
+  } catch (outputError) {}
+}
+
+function initOutputBroadcaster() {
+  if (outputChannel || typeof BroadcastChannel !== 'function') return;
+  try {
+    outputChannel = new BroadcastChannel(OUTPUT_CHANNEL_NAME);
+    publishOutputSnapshot();
+    window.setInterval(publishOutputSnapshot, 1000);
+  } catch (outputError) {
+    outputChannel = null;
+  }
 }
 
 function stopTimer() {
@@ -1010,6 +1070,7 @@ function confirmCaptain(teamKey, slotIdx) {
   inputEl.value = captainName;
   inputEl.classList.add('confirmed');
   state.captains[teamKey][slotIdx] = captainName;
+  publishOutputSnapshot();
   showCaptainReveal(captainName, teamKey);
   playSound(teamKey === 'girls' ? 'girls-captin' : 'boys-captin', 0.8);
 }
@@ -1257,6 +1318,122 @@ async function bankSingleRound() {
     showToast('تعذر تجهيز الجولة', 'SHOW CONTROL');
   }
   hideLoading();
+}
+
+function setStudioPanelOpen(isOpen) {
+  const panel = $('studioSetupPanel');
+  const toggle = $('studioPanelToggle');
+  if (!panel || !toggle) return;
+  panel.classList.toggle('hidden', !isOpen);
+  panel.setAttribute('aria-hidden', String(!isOpen));
+  toggle.setAttribute('aria-expanded', String(isOpen));
+  if (isOpen) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function initStudioPanel() {
+  const sourceCategory = $('category');
+  const studioCategory = $('studioCategory');
+  if (sourceCategory && studioCategory && sourceCategory.options.length) {
+    while (studioCategory.firstChild) studioCategory.removeChild(studioCategory.firstChild);
+    Array.from(sourceCategory.options).forEach((option) => studioCategory.appendChild(option.cloneNode(true)));
+    studioCategory.value = sourceCategory.value || 'اختيارات متنوعة';
+  }
+
+  safeOn('studioPanelToggle', 'click', () => {
+    const panel = $('studioSetupPanel');
+    setStudioPanelOpen(Boolean(panel && panel.classList.contains('hidden')));
+  });
+  safeOn('studioPanelClose', 'click', () => setStudioPanelOpen(false));
+  safeOn('studioStartBtn', 'click', startStudioCompetition);
+
+  $$('[data-studio-duration]').forEach((button) => button.addEventListener('click', () => {
+    $$('[data-studio-duration]').forEach((other) => {
+      other.classList.remove('is-active');
+      other.setAttribute('aria-pressed', 'false');
+    });
+    button.classList.add('is-active');
+    button.setAttribute('aria-pressed', 'true');
+  }));
+  $$('[data-studio-timer]').forEach((button) => button.addEventListener('click', () => {
+    $$('[data-studio-timer]').forEach((other) => {
+      other.classList.remove('is-active');
+      other.setAttribute('aria-pressed', 'false');
+    });
+    button.classList.add('is-active');
+    button.setAttribute('aria-pressed', 'true');
+  }));
+}
+
+async function startStudioCompetition() {
+  const status = $('studioSetupStatus');
+  const startButton = $('studioStartBtn');
+  const source = $('studioSource') ? $('studioSource').value : 'local';
+  const category = $('studioCategory') ? $('studioCategory').value : 'اختيارات متنوعة';
+  const difficulty = $('studioDifficulty') ? $('studioDifficulty').value : 'متوسط';
+  const count = Math.max(3, Math.min(30, Number($('studioCount') && $('studioCount').value) || 10));
+  const durationButton = document.querySelector('[data-studio-duration].is-active');
+  const timerButton = document.querySelector('[data-studio-timer].is-active');
+  const durationMinutes = [30, 45, 60, 90].includes(Number(durationButton && durationButton.dataset.studioDuration))
+    ? Number(durationButton.dataset.studioDuration) : 60;
+  const timerSeconds = [15, 20, 30, 45].includes(Number(timerButton && timerButton.dataset.studioTimer))
+    ? Number(timerButton.dataset.studioTimer) : 20;
+
+  if (source !== 'local') {
+    if (status) {
+      status.textContent = 'مصدر الأسئلة المختار غير متاح؛ اختر البنك المحلي للمتابعة.';
+      status.classList.add('is-error');
+    }
+    return;
+  }
+
+  if (startButton) startButton.disabled = true;
+  if (status) {
+    status.textContent = 'جارٍ جلب الأسئلة من البنك المحلي…';
+    status.classList.remove('is-error', 'is-success');
+  }
+  showLoading('نجهز المنافسة من بنك الأسئلة المحلي…');
+  try {
+    const questions = await fetchQuestions({ category, difficulty, count });
+    if (!questions.length) {
+      if (status) {
+        status.textContent = 'تعذّر جلب أسئلة مناسبة من البنك المحلي. تحقق من الاتصال أو غيّر الفئة/المستوى ثم أعد المحاولة.';
+        status.classList.add('is-error');
+      }
+      showToast('تعذّر جلب الأسئلة — الإعدادات ما زالت مفتوحة', 'STUDIO SETUP');
+      return;
+    }
+
+    state.questions = questions;
+    state.fullShowRounds = [];
+    state.mode = 'single';
+    state.fullShowDuration = durationMinutes;
+    state.timerDuration = timerSeconds;
+    state.timerValue = timerSeconds;
+    state.studioConfig = { source, category, difficulty, questionCount: count, durationMinutes, timerSeconds };
+    if ($('category')) $('category').value = category;
+    if ($('difficulty')) $('difficulty').value = difficulty;
+    if ($('count')) $('count').value = String(count);
+    $$('.mode-tab').forEach((tab) => tab.classList.toggle('is-active', tab.dataset.mode === 'single'));
+    if ($('fullShowOptions')) $('fullShowOptions').hidden = true;
+    if ($('categoryField')) $('categoryField').hidden = false;
+
+    resetMatch();
+    state.questionHistory = state.questionHistory.concat(questions.map((question) => question.question)).slice(-400);
+    saveHistory();
+    saveQuestionSet(questions, { category, difficulty, source: 'local' });
+    prepareGame();
+    setStudioPanelOpen(false);
+    showToast('بدأت المنافسة من بنك الأسئلة المحلي', 'STUDIO READY');
+  } catch (studioError) {
+    if (status) {
+      status.textContent = 'حدث خطأ أثناء تجهيز الأسئلة. بقيت لوحة الإعداد مفتوحة؛ أعد المحاولة أو استخدم زر البدء القديم.';
+      status.classList.add('is-error');
+    }
+    showToast('تعذّر تجهيز المنافسة — اللوحة ما زالت مفتوحة', 'STUDIO SETUP');
+  } finally {
+    hideLoading();
+    if (startButton) startButton.disabled = false;
+  }
 }
 
 document.addEventListener('click', (clickEvt) => {
@@ -1516,9 +1693,11 @@ function initSetup() {
   }));
   safeOn('savedQuestionsBtn', 'click', openSaved);
   safeOn('setupSoundBtn', 'click', toggleSound);
+  initStudioPanel();
 }
 
 function initGame() {
+  initOutputBroadcaster();
   safeOn('soundToggle', 'click', toggleSound);
   safeOn('startTimerBtn', 'click', startTimer);
   safeOn('revealBtn', 'click', revealAnswer);
