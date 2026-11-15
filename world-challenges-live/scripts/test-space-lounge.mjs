@@ -20,9 +20,9 @@ test('الصفحة الرئيسية تعرض اختياراً منفصلاً ل�
 });
 
 test('مسار الاستراحة صفحة مستقلة وتحمل مشهد 3D محلياً وبكسل إصدار جديد', () => {
-  assert.match(loungePage, /space-lounge-3d\.js\?v=20261112-v4/);
-  assert.match(loungePage, /space-lounge\.js\?v=20261112-v6/);
-  assert.match(loungePage, /space-lounge\.css\?v=20261112-v2/);
+  assert.match(loungePage, /space-lounge-3d\.js\?v=5/);
+  assert.match(loungePage, /space-lounge\.js\?v=5/);
+  assert.match(loungePage, /space-lounge\.css\?v=5/);
   assert.match(server, /extensions:\s*\["html"\]/);
 });
 
@@ -32,7 +32,7 @@ test('المشهد ثلاثي الأبعاد حقيقي، منخفض المضل�
   assert.match(sceneSource, /new THREE\.CapsuleGeometry/);
   assert.match(sceneSource, /raycaster\.ray\.intersectPlane\(groundPlane/);
   assert.match(sceneSource, /node\.dataset\.sceneLeft/);
-  assert.match(loungeStyle, /\.arena-scene\.has-3d-scene \.participant-avatar-wrap\{visibility:hidden\}/);
+  assert.match(loungeStyle, /\.sl-plate\{[^}]*display:flex/);
   assert.match(sceneSource, /camera\.zoom/);
   assert.match(sceneSource, /stage\.classList\.remove\('has-3d-scene'\)/);
   assert.match(sceneSource, /requestAnimationFrame/);
@@ -40,8 +40,8 @@ test('المشهد ثلاثي الأبعاد حقيقي، منخفض المضل�
 
 test('الاستراحة تستخدم تدفق SSE الحالي وأحداث دخولها وهداياها دون تعديل نقاط المسابقة', () => {
   assert.match(loungeClient, /new EventSource\('\/live\/events'\)/);
-  assert.match(loungeClient, /message\.type === 'lounge-join'/);
-  assert.match(loungeClient, /message\.type === 'lounge-gift'/);
+  assert.match(loungeClient, /m\.type === 'lounge-join'/);
+  assert.match(loungeClient, /m\.type === 'lounge-gift'/);
   assert.match(loungeClient, /function setLogicalPosition/);
   assert.match(loungeClient, /is-dragging/);
   assert.doesNotMatch(loungeClient, /applyPoint|girlsScore|boysScore/);
@@ -51,7 +51,8 @@ test('الاستراحة تستخدم تدفق SSE الحالي وأحداث د�
 
 test('أصول المشهد لا تدخل التحميل الأولي للعبة ويظل حد الحضور معقولاً', () => {
   assert.match(loungePage, /0 \/ 50/);
-  assert.match(loungeClient, /MAX_PARTICIPANTS = 50/);
+  assert.match(loungeClient, /var MAX = 50/);
+  assert.match(loungeClient, /participants\.size >= MAX/);
   assert.match(worker, /arena-extras\.css\?v=107/);
   assert.match(worker, /CACHE_NAME = "wcq-v20261113-audio-compressed-v1"/);
   assert.doesNotMatch(worker, /space-lounge-3d\.js/);
