@@ -13,7 +13,7 @@
   function hashHue(id) { var h = 17; for (var i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0; return h % 360; }
 
   var ZONES = { floor: [32, 68, 32, 68], bar: [74, 90, 38, 62], roam: [8, 92, 22, 84] };
-  var ZONE_LABEL = { floor: 'يرقص على المسرح', bar: 'عند البار', roam: 'يتجول بالمحطة' };
+  var ZONE_LABEL = { floor: 'على مسرح الرقص', bar: 'في صالة الكبار', roam: 'يتجول بالمحطة' };
 
   function setLogicalPosition(node, left, top) { node.dataset.sceneLeft = String(left); node.dataset.sceneTop = String(top); node.style.left = left + '%'; node.style.top = top + '%'; }
   function randomPosition(zone) { var r = ZONES[zone] || ZONES.roam; return { left: r[0] + Math.random() * (r[1] - r[0]), top: r[2] + Math.random() * (r[3] - r[2]) }; }
@@ -168,7 +168,7 @@
   }
 
   function addParticipant(data, source) {
-    if (participants.size >= MAX) { showToast('الساحة ممتلئة — الحد 50 رائدًا'); return null; }
+    if (participants.size >= MAX) { showToast('الساحة ممتلئة — الحد 50 ضيفًا'); return null; }
     var id = stableId(data);
     if (participants.has(id)) {
       var ex = participants.get(id);
@@ -178,7 +178,7 @@
     }
     var zone = participants.size % 3 === 0 ? 'floor' : (participants.size % 3 === 1 ? 'roam' : 'bar');
     var pos = randomPosition(zone);
-    var p = { id: id, name: data.name || data.uniqueId || 'رائد', uniqueId: data.uniqueId || '', source: source || 'manual', zone: zone, left: pos.left, top: pos.top, node: null, queue: Promise.resolve(), pending: 0, dragging: false, busy: false, holdUntil: 0 };
+    var p = { id: id, name: data.name || data.uniqueId || 'ضيف', uniqueId: data.uniqueId || '', source: source || 'manual', zone: zone, left: pos.left, top: pos.top, node: null, queue: Promise.resolve(), pending: 0, dragging: false, busy: false, holdUntil: 0 };
     participants.set(id, p);
     renderParticipant(p);
     updateCount();
@@ -210,7 +210,7 @@
   }
   function runAction(data) {
     var list = Array.from(participants.values());
-    if (!list.length) { showToast('وصلت هدية — أضف رائدًا أولًا'); return; }
+    if (!list.length) { showToast('وصلت هدية — أضف ضيفًا أولًا'); return; }
     var p = participants.get(stableId(data)) || list[Math.floor(Math.random() * list.length)];
     var meta = ACTION[data.action] || ACTION.DANCE;
     var dur = Number(data.duration) || meta[2];
@@ -295,7 +295,7 @@
   function runPerformanceProbe() {
     if (new URLSearchParams(location.search).get('perf') !== '50') return;
     var t0 = performance.now();
-    for (var i = 0; i < MAX; i++) addParticipant({ name: 'رائد ' + (i + 1), uniqueId: 'probe_' + i }, 'perf');
+    for (var i = 0; i < MAX; i++) addParticipant({ name: 'ضيف ' + (i + 1), uniqueId: 'probe_' + i }, 'perf');
     var addMs = performance.now() - t0;
     var t1 = performance.now();
     for (var f = 0; f < 60; f++) participants.forEach(function (p, idx) { setLogicalPosition(p.node, 10 + ((idx + f) % 80), 25 + ((idx + f) % 55)); });

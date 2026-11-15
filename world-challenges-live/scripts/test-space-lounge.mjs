@@ -20,21 +20,21 @@ test('الصفحة الرئيسية تعرض اختياراً منفصلاً ل�
 });
 
 test('مسار الاستراحة صفحة مستقلة وتحمل مشهد 3D محلياً وبكسل إصدار جديد', () => {
-  assert.match(loungePage, /space-lounge-3d\.js\?v=5/);
-  assert.match(loungePage, /space-lounge\.js\?v=5/);
-  assert.match(loungePage, /space-lounge\.css\?v=5/);
+  assert.match(loungePage, /space-lounge-3d\.js\?v=7/);
+  assert.match(loungePage, /space-lounge\.js\?v=7/);
+  assert.match(loungePage, /space-lounge\.css\?v=7/);
   assert.match(server, /extensions:\s*\["html"\]/);
 });
 
 test('المشهد ثلاثي الأبعاد حقيقي، منخفض المضلع، ويحتوي رجوعاً آمناً عند غياب WebGL', () => {
   assert.match(sceneSource, /new THREE\.WebGLRenderer/);
-  assert.match(sceneSource, /new THREE\.OrthographicCamera/);
+  assert.match(sceneSource, /new THREE\.PerspectiveCamera/);
   assert.match(sceneSource, /new THREE\.CapsuleGeometry/);
-  assert.match(sceneSource, /raycaster\.ray\.intersectPlane\(groundPlane/);
   assert.match(sceneSource, /node\.dataset\.sceneLeft/);
+  assert.match(sceneSource, /buildDJDeck/);
+  assert.match(sceneSource, /buildVipLounge/);
+  assert.match(sceneSource, /stage\.classList\.remove\('has-3d'\)/);
   assert.match(loungeStyle, /\.sl-plate\{[^}]*display:flex/);
-  assert.match(sceneSource, /camera\.zoom/);
-  assert.match(sceneSource, /stage\.classList\.remove\('has-3d-scene'\)/);
   assert.match(sceneSource, /requestAnimationFrame/);
 });
 
@@ -54,7 +54,7 @@ test('أصول المشهد لا تدخل التحميل الأولي للعبة
   assert.match(loungeClient, /var MAX = 50/);
   assert.match(loungeClient, /participants\.size >= MAX/);
   assert.match(worker, /arena-extras\.css\?v=107/);
-  assert.match(worker, /CACHE_NAME = "wcq-v20261113-audio-compressed-v1"/);
-  assert.doesNotMatch(worker, /space-lounge-3d\.js/);
+  assert.match(worker, /CACHE_NAME = "wcq-v20261115-space-lounge-cinematic-v1"/);
+  assert.match(worker, /space-lounge-3d\.js\?v=7/);
   assert.doesNotMatch(worker, /three\.module|three\.core/);
 });
