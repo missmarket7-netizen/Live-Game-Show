@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b18">
+  <meta name="robots" content="noindex,nofollow">
+  <title>لوحة مخرج استديو قدها — عالم التحديات</title>
+  <link rel="stylesheet" href="/studio-control.css?v=20261116-studio-v1">
+  <script defer src="/studio-control.js?v=20261116-studio-v1"></script>
+</head>
+<body class="studio-control-body">
+  <main class="control-shell">
+    <header class="control-header">
+      <a class="control-brand" href="/" aria-label="العودة إلى عالم التحديات">
+        <img src="/images/studio-world-challenges.webp" alt="" width="48" height="48">
+        <span><small>QADDAHA / BROADCAST</small><strong>استديو قدها</strong></span>
+      </a>
+      <div class="control-header-actions">
+        <a class="quiet-link" href="/" title="العودة إلى صفحة البرنامج">البرنامج</a>
+        <a class="output-link" href="/studio" target="_blank" rel="noopener">فتح مخرج البث <span aria-hidden="true">↗</span></a>
+      </div>
+    </header>
+
+    <section class="control-intro">
+      <div><span class="control-eyebrow">مخرج مستقل · لا يغيّر نتيجة اللعبة</span><h1>قدها على الهواء.</h1><p>وجّه المشهد، راقب النتيجة، واترك السؤال في قلب الحكاية.</p></div>
+      <div id="controlConnection" class="control-connection is-idle" role="status" aria-live="polite"><i></i><span id="controlConnectionText">افتح لوحة اللعبة في نافذة أخرى لبدء التحديث</span></div>
+    </section>
+
+    <div class="control-layout">
+      <section class="preview-column" aria-label="معاينة مخرج البث">
+        <div class="section-heading"><div><span>01 / PROGRAM MONITOR</span><h2>المشهد النهائي</h2></div><span class="preview-live-indicator"><i></i> PREVIEW</span></div>
+        <div class="preview-frame"><iframe title="معاينة استديو قدها" src="/studio?preview=1" loading="eager"></iframe></div>
+        <p class="preview-hint">هذه نسخة 2.5D خفيفة؛ نموذج المقدم ثلاثي الأبعاد وRig الوجه ومزامنة الشفاه مرحلة لاحقة. افتح «مخرج البث» في نافذة منفصلة لاستخدامها في OBS.</p>
+      </section>
+
+      <aside class="director-panel" aria-label="أدوات المخرج">
+        <section class="control-card">
+          <div class="section-heading compact"><div><span>02 / CAMERA DIRECTOR</span><h2>اختيار الكادر</h2></div></div>
+          <div class="camera-presets" role="group" aria-label="زوايا المشهد">
+            <button class="camera-preset is-active" type="button" data-view="wide" aria-pressed="true"><b>◉</b><span>اللقطة الواسعة</span><small>المشهد كاملًا</small></button>
+            <button class="camera-preset" type="button" data-view="scores" aria-pressed="false"><b>◎</b><span>تركيز النتيجة</span><small>الكباتن والنقاط</small></button>
+            <button class="camera-preset" type="button" data-view="awards" aria-pressed="false"><b>✦</b><span>لحظة التميز</span><small>الهدايا والنجوم</small></button>
+          </div>
+          <label class="merge-toggle"><input id="mergeLayers" type="checkbox"><span class="merge-switch" aria-hidden="true"></span><span><b>دمج الطبقات</b><small>لقطة موحّدة بعمق بصري أخف</small></span></label>
+        </section>
+
+        <section class="control-card">
+          <div class="section-heading compact"><div><span>03 / SCENE LAYERS</span><h2>طبقات الاستديو</h2></div></div>
+          <label class="layer-toggle"><input type="checkbox" data-layer-toggle="scores" checked><span class="layer-check" aria-hidden="true"></span><span><b>النتيجة والكباتن</b><small>الطبقة القريبة</small></span></label>
+          <label class="layer-toggle"><input type="checkbox" data-layer-toggle="awards" checked><span class="layer-check" aria-hidden="true"></span><span><b>الهدايا والنجوم</b><small>الطبقة الوسطى</small></span></label>
+          <label class="layer-toggle"><input type="checkbox" data-layer-toggle="branding" checked><span class="layer-check" aria-hidden="true"></span><span><b>الخلفية والرعاة</b><small>الطبقة البعيدة</small></span></label>
+        </section>
+
+        <section class="control-card awards-editor">
+          <div class="section-heading compact"><div><span>04 / SHOW MOMENTS</span><h2>لحظات الأسبوع</h2></div></div>
+          <label class="control-field"><span>عنوان الهدية أو اللحظة</span><input id="giftMoment" type="text" maxlength="44" placeholder="مثال: لحظة المجرة"></label>
+          <div class="field-pair"><label class="control-field"><span>قائد الأسبوع</span><input id="weeklyLeader" type="text" maxlength="28" placeholder="اسم المشارك"></label><label class="control-field"><span>نجم الجولة</span><input id="roundStar" type="text" maxlength="28" placeholder="اسم المشارك"></label></div>
+          <button id="applyAwards" class="apply-button" type="button">تحديث لحظات الاستديو <span aria-hidden="true">←</span></button>
+          <p class="control-note">هذه البيانات تخص العرض فقط؛ لا تعدّل نقاط الفرق أو سجل المنافسة.</p>
+        </section>
+      </aside>
+    </div>
+    <footer class="control-footer"><span>اللعبة الحالية ما زالت مصدر السؤال والنتيجة.</span><span>الانتقال إلى البث الحي يبقى بقرار المخرج.</span></footer>
+  </main>
+</body>
+</html>

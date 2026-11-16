@@ -421,18 +421,29 @@ function createOutputSnapshot() {
     ? state.captains[team].map((name) => safeText(name, 48)).filter(Boolean).slice(0, 5)
     : [];
   const timerDuration = Math.max(1, Math.min(3600, Number(state.timerDuration) || 30));
+  const answerText = currentQuestion
+    ? safeText(currentQuestion.source === 'random-host' ? 'إجابة حرة — الحكم للمقدم' : (questionAnswer(currentQuestion) || 'إجابة حرة — الحكم للمقدم'), 160)
+    : '';
   return {
     schemaVersion: 1,
     sentAt: Date.now(),
     ready: Boolean(currentQuestion),
     scores: { girls: safeScore(state.girlsScore), boys: safeScore(state.boysScore) },
-    question: { text: outputQuestionText(currentQuestion) },
+    question: {
+      text: outputQuestionText(currentQuestion),
+      answer: answerText,
+      category: safeText(currentQuestion && currentQuestion.category, 48),
+      revealed: Boolean(state.isRevealed),
+      index: currentQuestion ? state.currentIndex + 1 : 0,
+      total: state.questions.length
+    },
     timer: {
       remainingSeconds: Math.max(0, Math.min(3600, Number(state.timerValue) || 0)),
       durationSeconds: timerDuration,
       running: Boolean(state.isTimerRunning)
     },
-    captains: { girls: safeCaptains('girls'), boys: safeCaptains('boys') }
+    captains: { girls: safeCaptains('girls'), boys: safeCaptains('boys') },
+    roundNumber: Math.max(1, Math.min(999, Number(state.roundNumber) || 1))
   };
 }
 
@@ -604,6 +615,7 @@ function revealAnswer() {
   $('answerReveal').classList.remove('hidden');
   $('answerReveal').classList.add('reveal-anim');
   $('revealBtn').disabled = true;
+  publishOutputSnapshot();
 }
 
 /* ═══ نظام الهدايا والدروع ═══ */

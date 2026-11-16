@@ -8,7 +8,7 @@
 <link rel="manifest" href="/manifest.json?v=20261106">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261114-studio-output-1">
+<link rel="stylesheet" href="/style.css?v=20261116-studio-v1">
 <link rel="stylesheet" href="arena-extras.css?v=110" />
 </head>
 <body>
@@ -26,9 +26,10 @@
 <h1>ساحة<br><span>التحدّي</span></h1>
 <p class="hero-subtitle">مواجهة بنات × شباب، لحظات حاسمة، وهدايا تغيّر مسار الجولة أمام جمهور اللايف.</p>
 <div class="host-line"><span>المضيف التنفيذي</span><strong>مروان حكيم</strong></div>
-<button id="studioPanelToggle" class="studio-entry-btn" type="button" aria-controls="studioSetupPanel" aria-expanded="false">
-<span class="studio-entry-mark" aria-hidden="true">K / 01</span><span class="studio-entry-copy"><strong>استديو قدها</strong><small>اضبط الجولة، ثم ابدأ المنافسة من بنك الأسئلة المحلي</small></span><span class="studio-entry-arrow" aria-hidden="true">＋</span>
-</button>
+<a id="broadcastStudioEntry" class="studio-entry-btn" href="/studio-control">
+<span class="studio-entry-mark" aria-hidden="true">LIVE / 01</span><span class="studio-entry-copy"><strong>ادخل استديو قدها</strong><small>لوحة المخرج · طبقات سينمائية · مخرج بث مستقل</small></span><span class="studio-entry-arrow" aria-hidden="true">←</span>
+</a>
+<button id="studioPanelToggle" class="studio-setup-shortcut" type="button" aria-controls="studioSetupPanel" aria-expanded="false">إعداد المنافسة والأسئلة <span aria-hidden="true">＋</span></button>
 </div>
 <div class="hero-app-visual">
 <span class="visual-label">OFFICIAL LIVE APP</span>
@@ -183,7 +184,7 @@
 <button class="sound-trigger" data-sound="ana" type="button">🎙️ Ana</button></div></div></div>
 <canvas id="confettiCanvas"></canvas>
 
-<script src="/app.js?v=20261115-qaddaha-output-v2"></script>
+<script src="/app.js?v=20261116-studio-v1"></script>
 <script src="audience-race.js?v=20261109-timer-king-queen"></script>
 <script src="flag-renderer.js?v=20261106"></script>
 <script src="arena-extras.js?v=109"></script>
@@ -191,7 +192,7 @@
 <script src="frame-clean.js?v=20261106"></script>
 <script src="captain-sounds.js?v=106"></script>
 <script src="flag-view.js?v=20261107"></script>
-<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261115-studio-output-v2").catch(function(){});</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261116-studio-v1").catch(function(){});</script>
 <a id="loungeEntryChip" class="icon-button" href="/space-lounge.html" title="استراحة الفضاء" style="text-decoration:none">🛰️</a>
 </body>
 </html>
