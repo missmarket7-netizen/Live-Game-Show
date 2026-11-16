@@ -30,7 +30,8 @@
     { key: 'shoaib',   aliases: ['shoaib', 'شعيب'] },
     { key: 'shero',    aliases: ['shero', 'شيرو'] },
     { key: 'lana',     aliases: ['lana', 'لانا'] },
-    { key: 'asia',     aliases: ['asia', 'آسيا'] }
+    { key: 'asia',     aliases: ['asia', 'آسيا'] },
+    { key: 'dahab',    aliases: ['dahab', 'دهب'] }
   ];
 
   var FALLBACK_BY_KEY = {
@@ -46,7 +47,8 @@
     shoaib: 'boys-captin',
     shero: 'boys-captin',
     lana: 'girls-captin',
-    asia: 'girls-captin'
+    asia: 'girls-captin',
+    dahab: 'girls-captin'
   };
 
   function norm(s) {
