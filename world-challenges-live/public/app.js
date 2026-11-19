@@ -9,7 +9,14 @@ const state = {
 };
 window.state = state;
 const OUTPUT_CHANNEL_NAME = 'wcq-output-v1';
+const STUDIO_SCORE_COMMAND_CHANNEL_NAME = 'wcq-studio-score-command-v1';
+const OPERATOR_KEY_STORAGE_KEY = 'wcq_operator_write_key_v1';
 let outputChannel = null;
+let outputPublishInFlight = false;
+let pendingServerOutputSnapshot = null;
+let serverOutputPublishTimer = 0;
+let lastServerOutputSentAt = 0;
+const handledStudioScoreCommands = new Set();
 const SAVED_KEY = 'lgs_saved_sets_v7';
 const HISTORY_KEY = 'lgs_question_history_v7';
 const SOUND_KEY = 'lgs_sound_v7';
@@ -17,6 +24,110 @@ const THEME_KEY = 'lgs_theme_v1';
 const $ = (id) => document.getElementById(id);
 const safeOn = (id, evt, fn) => { const el = $(id); if (el) el.addEventListener(evt, fn); return el; };
 const $$ = (s) => Array.from(document.querySelectorAll(s));
+let operatorKeyMemory = '';
+
+function getOperatorKey() {
+  try { return sessionStorage.getItem(OPERATOR_KEY_STORAGE_KEY) || operatorKeyMemory; }
+  catch (error) { return operatorKeyMemory; }
+}
+
+function setOperatorKey(value) {
+  operatorKeyMemory = value;
+  try { sessionStorage.setItem(OPERATOR_KEY_STORAGE_KEY, value); } catch (error) {}
+}
+
+function clearOperatorKey() {
+  operatorKeyMemory = '';
+  try { sessionStorage.removeItem(OPERATOR_KEY_STORAGE_KEY); } catch (error) {}
+}
+
+function setOperatorAuthStatus(message, state) {
+  const status = $('operatorKeyStatus');
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.state = state || 'info';
+}
+
+async function verifyOperatorKey(candidate) {
+  const headers = candidate ? { 'X-Operator-Key': candidate } : {};
+  try {
+    const response = await fetch('/api/operator/verify', { method: 'GET', cache: 'no-store', headers });
+    if (response.ok) return { state: 'ready', message: 'المفتاح صحيح لهذه الجلسة. لم يُحفظ على نحو دائم.' };
+    if (response.status === 503) return { state: 'unconfigured', message: 'مفتاح المشغّل غير مضبوط أو لا يحقق الحد الأدنى المطلوب في بيئة الخادم.' };
+    if (response.status === 401) return candidate
+      ? { state: 'invalid', message: 'المفتاح غير صحيح؛ لم يُحفظ.' }
+      : { state: 'required', message: 'أدخل مفتاح المشغّل قبل استخدام واجهات الأسئلة المحمية.' };
+    return { state: 'unavailable', message: 'تعذر التحقق من مفتاح المشغّل.' };
+  } catch (error) {
+    return { state: 'unavailable', message: 'تعذر الاتصال بالخادم للتحقق من المفتاح.' };
+  }
+}
+
+async function operatorApiFetch(path, options = {}) {
+  const url = new URL(path, window.location.href);
+  if (url.origin !== window.location.origin) throw new Error('ممنوع إرسال مفتاح المشغّل إلى نطاق آخر');
+  const headers = new Headers(options.headers || {});
+  const operatorKey = getOperatorKey();
+  if (operatorKey) headers.set('X-Operator-Key', operatorKey);
+  const response = await fetch(url.pathname + url.search, { ...options, headers, cache: 'no-store' });
+  if (response.status === 401) setOperatorAuthStatus('مفتاح المشغّل مفقود أو غير صحيح؛ افتح إعداد المفتاح وأعد المحاولة.', 'error');
+  else if (response.status === 503) setOperatorAuthStatus('مفتاح المشغّل غير مضبوط في بيئة الخادم؛ واجهات الكتابة مغلقة بأمان.', 'error');
+  else if (response.status === 429) {
+    const retryAfter = Math.max(1, Number(response.headers.get('Retry-After')) || 1);
+    setOperatorAuthStatus(`تجاوزت طلبات المشغّل الحد المؤقت؛ انتظر ${retryAfter} ثانية ثم أعد المحاولة.`, 'error');
+  }
+  return response;
+}
+
+function initOperatorSecurity() {
+  const panel = $('operatorKeyPanel');
+  const input = $('operatorKeyInput');
+  const saveButton = $('operatorKeySave');
+  const clearButton = $('operatorKeyClear');
+  const toggles = $$('[data-operator-key-toggle]');
+  if (!panel || !input || !saveButton || !clearButton || !toggles.length) return;
+
+  const setOpen = (open) => {
+    panel.hidden = !open;
+    toggles.forEach((button) => button.setAttribute('aria-expanded', String(open)));
+    if (open) input.focus();
+  };
+  toggles.forEach((button) => button.addEventListener('click', () => setOpen(panel.hidden)));
+  safeOn('operatorKeyClose', 'click', () => setOpen(false));
+  safeOn('operatorKeyForm', 'submit', async (event) => {
+    event.preventDefault();
+    const candidate = input.value.trim();
+    if (!candidate) {
+      setOperatorAuthStatus('اكتب المفتاح أولًا. لا تضعه في رابط أو رسالة عامة.', 'error');
+      input.focus();
+      return;
+    }
+    setOperatorAuthStatus('جارٍ التحقق من المفتاح مع الخادم…', 'pending');
+    const result = await verifyOperatorKey(candidate);
+    if (result.state === 'ready') setOperatorKey(candidate);
+    else clearOperatorKey();
+    input.value = '';
+    setOperatorAuthStatus(result.message, result.state);
+  });
+  clearButton.addEventListener('click', async () => {
+    clearOperatorKey();
+    input.value = '';
+    const result = await verifyOperatorKey('');
+    setOperatorAuthStatus(result.state === 'required'
+      ? 'حُذف المفتاح من جلسة هذا المتصفح.'
+      : result.message, result.state === 'required' ? 'info' : result.state);
+  });
+  input.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setOpen(false);
+  });
+
+  const savedKey = getOperatorKey();
+  setOperatorAuthStatus(savedKey ? 'جارٍ التحقق من مفتاح هذه الجلسة…' : 'جارٍ التحقق من إعداد الخادم…', 'pending');
+  verifyOperatorKey(savedKey).then((result) => {
+    if (savedKey && result.state !== 'ready') clearOperatorKey();
+    setOperatorAuthStatus(result.message, result.state);
+  });
+}
 const soundFiles = {
   'gift-rose': ['gift-rose'], 'gift-donut': ['gift-dount', 'gift-donut'], 'gift-corgi': ['gift-corgi'],
   'gift-heart': ['gift-heart'], 'gift-tiktok': ['gift-tiktok'], 'gift-cat': ['gift-cat'],
@@ -399,70 +510,98 @@ function updateTimer() {
 }
 
 function createOutputSnapshot() {
-  const currentQuestion = state.questions[state.currentIndex] || null;
-  const safeText = (value, maxLength) => String(value == null ? '' : value)
-    .replace(/[\u0000-\u001F\u007F]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, maxLength);
-  const outputQuestionText = (question) => {
-    const candidate = safeText(question && question.question, 320);
-    const isMediaPath = /^(?:https?:\/\/|\/|(?:public\/)?(?:flags|guess|name|landmarks?|tourism|images)\/)|\.(?:svg|png|jpe?g|webp)(?:[?#]|$)/i.test(candidate);
-    if (candidate && !isMediaPath) return candidate;
-    const category = safeText(question && question.category, 80);
-    if (/خمن\s*(?:الدولة\s*أو\s*المدينة|المدينة)/i.test(category)) return 'خمن الدولة أو المدينة من الصورة';
-    if (/خمن\s*الدولة|أعلام/i.test(category)) return 'ما اسم هذه الدولة؟';
-    if (/خمن\s*الاسم/i.test(category)) return 'خمن الاسم من الصورة';
-    if (/معالم|سياحية/i.test(category)) return 'حدّد المعلم أو الوجهة من الصورة';
-    return category ? 'سؤال بصري من فئة ' + category : 'سؤال بصري';
-  };
-  const safeScore = (value) => {
-    const score = Number(value);
-    return Number.isFinite(score) ? Math.max(-9999, Math.min(9999, score)) : 0;
-  };
-  const safeCaptains = (team) => Array.isArray(state.captains && state.captains[team])
-    ? state.captains[team].map((name) => safeText(name, 48)).filter(Boolean).slice(0, 5)
-    : [];
-  const timerDuration = Math.max(1, Math.min(3600, Number(state.timerDuration) || 30));
-  const answerText = currentQuestion
-    ? safeText(currentQuestion.source === 'random-host' ? 'إجابة حرة — الحكم للمقدم' : (questionAnswer(currentQuestion) || 'إجابة حرة — الحكم للمقدم'), 160)
-    : '';
-  return {
-    schemaVersion: 1,
-    sentAt: Date.now(),
-    ready: Boolean(currentQuestion),
-    scores: { girls: safeScore(state.girlsScore), boys: safeScore(state.boysScore) },
-    question: {
-      text: outputQuestionText(currentQuestion),
-      answer: answerText,
-      category: safeText(currentQuestion && currentQuestion.category, 48),
-      revealed: Boolean(state.isRevealed),
-      index: currentQuestion ? state.currentIndex + 1 : 0,
-      total: state.questions.length
-    },
-    timer: {
-      remainingSeconds: Math.max(0, Math.min(3600, Number(state.timerValue) || 0)),
-      durationSeconds: timerDuration,
-      running: Boolean(state.isTimerRunning)
-    },
-    captains: { girls: safeCaptains('girls'), boys: safeCaptains('boys') },
-    roundNumber: Math.max(1, Math.min(999, Number(state.roundNumber) || 1))
-  };
+  const snapshotBuilder = window.WCQOutputSnapshot;
+  if (!snapshotBuilder || typeof snapshotBuilder.create !== 'function') return null;
+  return snapshotBuilder.create(state, questionAnswer);
 }
 
 function publishOutputSnapshot() {
-  if (!outputChannel) return;
   try {
-    outputChannel.postMessage({ channel: OUTPUT_CHANNEL_NAME, type: 'snapshot', snapshot: createOutputSnapshot() });
+    const snapshot = createOutputSnapshot();
+    if (!snapshot) return;
+    if (outputChannel) outputChannel.postMessage({ channel: OUTPUT_CHANNEL_NAME, type: 'snapshot', snapshot });
+    publishServerOutputSnapshot(snapshot);
   } catch (outputError) {}
 }
 
+function scheduleServerOutputPublish() {
+  if (outputPublishInFlight || serverOutputPublishTimer || !pendingServerOutputSnapshot || !getOperatorKey()) return;
+  const delay = Math.max(0, 1000 - (Date.now() - lastServerOutputSentAt));
+  serverOutputPublishTimer = window.setTimeout(() => {
+    serverOutputPublishTimer = 0;
+    const snapshot = pendingServerOutputSnapshot;
+    pendingServerOutputSnapshot = null;
+    if (!snapshot || !getOperatorKey()) return;
+    outputPublishInFlight = true;
+    lastServerOutputSentAt = Date.now();
+    operatorApiFetch('/api/output-snapshot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ snapshot }),
+      signal: AbortSignal.timeout(4000)
+    }).catch(() => {}).finally(() => {
+      outputPublishInFlight = false;
+      scheduleServerOutputPublish();
+    });
+  }, delay);
+}
+
+function publishServerOutputSnapshot(snapshot) {
+  if (!getOperatorKey()) return;
+  pendingServerOutputSnapshot = snapshot;
+  scheduleServerOutputPublish();
+}
+
 function initOutputBroadcaster() {
-  if (outputChannel || typeof BroadcastChannel !== 'function') return;
-  try {
-    outputChannel = new BroadcastChannel(OUTPUT_CHANNEL_NAME);
-    publishOutputSnapshot();
-    window.setInterval(publishOutputSnapshot, 1000);
-  } catch (outputError) {
-    outputChannel = null;
+  if (!outputChannel && typeof BroadcastChannel === 'function') {
+    try {
+      outputChannel = new BroadcastChannel(OUTPUT_CHANNEL_NAME);
+      outputChannel.addEventListener('message', (event) => {
+        const message = event && event.data;
+        if (!message || message.channel !== OUTPUT_CHANNEL_NAME || message.type !== 'request-snapshot') return;
+        publishOutputSnapshot();
+      });
+    } catch (outputError) {
+      outputChannel = null;
+    }
   }
+  publishOutputSnapshot();
+  window.setInterval(publishOutputSnapshot, 1000);
+  try {
+    const scoreCommands = new BroadcastChannel(STUDIO_SCORE_COMMAND_CHANNEL_NAME);
+    scoreCommands.addEventListener('message', (event) => {
+      const message = event && event.data;
+      if (!message || message.channel !== STUDIO_SCORE_COMMAND_CHANNEL_NAME || message.type !== 'adjust-score') return;
+      const id = String(message.id || '').slice(0, 100);
+      const team = message.team;
+      const delta = Number(message.delta);
+      const reply = (ok, reason, scores) => scoreCommands.postMessage({
+        channel: STUDIO_SCORE_COMMAND_CHANNEL_NAME,
+        type: 'score-ack', id, ok, reason: reason || '', scores,
+        team: ['girls', 'boys'].includes(team) ? team : '', delta: [-1, 1].includes(delta) ? delta : 0
+      });
+      if (!id || handledStudioScoreCommands.has(id)) return;
+      handledStudioScoreCommands.add(id);
+      if (handledStudioScoreCommands.size > 128) handledStudioScoreCommands.delete(handledStudioScoreCommands.values().next().value);
+      if (!['girls', 'boys'].includes(team) || ![-1, 1].includes(delta)) {
+        reply(false, 'أمر غير صالح');
+        return;
+      }
+      if (!state.questions[state.currentIndex]) {
+        reply(false, 'ابدأ جولة في لوحة اللعبة أولًا');
+        return;
+      }
+      const before = team === 'girls' ? state.girlsScore : state.boysScore;
+      try { applyPoint(team, delta); } catch (error) {
+        reply(false, 'تعذر تطبيق النقطة');
+        return;
+      }
+      const after = team === 'girls' ? state.girlsScore : state.boysScore;
+      reply(after !== before, after === before ? 'وصل الفريق إلى الحد الأعلى للنقاط' : '', {
+        girls: state.girlsScore, boys: state.boysScore
+      });
+    });
+  } catch (outputError) {}
 }
 
 function stopTimer() {
@@ -546,7 +685,7 @@ function setQuestionVisual(q) {
   if (!isVisualQuestion(q)) { node.textContent = q?.question || '—'; return; }
   const sources = visualCandidates(q);
   const figure = document.createElement('figure'); figure.className = 'question-visual-frame';
-  const img = document.createElement('img'); img.alt = q.answer ? `صورة السؤال — ${q.answer}` : 'صورة السؤال'; img.loading = 'eager'; img.decoding = 'async'; img.draggable = false;
+  const img = document.createElement('img'); img.alt = 'صورة السؤال'; img.loading = 'eager'; img.decoding = 'async'; img.draggable = false;
   const caption = document.createElement('figcaption');
   const isFlag = /(?:^|\/)flags\/[a-z]{2}\.(?:svg|png)$|flagcdn\.com/i.test(sources[0] || '');
   node.classList.add('question-media-host', isFlag ? 'is-flag-visual' : 'is-landmark-visual');
@@ -1180,7 +1319,7 @@ function initActivity() {
 /* ═══ جلب الأسئلة من السيرفر ═══ */
 async function fetchQuestions(apiParams) {
   try {
-    const respObj = await fetch('/api/questions?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
+    const respObj = await operatorApiFetch('/api/questions?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
       method: 'POST',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
@@ -1198,7 +1337,7 @@ async function fetchQuestions(apiParams) {
 
 async function fetchAIQuestions(aiParams) {
   try {
-    const aiResp = await fetch('/api/generate?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
+    const aiResp = await operatorApiFetch('/api/generate?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
       method: 'POST',
       cache: 'no-store',
       headers: { 'Content-Type': 'application/json' },
@@ -1803,7 +1942,7 @@ function init() {
     updateSavedCount();
   } catch (e) { console.warn('state init', e); }
   const steps = [
-    injectSponsor, expandCaptainSlots, initTheme, initActivity, fixTimerPills,
+    initOperatorSecurity, injectSponsor, expandCaptainSlots, initTheme, initActivity, fixTimerPills,
     patchGiftImages, cleanCaptainSection, watchScreensForSoundBtn,
     initSetup, initGame, initResults, initOverlays, initFloatingSound,
     connectLiveStream, startLeaderboardPoll

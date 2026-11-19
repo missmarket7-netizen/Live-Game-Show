@@ -6,8 +6,10 @@
   <meta name="theme-color" content="#080b18">
   <meta name="robots" content="noindex,nofollow">
   <title>لوحة مخرج استديو قدها — عالم التحديات</title>
-  <link rel="stylesheet" href="/studio-control.css?v=20261116-studio-v1">
-  <script defer src="/studio-control.js?v=20261116-studio-v1"></script>
+  <link rel="stylesheet" href="/studio-control.css?v=20261118-independent-studio-v1">
+  <script defer src="/output-snapshot.js?v=20261118-output-bridge-v1"></script>
+  <script defer src="/studio-director-state.js?v=20261118-independent-studio-v1"></script>
+  <script defer src="/studio-control.js?v=20261118-independent-studio-v1"></script>
 </head>
 <body class="studio-control-body">
   <main class="control-shell">
@@ -23,7 +25,7 @@
     </header>
 
     <section class="control-intro">
-      <div><span class="control-eyebrow">مخرج مستقل · لا يغيّر نتيجة اللعبة</span><h1>قدها على الهواء.</h1><p>وجّه المشهد، راقب النتيجة، واترك السؤال في قلب الحكاية.</p></div>
+      <div><span class="control-eyebrow">مخرج مستقل · النتيجة تبقى داخل اللعبة</span><h1>قدها على الهواء.</h1><p>وجّه المشهد، راقب النتيجة، واترك السؤال في قلب الحكاية.</p></div>
       <div id="controlConnection" class="control-connection is-idle" role="status" aria-live="polite"><i></i><span id="controlConnectionText">افتح لوحة اللعبة في نافذة أخرى لبدء التحديث</span></div>
     </section>
 
@@ -31,10 +33,28 @@
       <section class="preview-column" aria-label="معاينة مخرج البث">
         <div class="section-heading"><div><span>01 / PROGRAM MONITOR</span><h2>المشهد النهائي</h2></div><span class="preview-live-indicator"><i></i> PREVIEW</span></div>
         <div class="preview-frame"><iframe title="معاينة استديو قدها" src="/studio?preview=1" loading="eager"></iframe></div>
-        <p class="preview-hint">هذه نسخة 2.5D خفيفة؛ نموذج المقدم ثلاثي الأبعاد وRig الوجه ومزامنة الشفاه مرحلة لاحقة. افتح «مخرج البث» في نافذة منفصلة لاستخدامها في OBS.</p>
+        <section class="score-control" aria-label="أزرار نقاط الفريقين">
+          <div class="score-control-heading"><div><span>تحكم الجولة</span><small>كل ضغطة نقطة واحدة عبر تبويب اللعبة</small></div><strong id="scoreControlSnapshot">0 — 0</strong></div>
+          <div class="score-control-teams">
+            <div class="score-control-team score-control-team--girls"><b>فريق البنات</b><div class="score-control-buttons"><button type="button" data-score-team="girls" data-score-delta="-1" aria-label="خصم نقطة من فريق البنات">−</button><span id="controlGirlsScore">0</span><button type="button" data-score-team="girls" data-score-delta="1" aria-label="إضافة نقطة لفريق البنات">+</button></div></div>
+            <div class="score-control-team score-control-team--boys"><b>فريق الشباب</b><div class="score-control-buttons"><button type="button" data-score-team="boys" data-score-delta="-1" aria-label="خصم نقطة من فريق الشباب">−</button><span id="controlBoysScore">0</span><button type="button" data-score-team="boys" data-score-delta="1" aria-label="إضافة نقطة لفريق الشباب">+</button></div></div>
+          </div>
+          <p id="scoreControlStatus" class="score-control-status" role="status" aria-live="polite">افتح لوحة اللعبة وابدأ الجولة لتفعيل الأزرار.</p>
+        </section>
+        <p class="preview-hint">المقدم الحالي صورة 2D مستندة إلى تصورك وليست نموذجًا ثلاثي الأبعاد أو Rig. المخرج مستقل وخفيف؛ افتح «مخرج البث» في نافذة منفصلة لاستخدامه في OBS.</p>
       </section>
 
       <aside class="director-panel" aria-label="أدوات المخرج">
+        <section class="control-card director-sync-card">
+          <div class="section-heading compact"><div><span>SECURE OUTPUT LINK</span><h2>ربط مخرج OBS</h2></div></div>
+          <p class="control-note">أدخل مفتاح المشغّل لرفع إعدادات المشهد إلى الخادم. المفتاح يبقى في جلسة هذا التبويب ولا يصل إلى صفحة العرض.</p>
+          <form id="directorKeyForm" autocomplete="off">
+            <label class="control-field" for="directorKeyInput"><span>مفتاح المشغّل</span><input id="directorKeyInput" type="password" inputmode="text" autocomplete="new-password" maxlength="4096" spellcheck="false" placeholder="الصق المفتاح الذي ضبطه مالك الخادم"></label>
+            <button class="apply-button" type="submit">تحقق وربط المخرج <span aria-hidden="true">↗</span></button>
+          </form>
+          <p id="directorSyncStatus" class="control-note" role="status" aria-live="polite">المشهد المحلي متاح؛ ربط OBS المستقل يحتاج تحقق المفتاح.</p>
+        </section>
+
         <section class="control-card">
           <div class="section-heading compact"><div><span>02 / CAMERA DIRECTOR</span><h2>اختيار الكادر</h2></div></div>
           <div class="camera-presets" role="group" aria-label="زوايا المشهد">

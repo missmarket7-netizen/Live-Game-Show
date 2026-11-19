@@ -7,8 +7,11 @@
   <meta name="robots" content="noindex,nofollow">
   <title>مخرج استديو قدها — عالم التحديات</title>
   <link rel="preload" as="image" href="/images/qaddaha-studio-bg.webp">
-  <link rel="stylesheet" href="/studio.css?v=20261116-studio-v1">
-  <script defer src="/studio.js?v=20261116-studio-v1"></script>
+  <link rel="preload" as="image" href="/images/studio-presenter-cutout.png">
+  <link rel="stylesheet" href="/studio.css?v=20261118-independent-studio-v1">
+  <script defer src="/output-snapshot.js?v=20261118-output-bridge-v1"></script>
+  <script defer src="/studio-director-state.js?v=20261118-independent-studio-v1"></script>
+  <script defer src="/studio.js?v=20261118-independent-studio-v1"></script>
 </head>
 <body class="studio-output-body">
   <main id="studioStage" class="studio-stage" data-view="wide" data-merged="false" aria-label="مخرج استديو قدها">
@@ -16,43 +19,49 @@
     <div class="studio-vignette" aria-hidden="true"></div>
     <div class="studio-light-beam studio-light-beam--one" aria-hidden="true"></div>
     <div class="studio-light-beam studio-light-beam--two" aria-hidden="true"></div>
+    <div class="studio-floor-glow" aria-hidden="true"></div>
 
     <header class="studio-topline" data-studio-layer="branding">
       <div class="studio-identity">
         <img src="/images/studio-world-challenges.webp" alt="" width="48" height="48">
         <div><span>برنامج ترفيهي عربي مباشر</span><strong>عالم التحديات</strong></div>
       </div>
-      <div id="studioConnection" class="studio-live-pill is-offline" role="status" aria-live="polite"><i></i><span id="studioConnectionText">بانتظار لوحة اللعبة</span></div>
+      <div class="studio-statuses">
+        <div id="studioConnection" class="studio-live-pill is-offline" role="status" aria-live="polite"><i></i><span id="studioConnectionText">بانتظار لوحة اللعبة</span></div>
+        <div id="studioTikTokStatus" class="studio-live-pill is-offline" role="status" aria-live="polite"><i></i><span id="studioTikTokText">هدايا TikTok غير متصلة</span></div>
+      </div>
     </header>
 
     <section class="sponsor-wall" data-studio-layer="branding" aria-label="الرعاة الرسميون">
       <span class="sponsor-caption">برعاية</span>
-      <div class="sponsor-brand sponsor-brand--qaddaha"><img src="/images/qaddaha.png" alt="قدها" width="38" height="38"><strong>قدها</strong></div>
+      <div class="sponsor-brand sponsor-brand--qaddaha"><img src="/images/qaddaha.png" alt="" width="38" height="38"><strong>قدها</strong></div>
       <span class="sponsor-divider" aria-hidden="true"></span>
-      <div class="sponsor-brand sponsor-brand--twin"><img src="/images/studio-mytwin.webp" alt="My Twin" width="38" height="38"><strong>My Twin</strong></div>
+      <div class="sponsor-brand sponsor-brand--twin"><img src="/images/studio-mytwin.webp" alt="" width="38" height="38"><strong>My Twin</strong></div>
     </section>
 
     <div class="presenter-halo" aria-hidden="true">
-      <div class="halo-ring halo-ring--outer"></div><div class="halo-ring halo-ring--inner"></div>
+      <div class="halo-ring halo-ring--outer"></div>
+      <div class="halo-ring halo-ring--inner"></div>
       <span class="halo-core">ق</span>
-      <span class="halo-caption">مساحة المقدم</span>
     </div>
+    <div class="presenter-ground" aria-hidden="true"></div>
+    <img class="presenter-figure" src="/images/studio-presenter-cutout.png" alt="مقدم عالم التحديات" width="941" height="1672" fetchpriority="high">
 
     <section class="team-layer" data-studio-layer="scores" aria-label="النتيجة والكباتن">
       <article class="team-panel team-panel--girls">
         <div class="team-panel-heading"><span class="team-dot"></span><b>فريق البنات</b></div>
         <strong id="studioGirlsScore" class="team-score-value">0</strong>
-        <div class="team-panel-foot"><span>الكباتن</span><b id="studioGirlsCaptains">بانتظار التسمية</b></div>
+        <div class="team-panel-foot"><span>الكابتن</span><b id="studioGirlsCaptains">بانتظار بيانات اللعبة</b></div>
       </article>
       <div class="versus-mark" aria-hidden="true">VS</div>
       <article class="team-panel team-panel--boys">
         <div class="team-panel-heading"><span class="team-dot"></span><b>فريق الشباب</b></div>
         <strong id="studioBoysScore" class="team-score-value">0</strong>
-        <div class="team-panel-foot"><span>الكباتن</span><b id="studioBoysCaptains">بانتظار التسمية</b></div>
+        <div class="team-panel-foot"><span>الكابتن</span><b id="studioBoysCaptains">بانتظار بيانات اللعبة</b></div>
       </article>
     </section>
 
-    <section class="question-stage" aria-label="السؤال الحالي">
+    <section id="studioQuestionStage" class="question-stage" aria-label="السؤال الحالي">
       <div class="question-card-frame">
         <div class="question-card-top"><span class="question-live-dot"></span><span id="studioQuestionCategory">سؤال المواجهة</span><small id="studioQuestionIndex">جاهزون؟</small></div>
         <p id="studioQuestionText" class="studio-question-text">استعدوا للحظة التحدي…</p>
@@ -68,11 +77,17 @@
       </div>
     </section>
 
-    <section class="awards-layer" data-studio-layer="awards" aria-label="لحظات التميز">
-      <article class="award-card award-card--gift"><span class="award-icon" aria-hidden="true">✦</span><div><small id="studioGiftLabel">لحظة الهدية</small><strong id="studioGiftName">بانتظار لحظة مميزة</strong></div></article>
-      <article class="award-card award-card--leader"><span class="award-icon" aria-hidden="true">♛</span><div><small>قائد الأسبوع</small><strong id="studioWeeklyLeader">لم يتم التحديد</strong></div></article>
-      <article class="award-card award-card--star"><span class="award-icon" aria-hidden="true">★</span><div><small>نجم الجولة</small><strong id="studioRoundStar">لم يتم التحديد</strong></div></article>
+    <section class="awards-layer" data-studio-layer="awards" aria-label="الهدايا ونجوم البرنامج">
+      <article id="studioGiftCard" class="award-card award-card--gift"><span class="award-icon" aria-hidden="true">✦</span><div><small id="studioGiftLabel">لحظة الهدية</small><strong id="studioGiftName">بانتظار لحظة مميزة</strong><em id="studioGiftMeta">هدية المشاهدين تصنع لحظات البرنامج</em></div></article>
+      <article class="award-card award-card--leader"><span class="award-icon" aria-hidden="true">♛</span><div><small>قائد الأسبوع</small><strong id="studioWeeklyLeader">لم يتم التحديد</strong><em>اختيار المخرج</em></div></article>
+      <article class="award-card award-card--star"><span class="award-icon" aria-hidden="true">★</span><div><small>نجم الجولة</small><strong id="studioRoundStar">لم يتم التحديد</strong><em>اختيار المخرج</em></div></article>
+      <article class="award-card award-card--live-star"><span class="award-icon" aria-hidden="true">✧</span><div><small>نجم البث · هدايا</small><strong id="studioLiveStar">بانتظار التفاعل</strong><em id="studioLiveStarMeta">يظهر الترتيب عند وصول البيانات</em></div></article>
     </section>
+
+    <div id="giftSpotlight" class="gift-spotlight" hidden aria-live="polite" aria-atomic="true">
+      <span class="gift-spotlight-icon" aria-hidden="true">✦</span>
+      <div><small>لحظة وفاء من الجمهور</small><strong id="giftSpotlightName"></strong><span id="giftSpotlightDetail"></span></div>
+    </div>
 
     <footer class="studio-footer" data-studio-layer="branding"><span>الساحة لكم</span><i></i><span id="studioRoundLabel">عالم التحديات · قدها</span></footer>
     <div id="studioOfflineNotice" class="studio-offline-notice" hidden>المشهد الاحتياطي نشط — أعد اتصال لوحة اللعبة لاستئناف التحديث</div>
