@@ -2742,3 +2742,25 @@ document.addEventListener('DOMContentLoaded', init);
     return result;
   };
 })();
+
+/* ═══ EMPTY_GAME_GUARD_V1 — يمنع دخول شاشة اللعب بدون أسئلة (أي نسخة app.js) ═══ */
+(function () {
+  'use strict';
+  if (window.__EMPTY_GAME_GUARD_V1__) return;
+  window.__EMPTY_GAME_GUARD_V1__ = true;
+  var orig = window.showScreen;
+  if (typeof orig !== 'function') return;
+  window.showScreen = function (id) {
+    if (id === 'gameScreen') {
+      var st = window.state || null;
+      if (!st || !Array.isArray(st.questions) || st.questions.length === 0) {
+        if (typeof window.showToast === 'function') {
+          window.showToast('لا توجد أسئلة جاهزة — تحقق من السيرفر ثم أعد المحاولة', 'SHOW CONTROL');
+        }
+        if (typeof window.hideLoading === 'function') window.hideLoading();
+        return;
+      }
+    }
+    return orig.apply(this, arguments);
+  };
+})();
