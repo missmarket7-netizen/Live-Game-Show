@@ -1642,3 +1642,15 @@ body:has(#liveStatsChip) .floating-sound-controls {
 
 /* QADDAHA BROADCAST STUDIO ENTRY — gameplay setup remains a separate action */
 .studio-entry-btn{text-decoration:none;color:inherit;cursor:pointer}.studio-entry-btn .studio-entry-arrow{font-size:20px}.studio-setup-shortcut{display:flex;align-items:center;gap:7px;margin-top:8px;padding:4px 0;border:0;background:transparent;color:#aeb9d5;font:700 10px Cairo,Tahoma,sans-serif;text-align:right;cursor:pointer;transition:color .18s}.studio-setup-shortcut span{color:var(--neon-lime);font:700 15px var(--display);transition:transform .18s}.studio-setup-shortcut:hover{color:#f4f6ff}.studio-setup-shortcut[aria-expanded="true"] span{transform:rotate(45deg)}
+
+/* OPERATOR WRITE KEY — control interface only; never included in /output */
+.operator-key-toggle{position:relative;border-color:rgba(200,255,81,.32);color:#d8ff83;font-size:15px}
+.operator-key-toggle[aria-expanded="true"]{border-color:rgba(200,255,81,.8);box-shadow:0 0 18px rgba(200,255,81,.18)}
+.operator-key-panel{position:fixed;top:72px;left:14px;z-index:5500;width:min(350px,calc(100vw - 28px));padding:15px;border:1px solid rgba(200,255,81,.34);border-radius:15px;background:linear-gradient(145deg,rgba(18,25,49,.98),rgba(7,10,22,.99));box-shadow:0 22px 64px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.07);color:#f4f6ff;direction:rtl;backdrop-filter:blur(18px)}
+.operator-key-panel[hidden]{display:none!important}
+.operator-key-heading{display:flex;align-items:center;justify-content:space-between;gap:10px}.operator-key-heading h2{margin:0;color:#d8ff83;font-size:16px;font-weight:900}
+.operator-key-panel>p{margin:9px 0;color:#aab5d2;font-size:11px;line-height:1.7}.operator-key-panel form{display:grid;gap:7px}.operator-key-panel label{color:#dce3f7;font-size:11px;font-weight:800}
+.operator-key-panel input{width:100%;min-height:42px;padding:9px 11px;border:1px solid rgba(255,255,255,.18);border-radius:9px;background:rgba(0,0,0,.28);color:#fff;font:12px ui-monospace,monospace;direction:ltr;text-align:left;outline:none}.operator-key-panel input:focus{border-color:rgba(200,255,81,.72);box-shadow:0 0 0 3px rgba(200,255,81,.1)}
+.operator-key-actions{display:flex;gap:7px}.operator-key-actions button{min-height:38px;padding:7px 11px;border:1px solid rgba(200,255,81,.42);border-radius:9px;background:rgba(200,255,81,.12);color:#e7ffb3;font:800 11px Cairo,Tahoma,sans-serif;cursor:pointer}.operator-key-actions button:last-child{border-color:rgba(255,255,255,.16);background:rgba(255,255,255,.06);color:#ccd3e5}
+.operator-key-status{padding:8px 9px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04)}.operator-key-status[data-state="ready"]{border-color:rgba(200,255,81,.32);color:#d8ff83}.operator-key-status[data-state="error"],.operator-key-status[data-state="invalid"],.operator-key-status[data-state="unconfigured"]{border-color:rgba(255,93,130,.32);color:#ff9bb1}.operator-key-status[data-state="pending"]{color:#ffd98a}
+@media(max-width:560px){.operator-key-panel{top:62px;left:8px;width:calc(100vw - 16px);padding:12px}.operator-key-panel>p{font-size:10px}}

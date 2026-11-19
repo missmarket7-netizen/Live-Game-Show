@@ -54,7 +54,7 @@ test('أصول المشهد لا تدخل التحميل الأولي للعبة
   assert.match(loungeClient, /var MAX = 50/);
   assert.match(loungeClient, /participants\.size >= MAX/);
   assert.match(worker, /arena-extras\.css\?v=107/);
-  assert.match(worker, /CACHE_NAME = "wcq-v20261115-space-lounge-cinematic-v1"/);
+  assert.match(worker, /CACHE_NAME = "wcq-v[^"]+"/);
   assert.match(worker, /space-lounge-3d\.js\?v=7/);
   assert.doesNotMatch(worker, /three\.module|three\.core/);
 });

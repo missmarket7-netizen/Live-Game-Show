@@ -8,7 +8,7 @@
 <link rel="manifest" href="/manifest.json?v=20261106">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/style.css?v=20261116-studio-v1">
+<link rel="stylesheet" href="/style.css?v=20261118-operator-write-auth-v1">
 <link rel="stylesheet" href="arena-extras.css?v=110" />
 </head>
 <body>
@@ -17,6 +17,7 @@
 <header class="topbar setup-topbar">
 <div class="brand-lockup"><img class="brand-mark" src="/images/logo.png" alt="عالم التحديات"><div><span class="eyebrow">LIVE GAME SHOW</span><strong>عالم التحديات</strong></div></div>
 <div class="sponsor-chip"><span>برعاية</span><b>قدها</b></div>
+<button data-operator-key-toggle class="icon-button operator-key-toggle" type="button" aria-label="مفتاح المشغّل" title="إعداد مفتاح المشغّل" aria-controls="operatorKeyPanel" aria-expanded="false">🔑</button>
 <button id="setupSoundBtn" class="icon-button" type="button" aria-label="الصوت">◉</button>
 </header>
 <section class="new-hero">
@@ -90,6 +91,7 @@
 <header class="topbar live-topbar">
 <div class="brand-lockup compact-brand"><img class="brand-mark" src="/images/logo.png" alt=""><div><span class="eyebrow">ON AIR / 02</span><strong>عالم التحديات</strong></div></div>
 <div class="live-status"><b>LIVE</b><span id="showClock">00:00</span><span>◉</span></div>
+<button data-operator-key-toggle class="icon-button operator-key-toggle" type="button" aria-label="مفتاح المشغّل" title="إعداد مفتاح المشغّل" aria-controls="operatorKeyPanel" aria-expanded="false">🔑</button>
 <button id="soundToggle" class="icon-button sound-on" type="button">◉</button>
 </header>
 <section class="show-stage">
@@ -169,6 +171,16 @@
 <button class="sound-trigger" data-sound="ana" type="button">🎙️ Ana</button></div></div>
 </section>
 </div>
+<section id="operatorKeyPanel" class="operator-key-panel" hidden role="dialog" aria-labelledby="operatorKeyTitle">
+  <div class="operator-key-heading"><h2 id="operatorKeyTitle">مفتاح المشغّل</h2><button id="operatorKeyClose" class="close-button" type="button" aria-label="إغلاق">×</button></div>
+  <p>أدخل المفتاح الذي ضُبط في بيئة الخادم. يلزم للتوليد والحفظ والتصفير وسحب سؤال من البنك المحلي لأن السحب يحدّث سجل منع التكرار. يُحفظ لهذه الجلسة فقط ويُرسل إلى نفس الخادم.</p>
+  <form id="operatorKeyForm" autocomplete="off">
+    <label for="operatorKeyInput">مفتاح المشغّل</label>
+    <input id="operatorKeyInput" name="operatorKeyTemporary" type="password" inputmode="text" autocomplete="off" spellcheck="false" maxlength="4096" placeholder="64 حرفًا عشوائيًا أو أكثر">
+    <div class="operator-key-actions"><button id="operatorKeySave" type="submit">تحقق واحفظ للجلسة</button><button id="operatorKeyClear" type="button">مسح</button></div>
+  </form>
+  <p id="operatorKeyStatus" class="operator-key-status" role="status" aria-live="polite">مفتاح المشغّل مطلوب لواجهات الكتابة.</p>
+</section>
 <div id="captainToast" class="captain-toast hidden"><span class="toast-icon">✦</span><div><small id="captainToastKicker">CAPTAIN INTRO</small><strong id="captainToastText">كابتن لينا دخلت المواجهة</strong></div></div>
 <div id="captainRevealOverlay" class="captain-reveal hidden"><span class="captain-reveal-kicker">ON AIR CAPTAIN</span><h2 id="captainRevealName">—</h2></div>
 <div id="roundEndOverlay" class="overlay hidden"><div class="overlay-card glass-card"><span class="overlay-kicker">ROUND COMPLETE ✦</span><div class="overlay-trophy">🏆</div><h2 id="roundEndNumber">الجولة 1</h2><p id="roundEndWinner">مبروك للفريق الفائز</p><div class="overlay-score"><span><b id="roundEndGirlsScore">0</b><small>البنات</small></span><i>VS</i><span><b id="roundEndBoysScore">0</b><small>الشباب</small></span></div><button id="roundEndContinueBtn" class="deck-button next-button" type="button">استمرار العرض <span>→</span></button></div></div>
@@ -184,7 +196,8 @@
 <button class="sound-trigger" data-sound="ana" type="button">🎙️ Ana</button></div></div></div>
 <canvas id="confettiCanvas"></canvas>
 
-<script src="/app.js?v=20261116-studio-v1"></script>
+<script src="/output-snapshot.js?v=20261118-output-bridge-v1"></script>
+<script src="/app.js?v=20261118-independent-output-v1"></script>
 <script src="audience-race.js?v=20261109-timer-king-queen"></script>
 <script src="flag-renderer.js?v=20261106"></script>
 <script src="arena-extras.js?v=109"></script>
@@ -192,7 +205,7 @@
 <script src="frame-clean.js?v=20261106"></script>
 <script src="captain-sounds.js?v=109"></script>
 <script src="flag-view.js?v=20261107"></script>
-<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261116-studio-v1").catch(function(){});</script>
+<script>if ("serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js?v=20261118-independent-output-bridge-v1").catch(function(){});</script>
 <a id="loungeEntryChip" class="icon-button" href="/space-lounge.html" title="استراحة الفضاء" style="text-decoration:none">🛰️</a>
 </body>
 </html>

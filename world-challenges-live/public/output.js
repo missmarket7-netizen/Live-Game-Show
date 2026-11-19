@@ -7,47 +7,13 @@
   const node = (id) => document.getElementById(id);
   const statusNode = node('connectionStatus');
   const statusText = node('connectionText');
-  let lastMessageAt = 0;
+  let lastServerAt = 0;
+  let lastLocalAt = 0;
   let lastSnapshot = null;
 
-  function safeText(value, maxLength) {
-    return String(value == null ? '' : value)
-      .replace(/[\u0000-\u001F\u007F]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, maxLength);
-  }
-
-  function safeNumber(value, min, max, fallback) {
-    const number = Number(value);
-    return Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback;
-  }
-
   function normalizeSnapshot(raw) {
-    if (!raw || raw.schemaVersion !== 1 || typeof raw !== 'object') return null;
-    const scores = raw.scores && typeof raw.scores === 'object' ? raw.scores : {};
-    const question = raw.question && typeof raw.question === 'object' ? raw.question : {};
-    const timer = raw.timer && typeof raw.timer === 'object' ? raw.timer : {};
-    const captains = raw.captains && typeof raw.captains === 'object' ? raw.captains : {};
-    const names = (items) => Array.isArray(items) ? items.map((name) => safeText(name, 48)).filter(Boolean).slice(0, 5) : [];
-    const sentAt = safeNumber(raw.sentAt, 0, Date.now() + 5000, 0);
-    if (!sentAt || !Number.isFinite(Number(scores.girls)) || !Number.isFinite(Number(scores.boys))) return null;
-    return {
-      schemaVersion: 1,
-      sentAt,
-      ready: Boolean(raw.ready),
-      scores: {
-        girls: safeNumber(scores.girls, -9999, 9999, 0),
-        boys: safeNumber(scores.boys, -9999, 9999, 0)
-      },
-      question: { text: safeText(question.text, 320) },
-      timer: {
-        remainingSeconds: safeNumber(timer.remainingSeconds, 0, 3600, 0),
-        durationSeconds: safeNumber(timer.durationSeconds, 1, 3600, 30),
-        running: Boolean(timer.running)
-      },
-      captains: { girls: names(captains.girls), boys: names(captains.boys) }
-    };
+    const contract = window.WCQOutputSnapshot;
+    return contract && typeof contract.normalize === 'function' ? contract.normalize(raw) : null;
   }
 
   function renderCaptains(container, names) {
@@ -74,6 +40,11 @@
     node('questionText').textContent = snapshot.ready && snapshot.question.text
       ? snapshot.question.text
       : 'جاهزون؟ بانتظار بداية المنافسة';
+    const answer = node('answerText');
+    if (answer) {
+      answer.textContent = snapshot.question.answer || '';
+      answer.hidden = !snapshot.question.answer;
+    }
     node('timerValue').textContent = snapshot.ready
       ? String(snapshot.timer.remainingSeconds).padStart(2, '0')
       : '--';
@@ -86,22 +57,55 @@
     renderCaptains(node('boysCaptains'), snapshot.captains.boys);
   }
 
-  function setStatus(isLive) {
+  function setStatus(mode) {
     if (!statusNode || !statusText) return;
-    statusNode.classList.toggle('is-live', isLive);
-    statusNode.classList.toggle('is-stale', !isLive);
-    statusText.textContent = isLive ? 'تحديث مباشر' : 'التحديث متوقف';
+    const serverLive = mode === 'server';
+    const localOnly = mode === 'local';
+    statusNode.classList.toggle('is-live', serverLive);
+    statusNode.classList.toggle('is-local', localOnly);
+    statusNode.classList.toggle('is-stale', mode === 'stale');
+    statusText.textContent = serverLive ? 'تحديث مستقل عبر الخادم'
+      : localOnly ? 'تحديث محلي فقط · OBS غير مضمون'
+        : 'التحديث متوقف';
+  }
+
+  function currentConnectionMode() {
+    const now = Date.now();
+    const fresh = (timestamp) => timestamp > 0 && now >= timestamp && now - timestamp <= STALE_AFTER_MS;
+    if (fresh(lastServerAt)) return 'server';
+    if (fresh(lastLocalAt)) return 'local';
+    return 'stale';
+  }
+
+  function acceptSnapshot(raw, source, sourceUpdatedAt) {
+    const snapshot = normalizeSnapshot(raw);
+    if (!snapshot) return;
+    if (lastSnapshot && snapshot.sentAt < lastSnapshot.sentAt) return;
+    const publishedAt = Number(sourceUpdatedAt);
+    if (source === 'server') {
+      if (Number.isFinite(publishedAt) && publishedAt > 0) lastServerAt = publishedAt;
+    } else {
+      lastLocalAt = snapshot.sentAt;
+    }
+    try { localStorage.setItem(CACHE_KEY, JSON.stringify(snapshot)); } catch (storageError) {}
+    renderSnapshot(snapshot);
+    setStatus(currentConnectionMode());
   }
 
   function acceptMessage(event) {
     const message = event && event.data;
     if (!message || message.channel !== CHANNEL_NAME || message.type !== 'snapshot') return;
-    const snapshot = normalizeSnapshot(message.snapshot);
-    if (!snapshot) return;
-    lastMessageAt = Date.now();
-    try { localStorage.setItem(CACHE_KEY, JSON.stringify(snapshot)); } catch (storageError) {}
-    renderSnapshot(snapshot);
-    setStatus(true);
+    acceptSnapshot(message.snapshot, 'local');
+  }
+
+  async function pollIndependentSnapshot() {
+    try {
+      const response = await fetch('/api/output-snapshot', { cache: 'no-store', headers: { Accept: 'application/json' } });
+      if (!response.ok) return;
+      if (response.status === 204) return;
+      const payload = await response.json();
+      acceptSnapshot(payload && payload.snapshot, 'server', payload && payload.updatedAt);
+    } catch (networkError) {}
   }
 
   try {
@@ -113,11 +117,14 @@
     if (typeof BroadcastChannel === 'function') {
       const channel = new BroadcastChannel(CHANNEL_NAME);
       channel.addEventListener('message', acceptMessage);
+      channel.postMessage({ channel: CHANNEL_NAME, type: 'request-snapshot' });
     }
   } catch (channelError) {}
 
-  setStatus(false);
+  setStatus('stale');
+  pollIndependentSnapshot();
+  window.setInterval(pollIndependentSnapshot, 1000);
   window.setInterval(() => {
-    setStatus(Boolean(lastMessageAt && Date.now() - lastMessageAt <= STALE_AFTER_MS));
+    setStatus(currentConnectionMode());
   }, 1000);
 })();

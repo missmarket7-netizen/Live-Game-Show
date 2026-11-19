@@ -6,11 +6,21 @@ import fs from "node:fs";
 import { fileURLToPath } from "node:url";
 import { attachLiveRoutes } from "./live-connector.js";
 import { createClient } from "@libsql/client";
+import { protectOperatorApiWrites, requireOperatorWrite } from "./operator-auth.js";
+import { operatorApiWriteRateLimiter, operatorVerifyRateLimiter } from "./operator-rate-limit.js";
+import "../public/output-snapshot.js";
+import "../public/studio-director-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+app.use("/api", protectOperatorApiWrites, operatorApiWriteRateLimiter);
 installNoRepeatEngine(app);
+let latestOutputSnapshot = null;
+let latestOutputSnapshotReceivedAt = 0;
+let latestStudioDirectorState = null;
+let latestStudioDirectorReceivedAt = 0;
+let latestStudioDirectorSentAt = 0;
 
 
 app.use((req, res, next) => {
@@ -926,6 +936,61 @@ async function askProviders(prompt, count) {
 
   return null;
 }
+
+app.get("/api/output-snapshot", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (!latestOutputSnapshot) return res.status(204).end();
+  return res.json({ snapshot: latestOutputSnapshot, updatedAt: latestOutputSnapshotReceivedAt });
+});
+
+app.post("/api/output-snapshot", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const snapshotBuilder = globalThis.WCQOutputSnapshot;
+  const safeSnapshot = snapshotBuilder && typeof snapshotBuilder.normalize === "function"
+    ? snapshotBuilder.normalize(req.body && req.body.snapshot)
+    : null;
+  if (!safeSnapshot) {
+    return res.status(400).json({ error: "invalid_output_snapshot", message: "لقطة العرض غير صالحة." });
+  }
+  if (latestOutputSnapshot && safeSnapshot.sentAt < latestOutputSnapshot.sentAt) {
+    return res.status(409).json({ error: "stale_output_snapshot", message: "تم تجاهل لقطة أقدم من الحالة الحالية." });
+  }
+  latestOutputSnapshot = safeSnapshot;
+  latestOutputSnapshotReceivedAt = Date.now();
+  return res.json({ accepted: true, sentAt: safeSnapshot.sentAt });
+});
+
+app.get("/api/studio-director-state", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const contract = globalThis.WCQStudioDirectorState;
+  return res.json({
+    state: latestStudioDirectorState || contract.defaults(),
+    updatedAt: latestStudioDirectorReceivedAt,
+    sentAt: latestStudioDirectorSentAt
+  });
+});
+
+app.post("/api/studio-director-state", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const contract = globalThis.WCQStudioDirectorState;
+  const rawState = req.body && req.body.state;
+  const sentAt = Number(req.body && req.body.sentAt);
+  if (!rawState || typeof rawState !== "object" || !Number.isFinite(sentAt) || sentAt <= 0 || sentAt > Date.now() + 5000) {
+    return res.status(400).json({ error: "invalid_studio_director_state", message: "إعداد مشهد المخرج غير صالح." });
+  }
+  if (latestStudioDirectorState && sentAt <= latestStudioDirectorSentAt) {
+    return res.status(409).json({ error: "stale_studio_director_state", message: "تم تجاهل إعداد مشهد أقدم." });
+  }
+  latestStudioDirectorState = contract.normalize(rawState);
+  latestStudioDirectorSentAt = sentAt;
+  latestStudioDirectorReceivedAt = Date.now();
+  return res.json({ accepted: true, sentAt, updatedAt: latestStudioDirectorReceivedAt });
+});
+
+app.get("/api/operator/verify", operatorVerifyRateLimiter, requireOperatorWrite, (req, res) => {
+  res.set("Cache-Control", "no-store");
+  return res.json({ authenticated: true });
+});
 
 app.post("/api/generate", async (req, res) => {
   res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });

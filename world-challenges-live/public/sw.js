@@ -1,9 +1,10 @@
-const CACHE_NAME = "wcq-v20261115-space-lounge-cinematic-v1";
+const CACHE_NAME = "wcq-v20261118-independent-output-bridge-v1";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/app.js?v=20261116-studio-v1",
-  "/style.css?v=20261116-studio-v1",
+  "/output-snapshot.js?v=20261118-output-bridge-v1",
+  "/app.js?v=20261118-independent-output-v1",
+  "/style.css?v=20261118-operator-write-auth-v1",
   "/arena-extras.css?v=107",
   "/arena-extras.css?v=110",
   "/manifest.json?v=20261106",
@@ -13,19 +14,22 @@ const APP_SHELL = [
   "/space-lounge.js?v=7",
   "/space-lounge-3d.js?v=7",
   "/output",
-  "/output.css?v=20261114-qaddaha-output-v1",
-  "/output.js?v=20261114-qaddaha-output-v1",
+  "/output.css?v=20261118-independent-output-v1",
+  "/output-snapshot.js?v=20261118-output-bridge-v1",
+  "/output.js?v=20261118-independent-output-v1",
   "/studio",
   "/studio-control",
-  "/studio.css?v=20261116-studio-v1",
-  "/studio.js?v=20261116-studio-v1",
-  "/studio-control.css?v=20261116-studio-v1",
-  "/studio-control.js?v=20261116-studio-v1",
+  "/studio.css?v=20261118-independent-studio-v1",
+  "/studio-director-state.js?v=20261118-independent-studio-v1",
+  "/studio.js?v=20261118-independent-studio-v1",
+  "/studio-control.css?v=20261118-independent-studio-v1",
+  "/studio-control.js?v=20261118-independent-studio-v1",
   "/images/qaddaha-studio-bg.webp",
   "/images/studio-mytwin.webp",
   "/images/studio-world-challenges.webp",
   "/images/qaddaha.png",
   "/images/mytwinlogo.png",
+  "/images/studio-presenter-cutout.png",
   "/manus-routes.json"
 ];
 self.addEventListener("install", (event) => {
