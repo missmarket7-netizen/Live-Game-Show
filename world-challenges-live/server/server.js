@@ -1072,6 +1072,68 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
+app.post("/api/questions", async (req, res) => {
+  res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", Pragma: "no-cache", Expires: "0" });
+  try {
+    const body = req.body || {};
+    const count = Math.min(50, Math.max(1, Number(body.count) || 10));
+    const category = String(body.category || "").trim();
+    const difficulty = String(body.difficulty || "").trim();
+    const avoid = new Set((Array.isArray(body.avoid) ? body.avoid : []).map(normalizeText).filter(Boolean));
+    const result = await withCycleLock(async () => {
+      const st = await getCycleState();
+      const served = new Set(st.served);
+      const all = await getAllQuestions();
+      let pool = all.filter((q) => {
+        const key = normalizeText(q.question);
+        return key && !avoid.has(key) && !served.has(key);
+      });
+      if (difficulty && difficulty !== "متدرج") {
+        const f = pool.filter((q) => String(q.difficulty || "").trim() === difficulty);
+        if (f.length >= count) pool = f;
+      }
+      const isMixed = !category || category === "اختيارات متنوعة";
+      if (!isMixed) {
+        const f = pool.filter((q) => String(q.category || "").trim() === category);
+        if (f.length >= count) pool = f;
+      }
+      let selected = shuffleArray(pool).slice(0, count);
+      if (selected.length < count) {
+        const usedKeys = new Set(selected.map((q) => normalizeText(q.question)));
+        const relaxed = all.filter((q) => {
+          const key = normalizeText(q.question);
+          return key && !avoid.has(key) && !usedKeys.has(key);
+        });
+        selected = selected.concat(shuffleArray(relaxed).slice(0, count - selected.length));
+      }
+      if (selected.length) {
+        selected.forEach((q) => {
+          const key = normalizeText(q.question);
+          if (key) served.add(key);
+        });
+        await setCycleState(st.cycle, Array.from(served));
+      }
+      return { selected, cycle: st.cycle, servedSize: served.size, bankSize: all.length };
+    });
+    const questions = result.selected.map((q, i) =>
+      Object.assign({}, q, { id: "q_" + Date.now() + "_" + i, source: q.source || "bank" })
+    );
+    return res.json({
+      questions,
+      meta: {
+        source: questions.length ? "bank" : "none",
+        count: questions.length,
+        cycle: result.cycle,
+        served: result.servedSize,
+        bankSize: result.bankSize,
+        persistent: hasPersistentStorage()
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "فشل جلب الأسئلة", details: err.message });
+  }
+});
+
 app.post("/api/save-questions", async (req, res) => {
   try {
     const incoming = Array.isArray(req.body && req.body.questions) ? req.body.questions : [];
