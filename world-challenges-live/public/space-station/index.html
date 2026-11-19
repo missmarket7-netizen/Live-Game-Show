@@ -359,6 +359,38 @@
       pointer-events: none;
     }
 
+    .mobile-controls {
+      display: none;
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      z-index: 45;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      padding: 7px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 18px;
+      background: rgba(5,6,15,.86);
+      box-shadow: 0 12px 35px rgba(0,0,0,.38);
+      backdrop-filter: blur(14px);
+    }
+
+    .mobile-control {
+      min-height: 48px;
+      padding: 5px 3px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 13px;
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+      font: 800 10px "Cairo", sans-serif;
+      touch-action: manipulation;
+    }
+
+    .mobile-control:active { transform: scale(.96); background: rgba(200,255,81,.16); }
+    .mobile-control strong { display: block; font-size: 17px; line-height: 18px; color: var(--lime); }
+    .mobile-control.gift strong { color: var(--gold); }
+
     @media (max-width: 600px) {
       .topbar { padding: 10px 12px; }
       .brand-text span { font-size: 7px; }
@@ -368,8 +400,9 @@
       .chip { padding: 7px 9px; font-size: 10px; }
       .host-panel { top: 58px; left: 10px; width: calc(100vw - 20px); max-height: min(62vh, 520px); padding: 13px; border-radius: 15px; }
       .host-panel input, .btn { min-height: 42px; }
-      .scene-info { bottom: 12px; max-width: calc(100vw - 24px); gap: 8px; padding: 8px 11px; font-size: 10px; white-space: nowrap; }
+      .scene-info { bottom: 82px; max-width: calc(100vw - 24px); gap: 8px; padding: 8px 11px; font-size: 10px; white-space: nowrap; }
       .fullscreen-hint { display: none; }
+      .mobile-controls { display: grid; }
     }
   </style>
 </head>
@@ -457,6 +490,14 @@
       <span>•</span>
       <span id="cameraMode">كاميرا عامة</span>
     </div>
+
+    <nav class="mobile-controls" aria-label="تحكم الهاتف">
+      <button class="mobile-control" id="mobileWideBtn" type="button"><strong>⌖</strong>رؤية واسعة</button>
+      <button class="mobile-control" id="mobileDanceBtn" type="button"><strong>♪</strong>رقصة</button>
+      <button class="mobile-control gift" id="mobileGiftBtn" type="button"><strong>✦</strong>هدية</button>
+      <button class="mobile-control gift" id="mobilePartyBtn" type="button"><strong>★</strong>حفلة</button>
+      <button class="mobile-control" id="mobileHostBtn" type="button"><strong>☷</strong>المضيف</button>
+    </nav>
 
     <div class="fullscreen-hint">اضغط F للملء الشاشة · H لإخفاء اللوحة</div>
   </div>

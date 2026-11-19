@@ -59,6 +59,9 @@ const state = {
   giftTier: 'small',
   partyUntil: 0,
   zeroGUntil: 0,
+  applauseUntil: 0,
+  applauseTarget: null,
+  nextRandomDance: performance.now() + 9000,
   live: { viewerCount: 0, likes: 0, comments: 0, participantIds: new Map() },
   clock: new THREE.Clock(),
   idSeq: 0,
@@ -159,8 +162,8 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x05060f);
 scene.fog = new THREE.FogExp2(0x05060f, 0.012);
 
-const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 400);
-camera.position.set(0, 14, 28);
+const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 400);
+camera.position.set(0, 18, 38);
 
 const renderer = new THREE.WebGLRenderer({
   antialias: true,
@@ -654,7 +657,12 @@ function createAstronaut(name, handle) {
     baseY: 0,
     socialPhase: Math.random() * Math.PI * 2,
     partner: null,
-    home: null
+    home: null,
+    walkTarget: null,
+    walkSpeed: 0.65 + Math.random() * 0.35,
+    nextWalk: performance.now() + 1800 + Math.random() * 4000,
+    walkPhase: Math.random() * Math.PI * 2,
+    applausePhase: Math.random() * Math.PI * 2
   };
 
   // الجسم (البذلة)
@@ -929,6 +937,7 @@ function addParticipant(data = {}) {
     Math.sin(angle) * radius + 1
   );
   mesh.userData.home = mesh.position.clone();
+  mesh.userData.walkTarget = mesh.position.clone();
   mesh.rotation.y = Math.random() * Math.PI * 2;
 
   scene.add(mesh);
@@ -997,11 +1006,13 @@ function runGiftAction(tier = 'small', requestedTarget = null, event = null) {
   if (tier === 'small') {
     ud.state = 'dance';
     ud.actionUntil = performance.now() + 4000;
+    startApplause(target, 4000);
     showToast(`${event?.user?.nickname || ud.name} · رقص`);
     focusGiftCamera(target, 3500, 'small');
   } else if (tier === 'medium') {
     ud.state = 'flip';
     ud.actionUntil = performance.now() + 3500;
+    startApplause(target, 3500);
     showToast(`${event?.user?.nickname || ud.name} · شقلبة`);
     focusGiftCamera(target, 3200, 'medium');
   } else if (tier === 'big') {
@@ -1023,6 +1034,18 @@ function runGiftAction(tier = 'small', requestedTarget = null, event = null) {
     focusGiftCamera(target, 4500, 'mega');
     triggerConfetti();
   }
+}
+
+function startApplause(target, duration = 4000) {
+  state.applauseTarget = target;
+  state.applauseUntil = performance.now() + duration;
+  state.participants.forEach((actor) => {
+    if (actor !== target) {
+      actor.userData.state = 'applause';
+      actor.userData.actionUntil = state.applauseUntil;
+    }
+  });
+  showToast(`👏 الجميع يصفق لـ ${target.userData.name}`);
 }
 
 function focusGiftCamera(target, duration, tier = 'small') {
@@ -1094,6 +1117,14 @@ function updateSocialInteractions(dt, t) {
       b.rotation.y = THREE.MathUtils.lerp(b.rotation.y, Math.atan2(a.position.x - b.position.x, a.position.z - b.position.z), dt * 1.8);
       if (a.userData.state === 'idle' && b.userData.state === 'idle') {
         a.position.y += Math.sin(phase) * 0.018; b.position.y += Math.sin(phase + 0.35) * 0.018;
+        const greeting = Math.sin(t * 2.4 + i) > -0.35;
+        if (greeting) {
+          // ذراع ممدودة نحو الصديق ثم رجوعها؛ تبدو كتحية/مصافحة قصيرة.
+          a.userData.parts.armR.rotation.x = -0.48 + Math.sin(phase * 1.6) * 0.12;
+          b.userData.parts.armL.rotation.x = -0.48 + Math.sin(phase * 1.6 + 0.5) * 0.12;
+          a.userData.parts.armR.rotation.z = -0.62;
+          b.userData.parts.armL.rotation.z = 0.62;
+        }
       }
     }
   }
@@ -1121,11 +1152,31 @@ function updateCinematicFX(dt, t, now) {
   }
 }
 
+function chooseWalkTarget(actor, now) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 8.2 + Math.random() * 7.5;
+  actor.userData.walkTarget = new THREE.Vector3(Math.cos(angle) * radius, 0, Math.sin(angle) * radius + 1);
+  actor.userData.nextWalk = now + 4500 + Math.random() * 6500;
+}
+
+function triggerRandomDance(now, force = false) {
+  if (!force && now < state.nextRandomDance) return;
+  const available = [...state.participants.values()].filter((actor) => actor.userData.state === 'idle');
+  if (available.length) {
+    const dancer = available[Math.floor(Math.random() * available.length)];
+    dancer.userData.state = 'dance';
+    dancer.userData.actionUntil = now + 4200;
+    showToast(`✦ ${dancer.userData.name} بدأ رقصة عفوية`);
+  }
+  state.nextRandomDance = now + 11000 + Math.random() * 9000;
+}
+
 // ═══════════════════════════════════════════════════════════
 // تحديث الحركات كل إطار
 // ═══════════════════════════════════════════════════════════
 function updateCharacters(dt, now) {
   const t = now * 0.001;
+  triggerRandomDance(now);
   // تحديث الـ DJ
   if (state.dj) {
     const dj = state.dj;
@@ -1174,6 +1225,19 @@ function updateCharacters(dt, now) {
     } else if (ud.state === 'flip') {
       mesh.rotation.x += dt * 6;
       mesh.position.y = Math.sin(t * 4) * 1.2 + 0.8;
+    } else if (ud.state === 'applause') {
+      const applauseTarget = state.applauseTarget;
+      if (applauseTarget && applauseTarget !== mesh) {
+        mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, Math.atan2(applauseTarget.position.x - mesh.position.x, applauseTarget.position.z - mesh.position.z), dt * 2.4);
+      }
+      const clap = Math.abs(Math.sin(t * 6 + ud.applausePhase));
+      parts.armL.rotation.x = -0.55 - clap * 0.55;
+      parts.armR.rotation.x = -0.55 - clap * 0.55;
+      parts.armL.rotation.z = 0.34 + clap * 0.24;
+      parts.armR.rotation.z = -0.34 - clap * 0.24;
+      parts.legL.rotation.x = Math.sin(t * 3 + ud.applausePhase) * 0.12;
+      parts.legR.rotation.x = -Math.sin(t * 3 + ud.applausePhase) * 0.12;
+      mesh.position.y = Math.abs(Math.sin(t * 3 + ud.applausePhase)) * 0.08;
     } else if (ud.state === 'zeroG' || now < state.zeroGUntil) {
       mesh.position.y = 1.5 + Math.sin(t * 1.5 + mesh.id) * 0.9;
       mesh.rotation.x = Math.sin(t * 0.8) * 0.4;
@@ -1181,10 +1245,25 @@ function updateCharacters(dt, now) {
       parts.armL.rotation.z = 1.2;
       parts.armR.rotation.z = -1.2;
     } else {
-      // idle خفيف
-      parts.armL.rotation.x = Math.sin(t * 1.2 + mesh.id) * 0.15;
-      parts.armR.rotation.x = Math.sin(t * 1.1 + mesh.id + 1) * 0.15;
-      mesh.position.y = Math.sin(t * 1.5 + mesh.id) * 0.04;
+      // تجول هادئ: يختار كل مشارك نقطة قريبة ثم يمشي إليها ببطء.
+      if (!ud.walkTarget || now > ud.nextWalk) chooseWalkTarget(mesh, now);
+      const distance = mesh.position.distanceTo(ud.walkTarget);
+      if (distance > 0.28) {
+        const direction = ud.walkTarget.clone().sub(mesh.position).setY(0).normalize();
+        mesh.position.addScaledVector(direction, ud.walkSpeed * dt);
+        mesh.rotation.y = THREE.MathUtils.lerp(mesh.rotation.y, Math.atan2(direction.x, direction.z), dt * 3.2);
+        ud.walkPhase += dt * 7;
+        parts.armL.rotation.x = Math.sin(ud.walkPhase) * 0.22;
+        parts.armR.rotation.x = Math.sin(ud.walkPhase + Math.PI) * 0.22;
+        parts.legL.rotation.x = Math.sin(ud.walkPhase + Math.PI) * 0.35;
+        parts.legR.rotation.x = Math.sin(ud.walkPhase) * 0.35;
+      } else {
+        // وقفة قصيرة مع إيماءة خفيفة قبل اختيار مسار جديد.
+        parts.armL.rotation.x = Math.sin(t * 1.2 + ud.socialPhase) * 0.15;
+        parts.armR.rotation.x = Math.sin(t * 1.1 + ud.socialPhase + 1) * 0.15;
+        parts.legL.rotation.x *= 0.9; parts.legR.rotation.x *= 0.9;
+      }
+      mesh.position.y = Math.sin(t * 1.5 + ud.socialPhase) * 0.04;
       mesh.rotation.x *= 0.9;
       mesh.rotation.z *= 0.9;
     }
@@ -1244,8 +1323,8 @@ function adaptRenderQuality(dt) {
 // ═══════════════════════════════════════════════════════════
 // نظام الكاميرات
 // ═══════════════════════════════════════════════════════════
-const wideCamPos = new THREE.Vector3(0, 14, 28);
-const wideCamTarget = new THREE.Vector3(0, 1, 0);
+const wideCamPos = new THREE.Vector3(0, 18, 38);
+const wideCamTarget = new THREE.Vector3(0, 1.2, 0);
 let camAngle = 0;
 
 function updateCamera(dt, now) {
@@ -1269,10 +1348,10 @@ function updateCamera(dt, now) {
       if (cinematicFX.giftSpot) cinematicFX.giftSpot.visible = false;
     }
     camAngle += dt * 0.08;
-    const radius = 26 + Math.sin(camAngle * 0.5) * 3;
+    const radius = 36 + Math.sin(camAngle * 0.5) * 4;
     wideCamPos.x = Math.sin(camAngle) * radius;
     wideCamPos.z = Math.cos(camAngle) * radius;
-    wideCamPos.y = 12 + Math.sin(camAngle * 0.7) * 2.5;
+    wideCamPos.y = 17 + Math.sin(camAngle * 0.7) * 3.2;
 
     camera.position.lerp(wideCamPos, 1 - Math.pow(0.02, dt));
     camera.lookAt(wideCamTarget);
@@ -1303,6 +1382,18 @@ $('add10Btn').addEventListener('click', () => {
 });
 
 $('clearBtn').addEventListener('click', clearAll);
+
+$('mobileWideBtn').addEventListener('click', () => {
+  state.cameraMode = 'wide';
+  state.giftTarget = null;
+  cameraModeLabel.textContent = 'كاميرا عامة بعيدة';
+  showToast('تم توسيع الرؤية لإظهار المحطة كاملة');
+});
+
+$('mobileDanceBtn').addEventListener('click', () => triggerRandomDance(performance.now(), true));
+$('mobileGiftBtn').addEventListener('click', () => runGiftAction('small'));
+$('mobilePartyBtn').addEventListener('click', () => runGiftAction('mega'));
+$('mobileHostBtn').addEventListener('click', () => hostPanel.classList.toggle('is-hidden'));
 
 document.querySelectorAll('[data-gift]').forEach((btn) => {
   btn.addEventListener('click', () => runGiftAction(btn.dataset.gift));

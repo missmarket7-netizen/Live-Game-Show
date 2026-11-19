@@ -14,8 +14,15 @@ const routes = JSON.parse(read('public/manus-routes.json'));
 
 assert.match(page, /<script type="module" src="\.\/space-station-3d\.js"><\/script>/);
 assert.match(page, /three@0\.187\.0/);
+for (const id of ['mobileWideBtn', 'mobileDanceBtn', 'mobileGiftBtn', 'mobilePartyBtn', 'mobileHostBtn']) {
+  assert.match(page, new RegExp(`id="${id}"`));
+}
 assert.match(scene, /maxParticipants: 40/);
 assert.match(scene, /QUALITY/);
+assert.match(scene, /triggerRandomDance/);
+assert.match(scene, /startApplause/);
+assert.match(scene, /chooseWalkTarget/);
+assert.match(scene, /radius = 36/);
 assert.match(scene, /createTikTokLiveClient/);
 assert.match(client, /\/connect/);
 assert.match(client, /\/events/);
