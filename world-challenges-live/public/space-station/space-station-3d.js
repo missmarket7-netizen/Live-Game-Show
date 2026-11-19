@@ -176,7 +176,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = false;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.08;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 container.appendChild(renderer.domElement);
 
 // Post-processing (Bloom خفيف سينمائي)
@@ -276,6 +277,23 @@ function createFloor() {
   ring.rotation.x = Math.PI / 2;
   ring.position.y = 0.05;
   stationGroup.add(ring);
+
+  // فواصل ألواح أرضية هندسية: تمنح الأرضية مقياسًا معماريًا واقعيًا بدل سطح واحد.
+  const seamMat = new THREE.MeshBasicMaterial({ color: 0x253354, transparent: true, opacity: 0.55 });
+  const seamGeo = new THREE.BoxGeometry(0.025, 0.012, 19.5);
+  for (let i = 0; i < 12; i++) {
+    const seam = new THREE.Mesh(seamGeo, seamMat);
+    seam.rotation.y = (i / 12) * Math.PI;
+    seam.position.y = 0.035;
+    stationGroup.add(seam);
+  }
+  const innerFloorRing = new THREE.Mesh(
+    new THREE.TorusGeometry(10.4, 0.018, 6, 96),
+    new THREE.MeshBasicMaterial({ color: 0x64708f, transparent: true, opacity: 0.42 })
+  );
+  innerFloorRing.rotation.x = Math.PI / 2;
+  innerFloorRing.position.y = 0.04;
+  stationGroup.add(innerFloorRing);
 }
 createFloor();
 
@@ -288,6 +306,46 @@ function createLuxuryArchitecture() {
   const cyan = new THREE.MeshBasicMaterial({ color: CFG.colors.cyan, transparent: true, opacity: 0.75 });
   const gold = new THREE.MeshBasicMaterial({ color: CFG.colors.gold, transparent: true, opacity: 0.8 });
   const pink = new THREE.MeshBasicMaterial({ color: CFG.colors.pink, transparent: true, opacity: 0.7 });
+
+  // غلاف داخلي شفاف يشبه نوافذ محطة حقيقية، مع قطاعات معدنية تحمل السقف.
+  const windowShell = new THREE.Mesh(
+    new THREE.CylinderGeometry(20.2, 20.2, 7.4, 48, 1, true),
+    new THREE.MeshStandardMaterial({ color: 0x071126, metalness: 0.65, roughness: 0.24, transparent: true, opacity: DEVICE.mobile ? 0.14 : 0.22, side: THREE.DoubleSide })
+  );
+  windowShell.position.y = 4.0;
+  arch.add(windowShell);
+
+  const windowMat = new THREE.MeshStandardMaterial({ color: 0x102a4e, emissive: 0x08233f, emissiveIntensity: 0.32, metalness: 0.45, roughness: 0.18, transparent: true, opacity: 0.62, side: THREE.DoubleSide });
+  const windowFrameMat = new THREE.MeshStandardMaterial({ color: 0x35405a, metalness: 0.92, roughness: 0.2 });
+  const windowGeo = new THREE.BoxGeometry(4.1, 5.4, 0.08);
+  const mullionGeo = new THREE.BoxGeometry(0.16, 7.2, 0.22);
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2;
+    const bay = new THREE.Group();
+    bay.position.set(Math.cos(a) * 19.8, 4.0, Math.sin(a) * 19.8);
+    bay.rotation.y = -a;
+    const glass = new THREE.Mesh(windowGeo, windowMat);
+    glass.position.z = -0.03;
+    bay.add(glass);
+    const mullion = new THREE.Mesh(mullionGeo, windowFrameMat);
+    mullion.position.z = 0.12;
+    bay.add(mullion);
+    arch.add(bay);
+  }
+
+  // وحدات إضاءة سقفية دافئة؛ إضاءة عملية تخفف اعتماد المشهد على النيون.
+  const practicalGlow = new THREE.MeshBasicMaterial({ color: 0xffe4b0 });
+  for (let i = 0; i < 8; i++) {
+    const a = (i / 8) * Math.PI * 2;
+    const lamp = new THREE.Mesh(new THREE.SphereGeometry(0.16, 8, 6), practicalGlow);
+    lamp.position.set(Math.cos(a) * 12.8, 8.9, Math.sin(a) * 12.8);
+    arch.add(lamp);
+    if (!DEVICE.mobile) {
+      const lampLight = new THREE.PointLight(0xffd9a0, 0.22, 6);
+      lampLight.position.copy(lamp.position);
+      arch.add(lampLight);
+    }
+  }
 
   for (let i = 0; i < 8; i++) {
     const a = (i / 8) * Math.PI * 2;
@@ -425,6 +483,22 @@ function createDanceStage() {
     stage.userData.rings.push(ring);
   }
 
+  // حافة مسرح معدنية ومرايا أرضية تعطي عمقًا واقعيًا للمنصة.
+  const stageRail = new THREE.Mesh(
+    new THREE.TorusGeometry(6.35, 0.12, 8, 64),
+    new THREE.MeshStandardMaterial({ color: 0x3b4664, metalness: 0.95, roughness: 0.16 })
+  );
+  stageRail.rotation.x = Math.PI / 2;
+  stageRail.position.y = 0.34;
+  stage.add(stageRail);
+  const centerDisc = new THREE.Mesh(
+    new THREE.CircleGeometry(2.15, 48),
+    new THREE.MeshStandardMaterial({ color: 0x11182d, metalness: 0.8, roughness: 0.18, emissive: 0x071229, emissiveIntensity: 0.32 })
+  );
+  centerDisc.rotation.x = -Math.PI / 2;
+  centerDisc.position.y = 0.31;
+  stage.add(centerDisc);
+
   stationGroup.add(stage);
   return stage;
 }
@@ -481,6 +555,19 @@ function createBar() {
     const bottle = new THREE.Mesh(bottleGeo, bottleMat);
     bottle.position.set(-1.8 + i * 0.9, 1.55, -0.4);
     bar.add(bottle);
+  }
+
+  // رف خلفي وشريط إضاءة عملي؛ لا توجد كراسٍ حتى تبقى المنطقة مخصصة للحركة.
+  const backShelf = new THREE.Mesh(
+    new THREE.BoxGeometry(5.2, 2.7, 0.18),
+    new THREE.MeshStandardMaterial({ color: 0x0a1020, metalness: 0.8, roughness: 0.28 })
+  );
+  backShelf.position.set(0, 2.35, -0.72);
+  bar.add(backShelf);
+  for (let i = 0; i < 3; i++) {
+    const shelfLine = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.035, 0.035), new THREE.MeshBasicMaterial({ color: i === 1 ? CFG.colors.gold : CFG.colors.cyan }));
+    shelfLine.position.set(0, 1.55 + i * 0.62, -0.6);
+    bar.add(shelfLine);
   }
 
   stationGroup.add(bar);
@@ -549,6 +636,18 @@ function createDJBooth() {
   const eq = new THREE.Mesh(eqGeo, eqMat);
   eq.position.set(0, 1.45, -0.7);
   booth.add(eq);
+
+  const boothHeader = new THREE.Mesh(
+    new THREE.BoxGeometry(3.7, 0.42, 0.12),
+    new THREE.MeshStandardMaterial({ color: 0x080d1d, emissive: CFG.colors.gold, emissiveIntensity: 0.26, metalness: 0.55, roughness: 0.2 })
+  );
+  boothHeader.position.set(0, 2.05, -0.65);
+  booth.add(boothHeader);
+  for (let i = 0; i < 7; i++) {
+    const meter = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.24 + (i % 3) * 0.12, 0.035), new THREE.MeshBasicMaterial({ color: i % 2 ? CFG.colors.cyan : CFG.colors.gold }));
+    meter.position.set(-1.2 + i * 0.4, 2.05, -0.57);
+    booth.add(meter);
+  }
 
   stationGroup.add(booth);
   return booth;
