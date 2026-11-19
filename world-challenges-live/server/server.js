@@ -15,7 +15,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use("/api", protectOperatorApiWrites, operatorApiWriteRateLimiter);
-installNoRepeatEngine(app);
 let latestOutputSnapshot = null;
 let latestOutputSnapshotReceivedAt = 0;
 let latestStudioDirectorState = null;
@@ -1179,6 +1178,7 @@ app.get("/api/saved-questions", async (req, res) => {
     });
   }
 });
+installNoRepeatEngine(app);
 app.use(express.static(staticRoot, {
   extensions: ["html"],
   immutable: false,
