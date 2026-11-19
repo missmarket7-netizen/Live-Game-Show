@@ -1,4 +1,4 @@
-const CACHE_NAME = "wcq-v20261115-space-lounge-cinematic-v1";
+const CACHE_NAME = "wcq-v20261118-space-station-cinematic-v2";
 const APP_SHELL = [
   "/",
   "/index.html",
@@ -8,10 +8,11 @@ const APP_SHELL = [
   "/arena-extras.css?v=110",
   "/manifest.json?v=20261106",
   "/favicon.svg",
-  "/space-lounge",
-  "/space-lounge.css?v=7",
-  "/space-lounge.js?v=7",
-  "/space-lounge-3d.js?v=7",
+  "/space-station/",
+  "/space-station/space-station-3d.js",
+  "/space-station/tiktok-live-client.js",
+  "/space-station/README.md",
+  "/space-station/performance-report.md",
   "/output",
   "/output.css?v=20261114-qaddaha-output-v1",
   "/output.js?v=20261114-qaddaha-output-v1",

@@ -359,6 +359,18 @@ function startConnection(account) {
 }
 
 export function attachLiveRoutes(app) {
+  app.post("/live/connect", (req, res) => {
+    const username = String(req.body?.uniqueId || req.body?.username || "")
+      .trim().replace(/^@/, "").slice(0, 100);
+    if (!/^[A-Za-z0-9._-]{2,100}$/.test(username)) {
+      return res.status(400).json({ error: "أدخل username صالحًا للبث" });
+    }
+    if (!connections.has(username)) {
+      startConnection({ username, sessionId: "" });
+    }
+    return res.json({ ok: true, username, roomId: String(req.body?.roomId || "").trim().slice(0, 100), status: overallStatus() });
+  });
+
   app.get("/live/events", (req, res) => {
     res.writeHead(200, { "Content-Type": "text/event-stream", "Cache-Control": "no-cache", Connection: "keep-alive" });
     res.write("data: " + JSON.stringify({ type: "hello", payload: overallStatus() }) + "\n\n");

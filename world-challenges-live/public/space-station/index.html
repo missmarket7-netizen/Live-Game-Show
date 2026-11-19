@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05060f">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <title>ساحة استراحة الفضاء — محطة سينمائية ثلاثية الأبعاد</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;700;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #05060f;
+      --ink: #f4f6ff;
+      --muted: #8b95b8;
+      --lime: #c8ff51;
+      --cyan: #48e7ff;
+      --pink: #ff5b9f;
+      --gold: #ffd36e;
+      --violet: #9b6dff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Cairo", system-ui, sans-serif;
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    #canvas-container {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+    }
+
+    canvas {
+      display: block;
+      width: 100% !important;
+      height: 100% !important;
+    }
+
+    /* ─── شريط علوي ─── */
+    .topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      background: linear-gradient(180deg, rgba(5,6,15,.85) 0%, transparent 100%);
+      pointer-events: none;
+    }
+
+    .topbar > * { pointer-events: auto; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      border: 1px solid rgba(200,255,81,.4);
+      background: rgba(200,255,81,.08);
+      color: var(--lime);
+      font: 800 18px "Space Grotesk", sans-serif;
+      box-shadow: 0 0 24px rgba(200,255,81,.15);
+    }
+
+    .brand-text span {
+      display: block;
+      font: 700 9px "Space Grotesk", sans-serif;
+      letter-spacing: .18em;
+      color: var(--lime);
+    }
+
+    .brand-text strong {
+      display: block;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .top-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.04);
+      color: var(--muted);
+      font: 700 12px "Cairo", sans-serif;
+      cursor: pointer;
+      transition: .2s;
+      backdrop-filter: blur(8px);
+    }
+
+    .chip:hover {
+      color: var(--ink);
+      border-color: rgba(200,255,81,.45);
+      transform: translateY(-1px);
+    }
+
+    .chip.is-on {
+      color: var(--lime);
+      border-color: rgba(200,255,81,.55);
+      background: rgba(200,255,81,.08);
+    }
+
+    .chip .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #5a6480;
+    }
+
+    .chip.is-on .dot {
+      background: var(--lime);
+      box-shadow: 0 0 12px var(--lime);
+      animation: pulse 1.4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      50% { transform: scale(1.35); opacity: .7; }
+    }
+
+    /* ─── لوحة المضيف ─── */
+    .host-panel {
+      position: absolute;
+      top: 70px;
+      left: 16px;
+      z-index: 50;
+      width: 280px;
+      max-height: calc(100% - 100px);
+      overflow-y: auto;
+      padding: 16px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(8,10,24,.88);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 50px rgba(0,0,0,.45);
+      transition: transform .35s, opacity .35s;
+    }
+
+    .host-panel.is-hidden {
+      transform: translateX(-110%);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .host-panel h3 {
+      font-size: 13px;
+      font-weight: 800;
+      margin-bottom: 12px;
+      color: var(--lime);
+      letter-spacing: .04em;
+    }
+
+    .host-panel label {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .host-panel input {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.05);
+      color: var(--ink);
+      font: 600 13px "Cairo", sans-serif;
+      outline: none;
+    }
+
+    .host-panel input:focus {
+      border-color: rgba(200,255,81,.45);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn {
+      flex: 1;
+      min-width: 70px;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      color: var(--ink);
+      font: 700 12px "Cairo", sans-serif;
+      cursor: pointer;
+      transition: .2s;
+    }
+
+    .btn:hover {
+      background: rgba(200,255,81,.12);
+      border-color: rgba(200,255,81,.4);
+    }
+
+    .btn.accent {
+      background: linear-gradient(135deg, rgba(200,255,81,.2), rgba(72,231,255,.12));
+      border-color: rgba(200,255,81,.4);
+      color: var(--lime);
+    }
+
+    .btn.danger {
+      border-color: rgba(255,91,159,.35);
+      color: var(--pink);
+    }
+
+    .status-line {
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,.08);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status-line b {
+      color: var(--cyan);
+    }
+
+    /* ─── معلومات المشهد ─── */
+    .scene-info {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(5,6,15,.75);
+      backdrop-filter: blur(12px);
+      font-size: 12px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .scene-info b {
+      color: var(--ink);
+      font-weight: 800;
+    }
+
+    .scene-info .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--pink);
+      box-shadow: 0 0 12px var(--pink);
+      animation: pulse 1.5s infinite;
+    }
+
+    /* ─── توست ─── */
+    .toast {
+      position: absolute;
+      top: 90px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-20px);
+      z-index: 60;
+      padding: 10px 22px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,211,110,.4);
+      background: rgba(8,10,24,.92);
+      color: var(--ink);
+      font: 700 14px "Cairo", sans-serif;
+      opacity: 0;
+      pointer-events: none;
+      transition: .35s;
+      box-shadow: 0 12px 40px rgba(0,0,0,.4);
+    }
+
+    .toast.is-visible {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── شاشة تحميل ─── */
+    .loader {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      background: var(--bg);
+      transition: opacity .6s, visibility .6s;
+    }
+
+    .loader.is-done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .loader-ring {
+      width: 56px;
+      height: 56px;
+      border: 3px solid rgba(200,255,81,.15);
+      border-top-color: var(--lime);
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loader p {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    /* ─── ملء الشاشة ─── */
+    .fullscreen-hint {
+      position: absolute;
+      bottom: 70px;
+      right: 20px;
+      z-index: 40;
+      font-size: 11px;
+      color: rgba(255,255,255,.25);
+      pointer-events: none;
+    }
+
+    @media (max-width: 600px) {
+      .topbar { padding: 10px 12px; }
+      .brand-text span { font-size: 7px; }
+      .brand-text strong { font-size: 12px; }
+      .brand-mark { width: 34px; height: 34px; border-radius: 10px; font-size: 15px; }
+      .top-actions { gap: 5px; }
+      .chip { padding: 7px 9px; font-size: 10px; }
+      .host-panel { top: 58px; left: 10px; width: calc(100vw - 20px); max-height: min(62vh, 520px); padding: 13px; border-radius: 15px; }
+      .host-panel input, .btn { min-height: 42px; }
+      .scene-info { bottom: 12px; max-width: calc(100vw - 24px); gap: 8px; padding: 8px 11px; font-size: 10px; white-space: nowrap; }
+      .fullscreen-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="loader" id="loader">
+      <div class="loader-ring"></div>
+      <p>جاري بناء المحطة الفضائية السينمائية...</p>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">SL</div>
+        <div class="brand-text">
+          <span>CINEMATIC SPACE STATION</span>
+          <strong>محطة الفضاء</strong>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="chip" id="musicBtn" type="button">
+          <span class="dot"></span>
+          <span id="musicLabel">الموسيقى</span>
+        </button>
+        <button class="chip" id="hostToggle" type="button">لوحة المضيف</button>
+        <button class="chip" id="fsBtn" type="button">ملء الشاشة</button>
+      </div>
+    </header>
+
+    <aside class="host-panel" id="hostPanel">
+      <h3>HOST CONTROL</h3>
+
+      <label>اسم المشارك</label>
+      <input id="manualName" maxlength="22" placeholder="مثال: أحمد" autocomplete="off">
+
+      <div class="btn-row">
+        <button class="btn accent" id="addBtn" type="button">إضافة</button>
+        <button class="btn" id="add10Btn" type="button">+10</button>
+        <button class="btn danger" id="clearBtn" type="button">إخلاء</button>
+      </div>
+
+      <div class="btn-row" style="margin-top:12px">
+        <button class="btn" data-gift="small" type="button">هدية صغيرة</button>
+        <button class="btn" data-gift="medium" type="button">متوسطة</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" data-gift="big" type="button">كبيرة</button>
+        <button class="btn" data-gift="mega" type="button">حفلة</button>
+      </div>
+
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)">
+        <label for="tiktokUsername">TikTok LIVE @username</label>
+        <input id="tiktokUsername" maxlength="100" placeholder="مثال: creator_live" autocomplete="off">
+        <label for="tiktokRoomId" style="margin-top:8px">Room ID مرجعي اختياري</label>
+        <input id="tiktokRoomId" inputmode="numeric" maxlength="100" placeholder="للتوثيق فقط؛ الاتصال يعتمد @username" autocomplete="off">
+        <div class="btn-row">
+          <button class="btn accent" id="tiktokConnectBtn" type="button">اتصال مباشر</button>
+          <button class="btn danger" id="tiktokDisconnectBtn" type="button">فصل</button>
+        </div>
+        <div class="status-line" style="margin-top:10px;padding-top:10px">
+          <div>المشاهدون: <b id="viewerCount">—</b></div>
+          <div>الإعجابات: <b id="likeCount">0</b> · التعليقات: <b id="commentCount">0</b></div>
+          <details style="margin-top:8px;font-size:10px;opacity:.82">
+            <summary style="cursor:pointer;color:var(--cyan)">طريقة التفعيل والقيود</summary>
+            <p style="margin-top:6px;line-height:1.7">شغّل الخادم بأمر <b>npm start</b>، ثم أدخل @username للبث. Room ID مرجع اختياري ولا يستبدل username في الموصل الحالي. الموصل غير رسمي وقد يتغير مع TikTok، ولا تضع مفتاح التوقيع في المتصفح. مكتبة الاتصال الحالية AGPL-3.0-only؛ راجع الترخيص قبل النشر التجاري.</p>
+          </details>
+        </div>
+      </div>
+
+      <div class="status-line">
+        <div>الحالة: <b id="connectionStatus">يدوي — جاهز</b></div>
+        <div style="margin-top:4px">المشاركين: <b id="countLabel">0</b> / 40</div>
+        <div style="margin-top:4px;font-size:10px;opacity:.7">
+          الدخول من التعليق: <b>SPACE</b> · <b>قدها</b> · <b>عالم التحديات</b>
+        </div>
+      </div>
+    </aside>
+
+    <div class="toast" id="toast"></div>
+
+    <div class="scene-info">
+      <span class="live-dot"></span>
+      <span>المشاركين <b id="infoCount">0</b></span>
+      <span>•</span>
+      <span id="cameraMode">كاميرا عامة</span>
+    </div>
+
+    <div class="fullscreen-hint">اضغط F للملء الشاشة · H لإخفاء اللوحة</div>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module" src="./space-station-3d.js"></script>
+</body>
+</html>
