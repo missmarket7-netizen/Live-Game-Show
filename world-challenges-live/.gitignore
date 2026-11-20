@@ -1,6 +1,10 @@
+node_modules/
 .env
 .env.*
-!.env.example
-server/questions/cycle_state*.json
-*.tmp-*
-node_modules/
+dist/
+*.log
+.backup/
+android/
+ios/
+.DS_Store
+*.zip
