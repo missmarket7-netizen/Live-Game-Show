@@ -221,22 +221,6 @@
     "explanation": "الإجابة الصحيحة: بغداد."
   },
   {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم ولد يبدأ بحرف ك",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم رياضة تبدأ بحرف ت",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "تاريخ",
     "difficulty": "متوسط",
     "question": "من بنى أول هرم مدرج شهير؟",
@@ -352,14 +336,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: نواكشوط."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم دولة آسيوية من 5 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "علوم",
@@ -960,14 +936,6 @@
     "explanation": "عمر بن الخطاب رضي الله عنه ثاني الخلفاء الراشدين."
   },
   {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم أداة تبدأ بحرف م",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "سينما عربية",
     "difficulty": "متوسط",
     "question": "ما الدولة التي ينتمي إليها فيلم وهلأ لوين؟",
@@ -1122,22 +1090,6 @@
     ],
     "correctIndex": 0,
     "explanation": "الإجابة الصحيحة: نور الشريف."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم مدينة مصرية من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم حلوى مصرية",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "دين",
@@ -1361,22 +1313,6 @@
     "explanation": "الإجابة الصحيحة: فيتامين د."
   },
   {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم فيلم مصري يبدأ بحرف ع",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم ممثلة عربية تبدأ بحرف ل",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "دين",
     "difficulty": "متوسط",
     "question": "من النبي الذي كلمه الله تكليماً؟",
@@ -1453,14 +1389,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: 11."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم شهر يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -1580,14 +1508,6 @@
     "explanation": "الإجابة الصحيحة: المنامة."
   },
   {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم شخصية كرتونية من 4 حروف",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "معلومات عامة",
     "difficulty": "متوسط",
     "question": "كم ضلعًا للسداسي؟",
@@ -1666,22 +1586,6 @@
     "explanation": "الإجابة الصحيحة: خوفو."
   },
   {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم نادي مصري من كلمتين",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم مطربة عربية تبدأ بحرف ن",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
-  },
-  {
     "category": "رياضة",
     "difficulty": "متوسط",
     "question": "كم نقطة للتصويبة من خارج قوس الثلاثيات؟",
@@ -1706,14 +1610,6 @@
     ],
     "correctIndex": 2,
     "explanation": "الإجابة الصحيحة: القشرة الأرضية."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم مدينة مصرية يبدأ بحرف أ",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "جغرافيا",
@@ -1753,14 +1649,6 @@
     ],
     "correctIndex": 1,
     "explanation": "الإجابة الصحيحة: التوبة."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم طائر يبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "معلومات عامة",
@@ -1852,14 +1740,6 @@
     ],
     "correctIndex": 3,
     "explanation": "الإجابة الصحيحة: لافلز."
-  },
-  {
-    "category": "سرعة",
-    "difficulty": "متوسط",
-    "question": "اسم جماد يبدأ بحرف ب",
-    "options": [],
-    "correctIndex": null,
-    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
   },
   {
     "category": "رياضة",

@@ -1,0 +1,1487 @@
+[
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم ولد يبدأ بحرف ك",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم رياضة تبدأ بحرف ت",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم دولة آسيوية من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم أداة تبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مدينة مصرية من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم حلوى مصرية",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم فيلم مصري يبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم ممثلة عربية تبدأ بحرف ل",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شهر يبدأ بحرف أ",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شخصية كرتونية من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم نادي مصري من كلمتين",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مطربة عربية تبدأ بحرف ن",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مدينة مصرية يبدأ بحرف أ",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم طائر يبدأ بحرف ب",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db1.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم جماد يبدأ بحرف ب",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء إذا وضعته في الثلاجة لا يبرد، فما هو؟",
+    "options": [
+      "الفلفل الحار"
+    ],
+    "correctIndex": 0,
+    "answer": "الفلفل الحار",
+    "explanation": "لغز لفظي: الفلفل حار الطعم ولا يبرد بالثلاجة.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء كلما أخذت منه كبر، فما هو؟",
+    "options": [
+      "الحفرة"
+    ],
+    "correctIndex": 0,
+    "answer": "الحفرة",
+    "explanation": "الحفرة كلما أخذت منها ترابًا كبرت.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء كلما زاد نقص، فما هو؟",
+    "options": [
+      "العمر"
+    ],
+    "correctIndex": 0,
+    "answer": "العمر",
+    "explanation": "العمر كلما زاد نقصت الأيام المتبقية.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء له أسنان ولا يعض، فما هو؟",
+    "options": [
+      "المشط أو المنشار"
+    ],
+    "correctIndex": 0,
+    "answer": "المشط أو المنشار",
+    "explanation": "الإجابة المقبولة: المشط أو المنشار.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء له رقبة وليس له رأس، فما هو؟",
+    "options": [
+      "الزجاجة أو القارورة"
+    ],
+    "correctIndex": 0,
+    "answer": "الزجاجة أو القارورة",
+    "explanation": "الإجابة المقبولة: الزجاجة أو القارورة.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء له عين واحدة ولا يرى، ويُستخدم في الخياطة، فما هو؟",
+    "options": [
+      "الإبرة"
+    ],
+    "correctIndex": 0,
+    "answer": "الإبرة",
+    "explanation": "الإبرة لها عين ولا ترى، وتُستخدم في الخياطة.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء له مفاتيح ولا يفتح الأبواب، فما هو؟",
+    "options": [
+      "البيانو أو الكيبورد"
+    ],
+    "correctIndex": 0,
+    "answer": "البيانو أو الكيبورد",
+    "explanation": "الإجابة المقبولة: البيانو أو الكيبورد.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يتحرك دائمًا ولا يتعب أبدًا، فما هو؟",
+    "options": [
+      "الساعة أو الزمن"
+    ],
+    "correctIndex": 0,
+    "answer": "الساعة أو الزمن",
+    "explanation": "الإجابة المقبولة: الساعة أو الزمن.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يخاف من الماء ولا يشربه، فما هو؟",
+    "options": [
+      "النار"
+    ],
+    "correctIndex": 0,
+    "answer": "النار",
+    "explanation": "النار تنطفئ بالماء ولا تشربه.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يسمع بلا أذن ويتكلم بلا لسان، فما هو؟",
+    "options": [
+      "الهاتف أو الراديو"
+    ],
+    "correctIndex": 0,
+    "answer": "الهاتف أو الراديو",
+    "explanation": "الإجابة المقبولة: الهاتف أو الراديو.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يقرصك ولا تراه، فما هو؟",
+    "options": [
+      "البرد أو الجوع"
+    ],
+    "correctIndex": 0,
+    "answer": "البرد أو الجوع",
+    "explanation": "الإجابة المقبولة: البرد أو الجوع.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يكتب ولا يقرأ، فما هو؟",
+    "options": [
+      "القلم"
+    ],
+    "correctIndex": 0,
+    "answer": "القلم",
+    "explanation": "القلم يكتب ولا يقرأ.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يمر أمامك طوال الوقت ولا تراه، فما هو؟",
+    "options": [
+      "الهواء"
+    ],
+    "correctIndex": 0,
+    "answer": "الهواء",
+    "explanation": "الهواء يتحرك حولنا ولا نراه.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء يمشي بلا رجلين ويطير بلا جناحين، فما هو؟",
+    "options": [
+      "الدخان أو السحاب"
+    ],
+    "correctIndex": 0,
+    "answer": "الدخان أو السحاب",
+    "explanation": "الإجابة المقبولة: الدخان أو السحاب.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "شيء ينام وعيناه مفتوحتان، فما هو؟",
+    "options": [
+      "السمكة"
+    ],
+    "correctIndex": 0,
+    "answer": "السمكة",
+    "explanation": "السمكة تنام وعيناها مفتوحتان لأنها بلا جفون.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "ما الشيء الذي يقع على الماء ولا يبتل؟",
+    "options": [
+      "الظل"
+    ],
+    "correctIndex": 0,
+    "answer": "الظل",
+    "explanation": "الظل ليس جسمًا ماديًا، فيقع على الماء ولا يبتل.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "سهل",
+    "question": "ما الشيء الذي يلبسه الناس وهو مفتوح من الجانبين؟",
+    "options": [
+      "النظارة"
+    ],
+    "correctIndex": 0,
+    "answer": "النظارة",
+    "explanation": "النظارة تُلبس وهي مفتوحة من الجانبين.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "متوسط",
+    "question": "شيء له قلب ولكنه لا ينبض، فما هو؟",
+    "options": [
+      "قلب الخس"
+    ],
+    "correctIndex": 0,
+    "answer": "قلب الخس",
+    "explanation": "قلب الخس له قلب نباتي ولا ينبض.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "متوسط",
+    "question": "ما الشيء الذي يخرج من البحر ويذوب في الماء؟",
+    "options": [
+      "الملح"
+    ],
+    "correctIndex": 0,
+    "answer": "الملح",
+    "explanation": "الملح يُستخرج من البحر ويذوب في الماء.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "ألغاز",
+    "difficulty": "صعب",
+    "question": "ما الشيء الذي إذا نصفته مات، وإذا كملته نفع؟",
+    "options": [
+      "السمسم"
+    ],
+    "correctIndex": 0,
+    "answer": "السمسم",
+    "explanation": "لأن نصف الكلمة (سُم) يضر، وكلمة سمسم غذاء نافع.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "دين",
+    "difficulty": "سهل",
+    "question": "أكمل الحديث: الحياء من ...",
+    "options": [
+      "الإيمان"
+    ],
+    "correctIndex": 0,
+    "answer": "الإيمان",
+    "explanation": "حديث متفق عليه: الحياء من الإيمان.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "دين",
+    "difficulty": "سهل",
+    "question": "أكمل الحديث: إنما الأعمال ...",
+    "options": [
+      "بالنيات"
+    ],
+    "correctIndex": 0,
+    "answer": "بالنيات",
+    "explanation": "حديث متفق عليه: إنما الأعمال بالنيات.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "دين",
+    "difficulty": "متوسط",
+    "question": "أكمل الحديث: من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ...",
+    "options": [
+      "ليصمت"
+    ],
+    "correctIndex": 0,
+    "answer": "ليصمت",
+    "explanation": "حديث متفق عليه: من كان يؤمن بالله واليوم الآخر فليقل خيرًا أو ليصمت.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "دين",
+    "difficulty": "متوسط",
+    "question": "أكمل المقولة: اطلبوا العلم من المهد ...",
+    "options": [
+      "إلى اللحد"
+    ],
+    "correctIndex": 0,
+    "answer": "إلى اللحد",
+    "explanation": "مأثور مشهور: اطلبوا العلم من المهد إلى اللحد.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم بنت يبدأ بحرف الراء (ر) ويتكون من 3 حروف.",
+    "options": [
+      "ريم أو رنا أو رهف أو ربا"
+    ],
+    "correctIndex": 0,
+    "answer": "ريم أو رنا أو رهف أو ربا",
+    "explanation": "أسماء صحيحة تبدأ بالراء وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم بنت يبدأ بحرف السين (س) ويتكون من 4 حروف.",
+    "options": [
+      "سارة أو سلمى أو سهام أو سناء"
+    ],
+    "correctIndex": 0,
+    "answer": "سارة أو سلمى أو سهام أو سناء",
+    "explanation": "أسماء صحيحة تبدأ بالسين وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم حيوان يبدأ بحرف الباء (ب) ويتكون من 3 حروف.",
+    "options": [
+      "بطة أو بقر أو بغل أو بوم"
+    ],
+    "correctIndex": 0,
+    "answer": "بطة أو بقر أو بغل أو بوم",
+    "explanation": "حيوانات صحيحة تبدأ بالباء وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم حيوان يبدأ بحرف الفاء (ف) ويتكون من 3 حروف.",
+    "options": [
+      "فيل أو فهد أو فرس أو فأر"
+    ],
+    "correctIndex": 0,
+    "answer": "فيل أو فهد أو فرس أو فأر",
+    "explanation": "حيوانات صحيحة تبدأ بالفاء وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم حيوان يبدأ بحرف القاف (ق) ويتكون من 3 حروف.",
+    "options": [
+      "قرد أو قطة أو قمل أو قرش"
+    ],
+    "correctIndex": 0,
+    "answer": "قرد أو قطة أو قمل أو قرش",
+    "explanation": "حيوانات صحيحة تبدأ بالقاف وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء (جماد) يبدأ بحرف التاء (ت) ويتكون من 3 حروف.",
+    "options": [
+      "تاج أو ترس أو تبن"
+    ],
+    "correctIndex": 0,
+    "answer": "تاج أو ترس أو تبن",
+    "explanation": "أشياء صحيحة تبدأ بالتاء وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء (جماد) يبدأ بحرف الجيم (ج) ويتكون من 3 حروف.",
+    "options": [
+      "جبل أو جرس أو جسر أو جيب"
+    ],
+    "correctIndex": 0,
+    "answer": "جبل أو جرس أو جسر أو جيب",
+    "explanation": "أشياء صحيحة تبدأ بالجيم وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء (جماد) يبدأ بحرف الدال (د) ويتكون من 3 حروف.",
+    "options": [
+      "دار أو درج أو درع أو دلو"
+    ],
+    "correctIndex": 0,
+    "answer": "دار أو درج أو درع أو دلو",
+    "explanation": "أشياء صحيحة تبدأ بالدال وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء (جماد) يبدأ بحرف الشين (ش) ويتكون من 4 حروف.",
+    "options": [
+      "شباك أو شمعة أو شاشة أو شراع"
+    ],
+    "correctIndex": 0,
+    "answer": "شباك أو شمعة أو شاشة أو شراع",
+    "explanation": "أشياء صحيحة تبدأ بالشين وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء يبدأ بحرف الزاي (ز) ويتكون من 4 حروف.",
+    "options": [
+      "زجاج أو زهرة أو زئبق أو زعتر"
+    ],
+    "correctIndex": 0,
+    "answer": "زجاج أو زهرة أو زئبق أو زعتر",
+    "explanation": "أشياء صحيحة تبدأ بالزاي وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم شيء يبدأ بحرف الكاف (ك) ويتكون من 3 حروف.",
+    "options": [
+      "كأس أو كوب أو كيس أو كرة"
+    ],
+    "correctIndex": 0,
+    "answer": "كأس أو كوب أو كيس أو كرة",
+    "explanation": "أشياء صحيحة تبدأ بالكاف وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم طعام أو جماد يبدأ بحرف الثاء (ث) ويتكون من 3 حروف.",
+    "options": [
+      "ثوم أو ثمر أو ثلج أو ثوب"
+    ],
+    "correctIndex": 0,
+    "answer": "ثوم أو ثمر أو ثلج أو ثوب",
+    "explanation": "كلمات صحيحة تبدأ بالثاء وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم مهنة تبدأ بحرف الخاء (خ) وتتكون من 4 حروف.",
+    "options": [
+      "خباز أو خياط أو خطاط أو خبير"
+    ],
+    "correctIndex": 0,
+    "answer": "خباز أو خياط أو خطاط أو خبير",
+    "explanation": "مهن صحيحة تبدأ بالخاء وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم ولد يبدأ بحرف الألف (أ) ويتكون من 4 حروف.",
+    "options": [
+      "أحمد أو أسعد أو أمجد أو أنور"
+    ],
+    "correctIndex": 0,
+    "answer": "أحمد أو أسعد أو أمجد أو أنور",
+    "explanation": "أسماء صحيحة تبدأ بالألف وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم ولد يبدأ بحرف الحاء (ح) ويتكون من 4 حروف.",
+    "options": [
+      "حاتم أو حازم أو حامد أو حبيب"
+    ],
+    "correctIndex": 0,
+    "answer": "حاتم أو حازم أو حامد أو حبيب",
+    "explanation": "أسماء صحيحة تبدأ بالحاء وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر اسم ولد يبدأ بحرف الميم (م) ويتكون من 4 حروف.",
+    "options": [
+      "ماجد أو مالك أو ماهر أو محسن"
+    ],
+    "correctIndex": 0,
+    "answer": "ماجد أو مالك أو ماهر أو محسن",
+    "explanation": "أسماء صحيحة تبدأ بالميم وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر كلمة تبدأ بحرف الذال (ذ) وتتكون من 3 حروف.",
+    "options": [
+      "ذهب أو ذرة أو ذيل أو ذئب"
+    ],
+    "correctIndex": 0,
+    "answer": "ذهب أو ذرة أو ذيل أو ذئب",
+    "explanation": "كلمات صحيحة تبدأ بالذال وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر كلمة تبدأ بحرف الصاد (ص) وتتكون من 3 حروف.",
+    "options": [
+      "صحن أو صخر أو صوف أو صدأ"
+    ],
+    "correctIndex": 0,
+    "answer": "صحن أو صخر أو صوف أو صدأ",
+    "explanation": "كلمات صحيحة تبدأ بالصاد وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر كلمة تبدأ بحرف الضاد (ض) وتتكون من 3 حروف.",
+    "options": [
+      "ضوء أو ضرس أو ضلع أو ضأن"
+    ],
+    "correctIndex": 0,
+    "answer": "ضوء أو ضرس أو ضلع أو ضأن",
+    "explanation": "كلمات صحيحة تبدأ بالضاد وتتكون من 3 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "سهل",
+    "question": "اذكر مهنة أو دورًا يبدأ بحرف الطاء (ط) ويتكون من 4 حروف.",
+    "options": [
+      "طبيب أو طيار أو طاهي أو طالب"
+    ],
+    "correctIndex": 0,
+    "answer": "طبيب أو طيار أو طاهي أو طالب",
+    "explanation": "مهن أو أدوار صحيحة تبدأ بالطاء وتتكون من 4 حروف.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم أغنية من كلمتين",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم أكلة مصرية من كلمتين",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم بحر يبدأ بحرف أ",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم خضار يبدأ بحرف ب",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم رياضة من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم طائر يبدأ بحرف ح",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم محافظة مصرية من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مدينة تبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مسلسل مصري من كلمتين",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مطرب عربي يبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم ممثل عربي يبدأ بحرف ن",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم منتخب يبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم نهر يبدأ بحرف ن",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم وجبة إفطار مصرية",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم ولد يبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "answer": "",
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال.",
+    "source": "bank"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: آخر العنقود ...",
+    "options": [
+      "سكر معقود"
+    ],
+    "correctIndex": 0,
+    "answer": "سكر معقود",
+    "explanation": "المثل الصحيح: آخر العنقود سكر معقود.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: إذا غاب القط ...",
+    "options": [
+      "العب يا فار"
+    ],
+    "correctIndex": 0,
+    "answer": "العب يا فار",
+    "explanation": "المثل: إذا غاب القط العب يا فار.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: الجار قبل ...",
+    "options": [
+      "الدار"
+    ],
+    "correctIndex": 0,
+    "answer": "الدار",
+    "explanation": "المثل: الجار قبل الدار.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: الصبر مفتاح...",
+    "options": [
+      "الفرج"
+    ],
+    "correctIndex": 0,
+    "answer": "الفرج",
+    "explanation": "المثل: الصبر مفتاح الفرج.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: الطيور على أشكالها ...",
+    "options": [
+      "تقع"
+    ],
+    "correctIndex": 0,
+    "answer": "تقع",
+    "explanation": "المثل: الطيور على أشكالها تقع.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: القرد في عين أمه ...",
+    "options": [
+      "غزال"
+    ],
+    "correctIndex": 0,
+    "answer": "غزال",
+    "explanation": "المثل: القرد في عين أمه غزال.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: الوقت كالسيف إن لم تقطعه ...",
+    "options": [
+      "قطعك"
+    ],
+    "correctIndex": 0,
+    "answer": "قطعك",
+    "explanation": "المثل: الوقت كالسيف إن لم تقطعه قطعك.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: خير الكلام ما قل ...",
+    "options": [
+      "ودل"
+    ],
+    "correctIndex": 0,
+    "answer": "ودل",
+    "explanation": "المثل: خير الكلام ما قل ودل.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: عصفور في اليد خير من ...",
+    "options": [
+      "عشرة على الشجرة"
+    ],
+    "correctIndex": 0,
+    "answer": "عشرة على الشجرة",
+    "explanation": "المثل: عصفور في اليد خير من عشرة على الشجرة.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: في التأني السلامة وفي العجلة ...",
+    "options": [
+      "الندامة"
+    ],
+    "correctIndex": 0,
+    "answer": "الندامة",
+    "explanation": "المثل: في التأني السلامة وفي العجلة الندامة.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: لا يلدغ المؤمن من جحر ...",
+    "options": [
+      "مرتين"
+    ],
+    "correctIndex": 0,
+    "answer": "مرتين",
+    "explanation": "المثل: لا يلدغ المؤمن من جحر مرتين.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: من جد...",
+    "options": [
+      "وجد"
+    ],
+    "correctIndex": 0,
+    "answer": "وجد",
+    "explanation": "المثل: من جد وجد.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: من حفر حفرة لأخيه ...",
+    "options": [
+      "وقع فيها"
+    ],
+    "correctIndex": 0,
+    "answer": "وقع فيها",
+    "explanation": "المثل: من حفر حفرة لأخيه وقع فيها.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "سهل",
+    "question": "أكمل المثل: يد واحدة لا ...",
+    "options": [
+      "تصفق"
+    ],
+    "correctIndex": 0,
+    "answer": "تصفق",
+    "explanation": "المثل الصحيح: يد واحدة لا تصفق.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "متوسط",
+    "question": "أكمل المثل: العلم في الصغر ...",
+    "options": [
+      "كالنقش على الحجر"
+    ],
+    "correctIndex": 0,
+    "answer": "كالنقش على الحجر",
+    "explanation": "المثل: العلم في الصغر كالنقش على الحجر.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db2.json",
+    "category": "معلومات عامة",
+    "difficulty": "متوسط",
+    "question": "أكمل المثل: تجري الرياح بما لا تشتهي ...",
+    "options": [
+      "السفن"
+    ],
+    "correctIndex": 0,
+    "answer": "السفن",
+    "explanation": "المثل: تجري الرياح بما لا تشتهي السفن.",
+    "source": "reviewed"
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم دولة تبدأ بحرف ب",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم فاكهة تبدأ بحرف ت",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم عاصمة تبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم خضار من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم آلة موسيقية من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم بنت من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم بنت يبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم فيلم عربي من كلمتين",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مخرج مصري يبدأ بحرف ش",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مادة دراسية تبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مخرج عربي يبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم محافظة مصرية تبدأ بحرف د",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم آلة موسيقية تبدأ بحرف ع",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شيء موجود في المدرسة يبدأ بحرف ك",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db3.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم لاعب مصري يبدأ بحرف ح",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم حيوان يبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شهر من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم حيوان من 3 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مدينة عربية من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم حيوان بحري يبدأ بحرف د",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم بلد يبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مسلسل عربي يبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم عاصمة من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مشروب ساخن من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم دولة تبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شيء موجود في المطبخ يبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم بلد من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم لون من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم نبات من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db4.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم نادي كرة قدم يبدأ بحرف أ",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم ممثلة مصرية تبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم جماد من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم عاصمة تبدأ بحرف ب",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم دولة تبدأ بحرف ك",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم دولة أفريقية من 6 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم يوم يبدأ بحرف س",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم حشرة من 4 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم نبات يبدأ بحرف ر",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شيء في السيارة يبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم محافظة مصرية تبدأ بحرف ق",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم شخصية كرتونية تبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم فاكهة من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مهنة تبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم مادة دراسية من 5 حروف",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  },
+  {
+    "__file": "db5.json",
+    "category": "سرعة",
+    "difficulty": "متوسط",
+    "question": "اسم لاعب كرة قدم يبدأ بحرف م",
+    "options": [],
+    "correctIndex": null,
+    "explanation": "إجابة حرة؛ الحكم للمضيف وفق شروط السؤال."
+  }
+]
