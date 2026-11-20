@@ -1319,18 +1319,20 @@ function initActivity() {
 /* ═══ جلب الأسئلة من السيرفر ═══ */
 async function fetchQuestions(apiParams) {
   try {
-    const respObj = await operatorApiFetch('/api/questions?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
-      method: 'POST',
-      cache: 'no-store',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(Object.assign({}, apiParams, { avoid: (apiParams.avoid || state.questionHistory.slice(-150)) }))
-    });
     let jsonBody;
-    if (respObj.ok) {
-      jsonBody = await respObj.json();
-    } else {
+    const operatorKey = getOperatorKey();
+    if (operatorKey) {
+      const respObj = await operatorApiFetch('/api/questions?fresh=' + Date.now() + '-' + Math.random().toString(36).slice(2), {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Object.assign({}, apiParams, { avoid: (apiParams.avoid || state.questionHistory.slice(-150)) }))
+      });
+      if (respObj.ok) jsonBody = await respObj.json();
+    }
+    if (!jsonBody) {
       // القراءة الآمنة لا تغيّر دورة منع التكرار، وتبقي بوابة المواجهة
-      // قابلة للتشغيل حتى عند غياب مفتاح المشغل أو تعطل مسار الكتابة.
+      // قابلة للتشغيل بدون انتظار رفض مسار الكتابة المحمي.
       const params = new URLSearchParams({
         category: apiParams.category || 'اختيارات متنوعة',
         difficulty: apiParams.difficulty || 'متدرج',
