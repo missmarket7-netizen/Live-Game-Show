@@ -571,6 +571,28 @@ export function installNoRepeatEngine(app) {
     app.use(express.json({ limit: "2mb" }));
   } catch (e) {}
 
+  // مسار قراءة عام لا يكتب دورة منع التكرار. يحافظ على عمل صفحة الأسئلة
+  // عندما لا يكون OPERATOR_WRITE_KEY مضبوطًا، بينما تبقى كل عمليات السحب
+  // التي تغيّر الحالة محمية عبر POST /api/questions.
+  app.get("/api/questions-readonly", async (req, res) => {
+    res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
+    try {
+      await ensureReady();
+      const count = Math.min(30, Math.max(1, Number(req.query.count) || 10));
+      const category = req.query.category || "اختيارات متنوعة";
+      const difficulty = req.query.difficulty || "متدرج";
+      const rawAvoid = Array.isArray(req.query.avoid) ? req.query.avoid : (req.query.avoid ? [req.query.avoid] : []);
+      const avoidSet = new Set(rawAvoid.flatMap((value) => String(value).split("|")).map(keyFromText).filter(Boolean));
+      const bank = loadBankQuestions().filter((q) => !EXCLUDED_CATEGORIES.has(q.category));
+      const pool = applyFilters(bank.filter((q) => !avoidSet.has(questionKey(q))), count, category, difficulty);
+      const selected = pickBalanced(pool, count).slice(0, count);
+      const enriched = selected.map((q, i) => ({ ...q, id: "readonly_q_" + Date.now() + "_" + i, source: q.source || "bank" }));
+      return res.json({ questions: enriched, meta: { engine: VERSION, source: "readonly-fallback", count: enriched.length, bankSize: bank.length, persistent: Boolean(db || process.env.RAILWAY_VOLUME_MOUNT_PATH) } });
+    } catch (err) {
+      return res.status(500).json({ error: "فشل قراءة بنك الأسئلة", details: err.message, engine: VERSION });
+    }
+  });
+
   app.post("/api/questions", async (req, res) => {
     res.set({ "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate", "Pragma": "no-cache", "Expires": "0" });
     return withLock(async () => {

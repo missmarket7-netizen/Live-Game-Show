@@ -1325,8 +1325,25 @@ async function fetchQuestions(apiParams) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(Object.assign({}, apiParams, { avoid: (apiParams.avoid || state.questionHistory.slice(-150)) }))
     });
-    if (!respObj.ok) throw new Error('API unavailable');
-    const jsonBody = await respObj.json();
+    let jsonBody;
+    if (respObj.ok) {
+      jsonBody = await respObj.json();
+    } else if (respObj.status === 401 || respObj.status === 503) {
+      // القراءة الآمنة لا تغيّر دورة منع التكرار، لكنها تعيد تشغيل البرنامج
+      // الأساسي إذا لم يُضبط مفتاح المشغل في بيئة البث.
+      const params = new URLSearchParams({
+        category: apiParams.category || 'اختيارات متنوعة',
+        difficulty: apiParams.difficulty || 'متدرج',
+        count: String(apiParams.count || 10)
+      });
+      for (const avoided of (apiParams.avoid || state.questionHistory.slice(-40))) params.append('avoid', String(avoided));
+      const fallback = await fetch('/api/questions-readonly?' + params.toString(), { cache: 'no-store' });
+      if (!fallback.ok) throw new Error('Fallback unavailable');
+      jsonBody = await fallback.json();
+      setOperatorAuthStatus('وضع البنك المحلي الآمن يعمل؛ أضف مفتاح المشغل لتفعيل منع التكرار الدائم.', 'info');
+    } else {
+      throw new Error('API unavailable');
+    }
     const rawQs = Array.isArray(jsonBody.questions) ? jsonBody.questions : [];
     if (!rawQs.length) throw new Error('Empty');
     return rawQs.map((item) => Object.assign({}, item, { source: item.source || 'bank' }));

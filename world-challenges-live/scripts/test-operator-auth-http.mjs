@@ -109,6 +109,9 @@ try {
   server = await startIsolatedServer("");
   assert.equal((await request(server.baseUrl, "/api/operator/verify")).status, 503);
   assert.equal((await request(server.baseUrl, "/api/health")).status, 200);
+  const readonlyBank = await request(server.baseUrl, "/api/questions-readonly?category=%D8%A7%D8%AE%D8%AA%D9%8A%D8%A7%D8%B1%D8%A7%D8%AA%20%D9%85%D8%AA%D9%86%D9%88%D8%B9%D8%A9&difficulty=%D8%B3%D9%87%D9%84&count=1");
+  assert.equal(readonlyBank.status, 200, "the safe read-only bank fallback must work without an operator key");
+  assert.ok(Array.isArray(JSON.parse(readonlyBank.text).questions), "the fallback must return a questions array");
   assert.equal(
     (await request(server.baseUrl, "/api/questions", {
       method: "POST",
