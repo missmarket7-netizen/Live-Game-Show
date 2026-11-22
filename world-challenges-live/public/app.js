@@ -152,8 +152,38 @@ const categoryEmoji = {
 
 /* __WEBAUDIO_V1__ — الصوت عبر Web Audio: تشغيل أكثر استقراراً داخل الصفحة */
 let audioCtx = null;
+let audioMaster = null;
+let audioLimiter = null;
 const bufferPromises = {};
 const activeSources = {};
+
+const AUDIO_OUTPUT_GAIN = 1.12;
+const AUDIO_VOLUME_BOOST = 1.3;
+
+function ensureAudioBus(ctx) {
+  if (!ctx || audioMaster) return;
+  try {
+    audioLimiter = ctx.createDynamicsCompressor();
+    audioLimiter.threshold.value = -12;
+    audioLimiter.knee.value = 18;
+    audioLimiter.ratio.value = 5;
+    audioLimiter.attack.value = 0.003;
+    audioLimiter.release.value = 0.18;
+    audioMaster = ctx.createGain();
+    audioMaster.gain.value = AUDIO_OUTPUT_GAIN;
+    audioLimiter.connect(audioMaster);
+    audioMaster.connect(ctx.destination);
+  } catch (e) {
+    audioMaster = null;
+    audioLimiter = null;
+  }
+}
+
+function outputVolume(volume) {
+  const requested = volume == null ? 0.55 : Number(volume);
+  const safe = Number.isFinite(requested) ? requested : 0.55;
+  return Math.max(0.03, Math.min(0.98, safe * AUDIO_VOLUME_BOOST));
+}
 
 function getCtx() {
   if (audioCtx) return audioCtx;
@@ -161,6 +191,7 @@ function getCtx() {
   if (!AC) return null;
   try {
     audioCtx = new AC({ latencyHint: 'interactive' });
+    ensureAudioBus(audioCtx);
   } catch (e) {
     audioCtx = null;
   }
@@ -240,10 +271,11 @@ function startBuffer(key, buffer, volume, onEnd) {
     const sourceNode = ctx.createBufferSource();
     const gainNode = ctx.createGain();
 
-    gainNode.gain.value = volume;
+    gainNode.gain.value = outputVolume(volume);
     sourceNode.buffer = buffer;
     sourceNode.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    ensureAudioBus(ctx);
+    gainNode.connect(audioLimiter || audioMaster || ctx.destination);
 
     sourceNode.onended = () => {
       if (activeSources[key] === sourceNode) {
@@ -284,7 +316,7 @@ function htmlPlay(key, volume, onEnd) {
   try {
     const audio = getAudio(key);
     audio.currentTime = 0;
-    audio.volume = volume;
+    audio.volume = outputVolume(volume);
     audio.onended = onEnd || null;
     audio.onerror = onEnd || null;
     audio.play().catch(() => {
@@ -353,7 +385,18 @@ document.addEventListener('pointerdown', function preloadOnce() {
     'tick',
     'correct',
     'wrong',
-    'begin'
+    'begin',
+    'round-complete',
+    'gift-heart',
+    'gift-donut',
+    'gift-corgi',
+    'gift-rose',
+    'gift-tiktok',
+    'gift-cat',
+    'gift-crown',
+    'girls-captin',
+    'boys-captin',
+    'chimo'
   ]);
 }, { passive: true });
 

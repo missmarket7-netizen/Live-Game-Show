@@ -5,6 +5,7 @@
   window.__CAPTAIN_SOUNDS_V1__ = true;
 
   var CAP_MS = 35000; /* 35 ثانية فقط من مدة المؤثر */
+  var activeCaptainAudio = null;
 
   var CAPTAINS = [
     { key: 'nancy',    aliases: ['nancy', 'نانسي'] },
@@ -111,14 +112,22 @@
 
   /* تشغيل المؤثر الخاص مع حد 35 ثانية، وعند الفشل يحتياطي الفريق */
   function playCapped(key, fallbackKey) {
+    if (activeCaptainAudio) {
+      try { activeCaptainAudio.pause(); activeCaptainAudio.currentTime = 0; } catch (e) {}
+      activeCaptainAudio = null;
+    }
     var a = new Audio('/sounds/' + key + '.mp3?v=20261113-audio-compressed');
-    a.volume = 0.85;
+    a.preload = 'auto';
+    a.setAttribute('playsinline', '');
+    a.volume = 0.95;
+    activeCaptainAudio = a;
     var settled = false;
 
     function fail() {
       if (settled) return;
       settled = true;
       try { a.pause(); } catch (e) {}
+      if (activeCaptainAudio === a) activeCaptainAudio = null;
       playFallback(fallbackKey);
     }
 
@@ -126,9 +135,13 @@
 
     var timer = setTimeout(function () {
       try { if (!a.paused) { a.pause(); a.currentTime = 0; } } catch (e) {}
+      if (activeCaptainAudio === a) activeCaptainAudio = null;
     }, CAP_MS);
 
-    a.addEventListener('ended', function () { clearTimeout(timer); });
+    a.addEventListener('ended', function () {
+      clearTimeout(timer);
+      if (activeCaptainAudio === a) activeCaptainAudio = null;
+    });
 
     var p = a.play();
     if (p && typeof p.catch === 'function') p.catch(fail);
