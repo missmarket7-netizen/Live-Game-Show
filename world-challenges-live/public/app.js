@@ -535,8 +535,8 @@ function startShowClock() {
 function updateScores() {
   if ($('girlsScoreValue')) $('girlsScoreValue').textContent = state.girlsScore;
   if ($('boysScoreValue')) $('boysScoreValue').textContent = state.boysScore;
-  if ($('girlsProgress')) $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * 20) + '%';
-  if ($('boysProgress')) $('boysProgress').style.width = Math.min(100, Math.max(0, state.boysScore) * 20) + '%';
+  if ($('girlsProgress')) $('girlsProgress').style.width = Math.min(100, Math.max(0, state.girlsScore) * (100 / 30)) + '%';
+  if ($('boysProgress')) $('boysProgress').style.width = Math.min(100, Math.max(0, state.boysScore) * (100 / 30)) + '%';
   if ($('girlsRoundsWon')) $('girlsRoundsWon').textContent = state.girlsRounds + ' جولات';
   if ($('boysRoundsWon')) $('boysRoundsWon').textContent = state.boysRounds + ' جولات';
   if ($('roundResults')) $('roundResults').textContent = state.girlsRounds + ' - ' + state.boysRounds;
@@ -824,10 +824,10 @@ function selectGift(gift) {
     return;
   }
   if (gift === 'rose') {
-    subtractPoint('boys', true);
+    subtractPoint('boys', true, 5);
     playSound('gift-rose', 0.6);
   } else if (gift === 'tiktok') {
-    subtractPoint('girls', true);
+    subtractPoint('girls', true, 5);
     playSound('gift-tiktok', 0.6);
   } else if (gift === 'cat') {
     state.boysRounds += 1;
@@ -899,16 +899,18 @@ function resolveGift(team) {
   updateScores();
 }
 
-function subtractPoint(team, viaGift) {
+function subtractPoint(team, viaGift, amount) {
+const amt = Math.max(1, Number(amount) || 1);
   if ((team === 'girls' && state.shieldGirls) || (team === 'boys' && state.shieldBoys)) {
     playSound('gift-heart', 0.4);
     showToast('فريق ' + (team === 'girls' ? 'البنات' : 'الشباب') + ' محمي بالدرع', 'SHIELD ACTIVE');
     return;
   }
-  if (team === 'girls') state.girlsScore = Math.max(-5, state.girlsScore - 1);
-  else state.boysScore = Math.max(-5, state.boysScore - 1);
+  if (team === 'girls') state.girlsScore = Math.max(-30, state.girlsScore - amt);
+  else state.boysScore = Math.max(-30, state.boysScore - amt);
   updateScores();
-  if (!viaGift) playSound('wrong', 0.25);
+  if (viaGift) { burstAt(team === 'girls' ? 'boys' : 'girls'); playSound('wrong', 0.4); showToast('−' + amt + ' نقاط من فريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT HIT'); }
+else playSound('wrong', 0.25);
 }
 
 /* ═══ قصاصات النقاط الموجهة (بنات = الجانب الأيمن، شباب = الجانب الأيسر) ═══ */
@@ -954,17 +956,18 @@ function applyPoint(team, points) {
   if (team === 'girls') {
     state.girlsScore = state.girlsScore < 0
       ? Math.min(0, state.girlsScore + points)
-      : Math.min(5, state.girlsScore + points);
+      : Math.min(30, state.girlsScore + points);
   } else {
     state.boysScore = state.boysScore < 0
       ? Math.min(0, state.boysScore + points)
-      : Math.min(5, state.boysScore + points);
+      : Math.min(30, state.boysScore + points);
   }
   updateScores();
   playSound('correct', 0.28);
   burstAt(team);
-  if (state.girlsScore >= 5 || state.boysScore >= 5) {
-    showToast('اكتملت 5 نقاط! اضغط «الجولة التالية»', 'ROUND READY');
+if (points >= 5) { fireConfetti(); playSound('celebration', 0.5); }
+  if (state.girlsScore >= 30 || state.boysScore >= 30) {
+    showToast('اكتملت 30 نقطة! اضغط «الجولة التالية»', 'ROUND READY');
   }
 }
 
@@ -984,11 +987,11 @@ function finishRound() {
   let winnerMsg = 'تعادل رائع بين الفريقين';
   const multiplier = state.x2Active ? 2 : 1;
   playSound('round-complete', 0.55);
-  if (state.girlsScore >= 5 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
+  if (state.girlsScore >= 30 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
     state.girlsRounds += multiplier;
     winnerMsg = 'فوز فريق البنات' + (multiplier > 1 ? ' (×2!)' : '');
     playSequential(['girls-round', 'boys-lose']);
-  } else if (state.boysScore >= 5 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
+  } else if (state.boysScore >= 30 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
     state.boysRounds += multiplier;
     winnerMsg = 'فوز فريق الشباب' + (multiplier > 1 ? ' (×2!)' : '');
     playSequential(['boys-round', 'girls-lose']);
@@ -1827,13 +1830,13 @@ function fixTimerPills() {
 
 function patchGiftImages() {
   const giftConfigs = {
-    rose: { img: '/images/gift-rose.png', small: '−1 شباب' },
+    rose: { img: '/images/gift-rose.png', small: '−5 شباب' },
     donut: { img: '/images/gift-donut.png', small: '+1 جولة' },
     corgi: { img: '/images/gift-corgi.png', small: '+10 جولات' },
     heart: { img: '/images/gift-heart.png', label: 'درع الحماية', small: 'حماية الفريق' },
     galaxy: { img: '/images/gift-galaxy.png', small: '+50 جولة' },
     wheel: { img: '/images/gift-whale.png', fallback: '/images/gift-wheel.png', small: '+100 جولة' },
-    tiktok: { img: '/images/gift-tiktok.png', small: '−1 بنات' },
+    tiktok: { img: '/images/gift-tiktok.png', small: '−5 بنات' },
     cat: { img: '/images/gift-cat.png', fallbackEmoji: '🐱', small: '+1 جولة' },
     crown: { img: '/images/gift-crown.png', fallbackEmoji: '👑', small: '+10 جولات' }
   };
@@ -2826,4 +2829,53 @@ document.addEventListener('DOMContentLoaded', init);
     }
     return orig.apply(this, arguments);
   };
+})();
+/* ═══ POINT_PICK_V1 — أزرار +5 / +3 / +1 مع اختيار الفريق واحتفال ═══ */
+(function () {
+  'use strict';
+  function injectStyle() {
+    if (document.getElementById('pointPickStyle')) return;
+    var st = document.createElement('style');
+    st.id = 'pointPickStyle';
+    st.textContent = '.score-actions{grid-template-columns:repeat(5,1fr)!important}.point-add-control{border-color:rgba(100,236,173,.4);color:var(--green);font-weight:900}.point-add-control.point-big{border-color:rgba(255,211,110,.55);color:var(--gold-hot)}.point-pick-teams{display:flex;gap:8px;margin:12px 0}.point-pick-btn{flex:1;min-height:54px;font-size:15px;font-weight:900;border-radius:12px;border:0;color:#fff;cursor:pointer}@media(max-width:430px){.score-actions{grid-template-columns:repeat(3,1fr)!important}}';
+    document.head.appendChild(st);
+  }
+  function build() {
+    injectStyle();
+    var host = document.querySelector('.score-actions');
+    if (!host || document.getElementById('pointPickOverlay')) return;
+    var gp = document.getElementById('girlsPlusBtn');
+    var bp = document.getElementById('boysPlusBtn');
+    if (gp) gp.style.display = 'none';
+    if (bp) bp.style.display = 'none';
+    [5, 3, 1].forEach(function (v) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'text-control point-add-control' + (v === 5 ? ' point-big' : '');
+      b.dataset.points = String(v);
+      b.innerHTML = '<span>✦</span> +' + v;
+      b.addEventListener('click', function () { openPick(v); });
+      host.insertBefore(b, host.firstChild);
+    });
+    var ov = document.createElement('div');
+    ov.id = 'pointPickOverlay';
+    ov.className = 'overlay hidden';
+    ov.innerHTML = '<div class="overlay-card"><span class="overlay-kicker">POINT TARGET</span><h2>أضف النقاط لفريق</h2><p id="pointPickValue" style="color:var(--gold-hot);font-weight:900;font-size:15px;margin:6px 0 2px">+5</p><div class="point-pick-teams"><button id="pointPickGirls" type="button" class="point-pick-btn" style="background:var(--pink)">👧 البنات</button><button id="pointPickBoys" type="button" class="point-pick-btn" style="background:var(--cyan-deep)">👦 الشباب</button></div><button id="pointPickCancel" type="button" class="deck-button">إلغاء</button></div>';
+    document.body.appendChild(ov);
+    var pending = 1;
+    function openPick(v) {
+      pending = v;
+      var label = document.getElementById('pointPickValue');
+      if (label) label.textContent = '+' + v + ' نقطة';
+      ov.classList.remove('hidden');
+      if (window.playSound) window.playSound('tick', 0.3);
+    }
+    function closePick() { ov.classList.add('hidden'); }
+    ov.addEventListener('click', function (e) { if (e.target === ov) closePick(); });
+    document.getElementById('pointPickGirls').addEventListener('click', function () { closePick(); if (window.applyPoint) window.applyPoint('girls', pending); });
+    document.getElementById('pointPickBoys').addEventListener('click', function () { closePick(); if (window.applyPoint) window.applyPoint('boys', pending); });
+    document.getElementById('pointPickCancel').addEventListener('click', closePick);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
+  else build();
 })();
