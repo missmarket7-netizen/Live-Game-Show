@@ -1,4 +1,4 @@
-const CACHE_NAME = "wcq-v20261125-live-game-show-v5";
+const CACHE_NAME = "wcq-v20261125-live-game-show-v6";
 const APP_SHELL = [
   "/",
   "/index.html",
