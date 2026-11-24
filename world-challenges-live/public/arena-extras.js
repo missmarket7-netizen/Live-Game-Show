@@ -103,16 +103,16 @@
   }
 
   function ensureSoundFiles() {
-    try {
-      if (typeof soundFiles !== 'undefined' && soundFiles) {
-        soundFiles.speed = CONFIG.sounds.speed;
-        soundFiles.card = CONFIG.sounds.card;
-        soundFiles.wheel = CONFIG.sounds.wheel;
-      }
-    } catch (e) {}
-  }
-
-  function removeOverlay(id) {
+try {
+if (typeof soundFiles !== 'undefined' && soundFiles) {
+soundFiles.speed = CONFIG.sounds.speed;
+soundFiles.card = CONFIG.sounds.card;
+soundFiles.wheel = CONFIG.sounds.wheel;
+soundFiles.money = ['money', 'celebration', 'boom'];
+}
+} catch (e) {}
+}
+function removeOverlay(id) {
     var el = $(id);
     if (el && el.parentNode) {
       el.parentNode.removeChild(el);
@@ -607,58 +607,19 @@
     toastSafe('اخطف واجري — تحركت نقطة', 'WHEEL');
   }
 
-  var WHEEL_RESULTS = [
-    {
-      id: 'x3',
-      title: 'الدعم X3',
-      short: '×3 دعم',
-      desc: 'نقاط السؤال القادم ×3',
-      sound: 'fight',
-      apply: function () {
-        AX.pendingX3 = true;
-        updateBadges();
-        toastSafe('الدعم X3 جاهز للسؤال القادم', 'WHEEL');
-      }
-    },
-    {
-      id: 'swap',
-      title: 'تبديل نقاط',
-      short: 'تبديل',
-      desc: 'تم تبديل نقاط البنات والشباب',
-      sound: 'days',
-      apply: swapPoints
-    },
-    {
-      id: 'yellow',
-      title: 'كارت أصفر',
-      short: 'كارت',
-      desc: 'اختر الفريق الذي سيُحظر في السؤال القادم',
-      sound: 'teamwork',
-      apply: null
-    },
-    {
-      id: 'x2',
-      title: 'السؤال التالي X2',
-      short: '×2',
-      desc: 'مضاعفة نقاط السؤال القادم',
-      sound: 'advice',
-      apply: function () {
-        AX.pendingX2 = true;
-        updateBadges();
-        toastSafe('السؤال القادم ×2', 'WHEEL');
-      }
-    },
-    {
-      id: 'snatch',
-      title: 'اخطف واجري',
-      short: 'اخطف',
-      desc: 'نقل نقطة من المتصدر إلى الفريق الآخر',
-      sound: 'boom',
-      apply: snatchAndRun
-    }
-  ];
-
-  WHEEL_RESULTS.forEach(function (result, index) {
+  /* ═══ AX_WHEEL_V2 — 9 خيارات مخلوطة كل لفة ═══ */
+var WHEEL_RESULTS = [
+{ id: 'x3', title: 'الدعم X3', short: '×3 دعم', desc: 'نقاط السؤال القادم ×3', sound: 'fight', apply: function () { AX.pendingX3 = true; updateBadges(); toastSafe('الدعم X3 جاهز للسؤال القادم', 'WHEEL'); } },
+{ id: 'swap', title: 'تبديل نقاط', short: 'تبديل', desc: 'تم تبديل نقاط البنات والشباب', sound: 'days', apply: swapPoints },
+{ id: 'yellow', title: 'كارت أصفر', short: 'كارت', desc: 'اختر الفريق الذي سيُحظر في السؤال القادم', sound: 'teamwork', teamPick: 'block', apply: null },
+{ id: 'x2', title: 'السؤال التالي X2', short: '×2', desc: 'مضاعفة نقاط السؤال القادم', sound: 'advice', apply: function () { AX.pendingX2 = true; updateBadges(); toastSafe('السؤال القادم ×2', 'WHEEL'); } },
+{ id: 'snatch', title: 'اخطف واجري', short: 'اخطف', desc: 'نقل نقطة من المتصدر إلى الفريق الآخر', sound: 'boom', apply: snatchAndRun },
+{ id: 'minus-round', title: 'حذف جولة', short: '−1 جولة', desc: 'اختر الفريق الذي تُحذف منه جولة (تحتسب بالسالب)', sound: 'advice', teamPick: 'minus', apply: null },
+{ id: 'round-plus', title: 'جولة بلس', short: '+1 جولة', desc: 'اختر الفريق الذي تُضاف له جولة مع مؤثر فريقه', sound: 'celebration', teamPick: 'plus', apply: null },
+{ id: 'rahat', title: 'راحت عليك', short: 'راحت عليك', desc: 'لا تأثير — مجرد شماتة لطيفة 😈', sound: 'boys-mood', apply: function () { toastSafe('راحت عليك! 😈', 'WHEEL'); } },
+{ id: 'halal', title: 'المال الحلال', short: 'مال حلال', desc: 'مال نظيف — فرصة إضافية للفّ العجلة', sound: 'money', apply: null }
+];
+WHEEL_RESULTS.forEach(function (result, index) {
     result.index = index;
   });
 
@@ -694,133 +655,119 @@
     }
   }
 
-  function openWheel() {
-    if (AX.wheelBusy || $('axWheelOverlay')) return;
-
-    AX.wheelBusy = true;
-
-    var result = WHEEL_RESULTS[Math.floor(Math.random() * WHEEL_RESULTS.length)];
-    var segment = 360 / WHEEL_RESULTS.length;
-    var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad'];
-
-    var stops = WHEEL_RESULTS.map(function (item, index) {
-      var start = index * segment;
-      var end = (index + 1) * segment;
-      return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
-    }).join(', ');
-
-    var labels = WHEEL_RESULTS.map(function (item) {
-      var angle = item.index * segment + segment / 2;
-      var text = item.short || item.title;
-
-      return (
-        '<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
-        esc(text) +
-        '</span>'
-      );
-    }).join('');
-
-    var html =
-      '<div class="ax-wheel-stage">' +
-        '<div class="ax-wheel-wrap">' +
-          '<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
-            labels +
-          '</div>' +
-          '<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
-          '<div class="ax-wheel-pointer">▼</div>' +
-        '</div>' +
-        '<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
-      '</div>';
-
-    createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
-
-    var rotor = $('axWheelRotor');
-
-    if (!rotor) {
-      AX.wheelBusy = false;
-      return;
-    }
-
-    var center = result.index * segment + segment / 2;
-    var targetRotation = (360 * 5) - center;
-
-    requestAnimationFrame(function () {
-      rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
-      rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
-    });
-
-    setTimeout(function () {
-      showWheelResult(result);
-      AX.wheelBusy = false;
-    }, CONFIG.wheelSpinMs + 180);
-  }
-
-  function showWheelResult(result) {
-    var box = $('axWheelResult');
-    if (!box) return;
-
-    box.classList.remove('hidden');
-
-    var inner =
-      '<strong>' + esc(result.title) + '</strong>' +
-      '<span>' + esc(result.desc) + '</span>';
-
-    if (result.id === 'yellow') {
-      inner +=
-        '<div class="ax-yellow-choice">' +
-          '<button type="button" id="axYCGirls" class="ax-yc-btn ax-yc-girls">👧 البنات</button>' +
-          '<button type="button" id="axYCBoys" class="ax-yc-btn ax-yc-boys">👦 الشباب</button>' +
-        '</div>';
-    } else {
-      inner += '<button type="button" class="ax-close-btn" id="axWheelClose">إغلاق</button>';
-    }
-
-    box.innerHTML = inner;
-
-    playSoundSafe(result.sound, 0.85);
-    confettiSafe();
-
-    if (result.id === 'yellow') {
-      var girlsButton = $('axYCGirls');
-      var boysButton = $('axYCBoys');
-
-      function chooseBlockedTeam(team) {
-        AX.pendingBlockTeam = team;
-        updateBadges();
-        toastSafe('كارت أصفر على ' + teamLabel(team), 'YELLOW CARD');
-        removeOverlay('axWheelOverlay');
-      }
-
-      if (girlsButton) {
-        girlsButton.addEventListener('click', function () {
-          chooseBlockedTeam('girls');
-        });
-      }
-
-      if (boysButton) {
-        boysButton.addEventListener('click', function () {
-          chooseBlockedTeam('boys');
-        });
-      }
-
-      return;
-    }
-
-    try {
-      if (typeof result.apply === 'function') {
-        result.apply();
-      }
-    } catch (e) {}
-
-    var close = $('axWheelClose');
-    if (close) {
-      close.addEventListener('click', function () {
-        removeOverlay('axWheelOverlay');
-      });
-    }
-  }
-
-  /* ═══ ربط دورة الحياة بدون كسر app.js ═══ */
+  function shuffleList(list) {
+for (var i = list.length - 1; i > 0; i -= 1) {
+var j = Math.floor(Math.random() * (i + 1));
+var t = list[i]; list[i] = list[j]; list[j] = t;
+}
+return list;
+}
+function openWheel() {
+if (AX.wheelBusy || $('axWheelOverlay')) return;
+AX.wheelBusy = true;
+var order = shuffleList(WHEEL_RESULTS.slice());
+var winIndex = Math.floor(Math.random() * order.length);
+var result = order[winIndex];
+var segment = 360 / order.length;
+var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad', '#ff83bd', '#5de2ff', '#fff0a4', '#7ef2c6'];
+var stops = order.map(function (item, index) {
+var start = index * segment;
+var end = (index + 1) * segment;
+return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
+}).join(', ');
+var labels = order.map(function (item, index) {
+var angle = index * segment + segment / 2;
+return (
+'<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
+esc(item.short || item.title) +
+'</span>'
+);
+}).join('');
+var html =
+'<div class="ax-wheel-stage">' +
+'<div class="ax-wheel-wrap">' +
+'<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
+labels +
+'</div>' +
+'<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
+'<div class="ax-wheel-pointer">▼</div>' +
+'</div>' +
+'<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
+'</div>';
+createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
+var rotor = $('axWheelRotor');
+if (!rotor) { AX.wheelBusy = false; return; }
+var center = winIndex * segment + segment / 2;
+var targetRotation = (360 * 6) - center;
+requestAnimationFrame(function () {
+rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
+rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
+});
+setTimeout(function () { showWheelResult(result); AX.wheelBusy = false; }, CONFIG.wheelSpinMs + 180);
+}
+function applyTeamPick(result, team) {
+var st = getState();
+if (!st) return;
+if (result.teamPick === 'block') {
+AX.pendingBlockTeam = team;
+updateBadges();
+toastSafe('كارت أصفر على ' + teamLabel(team), 'YELLOW CARD');
+return;
+}
+if (result.teamPick === 'minus') {
+if (team === 'girls') st.girlsRounds = (Number(st.girlsRounds) || 0) - 1;
+else st.boysRounds = (Number(st.boysRounds) || 0) - 1;
+updateScoresSafe();
+toastSafe('حذف جولة من ' + teamLabel(team) + ' — أصبحت ' + (team === 'girls' ? st.girlsRounds : st.boysRounds), 'WHEEL');
+return;
+}
+if (result.teamPick === 'plus') {
+if (team === 'girls') st.girlsRounds = (Number(st.girlsRounds) || 0) + 1;
+else st.boysRounds = (Number(st.boysRounds) || 0) + 1;
+updateScoresSafe();
+playSoundSafe(team === 'girls' ? 'girls-round' : 'boys-round', 0.8);
+toastSafe('+1 جولة لفريق ' + teamLabel(team), 'WHEEL');
+}
+}
+function showWheelResult(result) {
+var box = $('axWheelResult');
+if (!box) return;
+box.classList.remove('hidden');
+var inner = '<strong>' + esc(result.title) + '</strong>' + '<span>' + esc(result.desc) + '</span>';
+if (result.teamPick) {
+inner += '<div class="ax-yellow-choice">' +
+'<button type="button" id="axYCGirls" class="ax-yc-btn ax-yc-girls">👧 البنات</button>' +
+'<button type="button" id="axYCBoys" class="ax-yc-btn ax-yc-boys">👦 الشباب</button>' +
+'</div>';
+} else {
+inner += '<div class="ax-yellow-choice">';
+if (result.id === 'halal') inner += '<button type="button" id="axChanceBtn" class="ax-yc-btn ax-yc-chance">🎯 فرصة — لف مرة أخرى</button>';
+inner += '<button type="button" class="ax-close-btn" id="axWheelClose">إغلاق</button></div>';
+}
+box.innerHTML = inner;
+playSoundSafe(result.sound, 0.85);
+confettiSafe();
+if (result.teamPick) {
+var girlsButton = $('axYCGirls');
+var boysButton = $('axYCBoys');
+var choose = function (team) { applyTeamPick(result, team); removeOverlay('axWheelOverlay'); };
+if (girlsButton) girlsButton.addEventListener('click', function () { choose('girls'); });
+if (boysButton) boysButton.addEventListener('click', function () { choose('boys'); });
+return;
+}
+if (result.id === 'halal') {
+var chance = $('axChanceBtn');
+if (chance) chance.addEventListener('click', function () {
+removeOverlay('axWheelOverlay');
+AX.wheelBusy = false;
+setTimeout(openWheel, 140);
+});
+}
+try { if (typeof result.apply === 'function') result.apply(); } catch (e) {}
+var close = $('axWheelClose');
+if (close) close.addEventListener('click', function () { removeOverlay('axWheelOverlay'); });
+}
+ربط دورة الحياة بدون كسر app.js ═══ */
 
   function beginQuestion() {
     AX.blockedTeam = AX.pendingBlockTeam || null;
