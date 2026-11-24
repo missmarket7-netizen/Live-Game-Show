@@ -1116,6 +1116,25 @@ app.get("/api/saved-questions", async (req, res) => {
     });
   }
 });
+app.get("/api/cycle/state", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    const st = await getCycleState();
+    const all = await getAllQuestions();
+    return res.json({ cycle: st.cycle, served: st.served.length, bank: all.length, remaining: Math.max(0, all.length - st.served.length), persistent: hasPersistentStorage() });
+  } catch (e) { return res.status(500).json({ error: "فشل قراءة حالة الدورة", details: e.message }); }
+});
+app.post("/api/cycle/reset", async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  try {
+    const before = await withCycleLock(async () => {
+      const st = await getCycleState();
+      await setCycleState(1, []);
+      return st.served.length;
+    });
+    return res.json({ ok: true, cycle: 1, servedBefore: before, servedNow: 0 });
+  } catch (e) { return res.status(500).json({ error: "فشل تصفير الدورة", details: e.message }); }
+});
 installNoRepeatEngine(app);
 app.use(express.static(staticRoot, {
   extensions: ["html"],
