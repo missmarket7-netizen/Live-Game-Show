@@ -957,3 +957,23 @@
 .ax-reel-pointer-left{left:6px;transform:translateY(-50%);border-width:9px 14px 9px 0;border-color:transparent #ffd36e transparent transparent}
 .ax-reel-glass{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.10),transparent 22%,transparent 78%,rgba(255,255,255,.08));border-radius:18px}
 @media (max-width:430px){.ax-reel-viewport{height:min(48vh,280px)}.ax-reel-card{padding:10px}.ax-reel-icon{width:34px;height:34px;font-size:17px}.ax-reel-text b{font-size:12px}}
+
+/* ═══ AX_WHEEL_V4_CINEMA — قرص دائري فاخر + نص طولي داخل كل خانة ═══ */
+.ax-wheel-overlay{background:radial-gradient(circle at 50% 42%,rgba(255,46,136,.16),rgba(3,5,18,.9) 55%,rgba(3,5,18,.98))}
+.ax-wheel-overlay .ax-wheel-stage{width:min(94vw,460px);gap:16px}
+.ax-wheel-overlay .ax-wheel-wrap{--ax-wheel-size:min(84vw,380px);--ax-wheel-label-radius:calc(var(--ax-wheel-size)*0.335);filter:drop-shadow(0 26px 40px rgba(0,0,0,.55))}
+.ax-wheel-bulbs{position:absolute;inset:-16px;border-radius:50%;z-index:0;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,240,164,.95) 0deg 2.6deg,transparent 2.6deg 12deg);-webkit-mask:radial-gradient(circle,transparent 60%,#000 61%,#000 68%,transparent 69%);mask:radial-gradient(circle,transparent 60%,#000 61%,#000 68%,transparent 69%);animation:axBulbsChase 5.5s linear infinite;filter:drop-shadow(0 0 7px rgba(255,211,110,.85))}
+@keyframes axBulbsChase{to{transform:rotate(360deg)}}
+.ax-wheel-overlay .ax-wheel-rotor{border:6px solid rgba(255,211,110,.92);box-shadow:0 0 0 3px rgba(255,255,255,.06),0 0 0 10px rgba(53,230,247,.10),0 26px 80px rgba(0,0,0,.65),inset 0 0 42px rgba(0,0,0,.45)}
+.ax-wheel-gloss{position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(circle at 30% 22%,rgba(255,255,255,.30),transparent 42%),linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.30));mix-blend-mode:soft-light}
+.ax-wheel-overlay .ax-wheel-segment-label{width:calc(var(--ax-wheel-size)*0.315);min-height:0;padding:4px 3px;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9px,2.7vw,13px);line-height:1.15;white-space:normal;word-break:break-word;border-radius:10px;border:1px solid rgba(255,255,255,.24);background:rgba(4,7,20,.44);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);transform:translate(-50%,-50%) rotate(var(--ax-angle)) translateY(calc(-1 * var(--ax-wheel-label-radius))) rotate(var(--ax-flip,90deg))}
+.ax-wheel-segment-label.is-win{background:linear-gradient(140deg,#ffd36e,#c8ff51);color:#141238;border-color:#fff0a4;box-shadow:0 0 24px rgba(255,211,110,.8);font-weight:900}
+.ax-wheel-overlay .ax-wheel-hub-fixed{z-index:4;font-size:clamp(50px,14vw,80px);filter:drop-shadow(0 0 16px rgba(255,79,154,.6)) drop-shadow(0 0 34px rgba(255,211,110,.35))}
+.ax-wheel-overlay .ax-wheel-pointer{top:-14px;font-size:0;width:0;height:0;border-left:11px solid transparent;border-right:11px solid transparent;border-top:26px solid #ffd36e;filter:drop-shadow(0 0 10px rgba(255,211,110,.9)) drop-shadow(0 4px 6px rgba(0,0,0,.5))}
+.ax-wheel-pointer i{position:absolute;top:-30px;left:-7px;width:14px;height:14px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c9,#ffd36e 60%,#b8860b);box-shadow:0 0 12px rgba(255,211,110,.9)}
+.ax-wheel-overlay .ax-wheel-result{border-color:rgba(200,255,81,.65);background:linear-gradient(145deg,rgba(16,33,70,.97),rgba(9,12,32,.97));box-shadow:0 0 40px rgba(200,255,81,.18),0 22px 60px rgba(0,0,0,.55);animation:axPop .45s cubic-bezier(.16,1,.3,1) both}
+.ax-yc-chance{flex:1 1 100%;border-color:rgba(200,255,81,.55);background:rgba(200,255,81,.14);color:#c8ff51;box-shadow:0 0 18px rgba(200,255,81,.22)}
+@media (max-width:430px){
+.ax-wheel-overlay .ax-wheel-wrap{--ax-wheel-size:min(86vw,320px)}
+.ax-wheel-overlay .ax-wheel-segment-label{width:calc(var(--ax-wheel-size)*0.30);font-size:clamp(8px,2.4vw,11px);padding:3px 2px}
+}
