@@ -767,7 +767,6 @@ try { if (typeof result.apply === 'function') result.apply(); } catch (e) {}
 var close = $('axWheelClose');
 if (close) close.addEventListener('click', function () { removeOverlay('axWheelOverlay'); });
 }
-ربط دورة الحياة بدون كسر app.js ═══ */
 
   function beginQuestion() {
     AX.blockedTeam = AX.pendingBlockTeam || null;
