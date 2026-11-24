@@ -586,11 +586,11 @@ function shuffleList(list) {
   return a;
 }
 var WHEEL_RESULTS = [
-{ id: 'x3', title: 'الدعم X3', short: '×3 دعم', desc: 'نقاط السؤال القادم ×3', sound: 'fight', apply: function () { AX.pendingX3 = true; updateBadges(); toastSafe('الدعم X3 جاهز للسؤال القادم', 'WHEEL'); } },
+{ id: 'x3', title: 'الدعم X3', short: '×3 دعم', desc: 'مؤثر صوتي فقط — X3 خاص بالهدايا', sound: 'fight', apply: null },
 { id: 'swap', title: 'تبديل نقاط', short: 'تبديل', desc: 'تم تبديل نقاط البنات والشباب', sound: 'days', apply: swapPoints },
 { id: 'yellow', title: 'كارت أصفر', short: 'كارت', desc: 'اختر الفريق الذي سيُحظر في السؤال القادم', sound: 'teamwork', teamPick: 'block', apply: null },
 { id: 'x2', title: 'السؤال التالي X2', short: '×2', desc: 'مضاعفة نقاط السؤال القادم', sound: 'advice', apply: function () { AX.pendingX2 = true; updateBadges(); toastSafe('السؤال القادم ×2', 'WHEEL'); } },
-{ id: 'snatch', title: 'اخطف واجري', short: 'اخطف', desc: 'نقل نقطة من المتصدر للفريق الآخر', sound: 'boom', apply: snatchAndRun },
+{ id: 'snatch', title: 'اخطف واجري', short: 'اخطف', desc: 'نقل نقطة من المتصدر للفريق الآخر', sound: 'boom', apply: null, teamPick: 'snatch' },
 { id: 'minus-round', title: 'حذف جولة', short: '−1 جولة', desc: 'اختر الفريق الذي تُحذف منه جولة (تصل بالسالب)', sound: 'suspense', teamPick: 'minus', apply: null },
 { id: 'round-plus', title: 'جولة بلس', short: '+1 جولة', desc: 'اختر الفريق الذي تُضاف له جولة بمؤثره الخاص', sound: 'celebration', teamPick: 'plus', apply: null },
 { id: 'rahat', title: 'راحت عليك', short: 'راحت عليك', desc: 'لا تأثير — مجرد شماتة لطيفة 😈', sound: 'boys-mood', apply: function () { toastSafe('راحت عليك! 😈', 'WHEEL'); } },
@@ -598,7 +598,18 @@ var WHEEL_RESULTS = [
 ];
 WHEEL_RESULTS.forEach(function (result, index) { result.index = index; });
 var WHEEL_ICONS = { x3: '✦', swap: '🔄', yellow: '🟨', x2: '⚡', snatch: '🏃', 'minus-round': '➖', 'round-plus': '➕', rahat: '😈', halal: '💰' };
+var c30 = function (v) { return Math.max(-30, Math.min(30, Number(v) || 0)); };
+function snatchTransfer(team) {
+var st = getState();
+if (!st) return;
+var other = team === 'girls' ? 'boys' : 'girls';
+if (team === 'girls') { st.girlsScore = c30((Number(st.girlsScore) || 0) + 5); st.boysScore = c30((Number(st.boysScore) || 0) - 5); }
+else { st.boysScore = c30((Number(st.boysScore) || 0) + 5); st.girlsScore = c30((Number(st.girlsScore) || 0) - 5); }
+updateScoresSafe();
+toastSafe('−5 من ' + teamLabel(other) + ' و +5 لـ ' + teamLabel(team), 'WHEEL');
+}
 function applyTeamPick(result, team) {
+if (result.teamPick === 'snatch') { snatchTransfer(team); return; }
   var st = getState(); if (!st) return;
   if (result.teamPick === 'block') { AX.pendingBlockTeam = team; updateBadges(); toastSafe('كارت أصفر على ' + teamLabel(team), 'YELLOW CARD'); return; }
   if (result.teamPick === 'minus') {
