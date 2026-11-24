@@ -190,7 +190,7 @@ function getCtx() {
   const AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return null;
   try {
-    audioCtx = new AC({ latencyHint: 'interactive' });
+    audioCtx = new AC({ latencyHint: 'playback' });
     ensureAudioBus(audioCtx);
   } catch (e) {
     audioCtx = null;
@@ -954,13 +954,9 @@ function burstAt(team) {
 function applyPoint(team, points) {
   if (!points) points = 1;
   if (team === 'girls') {
-    state.girlsScore = state.girlsScore < 0
-      ? Math.min(0, state.girlsScore + points)
-      : Math.min(30, state.girlsScore + points);
+    state.girlsScore = Math.max(-30, Math.min(30, state.girlsScore + points));
   } else {
-    state.boysScore = state.boysScore < 0
-      ? Math.min(0, state.boysScore + points)
-      : Math.min(30, state.boysScore + points);
+    state.boysScore = Math.max(-30, Math.min(30, state.boysScore + points));
   }
   updateScores();
   playSound('correct', 0.28);

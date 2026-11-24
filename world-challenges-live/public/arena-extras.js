@@ -665,70 +665,51 @@ return list;
 function openWheel() {
 if (AX.wheelBusy || $('axWheelOverlay')) return;
 AX.wheelBusy = true;
-var order = shuffleList(WHEEL_RESULTS.slice());
+var shuf = (typeof shuffleList === 'function') ? shuffleList : function (list) {
+  var a = list.slice();
+  for (var i = a.length - 1; i > 0; i -= 1) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+};
+var ICONS = { x3: '✦', swap: '🔄', yellow: '🟨', x2: '⚡', snatch: '🏃', 'minus-round': '➖', 'round-plus': '➕', rahat: '😈', halal: '💰' };
+var order = shuf(WHEEL_RESULTS.slice());
 var winIndex = Math.floor(Math.random() * order.length);
 var result = order[winIndex];
-var segment = 360 / order.length;
-var colors = ['#ff4f9a', '#35e6f7', '#ffd36e', '#917aff', '#64ecad', '#ff83bd', '#5de2ff', '#fff0a4', '#7ef2c6'];
-var stops = order.map(function (item, index) {
-var start = index * segment;
-var end = (index + 1) * segment;
-return colors[index % colors.length] + ' ' + start + 'deg ' + end + 'deg';
-}).join(', ');
-var labels = order.map(function (item, index) {
-var angle = index * segment + segment / 2;
-return (
-'<span class="ax-wheel-segment-label" style="--ax-angle:' + angle + 'deg;">' +
-esc(item.short || item.title) +
-'</span>'
-);
+var items = [];
+for (var l = 0; l < 3; l++) items = items.concat(order);
+items = items.concat(order.slice(0, winIndex + 1));
+var landIndex = items.length - 1;
+var cards = items.map(function (it, idx) {
+  return '<div class="ax-reel-card" data-idx="' + idx + '" style="--ax-hue:' + ((idx * 47) % 360) + '">' +
+    '<span class="ax-reel-icon">' + (ICONS[it.id] || '✦') + '</span>' +
+    '<span class="ax-reel-text"><b>' + esc(it.title) + '</b><small>' + esc(it.short || '') + '</small></span>' +
+    '<span class="ax-reel-edge"></span></div>';
 }).join('');
-var html =
-'<div class="ax-wheel-stage">' +
-'<div class="ax-wheel-wrap">' +
-'<div class="ax-wheel-rotor" id="axWheelRotor" style="background: conic-gradient(from 0deg, ' + stops + ');">' +
-labels +
-'</div>' +
-'<div class="ax-wheel-hub-fixed">❤️‍🔥</div>' +
-'<div class="ax-wheel-pointer">▼</div>' +
-'</div>' +
-'<div class="ax-wheel-result hidden" id="axWheelResult"></div>' +
-'</div>';
-createOverlay('axWheelOverlay', 'ax-wheel-overlay', html);
-var rotor = $('axWheelRotor');
-if (!rotor) { AX.wheelBusy = false; return; }
-var center = winIndex * segment + segment / 2;
-var targetRotation = (360 * 6) - center;
+var html = '<div class="ax-reel-stage"><div class="ax-reel-rays"></div><div class="ax-reel-frame">' +
+  '<div class="ax-reel-viewport" id="axReelViewport"><div class="ax-reel-strip" id="axReelStrip">' + cards + '</div></div>' +
+  '<div class="ax-reel-pointer ax-reel-pointer-left"></div><div class="ax-reel-pointer ax-reel-pointer-right"></div>' +
+  '<div class="ax-reel-glass"></div></div>' +
+  '<div class="ax-wheel-result hidden" id="axWheelResult"></div></div>';
+createOverlay('axWheelOverlay', 'ax-wheel-overlay ax-reel-overlay', html);
+var strip = $('axReelStrip'), viewport = $('axReelViewport');
+if (!strip || !viewport) { AX.wheelBusy = false; return; }
+var c0 = strip.children[0], c1 = strip.children[1];
+var cardH = c0 ? c0.offsetHeight : 64;
+var step = (c1 && c0) ? (c1.offsetTop - c0.offsetTop) : (cardH + 10);
+var vpH = viewport.clientHeight;
+var targetY = -1 * (landIndex * step) + (vpH / 2 - cardH / 2);
+playSoundSafe('wheel', 0.5);
 requestAnimationFrame(function () {
-rotor.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.12,.78,.18,1)';
-rotor.style.transform = 'rotate(' + targetRotation + 'deg)';
+  strip.style.transition = 'transform ' + CONFIG.wheelSpinMs + 'ms cubic-bezier(.10,.72,.16,1)';
+  strip.style.transform = 'translateY(' + targetY + 'px)';
 });
-setTimeout(function () { showWheelResult(result); AX.wheelBusy = false; }, CONFIG.wheelSpinMs + 180);
+setTimeout(function () {
+  var land = strip.querySelector('.ax-reel-card[data-idx="' + landIndex + '"]');
+  if (land) land.classList.add('is-land');
+  showWheelResult(result);
+  AX.wheelBusy = false;
+}, CONFIG.wheelSpinMs + 180);
 }
-function applyTeamPick(result, team) {
-var st = getState();
-if (!st) return;
-if (result.teamPick === 'block') {
-AX.pendingBlockTeam = team;
-updateBadges();
-toastSafe('كارت أصفر على ' + teamLabel(team), 'YELLOW CARD');
-return;
-}
-if (result.teamPick === 'minus') {
-if (team === 'girls') st.girlsRounds = (Number(st.girlsRounds) || 0) - 1;
-else st.boysRounds = (Number(st.boysRounds) || 0) - 1;
-updateScoresSafe();
-toastSafe('حذف جولة من ' + teamLabel(team) + ' — أصبحت ' + (team === 'girls' ? st.girlsRounds : st.boysRounds), 'WHEEL');
-return;
-}
-if (result.teamPick === 'plus') {
-if (team === 'girls') st.girlsRounds = (Number(st.girlsRounds) || 0) + 1;
-else st.boysRounds = (Number(st.boysRounds) || 0) + 1;
-updateScoresSafe();
-playSoundSafe(team === 'girls' ? 'girls-round' : 'boys-round', 0.8);
-toastSafe('+1 جولة لفريق ' + teamLabel(team), 'WHEEL');
-}
-}
+
 function showWheelResult(result) {
 var box = $('axWheelResult');
 if (!box) return;
