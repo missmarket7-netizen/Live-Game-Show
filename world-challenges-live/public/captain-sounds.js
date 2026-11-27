@@ -33,7 +33,8 @@
     { key: 'lana',     aliases: ['lana', 'لانا'] },
     { key: 'asia',     aliases: ['asia', 'آسيا'] },
     { key: 'dahab',    aliases: ['dahab', 'دهب'] },
-    { key: 'abdelrahman', aliases: ['abdelrahman', 'abd elrahman', 'عبد الرحمن', 'عبدالرحمن'] }
+    { key: 'abdelrahman', aliases: ['abdelrahman', 'abd elrahman', 'عبد الرحمن', 'عبدالرحمن'] },
+    { key: 'noha',     aliases: ['noha', 'نهى', 'نهي'] }
   ];
 
   var FALLBACK_BY_KEY = {
@@ -51,7 +52,8 @@
     lana: 'girls-captin',
     asia: 'girls-captin',
     dahab: 'girls-captin',
-    abdelrahman: 'boys-captin'
+    abdelrahman: 'boys-captin',
+    noha: 'girls-captin'
   };
 
   function norm(s) {
