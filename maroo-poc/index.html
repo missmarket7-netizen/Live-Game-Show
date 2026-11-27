@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131a">
+  <title>معاينة محلية للشخصية — PoC مستقل</title>
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.bundle.js"></script>
+</head>
+<body>
+  <main class="page-shell">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">نموذج اختبار محلي مستقل</p>
+        <h1>معاينة ملف الشخصية</h1>
+      </div>
+      <span class="local-badge"><span aria-hidden="true"></span> يعمل محليًا في المتصفح</span>
+    </header>
+
+    <section class="notice" aria-label="حدود هذه المرحلة">
+      <span class="notice-icon" aria-hidden="true">i</span>
+      <div>
+        <strong>فحص جهاز وعرض فقط</strong>
+        <p>لا يوجد تتبّع للحركة أو الوجه، ولا تحريك للشخصية بالكاميرا. اختيار ملف أو تشغيل الكاميرا لا يعني أن الـ avatar جاهز.</p>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="panel model-panel" aria-labelledby="model-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">١ — ملف محلي اختياري</p>
+            <h2 id="model-heading">معاينة GLB</h2>
+          </div>
+          <span class="pill">GLB فقط</span>
+        </div>
+
+        <label class="file-picker" for="glb-file">
+          <span class="upload-icon" aria-hidden="true">↑</span>
+          <span><strong>اختر ملفًا من جهازك</strong><small>لا يُرفع الملف ولا يغادر هذا المتصفح</small></span>
+          <input id="glb-file" type="file" accept=".glb,model/gltf-binary">
+        </label>
+        <p id="file-name" class="file-name" aria-live="polite">لم يتم اختيار ملف</p>
+
+        <div class="viewer-wrap">
+          <div id="viewer" class="viewer" role="img" aria-label="مساحة عرض مشهد GLB">
+            <div id="viewer-placeholder" class="viewer-placeholder">
+              <span class="cube-icon" aria-hidden="true">◇</span>
+              <strong>ستظهر المعاينة هنا</strong>
+              <span>اختر ملف GLB لعرضه محليًا</span>
+            </div>
+          </div>
+          <p id="model-status" class="status-line" role="status" aria-live="polite">لم يتم تحميل ملف.</p>
+        </div>
+
+        <div class="stats" aria-label="إحصاءات المشهد">
+          <div><span>Meshes</span><strong id="stat-meshes">—</strong></div>
+          <div><span>Bones</span><strong id="stat-bones">—</strong></div>
+          <div><span>مقاطع الحركة</span><strong id="stat-clips">—</strong></div>
+          <div><span>Morph targets</span><strong id="stat-morphs">—</strong></div>
+        </div>
+        <p class="privacy-note">يُقرأ الملف محليًا عبر رابط كائن مؤقت للمتصفح، ويُلغى هذا الرابط عند استبداله أو إغلاق الصفحة. لا توجد خدمة رفع أو حفظ.</p>
+      </section>
+
+      <section class="panel camera-panel" aria-labelledby="camera-heading">
+        <div class="panel-heading">
+          <div>
+            <p class="section-kicker">٢ — فحص اختياري</p>
+            <h2 id="camera-heading">معاينة الكاميرا</h2>
+          </div>
+          <span class="pill pill-muted">فيديو فقط</span>
+        </div>
+
+        <label class="field-label" for="camera-select">الكاميرا</label>
+        <div class="camera-controls">
+          <select id="camera-select" aria-label="اختيار الكاميرا">
+            <option value="">جارٍ البحث عن كاميرات…</option>
+          </select>
+          <button id="camera-toggle" class="primary-button" type="button">تشغيل الكاميرا</button>
+        </div>
+
+        <div class="video-frame">
+          <video id="camera-preview" autoplay muted playsinline aria-label="معاينة محلية مباشرة للكاميرا"></video>
+          <div id="video-placeholder" class="video-placeholder">
+            <span class="camera-icon" aria-hidden="true">◉</span>
+            <strong>المعاينة متوقفة</strong>
+            <span>لن يبدأ الفيديو إلا بعد ضغط زر التشغيل</span>
+          </div>
+          <span id="live-indicator" class="live-indicator" hidden><span></span> معاينة مباشرة</span>
+        </div>
+        <p id="camera-status" class="status-line" role="status" aria-live="polite">لم تُطلب صلاحية الكاميرا.</p>
+
+        <div class="privacy-card">
+          <strong>خصوصية الفيديو</strong>
+          <p>يُعرض الفيديو على هذا الجهاز فقط. لا تسجيل، ولا تخزين، ولا رفع أو إرسال لأي ملفات أو إطارات أو صوت. لا نطلب الميكروفون، والصوت معطّل.</p>
+        </div>
+      </section>
+    </div>
+
+    <footer>PoC محلي للفحص الأولي — لا تتبّع، ولا مزامنة، ولا تحريك للشخصية.</footer>
+  </main>
+</body>
+</html>
