@@ -1159,7 +1159,30 @@ app.use((req, res, next) => {
 });
 
 try {
-  attachLiveRoutes(app);
+  app.use(function augmentLiveStatus(req, res, next) {
+  if (req.method !== "GET" || req.path !== "/live/status") return next();
+  const origJson = res.json.bind(res);
+  res.json = function (body) {
+    try {
+      body = body && typeof body === "object" ? body : {};
+      const raw = JSON.stringify(body);
+      const blocked = /signblocked|signature_missing|signaturemissing|business plan|euler/i.test(raw);
+      body.sign = Object.assign({}, body.sign, {
+        blocked: blocked,
+        sessionConfigured: Boolean(process.env.TIKTOK_SESSION_ID),
+        selfSignerConfigured: Boolean(process.env.TIKTOK_SIGN_ENDPOINT || process.env.TIKTOK_SIGN_API_KEY),
+        usernameConfigured: Boolean(process.env.TIKTOK_USERNAME),
+        freePathNote: blocked
+          ? "المسار المجاني العام مقيد حاليًا من مزود التوقيع (Euler/Business). العرض مستمر بالإدخال اليدوي، أو اربط Signer ذاتيًا عبر TIKTOK_SIGN_ENDPOINT."
+          : "المسار المجاني يعمل بشكل طبيعي."
+      });
+      if (body.connected === false && !body.reason) body.reason = blocked ? "signblocked" : "disconnected";
+    } catch (e) {}
+    return origJson(body);
+  };
+  return next();
+});
+attachLiveRoutes(app);
 } catch (e) {
   console.error("❌ فشل تحميل مسارات اللايف:", e.message);
 }
