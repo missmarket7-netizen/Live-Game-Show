@@ -35,6 +35,7 @@ function CSUnifiedAudio(src) {
       var key = shim._key();
       if (key && bridge.stopKey) bridge.stopKey(key);
       shim.paused = true;
+      shim._fire('pause');
     },
     cloneNode: function () { return CSUnifiedAudio(shim.src); }
   };
