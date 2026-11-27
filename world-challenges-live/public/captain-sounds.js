@@ -1,3 +1,46 @@
+/* CAPTAIN_AUDIO_UNIFY_V1 — توجيه مؤثرات الكباتن عبر ناقل Web Audio نفسه عند توفره */
+var CSOrigAudio = window.Audio;
+function CSUnifiedAudio(src) {
+  var bridge = window.WCQ_AUDIO;
+  if (!bridge || !bridge.available || !bridge.available()) return new CSOrigAudio(src);
+  var shim = {
+    src: src || '',
+    volume: 0.9,
+    currentTime: 0,
+    paused: true,
+    ended: false,
+    onended: null,
+    onerror: null,
+    _handlers: { ended: [], error: [] },
+    addEventListener: function (type, fn) { if (shim._handlers[type]) shim._handlers[type].push(fn); },
+    removeEventListener: function () {},
+    _fire: function (type) {
+      var fns = shim._handlers[type] || [];
+      for (var i = 0; i < fns.length; i++) { try { fns[i]({ target: shim }); } catch (e) {} }
+      var direct = type === 'ended' ? shim.onended : shim.onerror;
+      if (direct) { try { direct({ target: shim }); } catch (e) {} }
+    },
+    _key: function () { return (String(shim.src).match(/\/sounds\/([^\/?]+)\.mp3/) || [, ''])[1]; },
+    play: function () {
+      var key = shim._key();
+      if (!key) { shim._fire('error'); return Promise.resolve(); }
+      shim.paused = false; shim.ended = false;
+      bridge.playKey(key, shim.volume, {
+        onEnd: function () { shim.ended = true; shim.paused = true; shim._fire('ended'); },
+        onFail: function () { shim._fire('error'); }
+      });
+      return Promise.resolve();
+    },
+    pause: function () {
+      var key = shim._key();
+      if (key && bridge.stopKey) bridge.stopKey(key);
+      shim.paused = true;
+    },
+    cloneNode: function () { return CSUnifiedAudio(shim.src); }
+  };
+  return shim;
+}
+
 /* ═══ CAPTAIN_CUSTOM_SOUNDS_V1 — مؤثر خاص باسم الكابتن (حد 35 ثانية) + احتياطي الفريق ═══ */
 (function () {
   'use strict';
@@ -118,7 +161,7 @@
       try { activeCaptainAudio.pause(); activeCaptainAudio.currentTime = 0; } catch (e) {}
       activeCaptainAudio = null;
     }
-    var a = new Audio('/sounds/' + key + '.mp3?v=20261113-audio-compressed');
+    var a = CSUnifiedAudio('/sounds/' + key + '.mp3?v=20261113-audio-compressed');
     a.preload = 'auto';
     a.setAttribute('playsinline', '');
     a.volume = 0.95;

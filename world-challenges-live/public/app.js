@@ -157,22 +157,27 @@ let audioLimiter = null;
 const bufferPromises = {};
 const activeSources = {};
 
-const AUDIO_OUTPUT_GAIN = 1.12;
-const AUDIO_VOLUME_BOOST = 1.3;
+const AUDIO_OUTPUT_GAIN = 1.0;
+const AUDIO_VOLUME_BOOST = 1.6;
+const AUDIO_BROADCAST_MODE = true;
+const COMPRESSOR = { thresholdDb: -3, kneeDb: 6, ratio: 1.8, attack: 0.004, release: 0.25 };
+const RAPID_REPEAT_MIN_MS = 120;
 
 function ensureAudioBus(ctx) {
   if (!ctx || audioMaster) return;
   try {
-    audioLimiter = ctx.createDynamicsCompressor();
-    audioLimiter.threshold.value = -12;
-    audioLimiter.knee.value = 18;
-    audioLimiter.ratio.value = 5;
-    audioLimiter.attack.value = 0.003;
-    audioLimiter.release.value = 0.18;
     audioMaster = ctx.createGain();
     audioMaster.gain.value = AUDIO_OUTPUT_GAIN;
-    audioLimiter.connect(audioMaster);
     audioMaster.connect(ctx.destination);
+    if (!AUDIO_BROADCAST_MODE) {
+      audioLimiter = ctx.createDynamicsCompressor();
+      audioLimiter.threshold.value = COMPRESSOR.thresholdDb;
+      audioLimiter.knee.value = COMPRESSOR.kneeDb;
+      audioLimiter.ratio.value = COMPRESSOR.ratio;
+      audioLimiter.attack.value = COMPRESSOR.attack;
+      audioLimiter.release.value = COMPRESSOR.release;
+      audioLimiter.connect(audioMaster);
+    }
   } catch (e) {
     audioMaster = null;
     audioLimiter = null;
@@ -182,7 +187,7 @@ function ensureAudioBus(ctx) {
 function outputVolume(volume) {
   const requested = volume == null ? 0.55 : Number(volume);
   const safe = Number.isFinite(requested) ? requested : 0.55;
-  return Math.max(0.03, Math.min(0.98, safe * AUDIO_VOLUME_BOOST));
+  return Math.max(0.05, Math.min(0.95, safe * AUDIO_VOLUME_BOOST));
 }
 
 function getCtx() {
@@ -214,6 +219,8 @@ function unlockAudio() {
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) unlockAudio();
 });
+window.addEventListener('focus', unlockAudio);
+window.addEventListener('pageshow', unlockAudio);
 
 function decodeBuf(ctx, arrayBuffer) {
   return new Promise((resolve, reject) => {
@@ -264,7 +271,14 @@ function startBuffer(key, buffer, volume, onEnd) {
     if (previous) {
       previous.onended = null;
       try {
-        previous.stop();
+        const nowSec = ctx.currentTime;
+        const prevGain = previous._wcqGain;
+        if (prevGain) {
+          prevGain.gain.cancelScheduledValues(nowSec);
+          prevGain.gain.setValueAtTime(Math.max(0.0001, prevGain.gain.value), nowSec);
+          prevGain.gain.exponentialRampToValueAtTime(0.0001, nowSec + 0.06);
+        }
+        previous.stop(nowSec + 0.09);
       } catch (e) {}
     }
 
@@ -274,6 +288,7 @@ function startBuffer(key, buffer, volume, onEnd) {
     gainNode.gain.value = outputVolume(volume);
     sourceNode.buffer = buffer;
     sourceNode.connect(gainNode);
+    sourceNode._wcqGain = gainNode;
     ensureAudioBus(ctx);
     gainNode.connect(audioLimiter || audioMaster || ctx.destination);
 
@@ -480,6 +495,7 @@ function toggleSound() {
   localStorage.setItem(SOUND_KEY, String(state.soundEnabled));
   updateSoundButtons();
   if (state.soundEnabled) {
+    preloadSounds(['tick', 'correct', 'wrong', 'begin', 'round-complete', 'celebration', 'girls-captin', 'boys-captin']);
     const s = $('setupScreen');
     if (s && !s.classList.contains('hidden')) playSound('begin', 0.35);
   }
@@ -970,6 +986,41 @@ if (points >= 5) { fireConfetti(); playSound('celebration', 0.5); }
 /* جسر رسمي لميزات السباق والطبقات الخارجية */
 window.playSound = playSound;
 window.applyPoint = applyPoint;
+function stopSound(key, fadeMs) {
+  const ctx = getCtx();
+  const src = activeSources[key];
+  if (!ctx || !src) return;
+  try {
+    const nowSec = ctx.currentTime;
+    const fade = Math.max(0.02, (fadeMs == null ? 80 : fadeMs) / 1000);
+    const g = src._wcqGain;
+    src.onended = null;
+    if (g) {
+      g.gain.cancelScheduledValues(nowSec);
+      g.gain.setValueAtTime(Math.max(0.0001, g.gain.value), nowSec);
+      g.gain.exponentialRampToValueAtTime(0.0001, nowSec + fade);
+    }
+    src.stop(nowSec + fade + 0.02);
+    delete activeSources[key];
+  } catch (e) {}
+}
+window.stopSound = stopSound;
+window.WCQ_AUDIO = {
+  available: function () { return Boolean(getCtx()); },
+  enabled: function () { return Boolean(state.soundEnabled); },
+  playKey: function (key, volume, cbs) {
+    if (!state.soundEnabled) { if (cbs && cbs.onEnd) cbs.onEnd(); return; }
+    unlockAudio();
+    const ctx = getCtx();
+    if (!ctx) { if (cbs && cbs.onFail) cbs.onFail(); return; }
+    loadBuffer(key).then(function (buffer) {
+      if (!buffer) { if (cbs && cbs.onFail) cbs.onFail(); return; }
+      const ok = startBuffer(key, buffer, volume == null ? 0.9 : volume, cbs && cbs.onEnd);
+      if (!ok && cbs && cbs.onFail) cbs.onFail();
+    });
+  },
+  stopKey: function (key) { stopSound(key); }
+};
 
 /* ═══ إنهاء الجولة مع دعم X2 ═══ */
 function finishRound() {
