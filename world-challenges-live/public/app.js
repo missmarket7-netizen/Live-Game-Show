@@ -2926,3 +2926,22 @@ document.addEventListener('DOMContentLoaded', init);
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
   else build();
 })();
+
+/* ═══ AUDIO_FAILSAFE_V2 — أي استثناء في مسار الصوت يسقط فورًا إلى HTMLAudio ═══ */
+(function () {
+  'use strict';
+  if (window.__AUDIO_FAILSAFE_V2__) return;
+  window.__AUDIO_FAILSAFE_V2__ = true;
+  var orig = window.playSound;
+  if (typeof orig !== 'function') return;
+  window.playSound = function (key, volume) {
+    try { return orig(key, volume); }
+    catch (e) {
+      try {
+        var a = new Audio('/sounds/' + key + '.mp3');
+        a.volume = 0.9;
+        a.play().catch(function () {});
+      } catch (e2) {}
+    }
+  };
+})();
