@@ -14,7 +14,8 @@ const writeRoutes = [
   "/api/save-questions",
   "/api/reset-cycle",
   "/api/output-snapshot",
-  "/api/studio-director-state"
+  "/api/studio-director-state",
+  "/api/studio-v2-state"
 ];
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -198,6 +199,52 @@ try {
   assert.equal((await request(server.baseUrl, "/api/studio-director-state", {
     method: "POST", key: operatorKey, body: { sentAt: directorSentAt - 1, state: { view: "wide" } }
   })).status, 409, "an older director update must not replace the latest settings");
+
+  const initialV2State = await request(server.baseUrl, "/api/studio-v2-state");
+  assert.equal(initialV2State.status, 200, "v2 scene state must be publicly readable without a key");
+  assert.equal(initialV2State.headers.get("Cache-Control"), "no-store");
+  assert.deepEqual(JSON.parse(initialV2State.text), {
+    state: { scene: "wide", presenterCue: "idle", layers: { scoreboard: true, branding: true, presenter: true, question: true } },
+    updatedAt: 0,
+    sentAt: 0
+  });
+  const v2SentAt = Date.now();
+  const v2Write = await request(server.baseUrl, "/api/studio-v2-state", {
+    method: "POST",
+    key: operatorKey,
+    body: {
+      sentAt: v2SentAt,
+      state: {
+        scene: "gift",
+        presenterCue: "thanks",
+        layers: { scoreboard: false, branding: true, presenter: false, question: true, secretLayer: true },
+        operatorKey: "PRIVATE_KEY_FIELD",
+        answer: "PRIVATE_ANSWER_FIELD",
+        html: "<script>PRIVATE_HTML</script>"
+      }
+    }
+  });
+  assert.equal(v2Write.status, 200, "authorized v2 state should be accepted");
+  assert.equal((await request(server.baseUrl, "/api/studio-v2-state", {
+    method: "POST", key: operatorKey, body: { sentAt: v2SentAt, state: { scene: "wide" } }
+  })).status, 409, "duplicate v2 state timestamps must be rejected");
+  assert.equal((await request(server.baseUrl, "/api/studio-v2-state", {
+    method: "POST", key: operatorKey, body: { sentAt: v2SentAt - 1, state: { scene: "wide" } }
+  })).status, 409, "an older v2 state must not replace the latest settings");
+  assert.equal((await request(server.baseUrl, "/api/studio-v2-state", {
+    method: "POST", key: operatorKey, body: { sentAt: 0, state: { scene: "wide" } }
+  })).status, 400, "invalid v2 timestamps must be rejected");
+  const publicV2State = await request(server.baseUrl, "/api/studio-v2-state");
+  assert.equal(publicV2State.status, 200);
+  const v2Payload = JSON.parse(publicV2State.text);
+  assert.deepEqual(v2Payload.state, {
+    scene: "gift",
+    presenterCue: "thanks",
+    layers: { scoreboard: false, branding: true, presenter: false, question: true }
+  }, "the public v2 endpoint must return only allowlisted scene, cue, and layer values");
+  assert.doesNotMatch(publicV2State.text, /PRIVATE_KEY_FIELD|PRIVATE_ANSWER_FIELD|PRIVATE_HTML|secretLayer|operatorKey/);
+  assert.ok(v2Payload.updatedAt > 0);
+  assert.equal(v2Payload.sentAt, v2SentAt);
   assert.equal((await request(server.baseUrl, "/api/studio-director-state", {
     method: "POST", key: operatorKey, body: { sentAt: 0, state: { view: "wide" } }
   })).status, 400, "invalid timestamps must be rejected");
@@ -288,7 +335,7 @@ try {
   assert.equal(saved.status, 200, "authorized save should use the isolated data root");
   assert.equal((await request(server.baseUrl, "/api/reset-cycle", { method: "POST", key: operatorKey, body: {} })).status, 200);
 
-  for (const route of ["/", "/output", "/studio", "/studio-control"]) {
+  for (const route of ["/", "/output", "/studio", "/studio-control", "/studio-v2", "/studio-control-v2"]) {
     const page = await request(server.baseUrl, route);
     assert.equal(page.status, 200, `${route} must remain publicly readable`);
     if (route === "/studio") {
@@ -299,6 +346,16 @@ try {
     if (route === "/studio-control") {
       assert.match(page.text, /directorKeyForm/, "the controller must offer explicit operator-key verification");
       assert.match(page.text, /studio-control\.js\?v=20261118-independent-studio-v1/);
+    }
+    if (route === "/studio-v2") {
+      assert.match(page.text, /studio-v2-state\.js\?v=20261123-studio-v2-phase3/);
+      assert.doesNotMatch(page.text, /operatorKey|OPERATOR_WRITE_KEY|X-Operator-Key/);
+    }
+    if (route === "/studio-control-v2") {
+      assert.match(page.text, /studio-v2-state\.js\?v=20261123-studio-control-v2/);
+      assert.match(page.text, /data-scene="gift"/);
+      assert.match(page.text, /لا يطلب v2 إذن الكاميرا أو الميكروفون/);
+      assert.doesNotMatch(page.text, /getUserMedia|MediaPipe/);
     }
     if (route === "/output") {
       assert.doesNotMatch(page.text, /OPERATOR_WRITE_KEY|X-Operator-Key|operatorKey/);
@@ -311,7 +368,7 @@ try {
   await stopIsolatedServer(server);
   server = null;
 
-  console.log("Operator-auth/output HTTP integration: PASS (six write routes protected; failed key verification throttled; game and director states sanitized; equal/stale director updates rejected; /studio reloads publicly without key UI; answers remain gated; temporary data removed).");
+  console.log("Operator-auth/output HTTP integration: PASS (v1 and v2 writes protected; v2 public state allowlisted and rate limited; failed key verification throttled; old and new studio routes readable; answers remain gated; temporary data removed).");
 } finally {
   if (server) await stopIsolatedServer(server);
 }

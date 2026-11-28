@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b18">
+  <meta name="robots" content="noindex,nofollow">
+  <title>استديو قدها v2 — عالم التحديات</title>
+  <link rel="preload" as="image" href="/images/qaddaha-studio-bg.webp">
+  <link rel="preload" as="image" href="/images/studio-presenter-cutout.png">
+  <link rel="stylesheet" href="/studio-v2.css?v=20261123-studio-v2-moment">
+  <script defer src="/output-snapshot.js?v=20261127-qaddaha-studio-sync-v1"></script>
+  <script defer src="/studio-v2-state.js?v=20261123-studio-v2-phase3"></script>
+  <script defer src="/studio-moment.js?v=20261123-studio-v2-moment"></script>
+  <script defer src="/studio-v2.js?v=20261123-studio-v2-phase3-moment"></script>
+</head>
+<body class="studio-v2-body">
+  <main id="studioStage" class="studio-v2-stage" aria-label="مخرج استديو قدها">
+    <div class="stage-backdrop" aria-hidden="true"></div>
+    <div class="stage-shade" aria-hidden="true"></div>
+    <div class="stage-glow stage-glow--cyan" aria-hidden="true"></div>
+    <div class="stage-glow stage-glow--gold" aria-hidden="true"></div>
+    <div id="studioMomentNotice" class="moment-notice" hidden role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <header class="studio-header">
+      <div class="program-mark">
+        <img src="/images/studio-world-challenges.webp" alt="" width="48" height="48">
+        <div><span>برنامج ترفيهي عربي مباشر</span><strong>عالم التحديات</strong></div>
+      </div>
+      <div id="studioConnection" class="connection-pill is-offline" role="status" aria-live="polite">
+        <i aria-hidden="true"></i><span id="studioConnectionText">بانتظار لقطة اللعبة</span>
+      </div>
+    </header>
+
+    <section class="brand-ribbon" aria-label="هوية البرنامج والشريك الرقمي">
+      <div class="brand-item brand-item--qaddaha">
+        <img src="/images/qaddaha.png" alt="قدها" width="36" height="36">
+        <strong>قدها</strong>
+      </div>
+      <span class="brand-separator" aria-hidden="true"></span>
+      <div class="brand-item brand-item--twin">
+        <img src="/images/studio-mytwin.webp" alt="My Twin" width="36" height="36">
+        <span><strong>My Twin</strong><small>الشريك الرقمي للبرنامج</small></span>
+      </div>
+    </section>
+
+    <section class="scoreboard" aria-label="نتائج اللعبة">
+      <article class="score-panel score-panel--girls">
+        <span class="score-team">فريق البنات</span>
+        <strong id="studioGirlsScore" class="score-value">0</strong>
+      </article>
+      <span class="versus" aria-hidden="true">VS</span>
+      <article class="score-panel score-panel--boys">
+        <span class="score-team">فريق الشباب</span>
+        <strong id="studioBoysScore" class="score-value">0</strong>
+      </article>
+      <div class="round-chip"><span>الجولة</span><strong id="studioRoundNumber">—</strong></div>
+    </section>
+
+    <figure id="presenterSafeArea" class="presenter-safe-area" aria-label="منطقة المقدم الآمنة">
+      <img id="presenterImage" src="/images/studio-presenter-cutout.png" alt="صورة المقدم الحالية" width="941" height="1672" fetchpriority="high">
+        <figcaption id="presenterFallbackLabel">صورة ثابتة · حالة المقدم إشارة إخراج فقط، ولا يوجد Rig متصل</figcaption>
+      <div id="presenterUnavailable" class="presenter-unavailable" hidden>منطقة المقدم<br>الاحتياطية</div>
+    </figure>
+
+    <section id="questionStage" class="question-stage" aria-label="السؤال الحالي" aria-live="polite">
+      <div class="question-card">
+        <div class="question-heading">
+          <span class="question-live-dot" aria-hidden="true"></span>
+          <span id="studioQuestionCategory">بانتظار اللعبة</span>
+          <small id="studioQuestionIndex">بانتظار بدء اللعبة</small>
+        </div>
+        <p id="studioQuestionText" class="question-text">بانتظار بدء اللعبة…</p>
+
+        <figure id="questionMedia" class="question-media" hidden>
+          <img id="questionMediaImage" alt="" loading="eager">
+          <figcaption id="questionMediaFallback" hidden>الصورة غير متاحة الآن · يستمر السؤال</figcaption>
+        </figure>
+
+        <ol id="studioQuestionOptions" class="question-options" aria-label="الاختيارات" hidden></ol>
+
+        <div class="timer-block">
+          <div class="timer-copy"><span id="studioTimerLabel">بانتظار اللعبة</span><small>الوقت المتبقي</small></div>
+          <div id="studioTimerValueWrap" class="timer-value"><strong id="studioTimerValue">—</strong><span>ث</span></div>
+        </div>
+        <div class="timer-track" aria-hidden="true"><i id="studioTimerProgress"></i></div>
+
+        <div id="studioAnswer" class="answer-reveal" hidden aria-live="polite">
+          <span>الإجابة</span><strong id="studioAnswerText"></strong>
+        </div>
+        <p id="studioAnswerPrompt" class="answer-prompt">بانتظار بدء اللعبة</p>
+      </div>
+    </section>
+
+    <footer class="studio-footer">
+      <span>الساحة لكم</span><i aria-hidden="true"></i><span>عالم التحديات · قدها</span>
+    </footer>
+    <div id="studioOfflineNotice" class="offline-notice" hidden role="status">مصدر اللقطة متوقف · يحتفظ المشهد بآخر لقطة صالحة</div>
+  </main>
+</body>
+</html>

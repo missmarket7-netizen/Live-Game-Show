@@ -38,6 +38,7 @@ test("assigns the documented conservative route budgets", () => {
   assert.deepEqual([byId.get("generate").limit, byId.get("generate").windowMs], [5, 60_000]);
   assert.deepEqual([byId.get("output-snapshot").limit, byId.get("output-snapshot").windowMs], [75, 60_000]);
   assert.deepEqual([byId.get("studio-director-state").limit, byId.get("studio-director-state").windowMs], [30, 60_000]);
+  assert.deepEqual([byId.get("studio-v2-state").limit, byId.get("studio-v2-state").windowMs], [30, 60_000]);
   assert.deepEqual([byId.get("save-questions").limit, byId.get("save-questions").windowMs], [10, 60_000]);
   assert.deepEqual([byId.get("reset-cycle").limit, byId.get("reset-cycle").windowMs], [2, 900_000]);
   assert.deepEqual([byId.get("global").limit, byId.get("global").windowMs], [90, 60_000]);
@@ -98,6 +99,18 @@ test("rejects a request above the route budget with 429 and retry headers", () =
 
   now += 1000;
   assert.equal(invoke(limiter, { path: "/api/generate" }).nextCalls, 1, "a new window resets the budget");
+});
+
+test("applies the dedicated 30-per-minute studio v2 state budget", () => {
+  const limiter = createOperatorApiWriteRateLimiter({ now: () => 40_000 });
+  for (let index = 0; index < 30; index += 1) {
+    const accepted = invoke(limiter, { path: "/api/studio-v2-state" });
+    assert.equal(accepted.nextCalls, 1, `v2 state write ${index + 1} should fit its route budget`);
+  }
+  const blocked = invoke(limiter, { path: "/api/studio-v2-state" });
+  assert.equal(blocked.response.statusCode, 429);
+  assert.equal(blocked.response.headers["RateLimit-Limit"], "30");
+  assert.ok(Number(blocked.response.headers["Retry-After"]) >= 1);
 });
 
 test("applies a global write cap while leaving GET, HEAD, and OPTIONS unmetered", () => {

@@ -5,7 +5,8 @@ const state = {
   timerDuration: 30, timerValue: 30, timerInterval: null, isTimerRunning: false, isRevealed: false,
   soundEnabled: false, activeGift: null, questionHistory: [], showStartedAt: 0, showClockInterval: null,
   fullShowDuration: 120, shieldGirls: false, shieldBoys: false, roundNumber: 1, isLoadingMore: false,
-  x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }, studioConfig: null
+  x2Active: false, captains: { girls: ['', '', '', '', ''], boys: ['', '', '', '', ''] }, studioConfig: null,
+  moment: null, matchResultMomentEmitted: false
 };
 window.state = state;
 const OUTPUT_CHANNEL_NAME = 'wcq-output-v1';
@@ -16,6 +17,7 @@ let outputPublishInFlight = false;
 let pendingServerOutputSnapshot = null;
 let serverOutputPublishTimer = 0;
 let lastServerOutputSentAt = 0;
+let momentSequence = 0;
 const handledStudioScoreCommands = new Set();
 const SAVED_KEY = 'lgs_saved_sets_v7';
 const HISTORY_KEY = 'lgs_question_history_v7';
@@ -574,6 +576,17 @@ function createOutputSnapshot() {
   return snapshotBuilder.create(state, questionAnswer);
 }
 
+function emitGameMoment(type, team) {
+  momentSequence += 1;
+  const sentAt = Date.now();
+  state.moment = {
+    id: `moment-${sentAt}-${momentSequence}-${Math.random().toString(36).slice(2, 10)}`,
+    type,
+    team,
+    sentAt
+  };
+}
+
 function publishOutputSnapshot() {
   try {
     const snapshot = createOutputSnapshot();
@@ -922,8 +935,11 @@ const amt = Math.max(1, Number(amount) || 1);
     showToast('فريق ' + (team === 'girls' ? 'البنات' : 'الشباب') + ' محمي بالدرع', 'SHIELD ACTIVE');
     return;
   }
+  const previousScore = team === 'girls' ? state.girlsScore : state.boysScore;
   if (team === 'girls') state.girlsScore = Math.max(-30, state.girlsScore - amt);
   else state.boysScore = Math.max(-30, state.boysScore - amt);
+  const nextScore = team === 'girls' ? state.girlsScore : state.boysScore;
+  if (nextScore !== previousScore) emitGameMoment('score', team);
   updateScores();
   if (viaGift) { burstAt(team === 'girls' ? 'boys' : 'girls'); playSound('wrong', 0.4); showToast('−' + amt + ' نقاط من فريق ' + (team === 'girls' ? 'البنات' : 'الشباب'), 'GIFT HIT'); }
 else playSound('wrong', 0.25);
@@ -969,11 +985,14 @@ function burstAt(team) {
 
 function applyPoint(team, points) {
   if (!points) points = 1;
+  const previousScore = team === 'girls' ? state.girlsScore : state.boysScore;
   if (team === 'girls') {
     state.girlsScore = Math.max(-30, Math.min(30, state.girlsScore + points));
   } else {
     state.boysScore = Math.max(-30, Math.min(30, state.boysScore + points));
   }
+  const nextScore = team === 'girls' ? state.girlsScore : state.boysScore;
+  if (nextScore !== previousScore) emitGameMoment('score', team);
   updateScores();
   playSound('correct', 0.28);
   burstAt(team);
@@ -1032,19 +1051,24 @@ function finishRound() {
     card.classList.add('round-sweep-host');
   }
   let winnerMsg = 'تعادل رائع بين الفريقين';
+  let winner = 'draw';
   const multiplier = state.x2Active ? 2 : 1;
   playSound('round-complete', 0.55);
   if (state.girlsScore >= 30 || (state.girlsScore > state.boysScore && state.girlsScore > 0)) {
+    winner = 'girls';
     state.girlsRounds += multiplier;
     winnerMsg = 'فوز فريق البنات' + (multiplier > 1 ? ' (×2!)' : '');
     playSequential(['girls-round', 'boys-lose']);
   } else if (state.boysScore >= 30 || (state.boysScore > state.girlsScore && state.boysScore > 0)) {
+    winner = 'boys';
     state.boysRounds += multiplier;
     winnerMsg = 'فوز فريق الشباب' + (multiplier > 1 ? ' (×2!)' : '');
     playSequential(['boys-round', 'girls-lose']);
   } else {
     playSound('girls-round', 0.35);
   }
+  if (winner === 'draw') emitGameMoment('draw', 'draw');
+  else emitGameMoment('round-win', winner);
   state.x2Active = false;
   updateScores();
   $('roundEndNumber').textContent = 'الجولة ' + state.roundNumber;
@@ -1211,6 +1235,11 @@ function showResults() {
     w.textContent = 'تعادل أبطال الليلة';
     w.style.color = 'var(--gold-hot)';
     team = 'draw';
+  }
+  if (!state.matchResultMomentEmitted) {
+    if (team === 'draw') emitGameMoment('draw', 'draw');
+    else emitGameMoment('match-win', team);
+    state.matchResultMomentEmitted = true;
   }
   showWinnerLights(team);
   // ⛔ NO playSound('end') here — disabled per host request
@@ -1483,6 +1512,8 @@ function resetMatch() {
   state.shieldGirls = false;
   state.shieldBoys = false;
   state.x2Active = false;
+  state.moment = null;
+  state.matchResultMomentEmitted = false;
 }
 async function aiSingleRound() {
   const chosenCat = $('category').value || 'اختيارات متنوعة';

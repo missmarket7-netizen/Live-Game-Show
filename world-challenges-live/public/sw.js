@@ -1,7 +1,11 @@
-const CACHE_NAME = "wcq-v20261125-live-game-show-v6";
+const CACHE_NAME = "wcq-v20261127-qaddaha-studio-sync-v1";
 const APP_SHELL = [
   "/",
   "/index.html",
+  "/output-snapshot.js?v=20261127-qaddaha-studio-sync-v1",
+  "/app.js?v=20261127-qaddaha-studio-sync-v1",
+  "/app.js?v=118-main-portal-cache-bust",
+  "/captain-sounds.js?v=118",
   "/output-snapshot.js?v=20261118-output-bridge-v1",
   "/app.js?v=20261118-independent-output-v1",
   "/style.css?v=20261118-operator-write-auth-v1",
@@ -25,6 +29,14 @@ const APP_SHELL = [
   "/studio.js?v=20261118-independent-studio-v1",
   "/studio-control.css?v=20261118-independent-studio-v1",
   "/studio-control.js?v=20261118-independent-studio-v1",
+  "/studio-v2",
+  "/studio-v2.css?v=20261123-studio-v2-moment",
+  "/studio-v2.js?v=20261123-studio-v2-phase3-moment",
+  "/studio-moment.js?v=20261123-studio-v2-moment",
+  "/studio-v2-state.js?v=20261123-studio-v2-phase3",
+  "/studio-control-v2",
+  "/studio-control-v2.css?v=20261123-studio-control-v2",
+  "/studio-control-v2.js?v=20261123-studio-control-v2",
   "/images/qaddaha-studio-bg.webp",
   "/images/studio-mytwin.webp",
   "/images/studio-world-challenges.webp",
