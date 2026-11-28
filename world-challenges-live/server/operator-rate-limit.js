@@ -6,6 +6,7 @@ export const OPERATOR_WRITE_RATE_POLICIES = Object.freeze([
   Object.freeze({ id: "generate", method: "POST", path: "/api/generate", limit: 5, windowMs: 60_000 }),
   Object.freeze({ id: "output-snapshot", method: "POST", path: "/api/output-snapshot", limit: 75, windowMs: 60_000 }),
   Object.freeze({ id: "studio-director-state", method: "POST", path: "/api/studio-director-state", limit: 30, windowMs: 60_000 }),
+  Object.freeze({ id: "studio-v2-state", method: "POST", path: "/api/studio-v2-state", limit: 30, windowMs: 60_000 }),
   Object.freeze({ id: "save-questions", method: "POST", path: "/api/save-questions", limit: 10, windowMs: 60_000 }),
   Object.freeze({ id: "reset-cycle", method: "POST", path: "/api/reset-cycle", limit: 2, windowMs: 15 * 60_000 }),
   Object.freeze({ id: "other", limit: 30, windowMs: 60_000 })

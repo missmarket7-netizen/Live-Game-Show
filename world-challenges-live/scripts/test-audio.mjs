@@ -27,7 +27,9 @@ assert.match(app, /gift-donut/);
 assert.match(app, /gift-corgi/);
 assert.match(app, /'chimo'/);
 assert.match(captain, /CAP_MS = 35000/);
-assert.match(captain, /activeCaptainAudio/);
+assert.match(captain, /var active = null/);
+assert.match(captain, /function stopActive\(\)/);
+assert.match(captain, /stop:\s*stopActive/);
 assert.match(captain, /playFallback/);
 
 console.log(`Audio quality: OK (${required.length} referenced files and shared output path verified)`);

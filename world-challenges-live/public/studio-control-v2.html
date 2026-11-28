@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080b18">
+  <meta name="robots" content="noindex,nofollow">
+  <title>لوحة إخراج استديو قدها v2 — عالم التحديات</title>
+  <link rel="stylesheet" href="/studio-control-v2.css?v=20261123-studio-control-v2">
+  <script defer src="/studio-v2-state.js?v=20261123-studio-control-v2"></script>
+  <script defer src="/studio-control-v2.js?v=20261123-studio-control-v2"></script>
+</head>
+<body>
+  <main class="control-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="العودة إلى عالم التحديات">
+        <img src="/images/studio-world-challenges.webp" alt="" width="42" height="42">
+        <span><small>QADDAHA / STUDIO V2</small><strong>لوحة المخرج</strong></span>
+      </a>
+      <nav aria-label="روابط الاستديو">
+        <a class="quiet-link" href="/studio-control">لوحة v1</a>
+        <a class="output-link" href="/studio-v2" target="_blank" rel="noopener">فتح مخرج v2 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+
+    <section class="intro">
+      <div><span class="eyebrow">استديو تجريبي مستقل · لا يغيّر نتيجة اللعبة</span><h1>أنت تختار اللقطة.</h1><p>تحكم بالمشهد وإشارة المقدم، بينما تظل الأسئلة والنقاط من اللعبة الحالية.</p></div>
+      <div class="connection-stack" aria-label="حالة الاتصالات">
+        <div id="studioConnection" class="connection-badge is-idle" role="status" aria-live="polite"><i></i><span id="studioConnectionText">جارٍ التحقق من اتصال المخرج</span></div>
+        <div id="gameConnection" class="connection-badge is-idle" role="status" aria-live="polite"><i></i><span id="gameConnectionText">جارٍ التحقق من لقطة اللعبة</span></div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <section class="monitor-panel" aria-label="معاينة استديو v2">
+        <div class="panel-heading"><div><span>01 / PROGRAM MONITOR</span><h2>معاينة المخرج</h2></div><span class="preview-tag"><i></i> v2</span></div>
+        <div class="preview-frame"><iframe title="معاينة منفذ استديو قدها v2" src="/studio-v2" loading="eager" allow="fullscreen"></iframe></div>
+        <p class="monitor-note">تظهر هنا واجهة الجمهور فقط؛ لا توجد أزرار تحكم أو مفتاح مشغّل داخل المخرج.</p>
+      </section>
+
+      <section class="director-panel" aria-label="أدوات مخرج v2">
+        <section class="card auth-card">
+          <div class="panel-heading compact"><div><span>SECURE V2 CONTROL</span><h2>ربط الإعدادات بالخادم</h2></div><span class="lock" aria-hidden="true">●</span></div>
+          <p>القراءة عامة ومنقّاة. الكتابة تتطلب مفتاح المشغّل؛ يبقى المفتاح في جلسة هذا التبويب ولا يصل إلى المخرج.</p>
+          <form id="operatorKeyForm" autocomplete="off">
+            <label for="operatorKeyInput">مفتاح المشغّل</label>
+            <div class="key-row"><input id="operatorKeyInput" type="password" inputmode="text" autocomplete="new-password" maxlength="4096" spellcheck="false" placeholder="أدخل المفتاح المضبوط على الخادم"><button type="submit">تحقق</button></div>
+          </form>
+          <p id="syncStatus" class="sync-status" role="status" aria-live="polite">التحكم المحلي متاح؛ مزامنة الخادم تحتاج تحقق المفتاح.</p>
+        </section>
+
+        <section class="card">
+          <div class="panel-heading compact"><div><span>02 / CINEMATIC SHOTS</span><h2>اختيار المشهد</h2></div></div>
+          <div class="scene-grid" role="group" aria-label="مشاهد الاستديو">
+            <button type="button" data-scene="wide" aria-pressed="true"><b>◉</b><span>واسع</span></button>
+            <button type="button" data-scene="question" aria-pressed="false"><b>▣</b><span>السؤال</span></button>
+            <button type="button" data-scene="score" aria-pressed="false"><b>◎</b><span>النتيجة</span></button>
+            <button type="button" data-scene="gift" aria-pressed="false"><b>✦</b><span>هدية</span></button>
+            <button type="button" data-scene="reveal" aria-pressed="false"><b>◈</b><span>كشف</span></button>
+            <button type="button" data-scene="win" aria-pressed="false"><b>★</b><span>فوز</span></button>
+            <button type="button" data-scene="loss" aria-pressed="false"><b>◇</b><span>خسارة مرحة</span></button>
+          </div>
+          <p class="fine-print">هذه تغيّر أسلوب العرض فقط، ولا تكشف إجابة أو تعدّل نتيجة.</p>
+        </section>
+
+        <section class="card">
+          <div class="panel-heading compact"><div><span>03 / PRESENTER CUE</span><h2>إشارة حالة المقدم</h2></div></div>
+          <label class="cue-field" for="presenterCue"><span>الحالة المطلوبة</span>
+            <select id="presenterCue">
+              <option value="idle">استعداد</option><option value="welcome">ترحيب</option><option value="thanks">شكر</option>
+              <option value="celebrate">فرح</option><option value="win">فوز</option><option value="loss">خسارة مرحة</option>
+              <option value="laugh">ضحك</option><option value="fun">فرفشة</option><option value="dance">رقص</option>
+            </select>
+          </label>
+          <p class="honest-note"><strong>مهم:</strong> هذه إشارة إخراج وصفية فقط. المعروض حالياً صورة ثابتة؛ لا يوجد Rig أو مقطع حركة مفترض أو مفعّل.</p>
+        </section>
+
+        <section class="card layers-card">
+          <div class="panel-heading compact"><div><span>04 / VISIBLE LAYERS</span><h2>طبقات المشهد</h2></div></div>
+          <label><input type="checkbox" data-layer="scoreboard" checked><span>النتيجة والجولة</span></label>
+          <label><input type="checkbox" data-layer="branding" checked><span>هوية البرنامج</span></label>
+          <label><input type="checkbox" data-layer="presenter" checked><span>منطقة المقدم الثابتة</span></label>
+          <label><input type="checkbox" data-layer="question" checked><span>بطاقة السؤال والمؤقت</span></label>
+        </section>
+
+        <section class="permission-card" aria-label="حالة أذونات الأجهزة">
+          <span class="permission-icon" aria-hidden="true">i</span><div><strong>أذونات الأجهزة غير مطلوبة في هذه المرحلة</strong><p>لا يطلب v2 إذن الكاميرا أو الميكروفون ولا يفتح أي جهاز. ستُعرض الحالة غير مفعّلة حتى تنفيذ مرحلة مستقلة لذلك.</p></div>
+        </section>
+      </section>
+    </div>
+    <footer><span>حالة اللعبة الحالية هي مصدر الأسئلة والنتائج.</span><span>الإعدادات منفصلة ومؤقتة في ذاكرة الخادم.</span></footer>
+  </main>
+</body>
+</html>

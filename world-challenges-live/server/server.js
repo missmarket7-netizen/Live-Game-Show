@@ -10,6 +10,7 @@ import { protectOperatorApiWrites, requireOperatorWrite } from "./operator-auth.
 import { operatorApiWriteRateLimiter, operatorVerifyRateLimiter } from "./operator-rate-limit.js";
 import "../public/output-snapshot.js";
 import "../public/studio-director-state.js";
+import "../public/studio-v2-state.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,6 +21,9 @@ let latestOutputSnapshotReceivedAt = 0;
 let latestStudioDirectorState = null;
 let latestStudioDirectorReceivedAt = 0;
 let latestStudioDirectorSentAt = 0;
+let latestStudioV2State = null;
+let latestStudioV2ReceivedAt = 0;
+let latestStudioV2SentAt = 0;
 
 
 app.use((req, res, next) => {
@@ -951,12 +955,22 @@ app.post("/api/output-snapshot", (req, res) => {
   if (!safeSnapshot) {
     return res.status(400).json({ error: "invalid_output_snapshot", message: "لقطة العرض غير صالحة." });
   }
-  if (latestOutputSnapshot && safeSnapshot.sentAt < latestOutputSnapshot.sentAt) {
-    return res.status(409).json({ error: "stale_output_snapshot", message: "تم تجاهل لقطة أقدم من الحالة الحالية." });
+  if (latestOutputSnapshot) {
+    const samePublisher = safeSnapshot.sourceId
+      && safeSnapshot.sourceId === latestOutputSnapshot.sourceId;
+    const newerFromSamePublisher = samePublisher
+      && Number.isSafeInteger(safeSnapshot.sequence)
+      && safeSnapshot.sequence > latestOutputSnapshot.sequence
+      && safeSnapshot.sentAt >= latestOutputSnapshot.sentAt;
+    const newerFromDifferentPublisher = !samePublisher
+      && safeSnapshot.sentAt > latestOutputSnapshot.sentAt;
+    if (!newerFromSamePublisher && !newerFromDifferentPublisher) {
+      return res.status(409).json({ error: "stale_output_snapshot", message: "تم تجاهل لقطة أقدم أو غير قابلة للترتيب." });
+    }
   }
   latestOutputSnapshot = safeSnapshot;
   latestOutputSnapshotReceivedAt = Date.now();
-  return res.json({ accepted: true, sentAt: safeSnapshot.sentAt });
+  return res.json({ accepted: true, sentAt: safeSnapshot.sentAt, sequence: safeSnapshot.sequence || null });
 });
 
 app.get("/api/studio-director-state", (req, res) => {
@@ -984,6 +998,34 @@ app.post("/api/studio-director-state", (req, res) => {
   latestStudioDirectorSentAt = sentAt;
   latestStudioDirectorReceivedAt = Date.now();
   return res.json({ accepted: true, sentAt, updatedAt: latestStudioDirectorReceivedAt });
+});
+
+app.get("/api/studio-v2-state", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const contract = globalThis.WCQStudioV2State;
+  return res.json({
+    state: latestStudioV2State || contract.defaults(),
+    updatedAt: latestStudioV2ReceivedAt,
+    sentAt: latestStudioV2SentAt
+  });
+});
+
+app.post("/api/studio-v2-state", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  const contract = globalThis.WCQStudioV2State;
+  const rawState = req.body && req.body.state;
+  const sentAt = Number(req.body && req.body.sentAt);
+  if (!rawState || typeof rawState !== "object" || Array.isArray(rawState)
+      || !Number.isFinite(sentAt) || sentAt <= 0 || sentAt > Date.now() + 5000) {
+    return res.status(400).json({ error: "invalid_studio_v2_state", message: "إعدادات استديو v2 غير صالحة." });
+  }
+  if (latestStudioV2State && sentAt <= latestStudioV2SentAt) {
+    return res.status(409).json({ error: "stale_studio_v2_state", message: "تم تجاهل إعداد مخرج أقدم." });
+  }
+  latestStudioV2State = contract.normalize(rawState);
+  latestStudioV2SentAt = sentAt;
+  latestStudioV2ReceivedAt = Date.now();
+  return res.json({ accepted: true, sentAt, updatedAt: latestStudioV2ReceivedAt });
 });
 
 app.get("/api/operator/verify", operatorVerifyRateLimiter, requireOperatorWrite, (req, res) => {
